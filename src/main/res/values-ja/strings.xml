@@ -199,8 +199,8 @@
   <string name="ssrsub_remove_tip_delete">ノードと購読</string>
 
   <!-- status -->
-  <string name="sent">送信済み:</string>
-  <string name="received">受信済み:</string>
+  <string name="sent">送信:</string>
+  <string name="received">受信:</string>
 
   <!-- kcp -->
   <string name="kcp_summary">KCP プロトコル を有効にする</string>

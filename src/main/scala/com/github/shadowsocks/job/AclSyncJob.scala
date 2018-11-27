@@ -33,7 +33,7 @@ class AclSyncJob(route: String) extends Job {
       {
         //noinspection JavaAccessorMethodCalledAsEmptyParen
         IOUtils.writeString(app.getApplicationInfo.dataDir + '/' + filename, autoClose(
-          new URL("https://raw.githubusercontent.com/shadowsocksr/shadowsocksr-android/nokcp/src/main/assets/acl/" +
+          new URL("https://raw.githubusercontent.com/shadowsocksrr/shadowsocksr-android/Akkariiin/master/src/main/assets/acl/" +
             filename).openConnection().getInputStream())(IOUtils.readString))
       }
       Result.SUCCESS

@@ -462,7 +462,6 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   }
 
   def ignoreBatteryOptimization() {
-    // TODO do . ignore_battery_optimization ......................................
     // http://blog.csdn.net/laxian2009/article/details/52474214
 
     var exception = false
@@ -474,7 +473,10 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
         val intent = new Intent()
         intent.setAction(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
         intent.setData(android.net.Uri.parse("package:" + packageName))
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
         startActivity(intent)
+      } else {
+        startActivity(new Intent("android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS"))
       }
       exception = false
     } catch {

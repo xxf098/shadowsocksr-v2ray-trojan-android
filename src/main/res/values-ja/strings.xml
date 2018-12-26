@@ -122,7 +122,7 @@
   <string name="add_profile_methods_manual_settings">手動でセットアップ</string>
   <string name="add_profile_nfc_hint_title">Android Beam (NFC) でプロファイルを追加</string>
   <string name="add_profile_nfc_hint">両方のデバイスの画面をオンにして、他のデバイスで共有ボタンをクリックし、両方のデバイスをお互いに置きます。NFCタグをスキャンすることもできます。</string>
-  <string name="add_profile_scanner_permission_required">QRコードをスキャンするにはカメラ権限が必要です。/string>
+  <string name="add_profile_scanner_permission_required">QRコードをスキャンするにはカメラ権限が必要です。</string>
 
   <string name="scan_qrcode_install_title">スキャンコードのヒント</string>
   <string name="scan_qrcode_install_text">あなたがダウンロードしてインストールしているアプリストアにあなたを導くでしょう「OK」をクリックし、zxing基準に沿ってスキャナーをインストールしていないようだ、またはあなたはAPKが直接設置ダウンロードするには、「ダウンロード」をクリックします。</string>

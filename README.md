@@ -1,4 +1,4 @@
-## ShadowsocksR for Android
+## A modified version ShadowsocksR for Android
 
 A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) client for Android, written in Scala.
 
@@ -17,33 +17,40 @@ A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) client for Andro
   - Android Support Repository and Google Repository (see `build.sbt` for version)
 * Android NDK r12b `High version may case something build fail`
 
-### BUILD
+### BUILD with Android Studio
 
 *Warnning: Cannot build in windows*
 
-* Set environment variable `ANDROID_HOME` to `/path/to/android-sdk`
-* Set environment variable `ANDROID_NDK_HOME` to `/path/to/android-ndk`
-* And you can set http.proxy for sbt
+* Download [Android Studio](https://developer.android.com/studio)
+* Download [Android NDK r12b](https://developer.android.com/ndk/downloads/older_releases)
+* Set proxy for sbt in Android Studio: open `Settings -> Build, Execution, Deployment -> Build Tool -> sbt`, in `VM parameters` input:
+
+        -Dhttp.proxyHost=127.0.0.1
+        -Dhttp.proxyPort=8080
+        -Dhttps.proxyHost=127.0.0.1
+        -Dhttps.proxyPort=8080
+        
+* Set environment variable `ANDROID_HOME` to `/path/to/Android/Sdk`
+* Set environment variable `ANDROID_NDK_HOME` to `/path/to/Android/android-ndk-r12b`
+* Set environment variable `TERM` to `xterm-color`
 * Create your key following the instructions at https://developer.android.com/studio/publish/app-signing.html
 * Put your key in ~/.keystore or any other place
 * Create `local.properties` from `local.properties.example` with your own key information
+* if you installed multiple versions of Java, use `sudo update-alternatives --config java` to select Java 8
+* Before build apk, make sure inside `./project/build.properties`, sbt.version=0.13.15 
 * Invoke the building like this
 
 ```bash
-    export ANDROID_HOME=/path/to/Android/Sdk/
-    export ANDROID_NDK_HOME=/path/to/Android/Sdk/ndk-bundle/
-    export JAVA_OPTS="$JAVA_OPTS -Dhttp.proxyHost=yourserver -Dhttp.proxyPort=port -Dhttp.proxyUser=username -Dhttp.proxyPassword=password"
-```
-
-```bash
+    export ANDROID_HOME=/path/to/Android/Sdk
+    export ANDROID_NDK_HOME=/path/to/Android/android-ndk-r12b
+    export TERM=xterm-color
     # install and update all git submodule
     git submodule update --init
-    
     # Build the App
     sbt native-build clean android:package-release
 ```
 
-##### If you use x64 linux like Archlinux x86_64, or your linux have new version ncurses lib, you may need install the 32bit version ncurses and link it as follow:
+##### If you use x64 linux like Archlinux x86_64, or your linux have new version ncurses lib, you may need install the 32bit version ncurses and link it as follow (make sure all these *.so files in the right location under your system, otherwise you have to copy them to /usr/lib/ and /usr/lib32/ directory):
 
 ```bash
     # use Archlinux x86_64 as example

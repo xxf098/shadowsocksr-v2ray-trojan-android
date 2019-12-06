@@ -36,6 +36,11 @@ A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) client for Andro
 * Create your key following the instructions at https://developer.android.com/studio/publish/app-signing.html
 * Put your key in ~/.keystore or any other place
 * Create `local.properties` from `local.properties.example` with your own key information
+
+        key.alias: abc
+        key.store: /path/to/Android/abc.jks
+        key.store.password: abc
+
 * if you installed multiple versions of Java, use `sudo update-alternatives --config java` to select Java 8
 * Before build apk, make sure inside `./project/build.properties`, sbt.version=0.13.15 
 * Invoke the building like this

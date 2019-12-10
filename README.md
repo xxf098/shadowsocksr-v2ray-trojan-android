@@ -53,6 +53,8 @@ A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) client for Andro
     git submodule update --init
     # Build the App
     sbt native-build clean android:package-release
+    # run app
+    sbt android:run
 ```
 
 ##### If you use x64 linux like Archlinux x86_64, or your linux have new version ncurses lib, you may need install the 32bit version ncurses and link it as follow (make sure all these *.so files in the right location under your system, otherwise you have to copy them to /usr/lib/ and /usr/lib32/ directory):

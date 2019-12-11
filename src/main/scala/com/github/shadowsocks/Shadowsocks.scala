@@ -135,6 +135,8 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
               connectionTestText.setVisibility(View.VISIBLE)
               connectionTestText.setText(getString(R.string.connection_test_pending))
             }
+            // check connection
+            checkConnection()
           case State.STOPPED =>
             fab.setBackgroundTintList(greyTint)
             fabProgressCircle.postDelayed(hideCircle, 1000)
@@ -252,6 +254,48 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     }
   }
 
+  def checkConnection (): Unit = {
+    connectionTestText = findViewById(R.id.connection_test).asInstanceOf[TextView]
+    val id = synchronized {
+      testCount += 1
+      handler.post(() => connectionTestText.setText(R.string.connection_test_testing))
+      testCount
+    }
+    Utils.ThrowableFuture {
+      // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
+      autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection()
+        .asInstanceOf[HttpURLConnection]) { conn =>
+        conn.setConnectTimeout(2 * 1000)
+        conn.setReadTimeout(2 * 1000)
+        conn.setInstanceFollowRedirects(false)
+        conn.setUseCaches(false)
+        if (testCount == id) {
+          var result: String = null
+          var success = true
+          try {
+            val start = currentTimeMillis
+            conn.getInputStream
+            val elapsed = currentTimeMillis - start
+            val code = conn.getResponseCode
+            if (code == 204 || code == 200 && conn.getContentLength == 0)
+              result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
+            else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
+          } catch {
+            case e: Exception =>
+              success = false
+              result = getString(R.string.connection_test_error, e.getMessage)
+          }
+          synchronized(if (testCount == id && app.isVpnEnabled) handler.post(() =>
+            if (success) connectionTestText.setText(result)
+            else {
+              connectionTestText.setText(R.string.connection_test_fail)
+              Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
+            }))
+        }
+      }
+    }
+  }
+
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     getWindow.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
@@ -281,47 +325,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     txRateText = findViewById(R.id.txRate).asInstanceOf[TextView]
     rxText = findViewById(R.id.rx).asInstanceOf[TextView]
     rxRateText = findViewById(R.id.rxRate).asInstanceOf[TextView]
-    stat.setOnClickListener(_ => {
-      val id = synchronized {
-        testCount += 1
-        handler.post(() => connectionTestText.setText(R.string.connection_test_testing))
-        testCount
-      }
-      Utils.ThrowableFuture {
-        // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
-        autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection()
-          .asInstanceOf[HttpURLConnection]) { conn =>
-          conn.setConnectTimeout(5 * 1000)
-          conn.setReadTimeout(5 * 1000)
-          conn.setInstanceFollowRedirects(false)
-          conn.setUseCaches(false)
-          if (testCount == id) {
-            var result: String = null
-            var success = true
-            try {
-              val start = currentTimeMillis
-              conn.getInputStream
-              val elapsed = currentTimeMillis - start
-              val code = conn.getResponseCode
-              if (code == 204 || code == 200 && conn.getContentLength == 0)
-                result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
-              else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
-            } catch {
-              case e: Exception =>
-                success = false
-                result = getString(R.string.connection_test_error, e.getMessage)
-            }
-            synchronized(if (testCount == id && app.isVpnEnabled) handler.post(() =>
-              if (success) connectionTestText.setText(result)
-              else {
-                connectionTestText.setText(R.string.connection_test_fail)
-                Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
-              }))
-          }
-        }
-      }
-    })
-
+    stat.setOnClickListener(_ => checkConnection())
     fab = findViewById(R.id.fab).asInstanceOf[FloatingActionButton]
     fabProgressCircle = findViewById(R.id.fabProgressCircle).asInstanceOf[FABProgressCircle]
     fab.setOnClickListener(_ => if (serviceStarted) serviceStop()
@@ -341,7 +345,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       case None => app.ssrsubManager.createDefault()
     }
 
-    SSRSubUpdateJob.schedule()
+//    SSRSubUpdateJob.schedule()
 
     handler.post(() => attachService)
   }

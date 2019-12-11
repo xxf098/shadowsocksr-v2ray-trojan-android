@@ -170,10 +170,10 @@ object Utils {
     result
   }
 
-  def resolve(host: String, addrType: Int): Option[String] = {
+  def resolve(host: String, addrType: Int, hostname:String): Option[String] = {
     try {
       val lookup = new Lookup(host, addrType)
-      val resolver = new SimpleResolver("114.114.114.114")
+      val resolver = new SimpleResolver(hostname)
       resolver.setTimeout(5)
       lookup.setResolver(resolver)
       val result = lookup.run()
@@ -202,15 +202,15 @@ object Utils {
     }
   }
 
-  def resolve(host: String, enableIPv6: Boolean): Option[String] = {
+  def resolve(host: String, enableIPv6: Boolean, hostname: String = "223.5.5.5"): Option[String] = {
     if (enableIPv6 && Utils.isIPv6Support) {
-      resolve(host, Type.AAAA) match {
+      resolve(host, Type.AAAA, hostname) match {
         case Some(addr) =>
           return Some(addr)
         case None =>
       }
     }
-    resolve(host, Type.A) match {
+    resolve(host, Type.A, hostname) match {
       case Some(addr) =>
         return Some(addr)
       case None =>

@@ -57,6 +57,7 @@ import com.github.shadowsocks.job.AclSyncJob
 import com.github.shadowsocks.utils._
 
 import scala.collection.mutable.ArrayBuffer
+import java.util.logging.Logger
 
 class ShadowsocksVpnService extends VpnService with BaseService {
   val TAG = "ShadowsocksVpnService"
@@ -188,7 +189,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     // Resolve the server address
     host_arg = profile.host
-    if (!Utils.isNumeric(profile.host)) Utils.resolve(profile.host, enableIPv6 = true) match {
+    if (!Utils.isNumeric(profile.host)) Utils.resolve(profile.host, enableIPv6 = true, hostname=dns_address) match {
       case Some(addr) => profile.host = addr
       case None => throw NameNotResolvedException()
     }

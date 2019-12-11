@@ -54,7 +54,7 @@ libraryDependencies ++=
   "com.mikepenz" % "materialdrawer" % "5.8.1" ::
   "com.mikepenz" % "materialize" % "1.0.0" ::
   "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2" ::
-  "dnsjava" % "dnsjava" % "2.1.7" ::
+  "dnsjava" % "dnsjava" % "2.1.9" ::
   "eu.chainfire" % "libsuperuser" % "1.0.0.+" ::
   "me.dm7.barcodescanner" % "zxing" % "1.9.8" ::
   "net.glxn.qrgen" % "android" % "2.0" ::

@@ -38,9 +38,11 @@
  */
 package com.github.shadowsocks
 
+import java.io.IOException
 import java.lang.System.currentTimeMillis
 import java.net.{HttpURLConnection, URL}
 import java.util
+import java.util.concurrent.TimeUnit
 import java.util.{GregorianCalendar, Locale}
 
 import android.app.backup.BackupManager
@@ -63,6 +65,7 @@ import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils._
 import com.github.shadowsocks.job.SSRSubUpdateJob
 import com.github.shadowsocks.ShadowsocksApplication.app
+import okhttp3._
 
 import scala.util.Random
 
@@ -254,7 +257,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     }
   }
 
-  def checkConnection (): Unit = {
+  def checkConnection(): Unit = {
     connectionTestText = findViewById(R.id.connection_test).asInstanceOf[TextView]
     val id = synchronized {
       testCount += 1
@@ -262,36 +265,40 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       testCount
     }
     Utils.ThrowableFuture {
-      // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
-      autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection()
-        .asInstanceOf[HttpURLConnection]) { conn =>
-        conn.setConnectTimeout(2 * 1000)
-        conn.setReadTimeout(2 * 1000)
-        conn.setInstanceFollowRedirects(false)
-        conn.setUseCaches(false)
-        if (testCount == id) {
-          var result: String = null
-          var success = true
-          try {
-            val start = currentTimeMillis
-            conn.getInputStream
-            val elapsed = currentTimeMillis - start
-            val code = conn.getResponseCode
-            if (code == 204 || code == 200 && conn.getContentLength == 0)
-              result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
-            else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
-          } catch {
-            case e: Exception =>
-              success = false
-              result = getString(R.string.connection_test_error, e.getMessage)
-          }
-          synchronized(if (testCount == id && app.isVpnEnabled) handler.post(() =>
-            if (success) connectionTestText.setText(result)
-            else {
-              connectionTestText.setText(R.string.connection_test_fail)
-              Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
-            }))
+      val builder = new OkHttpClient.Builder()
+        .connectTimeout(2, TimeUnit.SECONDS)
+        .writeTimeout(2, TimeUnit.SECONDS)
+        .readTimeout(2, TimeUnit.SECONDS)
+      val client = builder.build
+      val request = new Request.Builder()
+        .url("https://www.google.com/generate_204")
+        .removeHeader("Host")
+        .addHeader("Host", "www.google.com")
+        .build();
+      if (testCount == id) {
+        var result: String = null
+        var success = true
+        try {
+          val start = currentTimeMillis
+          val response = client.newCall(request).execute()
+          val elapsed = currentTimeMillis - start
+          val code = response.code()
+          if (code == 204 || (code == 200 && response.body().contentLength == 0))
+            result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
+          else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
+          response.body().close()
+        } catch {
+          case e: Exception =>
+            success = false
+            e.printStackTrace()
+            result = getString(R.string.connection_test_error, e.getMessage)
         }
+        synchronized(if (testCount == id && app.isVpnEnabled) handler.post(() =>
+          if (success) connectionTestText.setText(result)
+          else {
+            connectionTestText.setText(R.string.connection_test_fail)
+            Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
+          }))
       }
     }
   }

@@ -25,6 +25,7 @@ proguardOptions ++=
   "-keep class okio.** { *; }" ::
   "-keep interface okio.** { *; }" ::
   "-dontwarn okio.**" ::
+  "-dontwarn okhttp3.**" ::
   "-dontwarn com.google.android.gms.internal.**" ::
   "-dontwarn com.j256.ormlite.**" ::
   "-dontwarn org.xbill.**" ::

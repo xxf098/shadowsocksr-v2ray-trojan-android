@@ -283,9 +283,9 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
         var result: String = null
         var success = true
         try {
-          val start = currentTimeMillis
+          val start = SystemClock.elapsedRealtime()
           val response = client.newCall(request).execute()
-          val elapsed = currentTimeMillis - start
+          val elapsed = SystemClock.elapsedRealtime() - start
           val code = response.code()
           if (code == 204 || (code == 200 && response.body().contentLength == 0))
             result = getString(R.string.connection_test_available, elapsed: java.lang.Long)

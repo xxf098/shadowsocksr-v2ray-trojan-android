@@ -139,7 +139,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
               connectionTestText.setText(getString(R.string.connection_test_pending))
             }
             // check connection
-            checkConnection()
+            checkConnection(5)
           case State.STOPPED =>
             fab.setBackgroundTintList(greyTint)
             fabProgressCircle.postDelayed(hideCircle, 1000)
@@ -256,8 +256,12 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       }
     }
   }
-
-  def checkConnection(): Unit = {
+  
+//  def speedTest(): Unit = {
+//
+//  }
+  
+  def checkConnection(timeout: Int = 2): Unit = {
     connectionTestText = findViewById(R.id.connection_test).asInstanceOf[TextView]
     val id = synchronized {
       testCount += 1
@@ -266,9 +270,9 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     }
     Utils.ThrowableFuture {
       val builder = new OkHttpClient.Builder()
-        .connectTimeout(2, TimeUnit.SECONDS)
-        .writeTimeout(2, TimeUnit.SECONDS)
-        .readTimeout(2, TimeUnit.SECONDS)
+        .connectTimeout(timeout, TimeUnit.SECONDS)
+        .writeTimeout(timeout, TimeUnit.SECONDS)
+        .readTimeout(timeout, TimeUnit.SECONDS)
       val client = builder.build
       val request = new Request.Builder()
         .url("https://www.google.com/generate_204")

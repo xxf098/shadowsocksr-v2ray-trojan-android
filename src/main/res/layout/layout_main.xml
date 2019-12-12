@@ -29,7 +29,9 @@
                           android:textColor="?android:attr/textColorSecondary"
                           android:layout_width="0dp"
                           android:layout_height="wrap_content"
-                          android:layout_weight="1"/>
+                          android:singleLine="true"
+                          android:layout_weight="1"
+                          android:ellipsize="end" />
             </LinearLayout>
 
             <android.support.v7.widget.GridLayout android:layout_width="match_parent"

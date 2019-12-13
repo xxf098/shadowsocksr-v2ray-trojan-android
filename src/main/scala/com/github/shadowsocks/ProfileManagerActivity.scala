@@ -2,7 +2,7 @@ package com.github.shadowsocks
 
 import java.nio.charset.Charset
 import java.util.{Date, Locale, Random}
-import java.io.File
+import java.io.{BufferedWriter, File, IOException}
 import java.net._
 
 import android.app.{Activity, ProgressDialog, TaskStackBuilder}
@@ -23,8 +23,6 @@ import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.view._
 import android.widget.{CheckedTextView, CompoundButton, EditText, ImageView, LinearLayout, Switch, TextView, Toast}
 import android.net.Uri
-import java.io.IOException
-
 import android.support.design.widget.Snackbar
 import com.github.clans.fab.{FloatingActionButton, FloatingActionMenu}
 import com.github.shadowsocks.ShadowsocksApplication.app
@@ -445,7 +443,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   private val REQUEST_QRCODE = 1
   private var is_sort: Boolean = false
-  private final val CREATE_REQUEST_CODE = 40
+  private final val CREATE_DOCUMENT_REQUEST_CODE = 40
   private final val TAG = "ProfileManagerActivity"
 
 
@@ -929,8 +927,19 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               //handle cancel
           }
       }
-    if (requestCode == CREATE_REQUEST_CODE) {
-      Log.e(TAG, "CREATE_REQUEST_CODE")
+    if (requestCode == CREATE_DOCUMENT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+      autoClose({
+        val filePath = data.getData
+        getContentResolver.openOutputStream(filePath)
+      })(out => {
+        app.profileManager.getAllProfiles match {
+          case Some(profiles) =>
+            val buffer = profiles.mkString("\n").getBytes(Charset.forName("UTF-8"))
+            out.write(buffer)
+            Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show
+          case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
+        }
+      })
     }
   }
 
@@ -988,7 +997,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       intent.addCategory(Intent.CATEGORY_OPENABLE)
       intent.setType("text/plain")
       intent.putExtra(Intent.EXTRA_TITLE, s"profiles-$date.ssr")
-      startActivityForResult(intent, CREATE_REQUEST_CODE)
+      startActivityForResult(intent, CREATE_DOCUMENT_REQUEST_CODE)
       true
     case R.id.action_full_test =>
       app.profileManager.getAllProfiles match {

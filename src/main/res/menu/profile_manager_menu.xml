@@ -13,10 +13,22 @@
           android:numericShortcut="2"
           android:icon="@drawable/ic_down"
           app:showAsAction="always"/>
-    <item android:id="@+id/action_export"
-          android:title="@string/action_export"
-          android:alphabeticShortcut="e"
-          android:numericShortcut="3"
-          android:icon="@drawable/ic_content_copy"
-          app:showAsAction="always"/>
+    <item
+        android:alphabeticShortcut="s"
+        android:icon="@drawable/ic_content_copy"
+        android:title="@string/action_export_more"
+        app:showAsAction="always">
+        <menu>
+            <item
+                android:id="@+id/action_export"
+                android:alphabeticShortcut="e"
+                android:numericShortcut="3"
+                android:title="@string/action_export"/>
+            <item
+                android:id="@+id/action_export_file"
+                android:title="@string/action_export_file"
+                android:alphabeticShortcut="o"
+                android:numericShortcut="4"/>
+        </menu>
+    </item>
 </menu>

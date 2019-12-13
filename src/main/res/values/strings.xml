@@ -140,6 +140,8 @@
   <string name="action_apply_all">Apply Settings to All Profiles</string>
   <string name="action_export">Export to Clipboard</string>
   <string name="action_import">Import from Clipboard</string>
+  <string name="action_export_more">Export…</string>
+  <string name="action_export_file">Export to File</string>
   <string name="action_export_msg">Successfully exported profiles.</string>
   <string name="action_export_err">Failed to export profiles!</string>
   <string name="action_import_msg">Successfully imported profiles.</string>

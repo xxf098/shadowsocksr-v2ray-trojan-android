@@ -1,12 +1,11 @@
 package com.github.shadowsocks
 
 import java.nio.charset.Charset
-import java.util.Locale
+import java.util.{Date, Locale, Random}
 import java.io.File
-
 import java.net._
 
-import android.app.{Activity, TaskStackBuilder, ProgressDialog}
+import android.app.{Activity, ProgressDialog, TaskStackBuilder}
 import android.content._
 import android.content.pm.PackageManager
 import android.nfc.NfcAdapter.CreateNdefMessageCallback
@@ -22,9 +21,10 @@ import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
 import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.view._
-import android.widget.{CheckedTextView, ImageView, LinearLayout, Toast, Switch, CompoundButton, TextView, EditText}
+import android.widget.{CheckedTextView, CompoundButton, EditText, ImageView, LinearLayout, Switch, TextView, Toast}
 import android.net.Uri
 import java.io.IOException
+
 import android.support.design.widget.Snackbar
 import com.github.clans.fab.{FloatingActionButton, FloatingActionMenu}
 import com.github.shadowsocks.ShadowsocksApplication.app
@@ -38,12 +38,15 @@ import com.github.shadowsocks.utils.CloseUtils._
 import net.glxn.qrgen.android.QRCode
 import java.lang.System.currentTimeMillis
 import java.lang.Thread
-import java.util.Random
+import java.text.SimpleDateFormat
+
 import android.util.{Base64, Log}
 import android.content.DialogInterface._
 import okhttp3._
 import java.util.concurrent.TimeUnit
+
 import android.preference.PreferenceManager
+
 import scala.collection.mutable.ArrayBuffer
 
 final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext
@@ -442,6 +445,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   private val REQUEST_QRCODE = 1
   private var is_sort: Boolean = false
+  private final val CREATE_REQUEST_CODE = 40
+  private final val TAG = "ProfileManagerActivity"
 
 
   def isPortAvailable (port: Int):Boolean = {
@@ -924,6 +929,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               //handle cancel
           }
       }
+    if (requestCode == CREATE_REQUEST_CODE) {
+      Log.e(TAG, "CREATE_REQUEST_CODE")
+    }
   }
 
   override def onStart() {
@@ -972,6 +980,15 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show
         case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
       }
+      true
+    case R.id.action_export_file =>
+      val dateFormat = new SimpleDateFormat("yyyyMMddhhmmss")
+      val date = dateFormat.format(new Date())
+      val intent = new Intent(Intent.ACTION_CREATE_DOCUMENT)
+      intent.addCategory(Intent.CATEGORY_OPENABLE)
+      intent.setType("text/plain")
+      intent.putExtra(Intent.EXTRA_TITLE, s"profiles-$date.ssr")
+      startActivityForResult(intent, CREATE_REQUEST_CODE)
       true
     case R.id.action_full_test =>
       app.profileManager.getAllProfiles match {

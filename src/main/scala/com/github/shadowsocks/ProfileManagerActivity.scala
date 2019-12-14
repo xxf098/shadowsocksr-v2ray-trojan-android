@@ -316,6 +316,17 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       profiles ++= app.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
     }
 
+    def onGroupChange(groupName: String, allGroup: String): Unit = {
+      profiles = new ArrayBuffer[Profile]
+      profiles ++= {(groupName, is_sort) match {
+        case (`allGroup`, true) => app.profileManager.getAllProfilesByElapsed
+        case (`allGroup`, false) => app.profileManager.getAllProfiles
+        case (_, true) => app.profileManager.getAllProfilesByGroupOrderByElapse(groupName)
+        case (_, false) => app.profileManager.getAllProfilesByGroup(groupName)
+      }}.getOrElse(List.empty[Profile])
+      notifyDataSetChanged()
+    }
+
     def getItemCount = profiles.length
 
     def onBindViewHolder(vh: ProfileViewHolder, i: Int) = vh.bind(profiles(i))
@@ -571,6 +582,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       def onNothingSelected(parent: AdapterView[_]): Unit = {}
       def onItemSelected(parent: AdapterView[_], view: View, position: Int, id: Long): Unit = {
         val groupName = parent.getItemAtPosition(position).toString
+        profilesAdapter.onGroupChange(groupName, getString(R.string.allgroups))
       }
     })
   }

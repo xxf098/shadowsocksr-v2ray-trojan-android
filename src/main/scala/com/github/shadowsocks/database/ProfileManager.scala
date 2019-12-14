@@ -286,6 +286,19 @@ class ProfileManager(dbHelper: DBHelper) {
     }
   }
 
+  def getAllProfilesByGroupOrderByElapse(group: String): Option[List[Profile]] = {
+    try {
+      import scala.collection.JavaConversions._
+      Option(dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.orderBy("elapsed", true).where().eq("url_group", group).and().not().eq("elapsed", 0).prepare).toList
+        ++ dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.orderBy("elapsed", true).where().eq("url_group", group).and().eq("elapsed", 0).prepare).toList)
+    } catch {
+      case ex: Exception =>
+        Log.e(TAG, "getAllProfiles", ex)
+        app.track(ex)
+        None
+    }
+  }
+
   def getGroupNames: Option[List[String]] = {
     try {
       import scala.collection.JavaConversions._

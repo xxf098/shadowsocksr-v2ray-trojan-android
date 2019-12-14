@@ -21,7 +21,7 @@ import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
 import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.view._
-import android.widget.{CheckedTextView, CompoundButton, EditText, ImageView, LinearLayout, Switch, TextView, Toast}
+import android.widget.{Adapter, AdapterView, ArrayAdapter, CheckedTextView, CompoundButton, EditText, ImageView, LinearLayout, Switch, TextView, Toast}
 import android.net.Uri
 import android.support.design.widget.Snackbar
 import com.github.clans.fab.{FloatingActionButton, FloatingActionMenu}
@@ -44,6 +44,7 @@ import okhttp3._
 import java.util.concurrent.TimeUnit
 
 import android.preference.PreferenceManager
+import android.widget.AdapterView.OnItemSelectedListener
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -491,6 +492,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     toolbar.setOnMenuItemClickListener(this)
 
     initFab()
+    initGroupSpinner()
 
     app.profileManager.setProfileAddedListener(profilesAdapter.add)
     val profilesList = findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
@@ -554,6 +556,19 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     ssrsubAddFAB.setOnClickListener(this)
     menu.setOnMenuToggleListener(opened => if (opened) qrcodeAddFAB.setVisibility(
       if (getPackageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA)) View.VISIBLE else View.GONE))
+  }
+
+  def initGroupSpinner(): Unit = {
+    val groupSpinner = findViewById(R.id.group_choose_spinner).asInstanceOf[AppCompatSpinner]
+    val groupAdapter = new ArrayAdapter[String](this, android.R.layout.simple_spinner_dropdown_item)
+    groupAdapter.add(getString(R.string.allgroups))
+    groupSpinner.setAdapter(groupAdapter)
+    groupSpinner.setOnItemSelectedListener(new OnItemSelectedListener {
+      def onNothingSelected(parent: AdapterView[_]): Unit = {}
+      def onItemSelected(parent: AdapterView[_], view: View, position: Int, id: Long): Unit = {
+        val groupName = parent.getItemAtPosition(position).toString
+      }
+    })
   }
 
 

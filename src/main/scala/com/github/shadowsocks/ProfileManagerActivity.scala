@@ -2,7 +2,7 @@ package com.github.shadowsocks
 
 import java.nio.charset.Charset
 import java.util.{Date, Locale, Random}
-import java.io.{BufferedWriter, File, IOException}
+import java.io.{BufferedReader, BufferedWriter, File, IOException, InputStreamReader}
 import java.net._
 
 import android.app.{Activity, ProgressDialog, TaskStackBuilder}
@@ -443,7 +443,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   private val REQUEST_QRCODE = 1
   private var is_sort: Boolean = false
-  private final val CREATE_DOCUMENT_REQUEST_CODE = 40
+  private final val REQUEST_CREATE_DOCUMENT = 40
+  private final val REQUEST_IMPORT_PROFILES = 41
   private final val TAG = "ProfileManagerActivity"
 
 
@@ -927,19 +928,29 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               //handle cancel
           }
       }
-    if (requestCode == CREATE_DOCUMENT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-      autoClose({
-        val filePath = data.getData
-        getContentResolver.openOutputStream(filePath)
-      })(out => {
-        app.profileManager.getAllProfiles match {
-          case Some(profiles) =>
-            val buffer = profiles.mkString("\n").getBytes(Charset.forName("UTF-8"))
-            out.write(buffer)
-            Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show
-          case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
-        }
-      })
+    if (resultCode != Activity.RESULT_OK) return
+    requestCode match {
+      case REQUEST_CREATE_DOCUMENT => {
+        autoClose({
+          val filePath = data.getData
+          getContentResolver.openOutputStream(filePath)
+        })(out => {
+          app.profileManager.getAllProfiles match {
+            case Some(profiles) =>
+              val buffer = profiles.mkString("\n").getBytes(Charset.forName("UTF-8"))
+              out.write(buffer)
+              Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show
+            case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
+          }
+        })
+      }
+      case REQUEST_IMPORT_PROFILES => {
+        autoClose(getContentResolver.openInputStream(data.getData))(in => {
+          val lines = scala.io.Source.fromInputStream(in).mkString
+          val profiles = Parser.findAll_ssr(lines).toList
+          profiles.foreach(app.profileManager.createProfile)
+        })
+      }
     }
   }
 
@@ -997,7 +1008,14 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       intent.addCategory(Intent.CATEGORY_OPENABLE)
       intent.setType("text/plain")
       intent.putExtra(Intent.EXTRA_TITLE, s"profiles-$date.ssr")
-      startActivityForResult(intent, CREATE_DOCUMENT_REQUEST_CODE)
+      startActivityForResult(intent, REQUEST_CREATE_DOCUMENT)
+      true
+    case R.id.action_import_file =>
+      val intent = new Intent(Intent.ACTION_GET_CONTENT)
+      intent.setType("text/plain")
+      intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true)
+      intent.addCategory(Intent.CATEGORY_OPENABLE)
+      startActivityForResult(Intent.createChooser(intent, "SSR"), REQUEST_IMPORT_PROFILES)
       true
     case R.id.action_full_test =>
       app.profileManager.getAllProfiles match {

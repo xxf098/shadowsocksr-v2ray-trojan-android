@@ -286,6 +286,22 @@ class ProfileManager(dbHelper: DBHelper) {
     }
   }
 
+  def getGroupNames: Option[List[String]] = {
+    try {
+      import scala.collection.JavaConversions._
+      Option(dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder()
+        .selectColumns("url_group")
+        .distinct()
+        .prepare()).map(p => p.url_group)
+        .toList)
+    } catch {
+      case ex: Exception =>
+        Log.e(TAG, "getAllProfiles", ex)
+        app.track(ex)
+        None
+    }
+  }
+
   def createDefault(): Profile = {
     val profile = new Profile {
       name = "Android SSR Default"

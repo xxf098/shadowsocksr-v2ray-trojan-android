@@ -562,6 +562,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     val groupSpinner = findViewById(R.id.group_choose_spinner).asInstanceOf[AppCompatSpinner]
     val groupAdapter = new ArrayAdapter[String](this, android.R.layout.simple_spinner_dropdown_item)
     groupAdapter.add(getString(R.string.allgroups))
+    app.profileManager.getGroupNames match {
+      case Some(groupNames) => for (name <- groupNames) groupAdapter.add(name)
+      case None =>
+    }
     groupSpinner.setAdapter(groupAdapter)
     groupSpinner.setOnItemSelectedListener(new OnItemSelectedListener {
       def onNothingSelected(parent: AdapterView[_]): Unit = {}

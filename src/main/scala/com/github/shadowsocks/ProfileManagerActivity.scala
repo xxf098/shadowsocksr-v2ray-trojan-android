@@ -310,21 +310,28 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
     var profiles = new ArrayBuffer[Profile]
-    if (is_sort) {
-      profiles ++= app.profileManager.getAllProfilesByElapsed.getOrElse(List.empty[Profile])
-    } else {
-      profiles ++= app.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
+    profiles ++= getProfilesByGroup(currentGroupName)
+    Log.e(TAG, "====" + app.settings.getString(Key.currentGroupName, "====groupname"))
+    //    if (is_sort) {
+//      profiles ++= app.profileManager.getAllProfilesByElapsed.getOrElse(List.empty[Profile])
+//    } else {
+//      profiles ++= app.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
+//    }
+
+    def onGroupChange(groupName: String): Unit = {
+      profiles = new ArrayBuffer[Profile]
+      profiles ++= getProfilesByGroup(groupName)
+      notifyDataSetChanged()
     }
 
-    def onGroupChange(groupName: String, allGroup: String): Unit = {
-      profiles = new ArrayBuffer[Profile]
-      profiles ++= {(groupName, is_sort) match {
+    def getProfilesByGroup (groupName: String): List[Profile] = {
+      val allGroup = app.getString(R.string.allgroups)
+      return {(groupName, is_sort) match {
         case (`allGroup`, true) => app.profileManager.getAllProfilesByElapsed
         case (`allGroup`, false) => app.profileManager.getAllProfiles
         case (_, true) => app.profileManager.getAllProfilesByGroupOrderByElapse(groupName)
         case (_, false) => app.profileManager.getAllProfilesByGroup(groupName)
       }}.getOrElse(List.empty[Profile])
-      notifyDataSetChanged()
     }
 
     def getItemCount = profiles.length
@@ -458,6 +465,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   private final val REQUEST_CREATE_DOCUMENT = 40
   private final val REQUEST_IMPORT_PROFILES = 41
   private final val TAG = "ProfileManagerActivity"
+  private var currentGroupName: String = _
 
 
   def isPortAvailable (port: Int):Boolean = {
@@ -503,6 +511,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     toolbar.setOnMenuItemClickListener(this)
 
     initFab()
+    // get current group name
+    currentGroupName = app.settings.getString(Key.currentGroupName, getString(R.string.allgroups))
     initGroupSpinner()
 
     app.profileManager.setProfileAddedListener(profilesAdapter.add)
@@ -573,16 +583,21 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     val groupSpinner = findViewById(R.id.group_choose_spinner).asInstanceOf[AppCompatSpinner]
     val groupAdapter = new ArrayAdapter[String](this, android.R.layout.simple_spinner_dropdown_item)
     groupAdapter.add(getString(R.string.allgroups))
-    app.profileManager.getGroupNames match {
-      case Some(groupNames) => for (name <- groupNames) groupAdapter.add(name)
-      case None =>
+    val selectIndex = app.profileManager.getGroupNames match {
+      case Some(groupNames) => {
+        for (name <- groupNames) groupAdapter.add(name)
+        Math.max(0, groupNames.indexOf(currentGroupName)) + 1
+      }
+      case None => 1
     }
     groupSpinner.setAdapter(groupAdapter)
+    groupSpinner.setSelection(selectIndex)
     groupSpinner.setOnItemSelectedListener(new OnItemSelectedListener {
       def onNothingSelected(parent: AdapterView[_]): Unit = {}
       def onItemSelected(parent: AdapterView[_], view: View, position: Int, id: Long): Unit = {
-        val groupName = parent.getItemAtPosition(position).toString
-        profilesAdapter.onGroupChange(groupName, getString(R.string.allgroups))
+        currentGroupName = parent.getItemAtPosition(position).toString
+        profilesAdapter.onGroupChange(currentGroupName)
+        app.editor.putString(Key.currentGroupName, currentGroupName).apply()
       }
     })
   }

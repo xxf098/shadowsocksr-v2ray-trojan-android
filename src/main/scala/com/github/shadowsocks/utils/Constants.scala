@@ -203,6 +203,7 @@ object Key {
   val frontproxy = "frontproxy"
   val ssrsub_autoupdate = "ssrsub_autoupdate"
   val group_name = "groupName"
+  val currentGroupName = "currentGroupName"
 }
 
 object State {

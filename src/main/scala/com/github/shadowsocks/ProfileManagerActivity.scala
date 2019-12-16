@@ -372,6 +372,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     def commit(actions: Iterator[(Int, Profile)]) = for ((index, item) <- actions) {
       app.profileManager.delProfile(item.id)
       if (item.id == app.profileId) app.profileId(-1)
+      if (profiles.isEmpty) {
+        currentGroupName = getString(R.string.allgroups)
+        initGroupSpinner()
+      }
     }
   }
 
@@ -576,13 +580,13 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   def initGroupSpinner(): Unit = {
     val groupSpinner = findViewById(R.id.group_choose_spinner).asInstanceOf[AppCompatSpinner]
     val groupAdapter = new ArrayAdapter[String](this, android.R.layout.simple_spinner_dropdown_item)
-    groupAdapter.add(getString(R.string.allgroups))
     val selectIndex = app.profileManager.getGroupNames match {
       case Some(groupNames) => {
-        for (name <- groupNames) groupAdapter.add(name)
-        Math.max(0, groupNames.indexOf(currentGroupName)) + 1
+        val allGroupNames = getString(R.string.allgroups) +: groupNames
+        allGroupNames.foreach(name => groupAdapter.add(name))
+        Math.max(0, allGroupNames.indexOf(currentGroupName))
       }
-      case None => 1
+      case None => 0
     }
     groupSpinner.setAdapter(groupAdapter)
     groupSpinner.setSelection(selectIndex)

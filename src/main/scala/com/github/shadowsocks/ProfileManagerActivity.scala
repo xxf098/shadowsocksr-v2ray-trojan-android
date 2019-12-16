@@ -311,12 +311,6 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
     var profiles = new ArrayBuffer[Profile]
     profiles ++= getProfilesByGroup(currentGroupName)
-    Log.e(TAG, "====" + app.settings.getString(Key.currentGroupName, "====groupname"))
-    //    if (is_sort) {
-//      profiles ++= app.profileManager.getAllProfilesByElapsed.getOrElse(List.empty[Profile])
-//    } else {
-//      profiles ++= app.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
-//    }
 
     def onGroupChange(groupName: String): Unit = {
       profiles = new ArrayBuffer[Profile]
@@ -569,9 +563,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     val nfcAddFAB = findViewById(R.id.fab_nfc_add).asInstanceOf[FloatingActionButton]
     nfcAddFAB.setImageDrawable(dm.getDrawable(this, R.drawable.ic_device_nfc))
     nfcAddFAB.setOnClickListener(this)
-    val importAddFAB = findViewById(R.id.fab_import_add).asInstanceOf[FloatingActionButton]
-    importAddFAB.setImageDrawable(dm.getDrawable(this, R.drawable.ic_content_paste))
-    importAddFAB.setOnClickListener(this)
+//    val importAddFAB = findViewById(R.id.fab_import_add).asInstanceOf[FloatingActionButton]
+//    importAddFAB.setImageDrawable(dm.getDrawable(this, R.drawable.ic_content_paste))
+//    importAddFAB.setOnClickListener(this)
     val ssrsubAddFAB = findViewById(R.id.fab_ssr_sub).asInstanceOf[FloatingActionButton]
     ssrsubAddFAB.setImageDrawable(dm.getDrawable(this, R.drawable.ic_rss))
     ssrsubAddFAB.setOnClickListener(this)
@@ -671,27 +665,27 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           dialog.setMessage(getString(R.string.add_profile_nfc_hint))
         }
         dialog.show
-      case R.id.fab_import_add =>
-        menu.toggle(true)
-        if (clipboard.hasPrimaryClip) {
-          val profiles_normal = Parser.findAll(clipboard.getPrimaryClip.getItemAt(0).getText).toList
-          val profiles_ssr = Parser.findAll_ssr(clipboard.getPrimaryClip.getItemAt(0).getText).toList
-          val profiles = profiles_normal ::: profiles_ssr
-          if (profiles.nonEmpty) {
-            val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
-              .setTitle(R.string.add_profile_dialog)
-              .setPositiveButton(android.R.string.yes, ((_, _) =>
-                profiles.foreach(app.profileManager.createProfile)): DialogInterface.OnClickListener)
-              .setNeutralButton(R.string.dr, ((_, _) =>
-                profiles.foreach(app.profileManager.createProfile_dr)): DialogInterface.OnClickListener)
-              .setNegativeButton(android.R.string.no, ((_, _) => finish()): DialogInterface.OnClickListener)
-              .setMessage(profiles.mkString("\n"))
-              .create()
-            dialog.show()
-            return
-          }
-        }
-        Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show
+//      case R.id.fab_import_add =>
+//        menu.toggle(true)
+//        if (clipboard.hasPrimaryClip) {
+//          val profiles_normal = Parser.findAll(clipboard.getPrimaryClip.getItemAt(0).getText).toList
+//          val profiles_ssr = Parser.findAll_ssr(clipboard.getPrimaryClip.getItemAt(0).getText).toList
+//          val profiles = profiles_normal ::: profiles_ssr
+//          if (profiles.nonEmpty) {
+//            val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
+//              .setTitle(R.string.add_profile_dialog)
+//              .setPositiveButton(android.R.string.yes, ((_, _) =>
+//                profiles.foreach(app.profileManager.createProfile)): DialogInterface.OnClickListener)
+//              .setNeutralButton(R.string.dr, ((_, _) =>
+//                profiles.foreach(app.profileManager.createProfile_dr)): DialogInterface.OnClickListener)
+//              .setNegativeButton(android.R.string.no, ((_, _) => finish()): DialogInterface.OnClickListener)
+//              .setMessage(profiles.mkString("\n"))
+//              .create()
+//            dialog.show()
+//            return
+//          }
+//        }
+//        Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show
       case R.id.fab_ssr_sub =>
         menu.toggle(true)
         ssrsubDialog()
@@ -1046,6 +1040,27 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show
         case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
       }
+      true
+    case R.id.action_import_clipboard =>
+      if (clipboard.hasPrimaryClip) {
+        val profiles_normal = Parser.findAll(clipboard.getPrimaryClip.getItemAt(0).getText).toList
+        val profiles_ssr = Parser.findAll_ssr(clipboard.getPrimaryClip.getItemAt(0).getText).toList
+        val profiles = profiles_normal ::: profiles_ssr
+        if (profiles.nonEmpty) {
+          val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
+            .setTitle(R.string.add_profile_dialog)
+            .setPositiveButton(android.R.string.yes, ((_, _) =>
+              profiles.foreach(app.profileManager.createProfile)): DialogInterface.OnClickListener)
+            .setNeutralButton(R.string.dr, ((_, _) =>
+              profiles.foreach(app.profileManager.createProfile_dr)): DialogInterface.OnClickListener)
+            .setNegativeButton(android.R.string.no, ((_, _) => finish()): DialogInterface.OnClickListener)
+            .setMessage(profiles.mkString("\n"))
+            .create()
+          dialog.show()
+          return true
+        }
+      }
+      Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show
       true
     case R.id.action_export_file =>
       val dateFormat = new SimpleDateFormat("yyyyMMddhhmmss")

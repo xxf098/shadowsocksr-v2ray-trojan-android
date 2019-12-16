@@ -81,16 +81,16 @@
                 app:fab_size="mini"
                 app:fab_label="NFC"
                 />
-            <com.github.clans.fab.FloatingActionButton
-                android:id="@+id/fab_import_add"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:fab_colorNormal="@color/material_accent_500"
-                app:fab_colorPressed="@color/material_accent_700"
-                app:fab_colorRipple="@android:color/white"
-                app:fab_size="mini"
-                app:fab_label="@string/action_import"
-                />
+<!--            <com.github.clans.fab.FloatingActionButton-->
+<!--                android:id="@+id/fab_import_add"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                app:fab_colorNormal="@color/material_accent_500"-->
+<!--                app:fab_colorPressed="@color/material_accent_700"-->
+<!--                app:fab_colorRipple="@android:color/white"-->
+<!--                app:fab_size="mini"-->
+<!--                app:fab_label="@string/action_import"-->
+<!--                />-->
         </com.github.clans.fab.FloatingActionMenu>
     </android.support.design.widget.CoordinatorLayout>
 

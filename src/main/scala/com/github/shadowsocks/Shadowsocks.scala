@@ -295,12 +295,13 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
         } catch {
           case e: Exception =>
             success = false
-            e.printStackTrace()
             if (retry > 1) {
               handler.post(() => connectionTestText.setText("retry..."))
-              handler.postDelayed(() => checkConnection(timeout, retry -1), 550)
+              handler.postDelayed(() => checkConnection(timeout, retry -1),
+                500 * (Math.pow(0.5, retry).toLong + 1))
               return
             }
+            e.printStackTrace()
             result = getString(R.string.connection_test_error, e.getMessage)
         }
         synchronized(if (testCount == id && app.isVpnEnabled) handler.post(() =>

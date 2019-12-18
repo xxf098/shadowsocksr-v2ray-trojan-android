@@ -74,6 +74,11 @@ A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) client for Andro
     sudo ln -s /usr/lib32/libncurses.so.5 /usr/lib32/libtinfo.so.5
 ```
 
+#### Integration with Android Studio
+
+Checkout this [link](http://srodrigo.me/setting-up-scala-on-android/)
+* In Project Settings -> Modules -> shadowsocksr, change manifest file path
+* In Run/Debug Configuration -> Before launch, replace `Gradle-aware Make` with `android:run`
 
 #### BUILD on Mac OS X (with HomeBrew)
 

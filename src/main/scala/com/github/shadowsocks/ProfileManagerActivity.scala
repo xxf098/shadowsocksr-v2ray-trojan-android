@@ -60,7 +60,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     itemView.setOnKeyListener(this)
 
     {
-      val shareBtn = itemView.findViewById(R.id.share)
+      val shareBtn = itemView.findViewById(R.id.share).asInstanceOf[ImageView]
       shareBtn.setOnClickListener(_ => {
         val url = item.toString
         if (isNfcBeamEnabled) {
@@ -102,7 +102,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     }
 
     {
-      val pingBtn = itemView.findViewById(R.id.ping_single)
+      val pingBtn = itemView.findViewById(R.id.ping_single).asInstanceOf[ImageView]
       pingBtn.setOnClickListener(_ => {
 
         val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
@@ -190,59 +190,6 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           }
 
           Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
-
-          /*autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection(proxy)
-            .asInstanceOf[HttpURLConnection]) { conn =>
-            conn.setConnectTimeout(5 * 1000)
-            conn.setReadTimeout(5 * 1000)
-            conn.setInstanceFollowRedirects(false)
-            conn.setUseCaches(false)
-            var result: String = null
-            var success = true
-            try {
-              conn.getInputStream
-              val code = conn.getResponseCode
-              if (code == 204 || code == 200 && conn.getContentLength == 0)
-              {
-                autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection(proxy)
-                  .asInstanceOf[HttpURLConnection]) { conn =>
-                  conn.setConnectTimeout(5 * 1000)
-                  conn.setReadTimeout(5 * 1000)
-                  conn.setInstanceFollowRedirects(false)
-                  conn.setUseCaches(false)
-                  var result: String = null
-                  var success = true
-                  try {
-                    val start = currentTimeMillis
-                    conn.getInputStream
-                    val elapsed = currentTimeMillis - start
-                    val code = conn.getResponseCode
-                    if (code == 204 || code == 200 && conn.getContentLength == 0)
-                    {
-                      result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
-                      profile.elapsed = elapsed
-                      app.profileManager.updateProfile(profile)
-
-                      this.updateText(0, 0, elapsed)
-                    }
-                    else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
-                  } catch {
-                    case e: Exception =>
-                      success = false
-                      result = getString(R.string.connection_test_error, e.getMessage)
-                  }
-                  Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
-                }
-              }
-              else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
-            } catch {
-              case e: Exception =>
-                success = false
-                result = getString(R.string.connection_test_error, e.getMessage)
-                Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
-            }
-          }*/
-
           if (ssTestProcess != null) {
             ssTestProcess.destroy()
             ssTestProcess = null

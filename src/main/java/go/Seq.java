@@ -1,4 +1,4 @@
-package com.github.shadowsocks.go;
+package go;
 
 import java.util.logging.Logger;
 

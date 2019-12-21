@@ -1,6 +1,6 @@
-package com.github.shadowsocks.libv2ray;
+package libv2ray;
 
-import com.github.shadowsocks.go.Seq;
+import go.Seq;
 
 import java.util.Arrays;
 

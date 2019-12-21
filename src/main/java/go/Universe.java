@@ -1,4 +1,7 @@
-package com.github.shadowsocks.go;
+package go;
+
+import go.Seq;
+import go.Error;
 
 public abstract class Universe {
     private Universe() {

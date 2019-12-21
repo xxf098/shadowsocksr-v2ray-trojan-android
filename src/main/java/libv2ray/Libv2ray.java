@@ -1,6 +1,6 @@
-package com.github.shadowsocks.libv2ray;
+package libv2ray;
 
-import com.github.shadowsocks.go.Seq;
+import go.Seq;
 
 public abstract class Libv2ray {
     private Libv2ray() {

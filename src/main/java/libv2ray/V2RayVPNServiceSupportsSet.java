@@ -1,4 +1,4 @@
-package com.github.shadowsocks.libv2ray;
+package libv2ray;
 
 public interface V2RayVPNServiceSupportsSet {
     public long onEmitStatus(long var1, String var3);

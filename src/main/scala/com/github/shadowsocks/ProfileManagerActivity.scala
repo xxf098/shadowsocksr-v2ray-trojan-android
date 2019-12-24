@@ -934,13 +934,17 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           QRCodeDecoder.syncDecodeQRCode(bitmap) match {
             case Some(url) => {
               Log.e(TAG, url)
-              new Regex(".*ssr://.*").findFirstIn(url) match {
-                case Some(_) => handler.post(() => {
-                  clipboard.setPrimaryClip(ClipData.newPlainText(null, url))
-                  createProfilesFromText(url)
-                })
-                case None =>
-              }
+              handler.post(() => {
+                val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
+                  .setTitle(R.string.add_profile_dialog)
+                  .setPositiveButton(android.R.string.yes, ((_, _) =>
+                    clipboard.setPrimaryClip(ClipData.newPlainText(null, url))): DialogInterface.OnClickListener)
+                  .setNeutralButton(R.string.open_url, ((_, _) => openUrl(url)): DialogInterface.OnClickListener)
+                  .setNegativeButton(android.R.string.no, ((_, _) => finish()): DialogInterface.OnClickListener)
+                  .setMessage(url)
+                  .create()
+                dialog.show()
+              })
             }
             case None => handler.post(() => {
               Toast.makeText(this, "Nothing Found", Toast.LENGTH_SHORT)
@@ -948,6 +952,21 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           }
         }
       }
+    }
+  }
+
+  def openUrl (url: String): Unit ={
+    """(?i)^https?://.*""".r.findFirstIn(url) match {
+      case Some(x) => {
+        val intent = new Intent(Intent.ACTION_VIEW)
+        intent.setData(Uri.parse(url))
+        startActivity(intent)
+      }
+      case None =>
+    }
+    """(?i)ssr?://.*""".r.findFirstIn(url) match {
+      case Some(x) => createProfilesFromText(url)
+      case None =>
     }
   }
 

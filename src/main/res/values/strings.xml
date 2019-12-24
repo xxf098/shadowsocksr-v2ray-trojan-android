@@ -116,8 +116,10 @@
   <string name="remove_profile">Remove this profile "%s"?</string>
 
   <string name="dr">Duplicate Removal Add</string>
+  <string name="open_url">Open</string>
 
-  <!-- menu category -->
+
+    <!-- menu category -->
   <string name="profiles">Profiles</string>
   <string name="settings">Settings</string>
   <string name="recovery">Reset</string>

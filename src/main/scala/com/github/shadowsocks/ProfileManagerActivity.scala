@@ -11,7 +11,7 @@ import android.content.pm.PackageManager
 import android.nfc.NfcAdapter.CreateNdefMessageCallback
 import android.nfc.{NdefMessage, NdefRecord, NfcAdapter, NfcEvent}
 import android.os._
-import android.provider.Settings
+import android.provider.{MediaStore, Settings}
 import android.support.v7.app.{AlertDialog, AppCompatActivity}
 import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
@@ -47,6 +47,7 @@ import android.preference.PreferenceManager
 import android.widget.AdapterView.OnItemSelectedListener
 
 import scala.collection.mutable.ArrayBuffer
+import scala.util.matching.Regex
 
 final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext
   with View.OnClickListener with CreateNdefMessageCallback {
@@ -286,6 +287,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       undoManager.flush
       val pos = getItemCount
       profiles += item
+      initGroupSpinner(Some(item.url_group))
       notifyItemInserted(pos)
     }
 
@@ -320,7 +322,6 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       app.profileManager.delProfile(item.id)
       if (item.id == app.profileId) app.profileId(-1)
       if (profiles.isEmpty) {
-        currentGroupName = getString(R.string.allgroups)
         initGroupSpinner()
       }
     }
@@ -409,6 +410,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   private var is_sort: Boolean = false
   private final val REQUEST_CREATE_DOCUMENT = 40
   private final val REQUEST_IMPORT_PROFILES = 41
+  private final val REQUEST_IMPORT_QRCODE_IMAGE = 42
   private final val TAG = "ProfileManagerActivity"
   private var currentGroupName: String = _
 
@@ -457,8 +459,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
     initFab()
     // get current group name
-    currentGroupName = app.settings.getString(Key.currentGroupName, getString(R.string.allgroups))
-    initGroupSpinner()
+    initGroupSpinner(Some(app.settings.getString(Key.currentGroupName, getString(R.string.allgroups))))
 
     app.profileManager.setProfileAddedListener(profilesAdapter.add)
     val profilesList = findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
@@ -524,7 +525,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       if (getPackageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA)) View.VISIBLE else View.GONE))
   }
 
-  def initGroupSpinner(): Unit = {
+    def initGroupSpinner(groupName: Option[String] = None ): Unit = {
+    currentGroupName = groupName.getOrElse(getString(R.string.allgroups))
     val groupSpinner = findViewById(R.id.group_choose_spinner).asInstanceOf[AppCompatSpinner]
     val groupAdapter = new ArrayAdapter[String](this, android.R.layout.simple_spinner_dropdown_item)
     val selectIndex = app.profileManager.getGroupNames match {
@@ -896,24 +898,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       if (requestCode == 0) {
           if (resultCode == Activity.RESULT_OK) {
               val contents = data.getStringExtra("SCAN_RESULT")
-              if (TextUtils.isEmpty(contents)) return
-              val profiles_normal = Parser.findAll(contents).toList
-              val profiles_ssr = Parser.findAll_ssr(contents).toList
-              val profiles = profiles_ssr ::: profiles_normal
-              if (profiles.isEmpty) {
-                finish()
-                return
-              }
-              val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
-                .setTitle(R.string.add_profile_dialog)
-                .setPositiveButton(android.R.string.yes, ((_, _) =>
-                  profiles.foreach(app.profileManager.createProfile)): DialogInterface.OnClickListener)
-                .setNeutralButton(R.string.dr, ((_, _) =>
-                  profiles.foreach(app.profileManager.createProfile_dr)): DialogInterface.OnClickListener)
-                .setNegativeButton(android.R.string.no, ((_, _) => finish()): DialogInterface.OnClickListener)
-                .setMessage(profiles.mkString("\n"))
-                .create()
-              dialog.show()
+              createProfilesFromText(contents)
           }
           if(resultCode == Activity.RESULT_CANCELED){
               //handle cancel
@@ -942,7 +927,49 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           profiles.foreach(app.profileManager.createProfile)
         })
       }
+      case REQUEST_IMPORT_QRCODE_IMAGE => {
+        val uri = data.getData
+        val bitmap = MediaStore.Images.Media.getBitmap(getContentResolver, uri)
+        Utils.ThrowableFuture{
+          QRCodeDecoder.syncDecodeQRCode(bitmap) match {
+            case Some(url) => {
+              Log.e(TAG, url)
+              new Regex(".*ssr://.*").findFirstIn(url) match {
+                case Some(_) => handler.post(() => {
+                  clipboard.setPrimaryClip(ClipData.newPlainText(null, url))
+                  createProfilesFromText(url)
+                })
+                case None =>
+              }
+            }
+            case None => handler.post(() => {
+              Toast.makeText(this, "Nothing Found", Toast.LENGTH_SHORT)
+            })
+          }
+        }
+      }
     }
+  }
+
+  def createProfilesFromText (contents: String): Unit = {
+    if (TextUtils.isEmpty(contents)) return
+    val profiles_normal = Parser.findAll(contents).toList
+    val profiles_ssr = Parser.findAll_ssr(contents).toList
+    val profiles = profiles_ssr ::: profiles_normal
+    if (profiles.isEmpty) {
+      finish()
+      return
+    }
+    val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
+      .setTitle(R.string.add_profile_dialog)
+      .setPositiveButton(android.R.string.yes, ((_, _) =>
+        profiles.foreach(app.profileManager.createProfile)): DialogInterface.OnClickListener)
+      .setNeutralButton(R.string.dr, ((_, _) =>
+        profiles.foreach(app.profileManager.createProfile_dr)): DialogInterface.OnClickListener)
+      .setNegativeButton(android.R.string.no, ((_, _) => finish()): DialogInterface.OnClickListener)
+      .setMessage(profiles.mkString("\n"))
+      .create()
+    dialog.show()
   }
 
   override def onStart() {
@@ -1028,6 +1055,16 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true)
       intent.addCategory(Intent.CATEGORY_OPENABLE)
       startActivityForResult(Intent.createChooser(intent, "SSR"), REQUEST_IMPORT_PROFILES)
+      true
+    case R.id.action_import_qrcode_image =>
+      val intent = new Intent(Intent.ACTION_GET_CONTENT)
+      intent.setType("image/*")
+      intent.putExtra(Intent.EXTRA_MIME_TYPES, "image/png")
+      intent.putExtra(Intent.EXTRA_MIME_TYPES, "image/jpg")
+      intent.putExtra(Intent.EXTRA_MIME_TYPES, "image/jpeg")
+      intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true)
+      intent.addCategory(Intent.CATEGORY_OPENABLE)
+      startActivityForResult(Intent.createChooser(intent, "SSR"), REQUEST_IMPORT_QRCODE_IMAGE)
       true
     case R.id.action_full_test =>
       app.profileManager.getAllProfiles match {

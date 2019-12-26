@@ -21,7 +21,7 @@ proguardVersion := "6.2.0"
 proguardCache := Seq()
 proguardOptions ++=
   "-keep class com.github.shadowsocks.System { *; }" ::
-  "-keep class libv2ray.** { *;}" ::
+  "-keep class tun2socks.** { *;}" ::
   "-keep class go.** { *;}" ::
   "-keep class okhttp3.** { *; }" ::
   "-keep interface okhttp3.** { *; }" ::

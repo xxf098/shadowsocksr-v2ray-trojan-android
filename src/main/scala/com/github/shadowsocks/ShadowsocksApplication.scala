@@ -81,6 +81,7 @@ object ShadowsocksApplication {
 }
 
 class ShadowsocksApplication extends Application {
+
   import ShadowsocksApplication._
 
   final val SIG_FUNC = "getSignature"
@@ -93,6 +94,7 @@ class ShadowsocksApplication extends Application {
   lazy val resources = getResources()
 
   def isNatEnabled = settings.getBoolean(Key.isNAT, false)
+
   def isVpnEnabled = !isNatEnabled
 
   // send event
@@ -100,13 +102,16 @@ class ShadowsocksApplication extends Application {
     .setAction(action)
     .setLabel(BuildConfig.VERSION_NAME)
     .build())
+
   def track(t: Throwable) = tracker.send(new HitBuilders.ExceptionBuilder()
     .setDescription(new StandardExceptionParser(this, null).getDescription(Thread.currentThread.getName, t))
     .setFatal(false)
     .build())
 
   def profileId = settings.getInt(Key.id, -1)
+
   def profileId(i: Int) = editor.putInt(Key.id, i).apply
+
   def currentProfile = profileManager.getProfile(profileId)
 
   def switchProfile(id: Int) = {
@@ -115,8 +120,8 @@ class ShadowsocksApplication extends Application {
   }
 
   private def checkChineseLocale(locale: Locale): Locale = if (locale.getLanguage == "zh") locale.getCountry match {
-    case "CN" | "TW" => null            // already supported
-    case _ => locale.getScript match {  // fallback to the corresponding script
+    case "CN" | "TW" => null // already supported
+    case _ => locale.getScript match { // fallback to the corresponding script
       case "Hans" => SIMPLIFIED_CHINESE
       case "Hant" => TRADITIONAL_CHINESE
       case script =>
@@ -205,7 +210,7 @@ class ShadowsocksApplication extends Application {
     if (holder != null) holder.refresh()
   }
 
-  private def copyAssets(path: String) {
+  def copyAssets(path: String, destPath: String = null) {
     val assetManager = getAssets
     var files: Array[String] = null
     try files = assetManager.list(path) catch {
@@ -213,10 +218,13 @@ class ShadowsocksApplication extends Application {
         Log.e(TAG, e.getMessage)
         app.track(e)
     }
-    if (files != null) for (file <- files)
+    val destPath1 = if (destPath != null) destPath else getApplicationInfo.dataDir + "/"
+    if (files != null) for (file <- files) {
+//      Log.e(TAG, destPath1 + file)
       autoClose(assetManager.open(if (path.nonEmpty) path + '/' + file else file))(in =>
-        autoClose(new FileOutputStream(getApplicationInfo.dataDir + '/' + file))(out =>
+        autoClose(new FileOutputStream(destPath1 + file))(out =>
           IOUtils.copy(in, out)))
+    }
   }
 
   def crashRecovery() {

@@ -156,6 +156,8 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
             }
             preferences.setEnabled(true)
             stat.setVisibility(View.GONE)
+            // ignore test
+            testCount += 1
           case State.STOPPING =>
             fab.setBackgroundTintList(greyTint)
             fab.setImageResource(R.drawable.ic_start_busy)

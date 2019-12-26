@@ -1,5 +1,6 @@
 package go;
 
-public interface Error {
-    public String error();
+public interface Error
+{
+    String error();
 }

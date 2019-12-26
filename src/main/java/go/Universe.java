@@ -1,9 +1,7 @@
 package go;
 
-import go.Seq;
-import go.Error;
-
-public abstract class Universe {
+public abstract class Universe
+{
     private Universe() {
     }
 
@@ -14,13 +12,11 @@ public abstract class Universe {
 
     static {
         Seq.touch();
-        Universe._init();
+        _init();
     }
 
-    private static final class proxyerror
-            extends Exception
-            implements Seq.Proxy,
-            Error {
+    private static final class proxyerror extends Exception implements Seq.Proxy, Error
+    {
         private final int refnum;
 
         @Override
@@ -29,9 +25,8 @@ public abstract class Universe {
             return this.refnum;
         }
 
-        proxyerror(int n) {
-            this.refnum = n;
-            Seq.trackGoRef(n, this);
+        proxyerror(final int refnum) {
+            Seq.trackGoRef(this.refnum = refnum, this);
         }
 
         @Override
@@ -42,5 +37,4 @@ public abstract class Universe {
         @Override
         public native String error();
     }
-
 }

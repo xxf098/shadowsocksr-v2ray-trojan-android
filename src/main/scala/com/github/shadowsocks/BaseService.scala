@@ -134,12 +134,22 @@ trait BaseService extends Service {
     override def useSync(profileId: Int) = use(profileId)
   }
 
-  def checkProfile(profile: Profile) = if (TextUtils.isEmpty(profile.host) || TextUtils.isEmpty(profile.password)) {
-    stopRunner(true, getString(R.string.proxy_empty))
-    false
-  } else true
+  def checkProfile(profile: Profile): Boolean = {
+    if (profile.isV2ray) {
+      if (TextUtils.isEmpty(profile.v_add) || TextUtils.isEmpty(profile.v_port) || TextUtils.isEmpty(profile.v_id)) {
+        stopRunner(true, getString(R.string.proxy_empty))
+        return  false
+      } else {
+        return  true
+      }
+    }
+    if (TextUtils.isEmpty(profile.host) || TextUtils.isEmpty(profile.password)) {
+      stopRunner(true, getString(R.string.proxy_empty))
+      false
+    } else true
+  }
 
-  def connect() {
+  def connect() : Any = {
     if (profile.host == "198.199.101.152") {
       val holder = app.containerHolder
       val container = holder.getContainer
@@ -198,6 +208,7 @@ trait BaseService extends Service {
 
     if (profile.isMethodUnsafe) handler.post(() => Toast.makeText(this, R.string.method_unsafe, Toast.LENGTH_LONG).show)
 
+    // connect to VPN
     Utils.ThrowableFuture(try connect catch {
       case _: NameNotResolvedException => stopRunner(true, getString(R.string.invalid_server))
       case exc: KcpcliParseException =>

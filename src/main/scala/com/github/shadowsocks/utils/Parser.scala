@@ -59,6 +59,8 @@ object Parser {
   private val decodedPattern_ssr_protocolparam = "(?i)[?&]protoparam=([A-Za-z0-9_=-]*)".r
   private val decodedPattern_ssr_groupparam = "(?i)[?&]group=([A-Za-z0-9_=-]*)".r
 
+  private val pattern_vmess = "(?i)(vmess://[A-Za-z0-9_/+-]+=*)".r
+
   def findAll(data: CharSequence) = pattern.findAllMatchIn(if (data == null) "" else data).map(m => try
     decodedPattern.findFirstMatchIn(new String(Base64.decode(m.group(1), Base64.NO_PADDING), "UTF-8")) match {
       case Some(ss) =>
@@ -125,6 +127,36 @@ object Parser {
         null
     }).filter(_ != null)
 
+  def findAllVmess(data: CharSequence) = pattern_vmess
+    .findAllMatchIn(if (data == null) "" else data)
+    .flatMap(m => try {
+      findVmess(m.group(1))
+    } catch {
+      case ex: Exception =>
+        Log.e(TAG, "parser error: " + m.source, ex) // Ignore
+        None
+    })
+    .map(convertVmessBeanToProfile)
+
+  private def convertVmessBeanToProfile (vmessBean: VmessBean): Profile = {
+    val profile = new Profile
+    profile.proxy_protocol = "vmess"
+    profile.v_v = vmessBean.configVersion.toString
+    profile.v_ps = vmessBean.remarks
+    profile.v_add = vmessBean.address
+    profile.v_port = vmessBean.port.toString
+    profile.v_id = vmessBean.id
+    profile.v_aid = vmessBean.alterId.toString
+    profile.v_net = vmessBean.network
+    profile.v_type = vmessBean.headerType
+    profile.v_host = vmessBean.requestHost
+    profile.v_path = vmessBean.path
+    profile.v_tls = vmessBean.streamSecurity
+    // common
+    profile.name = profile.v_ps
+    profile.url_group = "v2ray"
+    profile
+  }
 
   // single link
   def findVmess (vmessLink: String): Option[VmessBean] = {
@@ -134,7 +166,7 @@ object Parser {
     val indexSplit = vmessLink.indexOf("?")
     if (indexSplit > 0) return None
     var result = vmessLink.replace("vmess://", "")
-    result = new String(Base64.decode(result, Base64.NO_WRAP), "UTF-8")
+    result = new String(Base64.decode(result, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP), "UTF-8")
     Log.e(TAG, result)
     val vmessQRCode = new Gson().fromJson(result, classOf[VmessQRCode])
     if (TextUtils.isEmpty(vmessQRCode.add) ||
@@ -168,6 +200,10 @@ object Parser {
       case Some(vmessBean) => Some(getV2rayConfig(vmessBean))
       case None => None
     }
+  }
+
+  def getV2rayConfig(profile: Profile) : Option[String] = {
+    getV2rayConfig(profile.toString())
   }
 
   def getV2rayConfig(vmessBean: VmessBean): String = {

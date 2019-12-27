@@ -41,8 +41,11 @@ package com.github.shadowsocks.utils
 
 import java.net.URLDecoder
 
+import android.text.TextUtils
 import android.util.{Base64, Log}
-import com.github.shadowsocks.database.Profile
+import com.github.shadowsocks.database.{DnsBean, InSettingsBean, InboundBean, LogBean, MuxBean, OutSettingsBean, OutboundBean, Profile, RoutingBean, RulesBean, StreamSettingsBean, TlssettingsBean, UsersBean, V2rayConfig, VmessBean, VmessQRCode, VnextBean, WsHeaderBean, WssettingsBean}
+import com.google.gson.{Gson, GsonBuilder}
+import scala.collection.JavaConverters._
 
 object Parser {
   val TAG = "ShadowParser"
@@ -121,4 +124,91 @@ object Parser {
         Log.e(TAG, "parser error: " + m.source, ex)// Ignore
         null
     }).filter(_ != null)
+
+
+  // single link
+  def findVmess (vmessLink: String): Option[VmessBean] = {
+    if (vmessLink == null ||
+      TextUtils.isEmpty(vmessLink) ||
+    !vmessLink.startsWith("vmess://")) return None
+    val indexSplit = vmessLink.indexOf("?")
+    if (indexSplit > 0) return None
+    var result = vmessLink.replace("vmess://", "")
+    result = new String(Base64.decode(result, Base64.NO_WRAP), "UTF-8")
+    Log.e(TAG, result)
+    val vmessQRCode = new Gson().fromJson(result, classOf[VmessQRCode])
+    if (TextUtils.isEmpty(vmessQRCode.add) ||
+    TextUtils.isEmpty(vmessQRCode.port) ||
+    TextUtils.isEmpty(vmessQRCode.id) ||
+    TextUtils.isEmpty(vmessQRCode.aid) ||
+    TextUtils.isEmpty(vmessQRCode.net)) return None
+    val vmess = VmessBean()
+    vmess.configType = EConfigType.Vmess
+    vmess.security = "auto"
+    vmess.network = "tcp"
+    vmess.headerType = "none"
+
+    vmess.configVersion = vmessQRCode.v.toInt
+    vmess.remarks = vmessQRCode.ps
+    vmess.address = vmessQRCode.add
+    vmess.port = vmessQRCode.port.toInt
+    vmess.id = vmessQRCode.id
+    vmess.alterId = vmessQRCode.aid.toInt
+    vmess.network = vmessQRCode.net
+    vmess.headerType = vmessQRCode.`type`
+    vmess.requestHost = vmessQRCode.host
+    vmess.path = vmessQRCode.path
+    vmess.streamSecurity = vmessQRCode.tls
+    vmess.subid = ""
+    Some(vmess)
+  }
+
+  def getV2rayConfig(vmessLink: String): Option[String] = {
+    findVmess(vmessLink) match {
+      case Some(vmessBean) => Some(getV2rayConfig(vmessBean))
+      case None => None
+    }
+  }
+
+  def getV2rayConfig(vmessBean: VmessBean): String = {
+    val v2rayConfig = V2rayConfig()
+    v2rayConfig.log = LogBean("", "", "error")
+    v2rayConfig.dns = DnsBean(List("1.0.0.1", "localhost").asJava)
+    // routing
+    val geoipRule = RulesBean()
+    geoipRule.ip = List("geoip:private", "geoip:cn").asJava
+    val geositeRule = RulesBean()
+    geositeRule.domain = List("geosite:cn").asJava
+    v2rayConfig.routing = RoutingBean("IPIfNonMatch", List(geoipRule, geositeRule).asJava)
+    // inbounds
+    val sockInbound = InboundBean("socks-in", 8088, "socks", "::", null, null)
+    sockInbound.settings = InSettingsBean("noauth", udp = true, "127.0.0.1")
+    val httpInvound = InboundBean("http-in", 8090, "http", "::", null, null)
+    v2rayConfig.inbounds = List(sockInbound, httpInvound).asJava
+    // outbounds
+    val freedomOutbound = OutboundBean("direct", "freedom", OutSettingsBean(null, null, null, "UseIP"), null, null)
+    val vmessOutbound = OutboundBean("proxy", "vmess", null, null, MuxBean(true))
+    // vnext
+    val userBean = UsersBean(vmessBean.id, vmessBean.alterId, vmessBean.security, "v2ray@email.com")
+    val vnext = VnextBean(vmessBean.address, vmessBean.port, List(userBean).asJava)
+    vmessOutbound.settings = OutSettingsBean(List(vnext).asJava, null, null, null)
+    // streamSettings
+    if (vmessBean.network == "ws") {
+      val streamSettingsBean = StreamSettingsBean(vmessBean.network, null, null, null, null, null, null, null)
+      val wssettingsBean = WssettingsBean(connectionReuse = true, vmessBean.path, null)
+      if (!TextUtils.isEmpty(vmessBean.requestHost)) {
+        wssettingsBean.headers = WsHeaderBean(vmessBean.requestHost)
+      }
+      streamSettingsBean.wssettings = wssettingsBean
+      if (vmessBean.streamSecurity == "tls") {
+          streamSettingsBean.security = vmessBean.streamSecurity
+        streamSettingsBean.tlssettings = TlssettingsBean()
+      }
+      vmessOutbound.streamSettings = streamSettingsBean
+    }
+    v2rayConfig.outbounds = List(vmessOutbound, freedomOutbound).asJava
+    val vmessJson = new GsonBuilder().setPrettyPrinting().create().toJson(v2rayConfig)
+    Log.e(TAG, vmessJson)
+    vmessJson
+  }
 }

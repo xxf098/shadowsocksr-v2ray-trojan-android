@@ -231,3 +231,10 @@ object Route {
   val CHINALIST = "china-list"
   val ACL = "self"
 }
+
+object EConfigType {
+  val Vmess = 1
+  val Custom = 2
+  val Shadowsocks = 3
+  val Socks = 4
+}

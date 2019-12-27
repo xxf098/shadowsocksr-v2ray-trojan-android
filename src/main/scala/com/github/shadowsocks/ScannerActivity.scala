@@ -10,6 +10,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.text.TextUtils
+import android.util.Log
 import android.widget.Toast
 import com.google.zxing.Result
 import com.github.shadowsocks.ShadowsocksApplication.app
@@ -85,6 +86,7 @@ class ScannerActivity extends AppCompatActivity with ZXingScannerView.ResultHand
     {
       Parser.findAll(uri).foreach(app.profileManager.createProfile)
       Parser.findAll_ssr(uri).foreach(app.profileManager.createProfile)
+      Parser.findAllVmess(uri).foreach(app.profileManager.createProfile)
     }
     navigateUp()
   }

@@ -40,9 +40,11 @@
 package com.github.shadowsocks.database
 
 import java.net.URLEncoder
+import java.nio.charset.Charset
 import java.util.Locale
 
-import android.util.Base64
+import android.util.{Base64, Log}
+import com.google.gson.GsonBuilder
 import com.j256.ormlite.field.{DataType, DatabaseField}
 
 class Profile {
@@ -121,14 +123,72 @@ class Profile {
   @DatabaseField
   var userOrder: Long = _
 
+  @DatabaseField
+  var proxy_protocol: String = "ssr"
 
-  override def toString = "ssr://" + Base64.encodeToString("%s:%d:%s:%s:%s:%s/?obfsparam=%s&protoparam=%s&remarks=%s&group=%s".formatLocal(Locale.ENGLISH,
-    host, remotePort, protocol, method, obfs, Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
-    password).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP), Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
-    obfs_param).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP), Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
-    protocol_param).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP), Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
-    name).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP), Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
-    url_group).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP)).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP)
+  @DatabaseField
+  var v_v: String = "2"
+
+  @DatabaseField
+  var v_ps: String = ""
+
+  @DatabaseField
+  var v_add: String = ""
+
+  @DatabaseField
+  var v_port: String = ""
+
+  @DatabaseField
+  var v_id: String = ""
+
+  @DatabaseField
+  var v_aid: String = ""
+
+  @DatabaseField
+  var v_net: String = ""
+
+  @DatabaseField
+  var v_type: String = ""
+
+  @DatabaseField
+  var v_host: String = ""
+
+  @DatabaseField
+  var v_path: String = ""
+
+  @DatabaseField
+  var v_tls: String = ""
+
+  override def toString(): String = {
+    if (isV2ray) {
+      val vmessQRCode = VmessQRCode(
+        this.v_v,
+        this.v_ps,
+        this.v_add,
+        this.v_port,
+        this.v_id,
+        this.v_aid,
+        this.v_net,
+        this.v_type,
+        this.v_host,
+        this.v_path,
+        this.v_tls)
+      val vmessJson = new GsonBuilder().setPrettyPrinting().create().toJson(vmessQRCode)
+      Log.e("Profile", vmessJson)
+      return "vmess://" + Base64.encodeToString(
+        vmessJson.getBytes(Charset.forName("UTF-8")),
+        Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP)
+    }
+    "ssr://" + Base64.encodeToString("%s:%d:%s:%s:%s:%s/?obfsparam=%s&protoparam=%s&remarks=%s&group=%s".formatLocal(Locale.ENGLISH,
+      host, remotePort, protocol, method, obfs, Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
+        password).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP), Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
+        obfs_param).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP), Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
+        protocol_param).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP), Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
+        name).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP), Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
+        url_group).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP)).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP)
+  }
 
   def isMethodUnsafe = "table".equalsIgnoreCase(method) || "rc4".equalsIgnoreCase(method)
+
+  def isV2ray = this.proxy_protocol == "vmess"
 }

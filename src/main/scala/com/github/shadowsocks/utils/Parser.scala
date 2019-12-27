@@ -59,7 +59,7 @@ object Parser {
   private val decodedPattern_ssr_protocolparam = "(?i)[?&]protoparam=([A-Za-z0-9_=-]*)".r
   private val decodedPattern_ssr_groupparam = "(?i)[?&]group=([A-Za-z0-9_=-]*)".r
 
-  private val pattern_vmess = "(?i)(vmess://[A-Za-z0-9_/+-]+=*)".r
+  private val pattern_vmess = "(?i)(vmess://[A-Za-z0-9_/+=-]+)".r
 
   def findAll(data: CharSequence) = pattern.findAllMatchIn(if (data == null) "" else data).map(m => try
     decodedPattern.findFirstMatchIn(new String(Base64.decode(m.group(1), Base64.NO_PADDING), "UTF-8")) match {
@@ -130,7 +130,7 @@ object Parser {
   def findAllVmess(data: CharSequence) = pattern_vmess
     .findAllMatchIn(if (data == null) "" else data)
     .flatMap(m => try {
-      findVmess(m.group(1))
+      findVmess(m.group(1).replaceAll("=", ""))
     } catch {
       case ex: Exception =>
         Log.e(TAG, "parser error: " + m.source, ex) // Ignore
@@ -166,8 +166,10 @@ object Parser {
     val indexSplit = vmessLink.indexOf("?")
     if (indexSplit > 0) return None
     var result = vmessLink.replace("vmess://", "")
+        .replace("+", "-")
+        .replace("/", "_")
     result = new String(Base64.decode(result, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP), "UTF-8")
-    Log.e(TAG, result)
+//    Log.e(TAG, result)
     val vmessQRCode = new Gson().fromJson(result, classOf[VmessQRCode])
     if (TextUtils.isEmpty(vmessQRCode.add) ||
     TextUtils.isEmpty(vmessQRCode.port) ||

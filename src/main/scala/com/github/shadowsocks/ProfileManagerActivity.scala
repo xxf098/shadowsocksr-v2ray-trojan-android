@@ -897,11 +897,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
       if (requestCode == 0) {
           if (resultCode == Activity.RESULT_OK) {
-              val contents = data.getStringExtra("SCAN_RESULT")
-              createProfilesFromText(contents)
+            val contents = data.getStringExtra("SCAN_RESULT")
+            createProfilesFromText(contents)
           }
           if(resultCode == Activity.RESULT_CANCELED){
-              //handle cancel
+            Toast.makeText(this, "Fail to Scan QRCode", Toast.LENGTH_SHORT)
           }
       }
     if (resultCode != Activity.RESULT_OK) return
@@ -970,14 +970,15 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     }
   }
 
-  def createProfilesFromText (contents: String): Unit = {
-    if (TextUtils.isEmpty(contents)) return
+  def createProfilesFromText (contents: CharSequence): Boolean = {
+    if (TextUtils.isEmpty(contents)) return false
     val profiles_normal = Parser.findAll(contents).toList
     val profiles_ssr = Parser.findAll_ssr(contents).toList
-    val profiles = profiles_ssr ::: profiles_normal
+    val profiles_vmess = Parser.findAllVmess(contents).toList
+    val profiles = profiles_ssr ::: profiles_normal ::: profiles_vmess
     if (profiles.isEmpty) {
       finish()
-      return
+      return false
     }
     val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
       .setTitle(R.string.add_profile_dialog)
@@ -989,6 +990,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       .setMessage(profiles.mkString("\n"))
       .create()
     dialog.show()
+    true
   }
 
   override def onStart() {
@@ -1040,22 +1042,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       true
     case R.id.action_import_clipboard =>
       if (clipboard.hasPrimaryClip) {
-        val profiles_normal = Parser.findAll(clipboard.getPrimaryClip.getItemAt(0).getText).toList
-        val profiles_ssr = Parser.findAll_ssr(clipboard.getPrimaryClip.getItemAt(0).getText).toList
-        val profiles = profiles_normal ::: profiles_ssr
-        if (profiles.nonEmpty) {
-          val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
-            .setTitle(R.string.add_profile_dialog)
-            .setPositiveButton(android.R.string.yes, ((_, _) =>
-              profiles.foreach(app.profileManager.createProfile)): DialogInterface.OnClickListener)
-            .setNeutralButton(R.string.dr, ((_, _) =>
-              profiles.foreach(app.profileManager.createProfile_dr)): DialogInterface.OnClickListener)
-            .setNegativeButton(android.R.string.no, ((_, _) => finish()): DialogInterface.OnClickListener)
-            .setMessage(profiles.mkString("\n"))
-            .create()
-          dialog.show()
-          return true
-        }
+        val link = clipboard.getPrimaryClip.getItemAt(0).getText
+        if (createProfilesFromText(link)) return true
       }
       Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show
       true

@@ -65,7 +65,7 @@ object DBHelper {
 }
 
 class DBHelper(val context: Context)
-  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 24) {
+  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 25) {
   import DBHelper._
 
   lazy val profileDao: Dao[Profile, Int] = getDao(classOf[Profile])
@@ -155,6 +155,20 @@ class DBHelper(val context: Context)
 
         if (oldVersion < 24) {
           TableUtils.createTable(connectionSource, classOf[SSRSub])
+        }
+        if (oldVersion < 25) {
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN proxy_protocol VARCHAR DEFAULT 'ssr';")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN v_v VARCHAR DEFAULT '2';")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN v_ps VARCHAR DEFAULT '';")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN v_add VARCHAR DEFAULT '';")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN v_port VARCHAR DEFAULT '';")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN v_id VARCHAR DEFAULT '';")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN v_aid VARCHAR DEFAULT '';")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN v_net VARCHAR DEFAULT '';")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN v_type VARCHAR DEFAULT '';")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN v_host VARCHAR DEFAULT '';")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN v_path VARCHAR DEFAULT '';")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN v_tls VARCHAR DEFAULT '';")
         }
       } catch {
         case ex: Exception =>

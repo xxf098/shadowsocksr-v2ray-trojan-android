@@ -65,7 +65,8 @@ libraryDependencies ++=
   "net.glxn.qrgen" % "android" % "2.0" ::
   "com.squareup.okhttp3" % "okhttp" % "4.2.2" ::
   "com.google.code.findbugs" % "jsr305" % "1.3.+" ::
-  Nil
+  "com.google.code.gson" % "gson" % "2.8.6" ::
+Nil
 
 lazy val nativeBuild = TaskKey[Unit]("native-build", "Build native executables")
 nativeBuild := {

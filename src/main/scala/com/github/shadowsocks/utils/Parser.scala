@@ -40,11 +40,13 @@
 package com.github.shadowsocks.utils
 
 import java.net.URLDecoder
+import java.util
 
 import android.text.TextUtils
 import android.util.{Base64, Log}
 import com.github.shadowsocks.database.{DnsBean, InSettingsBean, InboundBean, LogBean, MuxBean, OutSettingsBean, OutboundBean, Profile, RoutingBean, RulesBean, StreamSettingsBean, TlssettingsBean, UsersBean, V2rayConfig, VmessBean, VmessQRCode, VnextBean, WsHeaderBean, WssettingsBean}
 import com.google.gson.{Gson, GsonBuilder}
+
 import scala.collection.JavaConverters._
 
 object Parser {
@@ -211,7 +213,11 @@ object Parser {
   def getV2rayConfig(vmessBean: VmessBean): String = {
     val v2rayConfig = V2rayConfig()
     v2rayConfig.log = LogBean("", "", "error")
-    v2rayConfig.dns = DnsBean(List("1.0.0.1", "localhost").asJava)
+    // host
+    val host = new util.HashMap[String, String]()
+    host.put("domain:googleapis.cn", "googleapis.com")
+    host.put("domain:baidu.com", "127.0.0.1")
+    v2rayConfig.dns = DnsBean(List("1.0.0.1", "localhost").asJava, host)
     // routing
     val geoipRule = RulesBean()
     geoipRule.ip = List("geoip:private", "geoip:cn").asJava
@@ -248,5 +254,9 @@ object Parser {
     val vmessJson = new GsonBuilder().setPrettyPrinting().create().toJson(v2rayConfig)
     Log.e(TAG, vmessJson)
     vmessJson
+  }
+
+  def getV2rayConfig1(vmessBean: VmessBean): String = {
+      ""
   }
 }

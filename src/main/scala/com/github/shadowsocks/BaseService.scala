@@ -136,11 +136,15 @@ trait BaseService extends Service {
 
   def checkProfile(profile: Profile): Boolean = {
     if (profile.isV2ray) {
-      if (TextUtils.isEmpty(profile.v_add) || TextUtils.isEmpty(profile.v_port) || TextUtils.isEmpty(profile.v_id)) {
+      if (TextUtils.isEmpty(profile.v_add) ||
+        TextUtils.isEmpty(profile.v_port) ||
+        TextUtils.isEmpty(profile.v_id) ||
+        TextUtils.isEmpty(profile.v_aid) ||
+        TextUtils.isEmpty(profile.v_net)) {
         stopRunner(true, getString(R.string.proxy_empty))
-        return  false
+        return false
       } else {
-        return  true
+        return true
       }
     }
     if (TextUtils.isEmpty(profile.host) || TextUtils.isEmpty(profile.password)) {

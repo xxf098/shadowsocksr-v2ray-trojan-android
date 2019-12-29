@@ -216,7 +216,7 @@ object Parser {
     // host
     val host = new util.HashMap[String, String]()
     host.put("domain:googleapis.cn", "googleapis.com")
-    host.put("domain:baidu.com", "127.0.0.1")
+    Route.BLOCK_DOMAIN.foreach(domain => host.put(domain, "127.0.0.1"))
     v2rayConfig.dns = DnsBean(List("1.0.0.1", "localhost").asJava, host)
     // routing
     val geoipRule = RulesBean()

@@ -327,4 +327,5 @@ trait BaseService extends Service {
     }
   }
 
+  def getProfile() = profile
 }

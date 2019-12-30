@@ -87,12 +87,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   var china_dns_address = ""
   var china_dns_port = 0
 
-  var running = false
-  var inputStream: FileInputStream = _
-  var outputStream: FileOutputStream = _
-  var buffer = ByteBuffer.allocate(1501)
-  var pfd: ParcelFileDescriptor = _
-
+  var v2rayThread: V2RayVpnThread = _
 
   override def onBind(intent: Intent): IBinder = {
     val action = intent.getAction
@@ -131,8 +126,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       conn = null
     }
 
-    if (profile.isV2ray) {
-      stopTun2Socks()
+    if (profile.isV2ray && v2rayThread != null) {
+      v2rayThread.stopTun2Socks()
     }
 
     super.stopRunner(stopService, msg)
@@ -171,99 +166,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     super.startRunner(profile)
   }
 
-  class Flow(stream: FileOutputStream) extends PacketFlow {
-    private val flowOutputStream = stream
-    override def writePacket(pkt: Array[Byte]): Unit = {
-        flowOutputStream.write(pkt)
-    }
-  }
-
-  // shadowsocks vpn thread
-  class Service(service: VpnService) extends Tun2socksVpnService {
-    private val vpnService = service
-    override def protect(fd: Long): Boolean = {
-        vpnService.protect(fd.toInt)
-    }
-  }
-
-  class DBService() extends Tun2socksDBService {
-    override def insertProxyLog(p0: String, p1: String, p2: Long, p3: Long, p4: Int, p5: Int, p6: Int, p7: Int, p8: String, p9: String, p10: Int): Unit = {
-      Log.e(TAG, s"$p0, $p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10")
-    }
-  }
-
-  private def handlePackets(): Unit = {
-      while (running) {
-          try {
-            val n = inputStream.read(buffer.array())
-            if (n > 0) {
-              buffer.limit(n)
-              Tun2socks.inputPacket(buffer.array())
-              buffer.clear()
-            }
-          } catch {
-            case e: Exception => Log.e(TAG, "failed to read bytes from TUN fd")
-          }
-      }
-  }
-
-  def startTun2Socks (): Unit = {
-//    val builder = new Builder().setSession(profile.name)
-//      .setMtu(VPN_MTU)
-//      .addDnsServer("223.5.5.5")
-//      .addAddress("10.233.233.233", 30)
-//      .addRoute("0.0.0.0", 0)
-    val builder = initVPNBuilder()
-    pfd = builder.establish()
-    if (pfd == null ||
-    !Tun2socks.setNonblock(pfd.getFd.toLong, false)) {
-      Log.e(TAG, "failed to put tunFd in blocking mode")
-      stopTun2Socks()
-      return
-    }
-    inputStream = new FileInputStream(pfd.getFileDescriptor)
-    outputStream = new FileOutputStream(pfd.getFileDescriptor)
-    val flow = new Flow(outputStream)
-    val service = new Service(this)
-    val dbService = new DBService()
-    // check exist
-    app.copyAssets("dat", getApplicationInfo.dataDir + "/files/")
-    val sniffing = "http,tls"
-
-    val inboundTag = "tun2socks"
-    Tun2socks.setLocalDNS("223.5.5.5:53")
-    val config = Parser.getV2rayConfig(profile).orNull
-    if (config == null) {
-      return
-    }
-    Log.e(TAG, config)
-    val ret = Tun2socks.startV2Ray(
-      flow,
-      service,
-      dbService,
-      config.getBytes(StandardCharsets.UTF_8),
-      inboundTag,
-      sniffing,
-      getFilesDir.getAbsolutePath
-    )
-    if (ret != 0) {
-      Log.e(TAG, "vpn_start_err_config")
-      return
-    }
-    running = true
+  def v2rayConnected(): Unit = {
     changeState(State.CONNECTED)
     notification = new ShadowsocksNotification(this, profile.name)
-    handlePackets()
-  }
-
-  def stopTun2Socks (): Unit = {
-    Tun2socks.stopV2Ray()
-    if (pfd != null) pfd.close()
-    pfd = null
-    inputStream = null
-    outputStream = null
-    running = false
-    stopSelf()
   }
 
   override def connect() : Any = {
@@ -295,9 +200,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     }
 
     if (profile.isV2ray) {
-      new Thread(() => {
-        startTun2Socks()
-      }).start()
+      v2rayThread = new V2RayVpnThread(this)
+      v2rayThread.start()
       return
     }
 

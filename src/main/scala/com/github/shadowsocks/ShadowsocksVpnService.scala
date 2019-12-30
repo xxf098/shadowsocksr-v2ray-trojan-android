@@ -432,7 +432,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     Utils.printToFile (new File(getApplicationInfo.dataDir + "/pdnsd-vpn.conf"))(p => {
       p.println(conf)
-      Route.BLOCK_DOMAIN.foreach(domain => p.println(s"neg { name = $domain; types = domain; }"))
+      val BLOCK_DOMAIN = if (app.BLOCK_DOMAIN.nonEmpty) app.BLOCK_DOMAIN else Route.BLOCK_DOMAIN
+      BLOCK_DOMAIN.foreach(domain => {
+        p.println(s"neg { name = $domain; types = A,AAAA; }")
+      })
     })
     val cmd = Array(getApplicationInfo.dataDir + "/pdnsd", "-c", getApplicationInfo.dataDir + "/pdnsd-vpn.conf")
 

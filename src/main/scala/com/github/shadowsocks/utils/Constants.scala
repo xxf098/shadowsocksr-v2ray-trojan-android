@@ -230,7 +230,7 @@ object Route {
   val GFWLIST = "gfwlist"
   val CHINALIST = "china-list"
   val ACL = "self"
-  val BLOCK_DOMAIN = List("baidu.com", "baidustatic.com", "umeng.com")
+  val BLOCK_DOMAIN = List("baidu.com", "at3.doubanio.com", "auspiciousvp.com", "baidustatic.com", "umeng.com", "doubleclick.net", "sogou.com")
 }
 
 object EConfigType {

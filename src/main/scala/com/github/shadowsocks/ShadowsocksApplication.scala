@@ -93,6 +93,8 @@ class ShadowsocksApplication extends Application {
   lazy val ssrsubManager = new SSRSubManager(new DBHelper(this))
   lazy val resources = getResources()
 
+  var BLOCK_DOMAIN = List[String]()
+
   def isNatEnabled = settings.getBoolean(Key.isNAT, false)
 
   def isVpnEnabled = !isNatEnabled
@@ -203,6 +205,12 @@ class ShadowsocksApplication extends Application {
         }
       }.start
     }
+
+    new Thread(() => {
+      autoClose(getAssets.open("block_hosts.txt"))(in => {
+        BLOCK_DOMAIN = scala.io.Source.fromInputStream(in).getLines().toList
+      })
+    }).start()
   }
 
   def refreshContainerHolder {

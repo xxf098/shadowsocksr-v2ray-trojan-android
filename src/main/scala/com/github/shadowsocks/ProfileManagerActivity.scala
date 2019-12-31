@@ -923,7 +923,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       case REQUEST_IMPORT_PROFILES => {
         autoClose(getContentResolver.openInputStream(data.getData))(in => {
           val lines = scala.io.Source.fromInputStream(in).mkString
-          val profiles = Parser.findAll_ssr(lines).toList
+          val profiles_ssr = Parser.findAll_ssr(lines).toList
+          val profiles_v2ray = Parser.findAllVmess(lines).toList
+          val profiles = profiles_ssr ::: profiles_v2ray
           profiles.foreach(app.profileManager.createProfile)
         })
       }

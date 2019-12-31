@@ -206,11 +206,10 @@ class ShadowsocksApplication extends Application {
       }.start
     }
 
-    new Thread(() => {
-      autoClose(getAssets.open("block_hosts.txt"))(in => {
-        BLOCK_DOMAIN = scala.io.Source.fromInputStream(in).getLines().toList
-      })
-    }).start()
+    // future
+    Utils.ThrowableFuture(autoClose(getAssets.open("block_hosts.txt"))(in => {
+      BLOCK_DOMAIN = scala.io.Source.fromInputStream(in).getLines().toList
+    }))
   }
 
   def refreshContainerHolder {

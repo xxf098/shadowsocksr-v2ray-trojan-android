@@ -27,6 +27,7 @@
 
   <!-- proxy category -->
   <string name="proxy_cat">Server Settings</string>
+  <string name="proxy_v2ray" translatable="false">V2ray Settings</string>
   <string name="profile_name">Profile Name</string>
   <string name="proxy">Server</string>
   <string name="proxy_summary">Hostname or IP of the remote server</string>
@@ -218,4 +219,12 @@
   <string name="sent">Sent:</string>
   <string name="received">Received:</string>
   <string name="allgroups">All Groups</string>
+
+<!--  PreferenceScreen-->
+  <string name="preferenceScreen" translatable="false">preferenceScreen</string>
+  <string name="v2rayPreferenceGroup" translatable="false">v2rayPreferenceGroup</string>
+  <string name="ssrPreferenceGroup" translatable="false">ssrPreferenceGroup</string>
+  <string name="featurePreferenceGroup" translatable="false">featurePreferenceGroup</string>
+  <string name="miscPreferenceGroup" translatable="false">miscPreferenceGroup</string>
+
 </resources>

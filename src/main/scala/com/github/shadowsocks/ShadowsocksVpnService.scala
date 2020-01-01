@@ -39,7 +39,7 @@
 
 package com.github.shadowsocks
 
-import java.io.{File, FileDescriptor, FileInputStream, FileOutputStream}
+import java.io.{File, FileDescriptor, FileInputStream, FileOutputStream, PrintWriter}
 import java.util.Locale
 
 import scala.io.Source
@@ -432,10 +432,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     Utils.printToFile (new File(getApplicationInfo.dataDir + "/pdnsd-vpn.conf"))(p => {
       p.println(conf)
-      val BLOCK_DOMAIN = if (app.BLOCK_DOMAIN.nonEmpty) app.BLOCK_DOMAIN else Route.BLOCK_DOMAIN
-      BLOCK_DOMAIN.foreach(domain => {
-        p.println(s"neg { name = $domain; types = A,AAAA; }")
-      })
+      Route.BLOCK_DOMAIN.foreach(domain => p.println(s"neg { name = $domain; types = domain; }"))
+      app.BLOCK_DOMAIN.foreach(domain => p.println(s"neg { name = $domain; types = A,AAAA; }"))
     })
     val cmd = Array(getApplicationInfo.dataDir + "/pdnsd", "-c", getApplicationInfo.dataDir + "/pdnsd-vpn.conf")
 

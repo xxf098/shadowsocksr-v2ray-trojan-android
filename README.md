@@ -1,6 +1,6 @@
 ## A modified version ShadowsocksR and V2Ray for Android
 
-A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) and V2Ray client for Android, written in Scala.
+A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) and [V2Ray](https://github.com/v2ray/v2ray-core) client for Android, written in Scala.
 
 ### PREREQUISITES
 

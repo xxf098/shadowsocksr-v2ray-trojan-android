@@ -1,19 +1,13 @@
-## A modified version ShadowsocksR for Android
+## A modified version ShadowsocksR and V2Ray for Android
 
-A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) client for Android, written in Scala.
-
-<a href="https://play.google.com/store/apps/details?id=com.github.shadowsocks"><img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" height="48"></a>
-
-### CI STATUS
-
-[![Build Status](https://api.travis-ci.org/shadowsocks/shadowsocks-android.svg)](https://travis-ci.org/shadowsocks/shadowsocks-android)
+A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) and V2Ray client for Android, written in Scala.
 
 ### PREREQUISITES
 
 * JDK 1.8
 * SBT 0.13.0+
 * Android SDK
-  - Build Tools 25+
+  - Build Tools 27+
   - Android Support Repository and Google Repository (see `build.sbt` for version)
 * Android NDK r12b `High version may case something build fail`
 
@@ -46,6 +40,7 @@ A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) client for Andro
 * Invoke the building like this
 
 ```bash
+    export https_proxy=http://127.0.0.1:8080
     export ANDROID_HOME=/path/to/Android/Sdk
     export ANDROID_NDK_HOME=/path/to/Android/android-ndk-r12b
     export TERM=xterm-color
@@ -77,6 +72,7 @@ A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) client for Andro
 #### Integration with Android Studio
 
 Checkout this [link](http://srodrigo.me/setting-up-scala-on-android/)
+* rm -rf ~/.android/sbt/exploded-aars/*
 * In Project Settings -> Modules -> shadowsocksr, change manifest file path
 * In Run/Debug Configuration -> Before launch, replace `Gradle-aware Make` with `android:run`
 

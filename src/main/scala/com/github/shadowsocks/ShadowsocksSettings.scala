@@ -6,9 +6,10 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.content.{Intent, SharedPreferences}
 import android.net.Uri
 import android.os.{Build, Bundle}
-import java.io.{IOException, File}
+import java.io.{File, IOException}
 import java.net.URL
-import android.preference.{Preference, PreferenceFragment, SwitchPreference}
+
+import android.preference.{Preference, PreferenceFragment, PreferenceGroup, PreferenceScreen, SwitchPreference}
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.app.ProgressDialog
@@ -25,16 +26,18 @@ import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils.IOUtils
 import android.content.Context
 import com.github.shadowsocks.utils._
-
 import java.io.InputStreamReader
 import java.io.BufferedReader
+
 import android.util.Log
+import com.github.shadowsocks.Shadowsocks.TAG
 
 object ShadowsocksSettings {
   // Constants
   private final val TAG = "ShadowsocksSettings"
   private val PROXY_PREFS = Array(Key.group_name, Key.name, Key.host, Key.remotePort, Key.localPort, Key.password, Key.method,
-    Key.protocol, Key.obfs, Key.obfs_param, Key.dns, Key.china_dns, Key.protocol_param)
+    Key.protocol, Key.obfs, Key.obfs_param, Key.dns, Key.china_dns, Key.protocol_param, Key.v_ps,
+    Key.v_id, Key.v_add, Key.v_host, Key.v_port, Key.v_path)
   private val FEATURE_PREFS = Array(Key.route, Key.proxyApps, Key.udpdns, Key.ipv6, Key.tfo)
 
   // Helper functions
@@ -61,6 +64,23 @@ object ShadowsocksSettings {
   }
 
   def updatePreference(pref: Preference, name: String, profile: Profile) {
+    if (profile.isV2ray) {
+      name match {
+        case Key.group_name => updateSummaryEditTextPreference(pref, profile.url_group)
+        case Key.v_ps => updateSummaryEditTextPreference(pref, profile.v_ps)
+        case Key.v_port => updateNumberPickerPreference(pref, profile.v_port.toInt)
+        case Key.v_path => updateSummaryEditTextPreference(pref, profile.v_path)
+        case Key.v_host => updateSummaryEditTextPreference(pref, profile.v_host)
+        case Key.route => updateDropDownPreference(pref, profile.route)
+        case Key.proxyApps => updateSwitchPreference(pref, profile.proxyApps)
+        case Key.udpdns => updateSwitchPreference(pref, profile.udpdns)
+        case Key.dns => updateSummaryEditTextPreference(pref, profile.dns)
+        case Key.china_dns => updateSummaryEditTextPreference(pref, profile.china_dns)
+        case Key.ipv6 => updateSwitchPreference(pref, profile.ipv6)
+        case _ =>
+      }
+      return
+    }
     name match {
       case Key.group_name => updateSummaryEditTextPreference(pref, profile.url_group)
       case Key.name => updateSummaryEditTextPreference(pref, profile.name)
@@ -90,6 +110,13 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
   lazy val natSwitch = findPreference(Key.isNAT).asInstanceOf[SwitchPreference]
 
   private var isProxyApps: SwitchPreference = _
+
+  private var screen:PreferenceScreen = _
+  private var ssrCategory: PreferenceGroup  = _
+  private var v2rayCategory: PreferenceGroup  = _
+  private var featureCategory: PreferenceGroup  = _
+  private var miscCategory: PreferenceGroup  = _
+
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
@@ -153,6 +180,44 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       profile.obfs_param = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
     })
+
+    // v2ray
+    findPreference(Key.v_add).setOnPreferenceClickListener((preference: Preference) => {
+      val HostEditText = new EditText(activity);
+      HostEditText.setText(profile.v_add);
+      new AlertDialog.Builder(activity)
+        .setTitle(getString(R.string.proxy))
+        .setPositiveButton(android.R.string.ok, ((_, _) => {
+          profile.v_add = HostEditText.getText().toString()
+          app.profileManager.updateProfile(profile)
+        }): DialogInterface.OnClickListener)
+        .setNegativeButton(android.R.string.no,  ((_, _) => {
+          setProfile(profile)
+        }): DialogInterface.OnClickListener)
+        .setView(HostEditText)
+        .create()
+        .show()
+      true
+    })
+
+    findPreference(Key.v_id).setOnPreferenceClickListener((preference: Preference) => {
+      val HostEditText = new EditText(activity);
+      HostEditText.setText(profile.v_id);
+      new AlertDialog.Builder(activity)
+        .setTitle("UserID")
+        .setPositiveButton(android.R.string.ok, ((_, _) => {
+          profile.v_id = HostEditText.getText().toString()
+          app.profileManager.updateProfile(profile)
+        }): DialogInterface.OnClickListener)
+        .setNegativeButton(android.R.string.no,  ((_, _) => {
+          setProfile(profile)
+        }): DialogInterface.OnClickListener)
+        .setView(HostEditText)
+        .create()
+        .show()
+      true
+    })
+
     findPreference(Key.route).setOnPreferenceChangeListener((_, value) => {
       if(value == "self") {
         val AclUrlEditText = new EditText(activity);
@@ -492,6 +557,23 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
   var profile: Profile = _
   def setProfile(profile: Profile) {
     this.profile = profile
+    setCategory(profile)
     for (name <- Array(PROXY_PREFS, FEATURE_PREFS).flatten) updatePreference(findPreference(name), name, profile)
+  }
+
+  def setCategory(profile: Profile): Unit = {
+    screen = Option(screen).getOrElse(findPreference(getResources.getString(R.string.preferenceScreen)).asInstanceOf[PreferenceScreen])
+    ssrCategory = Option(ssrCategory).getOrElse(findPreference(getResources.getString(R.string.ssrPreferenceGroup)).asInstanceOf[PreferenceGroup])
+    v2rayCategory  = Option(v2rayCategory).getOrElse(findPreference(getResources.getString(R.string.v2rayPreferenceGroup)).asInstanceOf[PreferenceGroup])
+    featureCategory = Option(featureCategory).getOrElse(findPreference(getResources.getString(R.string.featurePreferenceGroup)).asInstanceOf[PreferenceGroup])
+    miscCategory  = Option(miscCategory).getOrElse(findPreference(getResources.getString(R.string.miscPreferenceGroup)).asInstanceOf[PreferenceGroup])
+    screen.removeAll()
+    if (profile.isV2ray) {
+      screen.addPreference(v2rayCategory)
+    } else {
+      screen.addPreference(ssrCategory)
+    }
+    screen.addPreference(featureCategory)
+    screen.addPreference(miscCategory)
   }
 }

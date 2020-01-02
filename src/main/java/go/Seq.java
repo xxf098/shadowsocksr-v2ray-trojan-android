@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Collection;
 import java.lang.ref.ReferenceQueue;
 import java.util.IdentityHashMap;
+import android.content.Context;
 import java.util.logging.Logger;
 
 public class Seq
@@ -16,6 +17,10 @@ public class Seq
     public static final Ref nullRef;
     private static final GoRefQueue goRefQueue;
     static final RefTracker tracker;
+
+    public static void setContext(final Context context) {
+        setContext((Object)context);
+    }
 
     private static native void init();
 
@@ -62,18 +67,7 @@ public class Seq
         Seq.log = Logger.getLogger("GoSeq");
         nullRef = new Ref(41, null);
         goRefQueue = new GoRefQueue();
-        try {
-            setContext(Class.forName("go.LoadJNI").getDeclaredField("ctx").get(null));
-        }
-        catch (ClassNotFoundException ex) {
-            Seq.log.warning("LoadJNI class not found");
-        }
-        catch (NoSuchFieldException obj) {
-            Seq.log.severe("LoadJNI class missing field: " + obj);
-        }
-        catch (IllegalAccessException obj2) {
-            Seq.log.severe("LoadJNI class bad field: " + obj2);
-        }
+        System.loadLibrary("gojni");
         init();
         Universe.touch();
         tracker = new RefTracker();

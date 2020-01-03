@@ -199,6 +199,13 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         china_dns_port = 53
     }
 
+    // Resolve the server address
+    host_arg = profile.host
+    if (!Utils.isNumeric(profile.host)) Utils.resolve(profile.host, enableIPv6 = true, hostname=dns_address) match {
+      case Some(addr) => profile.host = addr
+      case None => throw NameNotResolvedException()
+    }
+
     if (profile.isV2ray) {
       v2rayThread = new V2RayVpnThread(this)
       v2rayThread.start()
@@ -210,13 +217,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     // reset the context
     killProcesses()
-
-    // Resolve the server address
-    host_arg = profile.host
-    if (!Utils.isNumeric(profile.host)) Utils.resolve(profile.host, enableIPv6 = true, hostname=dns_address) match {
-      case Some(addr) => profile.host = addr
-      case None => throw NameNotResolvedException()
-    }
 
     handleConnection()
     // change state

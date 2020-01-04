@@ -1,6 +1,6 @@
 package com.github.shadowsocks
 
-import java.io.{FileInputStream, FileOutputStream}
+import java.io.{File, FileInputStream, FileOutputStream}
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 
@@ -8,7 +8,8 @@ import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import com.github.shadowsocks.ShadowsocksApplication.app
-import com.github.shadowsocks.utils.{Parser, State, TrafficMonitor}
+import com.github.shadowsocks.database.Profile
+import com.github.shadowsocks.utils.{Parser, Route, State, TrafficMonitor, Utils}
 import tun2socks.PacketFlow
 import tun2socks.Tun2socks
 import tun2socks.{DBService => Tun2socksDBService, VpnService => Tun2socksVpnService}
@@ -25,6 +26,7 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 
   var txTotal: Long = 0
   var rxTotal: Long = 0
+  val profile: Profile = vpnService.getProfile()
 
   class Flow(stream: FileOutputStream) extends PacketFlow {
     private val flowOutputStream = stream
@@ -63,30 +65,60 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 
     val flow = new Flow(outputStream)
     val service = new Service(vpnService)
-    val dbService = new DBService()
-    // check exist
-    app.copyAssets("dat", vpnService.getApplicationInfo.dataDir + "/files/")
-    val sniffing = "http,tls"
-    val inboundTag = "tun2socks"
-    Tun2socks.setLocalDNS("223.5.5.5:53")
-
-    val config = Parser.getV2rayConfig(vpnService.getProfile()).orNull
-    if (config == null) {
-      return
+    val assetPath = vpnService.getApplicationInfo.dataDir + "/files/"
+    if (!(new File(s"$assetPath/geoip.dat").exists() &&
+      new File(s"$assetPath/geosite.dat").exists())) {
+      app.copyAssets("dat", assetPath)
     }
-    Log.e(TAG, config)
-    val ret = Tun2socks.startV2Ray(
-      flow,
-      service,
-      dbService,
-      config.getBytes(StandardCharsets.UTF_8),
-      inboundTag,
-      sniffing,
-      vpnService.getFilesDir.getAbsolutePath
-    )
-    if (ret != 0) {
-      Log.e(TAG, "vpn_start_err_config")
-      return
+    // replace address with ip dns
+    if (profile.route == Route.CHINALIST)
+      Tun2socks.setLocalDNS(s"${vpnService.china_dns_address}:${vpnService.china_dns_port}")
+    else
+      Tun2socks.setLocalDNS(s"${vpnService.dns_address}:${vpnService.dns_port}")
+    try {
+//      val config = Parser.getV2rayConfig(profile).orNull
+//      if (config == null) {
+//        return
+//      }
+//      val config = Tun2socks.generateVmessString(
+//        profile.v_host,
+//        profile.v_path,
+//        profile.v_tls,
+//        profile.v_add,
+//        profile.v_port.toLong,
+//        profile.v_aid.toLong,
+//        profile.v_net,
+//        profile.v_id,
+//        "error")
+//      Log.e(TAG, config)
+//      Log.e(TAG, Tun2socks.checkVersion())
+//
+//      Tun2socks.startV2Ray(
+//        flow,
+//        service,
+//        config.getBytes(StandardCharsets.UTF_8),
+//        assetPath,
+//        vpnService.getFilesDir.getAbsolutePath
+//      )
+      Tun2socks.startV2RayWithVmess(
+        flow,
+        service,
+        profile.v_host,
+        profile.v_path,
+        profile.v_tls,
+        profile.v_add,
+        profile.v_port.toLong,
+        profile.v_aid.toLong,
+        profile.v_net,
+        profile.v_id,
+        "error",
+        assetPath
+      )
+    } catch {
+      case e: Exception => {
+        e.printStackTrace()
+        stopTun2Socks()
+      }
     }
     running = true
     vpnService.v2rayConnected()

@@ -46,6 +46,7 @@ import java.util.Locale
 import android.util.{Base64, Log}
 import com.google.gson.GsonBuilder
 import com.j256.ormlite.field.{DataType, DatabaseField}
+import tun2socks.{ Tun2socks, Vmess }
 
 class Profile {
   @DatabaseField(generatedId = true)
@@ -191,4 +192,21 @@ class Profile {
   def isMethodUnsafe = "table".equalsIgnoreCase(method) || "rc4".equalsIgnoreCase(method)
 
   def isV2ray = this.proxy_protocol == "vmess"
+
+  def toVmess: Vmess = {
+    if (!isV2ray) {
+      throw new Exception("Not a V2ray Profile")
+    }
+    Tun2socks.newVmess(
+      this.v_host,
+      this.v_path,
+      this.v_tls,
+      this.v_add,
+      this.v_port.toLong,
+      this.v_aid.toLong,
+      this.v_net,
+      this.v_id,
+      "error"
+    )
+  }
 }

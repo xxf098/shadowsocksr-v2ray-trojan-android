@@ -80,16 +80,6 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 //      if (config == null) {
 //        return
 //      }
-//      val config = Tun2socks.generateVmessString(
-//        profile.v_host,
-//        profile.v_path,
-//        profile.v_tls,
-//        profile.v_add,
-//        profile.v_port.toLong,
-//        profile.v_aid.toLong,
-//        profile.v_net,
-//        profile.v_id,
-//        "error")
 //      Log.e(TAG, config)
 //      Log.e(TAG, Tun2socks.checkVersion())
 //
@@ -100,20 +90,7 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 //        assetPath,
 //        vpnService.getFilesDir.getAbsolutePath
 //      )
-      Tun2socks.startV2RayWithVmess(
-        flow,
-        service,
-        profile.v_host,
-        profile.v_path,
-        profile.v_tls,
-        profile.v_add,
-        profile.v_port.toLong,
-        profile.v_aid.toLong,
-        profile.v_net,
-        profile.v_id,
-        "error",
-        assetPath
-      )
+      Tun2socks.startV2RayWithVmess(flow, service, profile.toVmess, assetPath)
     } catch {
       case e: Exception => {
         e.printStackTrace()

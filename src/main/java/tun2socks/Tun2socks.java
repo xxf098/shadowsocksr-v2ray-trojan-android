@@ -26,7 +26,7 @@ public abstract class Tun2socks
 
     public static native void startV2Ray(final PacketFlow p0, final VpnService p1, final byte[] p2, final String p3, final String p4) throws Exception;
 
-    public static native void startV2RayByVmess(final PacketFlow p0, final VpnService p1, final Vmess p2, final String p3) throws Exception;
+    public static native void startV2RayWithVmess(final PacketFlow p0, final VpnService p1, final Vmess p2, final String p3) throws Exception;
 
     public static native void stopV2Ray();
 

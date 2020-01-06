@@ -55,6 +55,7 @@ class ProfileManager(dbHelper: DBHelper) {
   def createProfile(p: Profile = null): Profile = {
     val profile = if (p == null) new Profile else p
     profile.id = 0
+    profile.url_group = "Default"
     try {
       app.currentProfile match {
         case Some(oldProfile) =>

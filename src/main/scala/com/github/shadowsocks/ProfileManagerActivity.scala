@@ -49,6 +49,7 @@ import android.widget.AdapterView.OnItemSelectedListener
 import scala.collection.mutable.ArrayBuffer
 import scala.util.matching.Regex
 
+// TODO: AndroidX
 final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext
   with View.OnClickListener with CreateNdefMessageCallback {
 
@@ -746,7 +747,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                     val response = client.newCall(request).execute()
                     val code = response.code()
                     if (code == 200) {
-                      val response_string = new String(Base64.decode(response.body().string, Base64.URL_SAFE))
+                      //
+//                      val response_string = new String(Base64.decode(response.body().string, Base64.URL_SAFE))
+                      val response_string = SSRSub.getResponseString(response)
                       var limit_num = -1
                       var encounter_num = 0
                       if (response_string.indexOf("MAX=") == 0) {
@@ -756,7 +759,13 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                       if (response_string.indexOf("MAX=") == 0) {
                         profiles_ssr = scala.util.Random.shuffle(profiles_ssr)
                       }
-                      profiles_ssr.foreach((profile: Profile) => {
+                      val profiles_vmess = Parser.findAllVmess(response_string)
+                        .map(profile => {
+                          profile.url_group = ssrsub.url_group
+                          profile
+                        })
+                      val profiles = profiles_ssr ++ profiles_vmess
+                      profiles.foreach((profile: Profile) => {
                         if (encounter_num < limit_num && limit_num != -1 || limit_num == -1) {
                           val result = app.profileManager.createProfile_sub(profile)
                           if (result != 0) {
@@ -789,6 +798,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       }): DialogInterface.OnClickListener)
       .setNegativeButton(android.R.string.no, null)
       .setNeutralButton(R.string.ssrsub_add, ((_, _) => {
+        // add url
         val UrlAddEdit = new EditText(this);
         new AlertDialog.Builder(this)
           .setTitle(getString(R.string.ssrsub_add))
@@ -813,18 +823,16 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                   val response = client.newCall(request).execute()
                   val code = response.code()
                   if (code == 200) {
-                    val profiles_ssr = Parser.findAll_ssr(new String(Base64.decode(response.body().string, Base64.URL_SAFE))).toList
-                    if(profiles_ssr(0).url_group != "") {
-                      val ssrsub = new SSRSub {
-                        url = UrlAddEdit.getText().toString()
-                        url_group = profiles_ssr(0).url_group
-                      }
-                      handler.post(() => app.ssrsubManager.createSSRSub(ssrsub))
+                    val responseString = SSRSub.getResponseString(response)
+                    SSRSub.createSSRSub(responseString, response.request().url().toString) match {
+                      case Some(ssrsub) => handler.post(() => app.ssrsubManager.createSSRSub(ssrsub))
+                      case None =>
                     }
                   } else throw new Exception(getString(R.string.ssrsub_error, code: Integer))
                   response.body().close()
                 } catch {
                   case e: Exception =>
+                    e.printStackTrace()
                     result = getString(R.string.ssrsub_error, e.getMessage)
                 }
                 handler.post(() => testProgressDialog.dismiss)

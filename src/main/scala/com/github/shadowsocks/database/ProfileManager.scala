@@ -55,7 +55,7 @@ class ProfileManager(dbHelper: DBHelper) {
   def createProfile(p: Profile = null): Profile = {
     val profile = if (p == null) new Profile else p
     profile.id = 0
-    profile.url_group = "Default"
+    profile.url_group = if (profile.url_group.isEmpty) "Default"  else profile.url_group
     try {
       app.currentProfile match {
         case Some(oldProfile) =>
@@ -147,7 +147,8 @@ class ProfileManager(dbHelper: DBHelper) {
         .prepareStatementString).getFirstResult
       if (last != null && last.length == 1 && last(0) != null) profile.userOrder = last(0).toInt + 1
 
-      val last_exist = dbHelper.profileDao.queryBuilder()
+      val last_exist = if (!profile.isV2ray) {
+        dbHelper.profileDao.queryBuilder()
         .where().eq("name", profile.name)
         .and().eq("host", profile.host)
         .and().eq("remotePort", profile.remotePort)
@@ -158,6 +159,19 @@ class ProfileManager(dbHelper: DBHelper) {
         .and().eq("obfs_param", profile.obfs_param)
         .and().eq("url_group", profile.url_group)
         .and().eq("method", profile.method).queryForFirst().asInstanceOf[Profile]
+      } else  {
+        dbHelper.profileDao.queryBuilder()
+          .where().eq("v_add", profile.v_add)
+          .and().eq("v_port", profile.v_port)
+          .and().eq("v_id", profile.v_id)
+          .and().eq("v_aid", profile.v_aid)
+          .and().eq("v_net", profile.v_net)
+          .and().eq("v_host", profile.v_host)
+          .and().eq("v_path", Option(profile.v_path).getOrElse(""))
+          .and().eq("url_group", profile.url_group)
+          .and().eq("name", profile.name)
+          .and().eq("v_tls", profile.v_tls).queryForFirst()
+      }
       if (last_exist == null) {
         dbHelper.profileDao.createOrUpdate(profile)
         0

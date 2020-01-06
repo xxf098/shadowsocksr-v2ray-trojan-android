@@ -39,11 +39,52 @@
 
 package com.github.shadowsocks.database
 
-import java.net.URLEncoder
+import java.net.{URL, URLEncoder}
 import java.util.Locale
 
 import android.util.Base64
+import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.utils.CloseUtils.autoClose
+import com.github.shadowsocks.utils.Parser
 import com.j256.ormlite.field.{DataType, DatabaseField}
+
+object SSRSub {
+
+  def getResponseString (response: okhttp3.Response): String = {
+    var subscribes = ""
+    val contentType = response.header("content-type", null)
+    if (contentType != null && contentType.contains("application/octet-stream")) {
+      autoClose(response.body().byteStream())(in => {
+        subscribes = scala.io.Source.fromInputStream(in).mkString
+        subscribes = new String(Base64.decode(subscribes, Base64.URL_SAFE))
+      })
+    } else {
+      subscribes = new String(Base64.decode(response.body().string, Base64.URL_SAFE))
+    }
+    subscribes
+  }
+
+  def createSSRSub(responseString: String, requestURL: String): Option[SSRSub] = {
+    val profiles_ssr = Parser.findAll_ssr(responseString).toList
+    if(profiles_ssr.nonEmpty && profiles_ssr.head.url_group != "") {
+      val ssrsub = new SSRSub {
+        url = requestURL
+        url_group = profiles_ssr(0).url_group
+      }
+      return Some(ssrsub)
+    } else {
+      val profiles_vmess = Parser.findAllVmess(responseString).toList
+      if (profiles_vmess.nonEmpty) {
+        val ssrsub = new SSRSub {
+          url = requestURL
+          url_group = new URL(requestURL).getHost
+        }
+        return Some(ssrsub)
+      }
+    }
+    None
+  }
+  }
 
 class SSRSub {
   @DatabaseField(generatedId = true)

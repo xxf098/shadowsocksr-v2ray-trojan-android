@@ -174,7 +174,7 @@ object Utils {
     try {
       val lookup = new Lookup(host, addrType)
       val resolver = new SimpleResolver(hostname)
-      resolver.setTimeout(5)
+      resolver.setTimeout(4)
       lookup.setResolver(resolver)
       val result = lookup.run()
       if (result == null) return None
@@ -210,9 +210,14 @@ object Utils {
         case None =>
       }
     }
+    if (app.DNS_CACHE.contains(host)) {
+      return Some(app.DNS_CACHE(host))
+    }
     resolve(host, Type.A, hostname) match {
-      case Some(addr) =>
+      case Some(addr) =>{
+        app.DNS_CACHE(host) = addr
         return Some(addr)
+      }
       case None =>
     }
     resolve(host) match {

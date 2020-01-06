@@ -94,6 +94,7 @@ class ShadowsocksApplication extends Application {
   lazy val resources = getResources()
 
   var BLOCK_DOMAIN = List[String]()
+  val DNS_CACHE =  scala.collection.mutable.Map[String, String]()
 
   def isNatEnabled = settings.getBoolean(Key.isNAT, false)
 

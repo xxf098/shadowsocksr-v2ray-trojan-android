@@ -188,6 +188,21 @@ object Key {
   val remotePort = "remotePortNum"
   val localPort = "localPortNum"
 
+  // v2ray
+  val v_host = "v_host"
+  val v_path = "v_path"
+  val v_tls = "v_tls"
+  val v_verify_cert = "v_verify_cert"
+  val v_add = "v_add"
+  val v_port = "v_port"
+  val v_aid = "v_aid"
+  val v_net = "v_net"
+  val v_type = "v_type"
+  val v_v = "v_v"
+  val v_ps = "v_ps"
+  val v_id = "v_id"
+  val v_class = "v_class"
+
   val profileTip = "profileTip"
 
   val obfs = "obfs"
@@ -230,7 +245,19 @@ object Route {
   val GFWLIST = "gfwlist"
   val CHINALIST = "china-list"
   val ACL = "self"
-  val BLOCK_DOMAIN = List("baidu.com", "at3.doubanio.com", "auspiciousvp.com", "baidustatic.com", "umeng.com", "doubleclick.net", "sogou.com")
+  val BLOCK_DOMAIN = List("baidu.com",
+    "www.auspiciousvp.com",
+    "auspiciousvp.com",
+    "baidustatic.com",
+    "umeng.com",
+    "umengcloud.com",
+    "uc.cn",
+    "uc.com",
+    "snssdk.com",
+    "ixigua.com",
+    "byteimg.com",
+    "doubleclick.net",
+    "sogou.com")
 }
 
 object EConfigType {

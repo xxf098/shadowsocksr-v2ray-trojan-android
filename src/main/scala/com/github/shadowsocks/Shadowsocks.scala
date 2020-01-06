@@ -300,8 +300,10 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
             success = false
             if (retry > 1) {
               handler.post(() => connectionTestText.setText("retry..."))
-              handler.postDelayed(() => checkConnection(timeout, retry -1),
-                500 * (Math.pow(0.5, retry).toLong + 1))
+              Thread.sleep(600 * (Math.pow(0.5, retry).toLong + 1))
+              checkConnection(timeout, retry -1)
+//              handler.postDelayed(() => checkConnection(timeout, retry -1),
+//                500 * (Math.pow(0.5, retry).toLong + 1))
               return
             }
             e.printStackTrace()

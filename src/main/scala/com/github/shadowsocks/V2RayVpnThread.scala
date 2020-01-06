@@ -80,6 +80,7 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 //      if (config == null) {
 //        return
 //      }
+//      val config = Tun2socks.generateVmessString(profile.toVmess)
 //      Log.e(TAG, config)
 //      Log.e(TAG, Tun2socks.checkVersion())
 //

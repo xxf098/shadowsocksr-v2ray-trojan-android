@@ -192,7 +192,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       china_dns_port = china_dns.split(":")(1).toInt
     } catch {
       case ex: Exception =>
-        dns_address = "8.8.8.8"
+        dns_address = "1.1.1.1"
         dns_port = 53
 
         china_dns_address = "223.5.5.5"
@@ -200,7 +200,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     }
 
     if (profile.isV2ray) {
-      // get ip
       if (!Utils.isNumeric(profile.v_add)) Utils.resolve(profile.v_add, enableIPv6 = true, hostname=dns_address) match {
         case Some(addr) => profile.v_add = addr
         case None => throw NameNotResolvedException()

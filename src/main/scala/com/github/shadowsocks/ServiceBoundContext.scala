@@ -10,6 +10,7 @@ import com.github.shadowsocks.ShadowsocksApplication.app
   * @author Mygod
   */
 trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
+  // client side
   class ShadowsocksServiceConnection extends ServiceConnection {
     override def onServiceConnected(name: ComponentName, service: IBinder) {
       binder = service

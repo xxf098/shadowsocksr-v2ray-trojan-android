@@ -12,7 +12,7 @@ import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils.{Parser, Route, State, TrafficMonitor, Utils}
 import tun2socks.PacketFlow
 import tun2socks.Tun2socks
-import tun2socks.{DBService => Tun2socksDBService, VpnService => Tun2socksVpnService}
+import tun2socks.{LogService => Tun2socksLogService, VpnService => Tun2socksVpnService}
 
 class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 
@@ -44,11 +44,16 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
     }
   }
 
-  class DBService() extends Tun2socksDBService {
-    override def insertProxyLog(p0: String, p1: String, p2: Long, p3: Long, p4: Int, p5: Int, p6: Int, p7: Int, p8: String, p9: String, p10: Int): Unit = {
-      //    Log.e(TAG, s"$p0, $p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10")
-    }
+//  class DBService() extends Tun2socksDBService {
+//    override def insertProxyLog(p0: String, p1: String, p2: Long, p3: Long, p4: Int, p5: Int, p6: Int, p7: Int, p8: String, p9: String, p10: Int): Unit = {
+//         Log.e(TAG, s"$p0, $p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10")
+//    }
+//  }
+  class AndroidLogService extends Tun2socksLogService {
+  override def writeLog(p0: String): Unit = {
+    Log.e(TAG, p0)
   }
+}
 
   override def run(): Unit = {
 
@@ -65,6 +70,7 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 
     val flow = new Flow(outputStream)
     val service = new Service(vpnService)
+    val androidLogService = new AndroidLogService()
     val assetPath = vpnService.getApplicationInfo.dataDir + "/files/"
     if (!(new File(s"$assetPath/geoip.dat").exists() &&
       new File(s"$assetPath/geosite.dat").exists())) {
@@ -91,7 +97,7 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 //        assetPath,
 //        vpnService.getFilesDir.getAbsolutePath
 //      )
-      Tun2socks.startV2RayWithVmess(flow, service, profile.toVmess, assetPath)
+      Tun2socks.startV2RayWithVmess(flow, service, androidLogService, profile.toVmess, assetPath)
     } catch {
       case e: Exception => {
         e.printStackTrace()

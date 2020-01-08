@@ -26,7 +26,7 @@ public abstract class Tun2socks
 
     public static native void startV2Ray(final PacketFlow p0, final VpnService p1, final byte[] p2, final String p3, final String p4) throws Exception;
 
-    public static native void startV2RayWithVmess(final PacketFlow p0, final VpnService p1, final Vmess p2, final String p3) throws Exception;
+    public static native void startV2RayWithVmess(final PacketFlow p0, final VpnService p1, final LogService p2, final Vmess p3, final String p4) throws Exception;
 
     public static native void stopV2Ray();
 
@@ -35,6 +35,24 @@ public abstract class Tun2socks
     static {
         Seq.touch();
         _init();
+    }
+
+    private static final class proxyLogService implements Seq.Proxy, LogService
+    {
+        private final int refnum;
+
+        @Override
+        public final int incRefnum() {
+            Seq.incGoRef(this.refnum, this);
+            return this.refnum;
+        }
+
+        proxyLogService(final int refnum) {
+            Seq.trackGoRef(this.refnum = refnum, this);
+        }
+
+        @Override
+        public native void writeLog(final String p0) throws Exception;
     }
 
     private static final class proxyPacketFlow implements Seq.Proxy, PacketFlow

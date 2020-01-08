@@ -13,11 +13,11 @@ public final class Vmess implements Seq.Proxy
         return this.refnum;
     }
 
-    public Vmess() {
-        Seq.trackGoRef(this.refnum = __NewVmess(), this);
+    public Vmess(final String s, final String s2, final String s3, final String s4, final long n, final long n2, final String s5, final String s6, final String s7) {
+        Seq.trackGoRef(this.refnum = __NewVmess(s, s2, s3, s4, n, n2, s5, s6, s7), this);
     }
 
-    private static native int __NewVmess();
+    private static native int __NewVmess(final String p0, final String p1, final String p2, final String p3, final long p4, final long p5, final String p6, final String p7, final String p8);
 
     Vmess(final int refnum) {
         Seq.trackGoRef(this.refnum = refnum, this);

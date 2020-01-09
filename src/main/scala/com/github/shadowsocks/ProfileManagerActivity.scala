@@ -966,15 +966,12 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   }
 
   def openUrl (url: String): Unit ={
-    """(?i)^https?://.*""".r.findFirstIn(url) match {
-      case Some(x) => {
-        val intent = new Intent(Intent.ACTION_VIEW)
-        intent.setData(Uri.parse(url))
-        startActivity(intent)
-      }
-      case None =>
+    if (android.util.Patterns.WEB_URL.matcher(url).find()) {
+      val intent = new Intent(Intent.ACTION_VIEW)
+      intent.setData(Uri.parse(url))
+      startActivity(intent)
     }
-    """(?i)ssr?://.*""".r.findFirstIn(url) match {
+      """(?i)ssr?://.*""".r.findFirstIn(url) match {
       case Some(x) => createProfilesFromText(url)
       case None =>
     }

@@ -2,7 +2,7 @@
 package com.github.shadowsocks
 
 import android.app.{Activity, TaskStackBuilder}
-import android.content.Intent
+import android.content.{ClipData, ClipboardManager, Context, Intent}
 import android.content.pm.{PackageManager, ShortcutManager}
 import android.os.{Build, Bundle}
 import android.support.v4.app.ActivityCompat
@@ -25,6 +25,8 @@ class ScannerActivity extends AppCompatActivity with ZXingScannerView.ResultHand
   import ScannerActivity._
 
   private var scannerView: ZXingScannerView = _
+  private lazy val clipboard = getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
+
 
   override def onRequestPermissionsResult(requestCode: Int, permissions: Array[String],
     grantResults: Array[Int]) {
@@ -87,6 +89,9 @@ class ScannerActivity extends AppCompatActivity with ZXingScannerView.ResultHand
       Parser.findAll(uri).foreach(app.profileManager.createProfile)
       Parser.findAll_ssr(uri).foreach(app.profileManager.createProfile)
       Parser.findAllVmess(uri).foreach(app.profileManager.createProfile)
+      if (android.util.Patterns.WEB_URL.matcher(uri).find()) {
+        clipboard.setPrimaryClip(ClipData.newPlainText(null, uri))
+      }
     }
     navigateUp()
   }

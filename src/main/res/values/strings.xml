@@ -151,6 +151,10 @@
   <string name="action_export_err">Failed to export profiles!</string>
   <string name="action_import_msg">Successfully imported profiles.</string>
   <string name="action_import_err">Failed to import profiles!</string>
+  <string name="v2ray_config">V2Ray Config</string>
+  <string name="action_add_v2ray_config">Add V2Ray JSON config</string>
+
+
 
   <!-- profile -->
   <string name="profile_manager_dialog">Profiles</string>

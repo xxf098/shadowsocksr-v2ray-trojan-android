@@ -118,6 +118,12 @@
                 android:excludeFromRecents="true"/>
 
         <activity
+            android:name=".V2RayConfigActivity"
+            android:label="@string/v2ray_config"
+            android:parentActivityName=".ProfileManagerActivity"
+            android:excludeFromRecents="true"/>
+
+        <activity
                 android:name=".AppManager"
                 android:label="@string/proxied_apps"
                 android:parentActivityName=".Shadowsocks"

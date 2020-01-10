@@ -93,11 +93,11 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 //      Tun2socks.startV2Ray(
 //        flow,
 //        service,
-//        config.getBytes(StandardCharsets.UTF_8),
+//        config.getBytes(StandardCharsgaioets.UTF_8),
 //        assetPath,
 //        vpnService.getFilesDir.getAbsolutePath
 //      )
-      Tun2socks.startV2RayWithVmess(flow, service, androidLogService, profile.toVmess, assetPath)
+      Tun2socks.startV2RayWithVmess(flow, service, null, profile.toVmess, assetPath)
     } catch {
       case e: Exception => {
         e.printStackTrace()

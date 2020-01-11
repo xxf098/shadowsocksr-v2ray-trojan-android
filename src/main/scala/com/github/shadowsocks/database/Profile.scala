@@ -160,6 +160,9 @@ class Profile {
   @DatabaseField
   var v_tls: String = ""
 
+  @DatabaseField
+  var v_json_config: String = ""
+
   override def toString(): String = {
     if (isVmess) {
       val vmessQRCode = VmessQRCode(

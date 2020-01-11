@@ -125,7 +125,7 @@ class Profile {
   var userOrder: Long = _
 
   @DatabaseField
-  var proxy_protocol: String = "ssr"
+  var proxy_protocol: String = "ssr" // ssr vmess v2ray_json
 
   @DatabaseField
   var v_v: String = "2"
@@ -161,7 +161,7 @@ class Profile {
   var v_tls: String = ""
 
   override def toString(): String = {
-    if (isV2ray) {
+    if (isVmess) {
       val vmessQRCode = VmessQRCode(
         this.v_v,
         this.v_ps,
@@ -191,10 +191,10 @@ class Profile {
 
   def isMethodUnsafe = "table".equalsIgnoreCase(method) || "rc4".equalsIgnoreCase(method)
 
-  def isV2ray = this.proxy_protocol == "vmess"
+  def isVmess = this.proxy_protocol == "vmess"
 
   def toVmess: Vmess = {
-    if (!isV2ray) {
+    if (!isVmess) {
       throw new Exception("Not a V2ray Profile")
     }
     Tun2socks.newVmess(
@@ -206,7 +206,7 @@ class Profile {
       this.v_aid.toLong,
       this.v_net,
       this.v_id,
-      "debug"
+      "error"
     )
   }
 }

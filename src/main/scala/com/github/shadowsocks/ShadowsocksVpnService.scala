@@ -126,7 +126,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       conn = null
     }
 
-    if (profile.isV2ray && v2rayThread != null) {
+    if (profile.isVmess && v2rayThread != null) {
       v2rayThread.stopTun2Socks()
     }
 
@@ -199,7 +199,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         china_dns_port = 53
     }
 
-    if (profile.isV2ray) {
+    if (profile.isVmess) {
       if (!Utils.isNumeric(profile.v_add)) Utils.resolve(profile.v_add, enableIPv6 = true, hostname=dns_address) match {
         case Some(addr) => profile.v_add = addr
         case None => throw NameNotResolvedException()

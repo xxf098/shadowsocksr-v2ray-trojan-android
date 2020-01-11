@@ -147,7 +147,7 @@ class ProfileManager(dbHelper: DBHelper) {
         .prepareStatementString).getFirstResult
       if (last != null && last.length == 1 && last(0) != null) profile.userOrder = last(0).toInt + 1
 
-      val last_exist = if (!profile.isV2ray) {
+      val last_exist = if (!profile.isVmess) {
         dbHelper.profileDao.queryBuilder()
         .where().eq("name", profile.name)
         .and().eq("host", profile.host)

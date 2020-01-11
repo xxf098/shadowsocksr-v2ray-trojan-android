@@ -135,7 +135,7 @@ trait BaseService extends Service {
   }
 
   def checkProfile(profile: Profile): Boolean = {
-    if (profile.isV2ray) {
+    if (profile.isVmess) {
       if (TextUtils.isEmpty(profile.v_add) ||
         TextUtils.isEmpty(profile.v_port) ||
         TextUtils.isEmpty(profile.v_id) ||

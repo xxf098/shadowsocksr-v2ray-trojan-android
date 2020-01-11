@@ -64,7 +64,7 @@ object ShadowsocksSettings {
   }
 
   def updatePreference(pref: Preference, name: String, profile: Profile) {
-    if (profile.isV2ray) {
+    if (profile.isVmess) {
       name match {
         case Key.group_name => updateSummaryEditTextPreference(pref, profile.url_group)
         case Key.v_ps => updateSummaryEditTextPreference(pref, profile.v_ps)
@@ -568,7 +568,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     featureCategory = Option(featureCategory).getOrElse(findPreference(getResources.getString(R.string.featurePreferenceGroup)).asInstanceOf[PreferenceGroup])
     miscCategory  = Option(miscCategory).getOrElse(findPreference(getResources.getString(R.string.miscPreferenceGroup)).asInstanceOf[PreferenceGroup])
     screen.removeAll()
-    if (profile.isV2ray) {
+    if (profile.isVmess) {
       screen.addPreference(v2rayCategory)
     } else {
       screen.addPreference(ssrCategory)

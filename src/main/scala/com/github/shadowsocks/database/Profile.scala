@@ -178,9 +178,14 @@ class Profile {
         this.v_path,
         this.v_tls)
       val vmessJson = new GsonBuilder().setPrettyPrinting().create().toJson(vmessQRCode)
-      Log.e("Profile", vmessJson)
+//      Log.e("Profile", vmessJson)
       return "vmess://" + Base64.encodeToString(
         vmessJson.getBytes(Charset.forName("UTF-8")),
+        Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP)
+    }
+    if (isV2RayJSON) {
+      return "vjson://" + Base64.encodeToString(
+        v_json_config.getBytes(Charset.forName("UTF-8")),
         Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP)
     }
     "ssr://" + Base64.encodeToString("%s:%d:%s:%s:%s:%s/?obfsparam=%s&protoparam=%s&remarks=%s&group=%s".formatLocal(Locale.ENGLISH,

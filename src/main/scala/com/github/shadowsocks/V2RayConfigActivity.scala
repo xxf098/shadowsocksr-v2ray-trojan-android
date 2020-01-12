@@ -70,8 +70,9 @@ class V2RayConfigActivity extends AppCompatActivity with
   }
 
   def saveConfig(config: String): Unit = {
+    // TODO: check json
     val newProfile = Parser.getV2RayJSONProfile(config)
-    if (newProfile == null) {
+    if (profile == null) {
       app.profileManager.createProfile(newProfile)
     } else {
       newProfile.id = profile.id

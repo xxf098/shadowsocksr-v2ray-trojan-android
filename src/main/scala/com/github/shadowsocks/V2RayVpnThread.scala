@@ -13,6 +13,8 @@ import com.github.shadowsocks.utils.{Parser, Route, State, TrafficMonitor, Utils
 import tun2socks.PacketFlow
 import tun2socks.Tun2socks
 import tun2socks.{LogService => Tun2socksLogService, VpnService => Tun2socksVpnService}
+import com.google.gson.{JsonParser, GsonBuilder}
+
 
 class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 
@@ -86,18 +88,17 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 //      if (config == null) {
 //        return
 //      }
-//      val config = Tun2socks.generateVmessString(profile.toVmess)
-//      Log.e(TAG, config)
-//      Log.e(TAG, Tun2socks.checkVersion())
-//
-//      Tun2socks.startV2Ray(
-//        flow,
-//        service,
-//        config.getBytes(StandardCharsgaioets.UTF_8),
-//        assetPath,
-//        vpnService.getFilesDir.getAbsolutePath
-//      )
-      Tun2socks.startV2RayWithVmess(flow, service, null, profile.toVmess, assetPath)
+      if (profile.isVmess) {
+//        val config = Tun2socks.generateVmessString(profile.toVmess)
+//        Log.e(TAG, config)
+//        Log.e(TAG, Tun2socks.checkVersion())
+//        Tun2socks.startV2Ray(flow, service, config.getBytes(StandardCharsets.UTF_8), assetPath, vpnService.getFilesDir.getAbsolutePath)
+        Tun2socks.startV2RayWithVmess(flow, service, null, profile.toVmess, assetPath)
+      } else if (profile.isV2RayJSON) {
+        val config = profile.v_json_config.getBytes(StandardCharsets.UTF_8)
+        Tun2socks.startV2Ray(flow, service, config, assetPath, vpnService.getFilesDir.getAbsolutePath)
+      }
+
     } catch {
       case e: Exception => {
         e.printStackTrace()

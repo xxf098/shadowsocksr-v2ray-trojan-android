@@ -148,7 +148,7 @@ trait BaseService extends Service {
       }
     }
     if (profile.isV2RayJSON) {
-      return TextUtils.isEmpty(profile.v_json_config)
+      return !TextUtils.isEmpty(profile.v_json_config)
     }
     if (TextUtils.isEmpty(profile.host) || TextUtils.isEmpty(profile.password)) {
       stopRunner(true, getString(R.string.proxy_empty))

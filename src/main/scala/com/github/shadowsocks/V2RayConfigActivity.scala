@@ -1,5 +1,6 @@
 package com.github.shadowsocks
 
+import java.io.File
 import java.lang.Exception
 
 import android.app.TaskStackBuilder
@@ -9,11 +10,13 @@ import android.support.v7.widget.Toolbar
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
 import android.util.Log
 import android.view.{MenuItem, WindowManager}
-import android.widget.{EditText, TextView}
+import android.widget.{EditText, TextView, Toast}
 import com.github.shadowsocks.utils.Parser.TAG
 import com.github.shadowsocks.utils.{ConfigUtils, Key, Parser}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
+import org.json.JSONObject
+import tun2socks.Tun2socks
 
 
 
@@ -70,15 +73,30 @@ class V2RayConfigActivity extends AppCompatActivity with
   }
 
   def saveConfig(config: String): Unit = {
-    // TODO: check json
+    if (!checkConfig(config)) {
+      Toast.makeText(this, "config is not valid", Toast.LENGTH_SHORT).show()
+      return
+    }
     val newProfile = Parser.getV2RayJSONProfile(config)
     if (profile == null) {
-      app.profileManager.createProfile(newProfile)
+      profile = app.profileManager.createProfile(newProfile)
     } else {
       newProfile.id = profile.id
       newProfile.url_group = profile.url_group
       newProfile.name = profile.name
       app.profileManager.updateProfile(newProfile)
+    }
+  }
+
+  def checkConfig(config: String): Boolean = {
+    try {
+      new JSONObject(config)
+      true
+    } catch {
+      case e: Exception => {
+        e.printStackTrace()
+        false
+      }
     }
   }
 }

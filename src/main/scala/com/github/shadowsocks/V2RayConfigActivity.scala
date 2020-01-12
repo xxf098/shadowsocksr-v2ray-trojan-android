@@ -17,6 +17,9 @@ import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
 import org.json.JSONObject
 import tun2socks.Tun2socks
+import scala.concurrent.ExecutionContext.Implicits.global
+
+import scala.concurrent.Future
 
 
 
@@ -73,30 +76,38 @@ class V2RayConfigActivity extends AppCompatActivity with
   }
 
   def saveConfig(config: String): Unit = {
-    if (!checkConfig(config)) {
-      Toast.makeText(this, "config is not valid", Toast.LENGTH_SHORT).show()
-      return
+    val future = checkConfig(config)
+    future onSuccess {
+      case true => {
+        runOnUiThread(() => {
+          val newProfile = Parser.getV2RayJSONProfile(config)
+          if (profile == null) {
+            profile = app.profileManager.createProfile(newProfile)
+          } else {
+            newProfile.id = profile.id
+            newProfile.url_group = profile.url_group
+            newProfile.name = profile.name
+            app.profileManager.updateProfile(newProfile)
+          }
+          Toast.makeText(this, "Saved!", Toast.LENGTH_SHORT).show()
+        })
+      }
+      case false => runOnUiThread(() => Toast.makeText(this, "Config is not valid!", Toast.LENGTH_SHORT))
     }
-    val newProfile = Parser.getV2RayJSONProfile(config)
-    if (profile == null) {
-      profile = app.profileManager.createProfile(newProfile)
-    } else {
-      newProfile.id = profile.id
-      newProfile.url_group = profile.url_group
-      newProfile.name = profile.name
-      app.profileManager.updateProfile(newProfile)
+    future onFailure {
+      case e: Exception => runOnUiThread(() => Toast.makeText(this, "config is not valid!", Toast.LENGTH_SHORT).show())
     }
   }
 
-  def checkConfig(config: String): Boolean = {
-    try {
-      new JSONObject(config)
-      true
-    } catch {
-      case e: Exception => {
-        e.printStackTrace()
-        false
+  def checkConfig(config: String): Future[Boolean] = {
+      Future {
+        new JSONObject(config)
+        val assetPath = getApplicationInfo.dataDir + "/files/"
+        if (!(new File(s"$assetPath/geoip.dat").exists() &&
+          new File(s"$assetPath/geosite.dat").exists())) {
+          app.copyAssets("dat", assetPath)
+        }
+        true
       }
-    }
   }
 }

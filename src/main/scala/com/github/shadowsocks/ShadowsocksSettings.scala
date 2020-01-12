@@ -64,11 +64,11 @@ object ShadowsocksSettings {
   }
 
   def updatePreference(pref: Preference, name: String, profile: Profile) {
-    if (profile.isVmess) {
+    if (profile.isVmess || profile.isV2RayJSON) {
       name match {
         case Key.group_name => updateSummaryEditTextPreference(pref, profile.url_group)
         case Key.v_ps => updateSummaryEditTextPreference(pref, profile.v_ps)
-        case Key.v_port => updateNumberPickerPreference(pref, profile.v_port.toInt)
+        case Key.v_port => updateNumberPickerPreference(pref, Option(profile.v_port).getOrElse("0").toInt)
         case Key.v_path => updateSummaryEditTextPreference(pref, profile.v_path)
         case Key.v_host => updateSummaryEditTextPreference(pref, profile.v_host)
         case Key.route => updateDropDownPreference(pref, profile.route)
@@ -183,8 +183,11 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
 
     // v2ray
     findPreference(Key.v_add).setOnPreferenceClickListener((preference: Preference) => {
-      val HostEditText = new EditText(activity);
-      HostEditText.setText(profile.v_add);
+      if (profile.isV2RayJSON) {
+        return startV2RayConfigActivity(profile)
+      }
+      val HostEditText = new EditText(activity)
+      HostEditText.setText(profile.v_add)
       new AlertDialog.Builder(activity)
         .setTitle(getString(R.string.proxy))
         .setPositiveButton(android.R.string.ok, ((_, _) => {
@@ -201,8 +204,11 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     })
 
     findPreference(Key.v_id).setOnPreferenceClickListener((preference: Preference) => {
-      val HostEditText = new EditText(activity);
-      HostEditText.setText(profile.v_id);
+      if (profile.isV2RayJSON) {
+        return startV2RayConfigActivity(profile)
+      }
+      val HostEditText = new EditText(activity)
+      HostEditText.setText(profile.v_id)
       new AlertDialog.Builder(activity)
         .setTitle("UserID")
         .setPositiveButton(android.R.string.ok, ((_, _) => {
@@ -512,6 +518,13 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     }.start()
   }
 
+  def startV2RayConfigActivity (profile: Profile): Boolean = {
+    val intent = new Intent(app, classOf[V2RayConfigActivity])
+    intent.putExtra(Key.EXTRA_PROFILE_ID, profile.id)
+    app.startActivity(intent)
+    true
+  }
+
   def refreshProfile() {
     profile = app.currentProfile match {
       case Some(p) => p
@@ -568,7 +581,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     featureCategory = Option(featureCategory).getOrElse(findPreference(getResources.getString(R.string.featurePreferenceGroup)).asInstanceOf[PreferenceGroup])
     miscCategory  = Option(miscCategory).getOrElse(findPreference(getResources.getString(R.string.miscPreferenceGroup)).asInstanceOf[PreferenceGroup])
     screen.removeAll()
-    if (profile.isVmess) {
+    if (profile.isVmess || profile.isV2RayJSON) {
       screen.addPreference(v2rayCategory)
     } else {
       screen.addPreference(ssrCategory)

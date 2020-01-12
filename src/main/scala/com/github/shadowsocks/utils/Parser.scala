@@ -256,7 +256,43 @@ object Parser {
     vmessJson
   }
 
-  def getV2rayConfig1(vmessBean: VmessBean): String = {
-      ""
+  def getV2RayJSONProfile (config: String): Profile = {
+    val profile = new Profile
+    profile.proxy_protocol = "v2ray_json"
+    profile.url_group = "v2ray"
+    profile.name = "V2ray Config"
+    profile.v_ps = profile.name
+    profile.v_json_config = config
+    profile.v_port = "0"
+    profile.v_add = "127.0.0.1"
+    profile.v_id = ""
+    profile.v_aid = ""
+    profile.v_path = ""
+    profile.v_host = ""
+    "\"address\":\\s*\"(.+)\"".r.findFirstMatchIn(config) match {
+      case Some(m) => {
+        profile.v_add = m.group(1)
+        profile.name = profile.v_add
+        profile.v_ps = profile.v_add
+      }
+      case None =>
+    }
+    "\"id\":\\s*\"(.+)\"".r.findFirstMatchIn(config) match {
+      case Some(m) => profile.v_id = m.group(1)
+      case None =>
+    }
+    "\"alterId\":\\s*\"(.+)\"".r.findFirstMatchIn(config) match {
+      case Some(m) => profile.v_aid = m.group(1)
+      case None =>
+    }
+    "\"path\":\\s*\"(.+)\"".r.findFirstMatchIn(config) match {
+      case Some(m) => profile.v_path = m.group(1)
+      case None =>
+    }
+    "\"Host\":\\s*\"(.+)\"".r.findFirstMatchIn(config) match {
+      case Some(m) => profile.v_host = m.group(1)
+      case None =>
+    }
+    profile
   }
 }

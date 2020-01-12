@@ -196,6 +196,10 @@ class Profile {
 
   def isVmess = this.proxy_protocol == "vmess"
 
+  def isV2RayJSON = this.proxy_protocol == "v2ray_json"
+
+  def isV2Ray = isVmess || isV2RayJSON
+
   def toVmess: Vmess = {
     if (!isVmess) {
       throw new Exception("Not a V2ray Profile")

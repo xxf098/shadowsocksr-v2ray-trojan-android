@@ -74,7 +74,7 @@
 
     <PreferenceCategory
         android:title="@string/proxy_v2ray"
-        android:key="@string/v2rayPreferenceGroup">
+        android:key="@string/vmessPreferenceGroup">
 
         <com.github.shadowsocks.preferences.SummaryEditTextPreference
             android:key="groupName"
@@ -109,6 +109,31 @@
             android:key="v_host"
             android:summary="Host"
             android:title="Host" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/proxy_v2ray"
+        android:key="@string/v2rayJSONPreferenceGroup">
+
+        <com.github.shadowsocks.preferences.SummaryEditTextPreference
+            android:key="groupName"
+            android:persistent="false"
+            android:title="@string/group_name" />
+        <com.github.shadowsocks.preferences.SummaryEditTextPreference
+            android:key="v_ps"
+            android:persistent="false"
+            android:title="@string/profile_name" />
+        <Preference
+            android:key="v_add_json"
+            android:persistent="false"
+            android:summary="@string/proxy_click"
+            android:title="@string/proxy" />
+        <Preference
+            android:key="v_id_json"
+            android:persistent="false"
+            android:summary="Click to see user id"
+            android:title="UserID" />
 
     </PreferenceCategory>
 

@@ -299,6 +299,8 @@ object Key {
   val v_ps = "v_ps"
   val v_id = "v_id"
   val v_class = "v_class"
+  val v_add_json = "v_add_json"
+  val v_id_json = "v_id_json"
 
   val profileTip = "profileTip"
 

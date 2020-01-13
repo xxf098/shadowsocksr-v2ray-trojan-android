@@ -64,7 +64,7 @@ object ShadowsocksSettings {
   }
 
   def updatePreference(pref: Preference, name: String, profile: Profile) {
-    if (profile.isVmess || profile.isV2RayJSON) {
+    if (profile.isVmess) {
       name match {
         case Key.group_name => updateSummaryEditTextPreference(pref, profile.url_group)
         case Key.v_ps => updateSummaryEditTextPreference(pref, profile.v_ps)
@@ -77,6 +77,14 @@ object ShadowsocksSettings {
         case Key.dns => updateSummaryEditTextPreference(pref, profile.dns)
         case Key.china_dns => updateSummaryEditTextPreference(pref, profile.china_dns)
         case Key.ipv6 => updateSwitchPreference(pref, profile.ipv6)
+        case _ =>
+      }
+      return
+    }
+    if (profile.isV2RayJSON) {
+      name match {
+        case Key.group_name => updateSummaryEditTextPreference(pref, profile.url_group)
+        case Key.v_ps => updateSummaryEditTextPreference(pref, profile.v_ps)
         case _ =>
       }
       return
@@ -113,7 +121,8 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
 
   private var screen:PreferenceScreen = _
   private var ssrCategory: PreferenceGroup  = _
-  private var v2rayCategory: PreferenceGroup  = _
+  private var vmessCategory: PreferenceGroup  = _
+  private var v2rayJSONCategory: PreferenceGroup  = _
   private var featureCategory: PreferenceGroup  = _
   private var miscCategory: PreferenceGroup  = _
 
@@ -183,9 +192,6 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
 
     // v2ray
     findPreference(Key.v_add).setOnPreferenceClickListener((preference: Preference) => {
-      if (profile.isV2RayJSON) {
-        return startV2RayConfigActivity(profile)
-      }
       val HostEditText = new EditText(activity)
       HostEditText.setText(profile.v_add)
       new AlertDialog.Builder(activity)
@@ -204,9 +210,6 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     })
 
     findPreference(Key.v_id).setOnPreferenceClickListener((preference: Preference) => {
-      if (profile.isV2RayJSON) {
-        return startV2RayConfigActivity(profile)
-      }
       val HostEditText = new EditText(activity)
       HostEditText.setText(profile.v_id)
       new AlertDialog.Builder(activity)
@@ -222,6 +225,14 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
         .create()
         .show()
       true
+    })
+
+    findPreference(Key.v_add_json).setOnPreferenceClickListener((preference: Preference) => {
+      startV2RayConfigActivity(profile)
+    })
+
+    findPreference(Key.v_id_json).setOnPreferenceClickListener((preference: Preference) => {
+      startV2RayConfigActivity(profile)
     })
 
     findPreference(Key.route).setOnPreferenceChangeListener((_, value) => {
@@ -577,14 +588,15 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
   def setCategory(profile: Profile): Unit = {
     screen = Option(screen).getOrElse(findPreference(getResources.getString(R.string.preferenceScreen)).asInstanceOf[PreferenceScreen])
     ssrCategory = Option(ssrCategory).getOrElse(findPreference(getResources.getString(R.string.ssrPreferenceGroup)).asInstanceOf[PreferenceGroup])
-    v2rayCategory  = Option(v2rayCategory).getOrElse(findPreference(getResources.getString(R.string.v2rayPreferenceGroup)).asInstanceOf[PreferenceGroup])
+    vmessCategory  = Option(vmessCategory).getOrElse(findPreference(getResources.getString(R.string.vmessPreferenceGroup)).asInstanceOf[PreferenceGroup])
+    v2rayJSONCategory  = Option(v2rayJSONCategory).getOrElse(findPreference(getResources.getString(R.string.v2rayJSONPreferenceGroup)).asInstanceOf[PreferenceGroup])
     featureCategory = Option(featureCategory).getOrElse(findPreference(getResources.getString(R.string.featurePreferenceGroup)).asInstanceOf[PreferenceGroup])
     miscCategory  = Option(miscCategory).getOrElse(findPreference(getResources.getString(R.string.miscPreferenceGroup)).asInstanceOf[PreferenceGroup])
     screen.removeAll()
-    if (profile.isVmess || profile.isV2RayJSON) {
-      screen.addPreference(v2rayCategory)
-    } else {
-      screen.addPreference(ssrCategory)
+    profile match {
+      case p if p.isVmess => screen.addPreference(vmessCategory)
+      case p if p.isV2RayJSON => screen.addPreference(v2rayJSONCategory)
+      case _ => screen.addPreference(ssrCategory)
     }
     screen.addPreference(featureCategory)
     screen.addPreference(miscCategory)

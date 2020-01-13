@@ -15,10 +15,11 @@ import com.github.shadowsocks.utils.Parser.TAG
 import com.github.shadowsocks.utils.{ConfigUtils, Key, Parser}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
+import com.google.gson.{Gson, GsonBuilder, JsonParser}
 import org.json.JSONObject
 import tun2socks.Tun2socks
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
@@ -78,9 +79,9 @@ class V2RayConfigActivity extends AppCompatActivity with
   def saveConfig(config: String): Unit = {
     val future = checkConfig(config)
     future onSuccess {
-      case true => {
+      case prettyConfig if prettyConfig != null => {
         runOnUiThread(() => {
-          val newProfile = Parser.getV2RayJSONProfile(config)
+          val newProfile = Parser.getV2RayJSONProfile(prettyConfig)
           if (profile == null) {
             profile = app.profileManager.createProfile(newProfile)
           } else {
@@ -92,22 +93,23 @@ class V2RayConfigActivity extends AppCompatActivity with
           Toast.makeText(this, "Saved!", Toast.LENGTH_SHORT).show()
         })
       }
-      case false => runOnUiThread(() => Toast.makeText(this, "Config is not valid!", Toast.LENGTH_SHORT))
+      case _ => runOnUiThread(() => Toast.makeText(this, "Config is not valid!", Toast.LENGTH_SHORT))
     }
     future onFailure {
       case e: Exception => runOnUiThread(() => Toast.makeText(this, "config is not valid!", Toast.LENGTH_SHORT).show())
     }
   }
 
-  def checkConfig(config: String): Future[Boolean] = {
+  def checkConfig(config: String): Future[String] = {
       Future {
-        new JSONObject(config)
+        val jsonObject = new JsonParser().parse(config).getAsJsonObject
+        val prettyConfig = new GsonBuilder().setPrettyPrinting().create().toJson(jsonObject)
         val assetPath = getApplicationInfo.dataDir + "/files/"
         if (!(new File(s"$assetPath/geoip.dat").exists() &&
           new File(s"$assetPath/geosite.dat").exists())) {
           app.copyAssets("dat", assetPath)
         }
-        true
+        prettyConfig
       }
   }
 }

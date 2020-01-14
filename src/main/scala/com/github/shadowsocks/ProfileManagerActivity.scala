@@ -50,7 +50,6 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.matching.Regex
 
 // TODO: AndroidX
-// TODO: config v2ray by json
 final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext
   with View.OnClickListener with CreateNdefMessageCallback {
 

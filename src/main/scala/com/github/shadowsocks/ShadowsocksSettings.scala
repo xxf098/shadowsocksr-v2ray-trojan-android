@@ -37,7 +37,7 @@ object ShadowsocksSettings {
   private final val TAG = "ShadowsocksSettings"
   private val PROXY_PREFS = Array(Key.group_name, Key.name, Key.host, Key.remotePort, Key.localPort, Key.password, Key.method,
     Key.protocol, Key.obfs, Key.obfs_param, Key.dns, Key.china_dns, Key.protocol_param, Key.v_ps,
-    Key.v_id, Key.v_add, Key.v_host, Key.v_port, Key.v_path)
+    Key.v_id, Key.v_add, Key.v_host, Key.v_port, Key.v_path, Key.v_id_json, Key.v_add_json)
   private val FEATURE_PREFS = Array(Key.route, Key.proxyApps, Key.udpdns, Key.ipv6, Key.tfo)
 
   // Helper functions

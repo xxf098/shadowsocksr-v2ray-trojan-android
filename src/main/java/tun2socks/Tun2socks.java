@@ -24,7 +24,7 @@ public abstract class Tun2socks
 
     public static native boolean setNonblock(final long p0, final boolean p1);
 
-    public static native void startV2Ray(final PacketFlow p0, final VpnService p1, final byte[] p2, final String p3, final String p4) throws Exception;
+    public static native void startV2Ray(final PacketFlow p0, final VpnService p1, final LogService p2, final byte[] p3, final String p4) throws Exception;
 
     public static native void startV2RayWithVmess(final PacketFlow p0, final VpnService p1, final LogService p2, final Vmess p3, final String p4) throws Exception;
 

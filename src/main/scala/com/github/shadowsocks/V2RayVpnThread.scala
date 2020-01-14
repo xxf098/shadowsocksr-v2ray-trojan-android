@@ -53,7 +53,7 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 //  }
   class AndroidLogService extends Tun2socksLogService {
   override def writeLog(p0: String): Unit = {
-    Log.e(TAG, p0)
+    Log.e(TAG, "===" + p0)
   }
 }
 
@@ -85,20 +85,20 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
       Tun2socks.setLocalDNS(s"${vpnService.dns_address}:${vpnService.dns_port}")
     try {
 //      val config = Parser.getV2rayConfig(profile).orNull
-//      if (config == null) {
-//        return
-//      }
-      if (profile.isVmess) {
-//        val config = Tun2socks.generateVmessString(profile.toVmess)
-//        Log.e(TAG, config)
-//        Log.e(TAG, Tun2socks.checkVersion())
-//        Tun2socks.startV2Ray(flow, service, config.getBytes(StandardCharsets.UTF_8), assetPath, vpnService.getFilesDir.getAbsolutePath)
-        Tun2socks.startV2RayWithVmess(flow, service, null, profile.toVmess, assetPath)
-      } else if (profile.isV2RayJSON) {
-        val config = profile.v_json_config.getBytes(StandardCharsets.UTF_8)
-        Tun2socks.startV2Ray(flow, service, config, assetPath, vpnService.getFilesDir.getAbsolutePath)
+      profile match {
+        case p if p.isVmess => {
+          // val config = Tun2socks.generateVmessString(profile.toVmess)
+          // Log.e(TAG, config)
+          // Log.e(TAG, Tun2socks.checkVersion())
+          // Tun2socks.startV2Ray(flow, service, config.getBytes(StandardCharsets.UTF_8), assetPath, vpnService.getFilesDir.getAbsolutePath)
+          Tun2socks.startV2RayWithVmess(flow, service, androidLogService, profile.toVmess, assetPath)
+        }
+        case p if p.isV2RayJSON => {
+          val config = "\"address\":\\s*\".+?\"".r.replaceFirstIn(profile.v_json_config, s""""address": "${profile.v_add}"""")
+          Tun2socks.startV2Ray(flow, service, androidLogService, config.getBytes(StandardCharsets.UTF_8), assetPath)
+        }
+        case _ => throw new Exception("Not Support!")
       }
-
     } catch {
       case e: Exception => {
         e.printStackTrace()

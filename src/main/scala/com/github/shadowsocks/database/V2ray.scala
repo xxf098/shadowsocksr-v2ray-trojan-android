@@ -14,7 +14,8 @@ case class VmessQRCode(v: String,
                        `type`: String,
                        host: String,
                        path: String,
-                       tls: String
+                       tls: String,
+                       url_group: String
                       )
 
 case class VmessBean(
@@ -33,13 +34,14 @@ case class VmessBean(
                       var configType: Int,
                       var configVersion: Int,
                       var testResult: String,
-                      var subid: String
+                      var subid: String,
+                      var url_group: String
                     )
 
 object VmessBean {
   def apply(): VmessBean = {
     val guid = UUID.randomUUID().toString.replace("-", "")
-    VmessBean(guid, "v2ray.com", 10086, "id", 64, "aes-128-cfb", "tcp", "def", "", "", "", "", 1, 2, "", "")
+    VmessBean(guid, "v2ray.com", 10086, "id", 64, "aes-128-cfb", "tcp", "def", "", "", "", "", 1, 2, "", "", "v2ray")
   }
 }
 

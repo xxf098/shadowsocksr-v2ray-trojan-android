@@ -156,7 +156,7 @@ object Parser {
     profile.v_tls = vmessBean.streamSecurity
     // common
     profile.name = profile.v_ps
-    profile.url_group = "v2ray"
+    profile.url_group = vmessBean.url_group
     profile
   }
 
@@ -196,6 +196,7 @@ object Parser {
     vmess.path = vmessQRCode.path
     vmess.streamSecurity = vmessQRCode.tls
     vmess.subid = ""
+    vmess.url_group = if (TextUtils.isEmpty(vmessQRCode.url_group)) vmess.url_group else vmessQRCode.url_group
     Some(vmess)
   }
 

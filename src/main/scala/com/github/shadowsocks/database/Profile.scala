@@ -176,7 +176,8 @@ class Profile {
         this.v_type,
         this.v_host,
         this.v_path,
-        this.v_tls)
+        this.v_tls,
+        this.url_group)
       val vmessJson = new GsonBuilder().setPrettyPrinting().create().toJson(vmessQRCode)
 //      Log.e("Profile", vmessJson)
       return "vmess://" + Base64.encodeToString(

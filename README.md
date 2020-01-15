@@ -1,4 +1,4 @@
-## A modified version ShadowsocksR and V2Ray for Android
+## A ShadowsocksR and V2Ray Client for Android
 
 A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) and [V2Ray](https://github.com/v2ray/v2ray-core) client for Android, integrate SSR and V2Ray in one application, written in Scala.
 

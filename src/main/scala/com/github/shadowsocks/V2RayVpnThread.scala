@@ -74,10 +74,6 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
     val service = new Service(vpnService)
     val androidLogService = new AndroidLogService()
     val assetPath = vpnService.getApplicationInfo.dataDir + "/files/"
-    if (!(new File(s"$assetPath/geoip.dat").exists() &&
-      new File(s"$assetPath/geosite.dat").exists())) {
-      app.copyAssets("dat", assetPath)
-    }
     // replace address with ip dns
     if (profile.route == Route.CHINALIST)
       Tun2socks.setLocalDNS(s"${vpnService.china_dns_address}:${vpnService.china_dns_port}")

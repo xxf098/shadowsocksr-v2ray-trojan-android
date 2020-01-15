@@ -16,6 +16,7 @@ import com.github.shadowsocks.utils.{ConfigUtils, Key, Parser}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
 import com.google.gson.{Gson, GsonBuilder, JsonParser}
+import go.Seq
 import org.json.JSONObject
 import tun2socks.Tun2socks
 
@@ -33,6 +34,7 @@ class V2RayConfigActivity extends AppCompatActivity with
 
   override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
+    Seq.setContext(getApplicationContext)
     getWindow.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
     getWindow.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
     setContentView(R.layout.layout_v2ray_config)
@@ -104,11 +106,8 @@ class V2RayConfigActivity extends AppCompatActivity with
       Future {
         val jsonObject = new JsonParser().parse(config).getAsJsonObject
         val prettyConfig = new GsonBuilder().setPrettyPrinting().create().toJson(jsonObject)
-        val assetPath = getApplicationInfo.dataDir + "/files/"
-        if (!(new File(s"$assetPath/geoip.dat").exists() &&
-          new File(s"$assetPath/geosite.dat").exists())) {
-          app.copyAssets("dat", assetPath)
-        }
+//        val assetPath = getApplicationInfo.dataDir + "/files/"
+//        Tun2socks.testConfig(prettyConfig, assetPath)
         prettyConfig
       }
   }

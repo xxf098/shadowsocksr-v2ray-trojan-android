@@ -57,6 +57,7 @@ import com.github.shadowsocks.utils._
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
 import okhttp3.{Dns, FormBody, OkHttpClient, Request}
+import go.Seq
 
 
 import scala.util.Random
@@ -295,6 +296,7 @@ trait BaseService extends Service {
     super.onCreate()
     app.refreshContainerHolder
     app.updateAssets()
+    Seq.setContext(getApplicationContext)
   }
 
   // Service of shadowsocks should always be started explicitly

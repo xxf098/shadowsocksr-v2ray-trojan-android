@@ -226,7 +226,10 @@ class ShadowsocksApplication extends Application {
         Log.e(TAG, e.getMessage)
         app.track(e)
     }
-    val destPath1 = if (destPath != null) destPath else getApplicationInfo.dataDir + "/"
+    val destPath1 = if (destPath != null) {
+      new File(destPath).mkdirs()
+      destPath
+    } else getApplicationInfo.dataDir + "/"
     if (files != null) for (file <- files) {
       autoClose(assetManager.open(if (path.nonEmpty) path + '/' + file else file))(in =>
         autoClose(new FileOutputStream(destPath1 + file))(out =>

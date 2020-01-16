@@ -61,11 +61,7 @@ import com.github.shadowsocks.utils._
 import com.github.shadowsocks.utils.CloseUtils._
 
 import scala.collection.mutable.ArrayBuffer
-import java.util.logging.Logger
 
-import tun2socks.PacketFlow
-import tun2socks.Tun2socks
-import tun2socks.{DBService => Tun2socksDBService, VpnService => Tun2socksVpnService}
 
 class ShadowsocksVpnService extends VpnService with BaseService {
   val TAG = "ShadowsocksVpnService"

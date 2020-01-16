@@ -48,6 +48,30 @@ import com.google.gson.GsonBuilder
 import com.j256.ormlite.field.{DataType, DatabaseField}
 import tun2socks.{ Tun2socks, Vmess }
 
+import scala.language.implicitConversions
+
+object Profile {
+  implicit def profileToVmess(profile: Profile): Vmess = {
+    if (!profile.isVmess) {
+      throw new Exception("Not a V2ray Profile")
+    }
+    Tun2socks.newVmess(
+      profile.v_host,
+      profile.v_path,
+      profile.v_tls,
+      profile.v_add,
+      profile.v_port.toLong,
+      profile.v_aid.toLong,
+      profile.v_net,
+      profile.v_id,
+      "error"
+    )
+  }
+
+  // TODO:
+  def profileToBytes(profile: Profile) = ???
+}
+
 class Profile {
   @DatabaseField(generatedId = true)
   var id: Int = 0
@@ -205,21 +229,4 @@ class Profile {
   def isV2RayJSON = this.proxy_protocol == "v2ray_json"
 
   def isV2Ray = isVmess || isV2RayJSON
-
-  def toVmess: Vmess = {
-    if (!isVmess) {
-      throw new Exception("Not a V2ray Profile")
-    }
-    Tun2socks.newVmess(
-      this.v_host,
-      this.v_path,
-      this.v_tls,
-      this.v_add,
-      this.v_port.toLong,
-      this.v_aid.toLong,
-      this.v_net,
-      this.v_id,
-      "error"
-    )
-  }
 }

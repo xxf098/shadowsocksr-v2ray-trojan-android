@@ -10,11 +10,11 @@ import android.util.Log
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils.{Parser, Route, State, TrafficMonitor, Utils}
-import tun2socks.PacketFlow
-import tun2socks.Tun2socks
-import tun2socks.{LogService => Tun2socksLogService, VpnService => Tun2socksVpnService}
-import com.google.gson.{JsonParser, GsonBuilder}
+import tun2socks.{PacketFlow, Tun2socks, Vmess, LogService => Tun2socksLogService, VpnService => Tun2socksVpnService}
+import com.google.gson.{GsonBuilder, JsonParser}
 
+import scala.language.implicitConversions
+import Profile._
 
 class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 
@@ -87,7 +87,7 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
           // Log.e(TAG, config)
           // Log.e(TAG, Tun2socks.checkVersion())
           // Tun2socks.startV2Ray(flow, service, config.getBytes(StandardCharsets.UTF_8), assetPath, vpnService.getFilesDir.getAbsolutePath)
-          Tun2socks.startV2RayWithVmess(flow, service, androidLogService, profile.toVmess, assetPath)
+          Tun2socks.startV2RayWithVmess(flow, service, androidLogService, profile, assetPath)
         }
         case p if p.isV2RayJSON => {
           val config = "\"address\":\\s*\".+?\"".r.replaceFirstIn(profile.v_json_config, s""""address": "${profile.v_add}"""")

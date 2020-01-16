@@ -39,7 +39,7 @@
 
 package com.github.shadowsocks
 
-import java.io.{FileOutputStream, IOException}
+import java.io.{File, FileOutputStream, IOException}
 import java.util
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -228,7 +228,6 @@ class ShadowsocksApplication extends Application {
     }
     val destPath1 = if (destPath != null) destPath else getApplicationInfo.dataDir + "/"
     if (files != null) for (file <- files) {
-//      Log.e(TAG, destPath1 + file)
       autoClose(assetManager.open(if (path.nonEmpty) path + '/' + file else file))(in =>
         autoClose(new FileOutputStream(destPath1 + file))(out =>
           IOUtils.copy(in, out)))
@@ -256,6 +255,8 @@ class ShadowsocksApplication extends Application {
     crashRecovery() // ensure executables are killed before writing to them
     copyAssets(System.getABI)
     copyAssets("acl")
+    val assetPath = getApplicationInfo.dataDir + "/files/"
+    app.copyAssets("dat", assetPath)
     Shell.SH.run(EXECUTABLES.map("chmod 755 " + getApplicationInfo.dataDir + '/' + _))
     editor.putInt(Key.currentVersionCode, BuildConfig.VERSION_CODE).apply()
   }

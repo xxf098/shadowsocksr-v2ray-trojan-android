@@ -296,7 +296,6 @@ trait BaseService extends Service {
     super.onCreate()
     app.refreshContainerHolder
     app.updateAssets()
-    Seq.setContext(getApplicationContext)
   }
 
   // Service of shadowsocks should always be started explicitly

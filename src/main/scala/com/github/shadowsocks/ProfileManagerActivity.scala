@@ -1109,7 +1109,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             override def run() {
               // Do some background work
               Looper.prepare()
-              profiles.foreach((profile: Profile) => {
+              profiles.filter(!_.isV2Ray).foreach((profile: Profile) => {
                 if (isTesting) {
 
                   if (testAsyncJob.isInterrupted()) {

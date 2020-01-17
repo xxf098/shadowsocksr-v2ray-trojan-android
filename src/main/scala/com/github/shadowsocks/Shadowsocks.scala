@@ -309,7 +309,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
             e.printStackTrace()
             result = getString(R.string.connection_test_error, e.getMessage)
         }
-        synchronized(if (testCount == id && app.isVpnEnabled) handler.post(() =>
+        synchronized(if (testCount == id && app.isVpnEnabled && serviceStarted) handler.post(() =>
           if (success) connectionTestText.setText(result)
           else {
             connectionTestText.setText(R.string.connection_test_fail)

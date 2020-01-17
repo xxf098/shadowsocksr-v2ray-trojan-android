@@ -46,9 +46,11 @@ import java.util.Locale
 import android.util.{Base64, Log}
 import com.google.gson.GsonBuilder
 import com.j256.ormlite.field.{DataType, DatabaseField}
-import tun2socks.{ Tun2socks, Vmess }
+import tun2socks.{Tun2socks, Vmess}
 
 import scala.language.implicitConversions
+import Profile._
+import com.github.shadowsocks.utils.Utils
 
 object Profile {
   implicit def profileToVmess(profile: Profile): Vmess = {
@@ -67,6 +69,7 @@ object Profile {
       "error"
     )
   }
+
 
   // TODO:
   def profileToBytes(profile: Profile) = ???
@@ -188,38 +191,18 @@ class Profile {
   var v_json_config: String = ""
 
   override def toString(): String = {
-    if (isVmess) {
-      val vmessQRCode = VmessQRCode(
-        this.v_v,
-        this.v_ps,
-        this.v_add,
-        this.v_port,
-        this.v_id,
-        this.v_aid,
-        this.v_net,
-        this.v_type,
-        this.v_host,
-        this.v_path,
-        this.v_tls,
-        this.url_group)
-      val vmessJson = new GsonBuilder().setPrettyPrinting().create().toJson(vmessQRCode)
-//      Log.e("Profile", vmessJson)
-      return "vmess://" + Base64.encodeToString(
-        vmessJson.getBytes(Charset.forName("UTF-8")),
-        Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP)
+    implicit val flags: Int = Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP
+    this match {
+      case _ if isVmess => VmessQRCode(v_v, v_ps, v_add, v_port, v_id, v_aid, v_net, v_type, v_host, v_path, v_tls, url_group).toString
+      case _ if isV2RayJSON => "vjson://" + Utils.b64Encode(v_json_config.getBytes(Charset.forName("UTF-8")))
+      case _ => "ssr://" + Utils.b64Encode("%s:%d:%s:%s:%s:%s/?obfsparam=%s&protoparam=%s&remarks=%s&group=%s".formatLocal(Locale.ENGLISH,
+        host, remotePort, protocol, method, obfs,
+        Utils.b64Encode("%s".formatLocal(Locale.ENGLISH, password).getBytes),
+        Utils.b64Encode("%s".formatLocal(Locale.ENGLISH, obfs_param).getBytes),
+        Utils.b64Encode("%s".formatLocal(Locale.ENGLISH, protocol_param).getBytes),
+        Utils.b64Encode("%s".formatLocal(Locale.ENGLISH, name).getBytes),
+        Utils.b64Encode("%s".formatLocal(Locale.ENGLISH, url_group).getBytes)).getBytes)
     }
-    if (isV2RayJSON) {
-      return "vjson://" + Base64.encodeToString(
-        v_json_config.getBytes(Charset.forName("UTF-8")),
-        Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP)
-    }
-    "ssr://" + Base64.encodeToString("%s:%d:%s:%s:%s:%s/?obfsparam=%s&protoparam=%s&remarks=%s&group=%s".formatLocal(Locale.ENGLISH,
-      host, remotePort, protocol, method, obfs, Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
-        password).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP), Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
-        obfs_param).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP), Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
-        protocol_param).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP), Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
-        name).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP), Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
-        url_group).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP)).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP)
   }
 
   def isMethodUnsafe = "table".equalsIgnoreCase(method) || "rc4".equalsIgnoreCase(method)

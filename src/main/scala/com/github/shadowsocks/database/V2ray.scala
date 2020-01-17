@@ -1,7 +1,11 @@
 package com.github.shadowsocks.database
 
+import java.nio.charset.Charset
 import java.util
 import java.util.UUID
+
+import android.util.Base64
+import com.google.gson.GsonBuilder
 
 
 case class VmessQRCode(v: String,
@@ -16,7 +20,13 @@ case class VmessQRCode(v: String,
                        path: String,
                        tls: String,
                        url_group: String
-                      )
+                      ) {
+  override def toString: String = {
+    val vmessJson = new GsonBuilder().setPrettyPrinting().create().toJson(this)
+    "vmess://" + Base64.encodeToString(vmessJson.getBytes(Charset.forName("UTF-8")),
+      Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP)
+  }
+}
 
 case class VmessBean(
                       var guid: String,

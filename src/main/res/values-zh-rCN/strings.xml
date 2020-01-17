@@ -155,6 +155,10 @@
   <string name="action_export_err">导出至剪贴板失败</string>
   <string name="action_import_msg">导入成功</string>
   <string name="action_import_err">导入失败</string>
+  <string name="action_export_file">导出至文件</string>
+  <string name="action_import_file">从文件导入</string>
+  <string name="action_import_qrcode_image">从二维码图片导入</string>
+  <string name="action_add_v2ray_config">从V2Ray JSON导入</string>
 
   <plurals name="removed">
     <item quantity="one">已删除</item>

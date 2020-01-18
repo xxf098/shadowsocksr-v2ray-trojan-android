@@ -47,7 +47,13 @@ import android.preference.PreferenceManager
 import android.widget.AdapterView.OnItemSelectedListener
 
 import scala.collection.mutable.ArrayBuffer
-import scala.util.matching.Regex
+import tun2socks.Tun2socks
+
+import scala.language.implicitConversions
+import Profile._
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 // TODO: AndroidX
 final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext
@@ -110,7 +116,42 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
 
         var profile = item
+        if (profile.isVmess) {
+         val future = Future{
+           if (!Utils.isNumeric(profile.v_add)) Utils.resolve(profile.v_add, enableIPv6 = true, hostname="1.1.1.1") match {
+             case Some(addr) => profile.v_add = addr
+             case None => throw new IOException("Name Not Resolved")
+           }
+           Tun2socks.testVmessLatency(profile, app.getV2rayAssetsPath())
+         }
+          future onSuccess {
+            case elapsed => {
+              runOnUiThread(() => {
+                profile.elapsed = elapsed
+                app.profileManager.updateProfile(profile)
+                this.updateText(0, 0, elapsed)
+                val result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
+                singleTestProgressDialog.dismiss()
+                Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
+              })
+            }
+            case _ =>
+          }
+          future onFailure {
+            case e: Exception => {
+              runOnUiThread(() => {
+                singleTestProgressDialog.dismiss()
+                Log.e(TAG, e.getMessage)
+                e.printStackTrace()
+                val result = getString(R.string.connection_test_error, e.getMessage)
+                singleTestProgressDialog.dismiss()
+                Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
+              })
+            }
+          }
+        }
 
+        if (!profile.isV2Ray) {
         Utils.ThrowableFuture {
 
           // Resolve the server address
@@ -196,9 +237,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             ssTestProcess.destroy()
             ssTestProcess = null
           }
-
           singleTestProgressDialog.dismiss()
         }
+        }
+
 
         // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
       })

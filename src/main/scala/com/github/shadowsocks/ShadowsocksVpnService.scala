@@ -39,7 +39,7 @@
 
 package com.github.shadowsocks
 
-import java.io.{File, FileDescriptor, FileInputStream, FileOutputStream, PrintWriter}
+import java.io.{File, FileDescriptor, FileInputStream, FileOutputStream, IOException, PrintWriter}
 import java.util.Locale
 
 import scala.io.Source

@@ -14,6 +14,8 @@ public abstract class Tun2socks
 
     public static native String checkVersion();
 
+    public static native void copyAssets(final String p0, final boolean p1) throws Exception;
+
     public static native String generateVmessString(final Vmess p0) throws Exception;
 
     public static native void inputPacket(final byte[] p0);
@@ -31,6 +33,10 @@ public abstract class Tun2socks
     public static native void stopV2Ray();
 
     public static native void testConfig(final String p0, final String p1) throws Exception;
+
+    public static native long testConfigLatency(final byte[] p0, final String p1) throws Exception;
+
+    public static native long testVmessLatency(final Vmess p0, final String p1) throws Exception;
 
     static {
         Seq.touch();

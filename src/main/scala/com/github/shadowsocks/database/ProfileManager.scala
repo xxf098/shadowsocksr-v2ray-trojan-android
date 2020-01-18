@@ -102,17 +102,7 @@ class ProfileManager(dbHelper: DBHelper) {
         .prepareStatementString).getFirstResult
       if (last != null && last.length == 1 && last(0) != null) profile.userOrder = last(0).toInt + 1
 
-      val last_exist = dbHelper.profileDao.queryBuilder()
-        .where().eq("name", profile.name)
-        .and().eq("host", profile.host)
-        .and().eq("remotePort", profile.remotePort)
-        .and().eq("password", profile.password)
-        .and().eq("protocol", profile.protocol)
-        .and().eq("protocol_param", profile.protocol_param)
-        .and().eq("obfs", profile.obfs)
-        .and().eq("obfs_param", profile.obfs_param)
-        .and().eq("url_group", profile.url_group)
-        .and().eq("method", profile.method).queryForFirst()
+      val last_exist = checkLastExistProfile(profile)
       if (last_exist == null)
       {
         dbHelper.profileDao.createOrUpdate(profile)
@@ -147,31 +137,7 @@ class ProfileManager(dbHelper: DBHelper) {
         .prepareStatementString).getFirstResult
       if (last != null && last.length == 1 && last(0) != null) profile.userOrder = last(0).toInt + 1
 
-      val last_exist = if (!profile.isVmess) {
-        dbHelper.profileDao.queryBuilder()
-        .where().eq("name", profile.name)
-        .and().eq("host", profile.host)
-        .and().eq("remotePort", profile.remotePort)
-        .and().eq("password", profile.password)
-        .and().eq("protocol", profile.protocol)
-        .and().eq("protocol_param", profile.protocol_param)
-        .and().eq("obfs", profile.obfs)
-        .and().eq("obfs_param", profile.obfs_param)
-        .and().eq("url_group", profile.url_group)
-        .and().eq("method", profile.method).queryForFirst().asInstanceOf[Profile]
-      } else  {
-        dbHelper.profileDao.queryBuilder()
-          .where().eq("v_add", profile.v_add)
-          .and().eq("v_port", profile.v_port)
-          .and().eq("v_id", profile.v_id)
-          .and().eq("v_aid", profile.v_aid)
-          .and().eq("v_net", profile.v_net)
-          .and().eq("v_host", profile.v_host)
-          .and().eq("v_path", Option(profile.v_path).getOrElse(""))
-          .and().eq("url_group", profile.url_group)
-          .and().eq("name", profile.name)
-          .and().eq("v_tls", profile.v_tls).queryForFirst()
-      }
+      val last_exist = checkLastExistProfile(profile)
       if (last_exist == null) {
         dbHelper.profileDao.createOrUpdate(profile)
         0
@@ -183,6 +149,35 @@ class ProfileManager(dbHelper: DBHelper) {
         Log.e(TAG, "addProfile", ex)
         app.track(ex)
         0
+    }
+  }
+
+  def checkLastExistProfile(profile: Profile): Profile = {
+    if (!profile.isVmess) {
+      dbHelper.profileDao.queryBuilder()
+        .where().eq("name", profile.name)
+        .and().eq("host", profile.host)
+        .and().eq("remotePort", profile.remotePort)
+        .and().eq("password", profile.password)
+        .and().eq("protocol", profile.protocol)
+        .and().eq("protocol_param", profile.protocol_param)
+        .and().eq("obfs", profile.obfs)
+        .and().eq("obfs_param", profile.obfs_param)
+        .and().eq("url_group", profile.url_group)
+        .and().eq("method", profile.method).queryForFirst().asInstanceOf[Profile]
+    } else  {
+      dbHelper.profileDao.queryBuilder()
+        .where().eq("v_add", profile.v_add)
+        .and().eq("v_port", profile.v_port)
+        .and().eq("v_id", profile.v_id)
+        .and().eq("v_aid", profile.v_aid)
+        .and().eq("v_net", profile.v_net)
+        .and().eq("v_type", profile.v_type)
+        .and().eq("v_host", profile.v_host)
+        .and().eq("v_path", Option(profile.v_path).getOrElse(""))
+        .and().eq("url_group", profile.url_group)
+        .and().eq("name", profile.name)
+        .and().eq("v_tls", profile.v_tls).queryForFirst()
     }
   }
 

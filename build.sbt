@@ -9,7 +9,7 @@ name := "shadowsocksr"
 applicationId := "in.zhaoj.shadowsocksrr"
 
 val supportLibVersion = "27.1.1"
-platformTarget := "android-27"
+platformTarget := "android-29"
 
 compileOrder := CompileOrder.JavaThenScala
 javacOptions ++= "-source" :: "1.8" :: "-target" :: "1.8" :: Nil
@@ -40,8 +40,8 @@ shrinkResources := true
 typedResources := false
 resConfigs := Seq("ja", "ru", "zh-rCN", "zh-rTW")
 
-resolvers += Resolver.jcenterRepo
 resolvers += "Google" at "https://maven.google.com/"
+resolvers += Resolver.jcenterRepo
 
 libraryDependencies ++=
   "com.android.support" % "cardview-v7" % supportLibVersion ::

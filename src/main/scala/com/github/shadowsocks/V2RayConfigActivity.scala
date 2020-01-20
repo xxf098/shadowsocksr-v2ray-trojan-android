@@ -98,13 +98,22 @@ class V2RayConfigActivity extends AppCompatActivity with
       case _ => runOnUiThread(() => Toast.makeText(this, "Config is not valid!", Toast.LENGTH_SHORT))
     }
     future onFailure {
-      case e: Exception => runOnUiThread(() => Toast.makeText(this, "config is not valid!", Toast.LENGTH_SHORT).show())
+      case e: Exception => {
+        e.printStackTrace()
+        runOnUiThread(() => Toast.makeText(this, "config is not valid!", Toast.LENGTH_SHORT).show())
+      }
     }
   }
 
   def checkConfig(config: String): Future[String] = {
       Future {
         val jsonObject = new JsonParser().parse(config).getAsJsonObject
+//        val outbounds = jsonObject.getAsJsonArray("outbounds")
+//        val vmess = outbounds.get(0).getAsJsonObject
+//        val settings = vmess.getAsJsonObject("settings")
+//        val vnext = vmess.getAsJsonArray("vnext")
+//        Log.e(TAG, vmess.toString)
+//        Log.e(TAG, "protocol==")
         val prettyConfig = new GsonBuilder().setPrettyPrinting().create().toJson(jsonObject)
 //        val assetPath = getApplicationInfo.dataDir + "/files/"
 //        Tun2socks.testConfig(prettyConfig, assetPath)

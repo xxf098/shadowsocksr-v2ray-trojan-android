@@ -39,6 +39,7 @@
 
 package com.github.shadowsocks.database
 
+import java.io.IOException
 import java.net.URLEncoder
 import java.nio.charset.Charset
 import java.util.Locale
@@ -50,7 +51,13 @@ import tun2socks.{Tun2socks, Vmess}
 
 import scala.language.implicitConversions
 import Profile._
+import com.github.shadowsocks.R
+import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.Utils
+
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+
 
 object Profile {
   implicit def profileToVmess(profile: Profile): Vmess = {
@@ -123,6 +130,9 @@ class Profile {
 
   @DatabaseField
   var url_group: String = ""
+
+  @DatabaseField
+  var ssrsub_id: Int = 0
 
   @DatabaseField
   var dns: String = "1.1.1.1:53,8.8.8.8:53,9.9.9.9:53"
@@ -212,4 +222,21 @@ class Profile {
   def isV2RayJSON = this.proxy_protocol == "v2ray_json"
 
   def isV2Ray = isVmess || isV2RayJSON
+
+  def testLatency (): Future[Long] = {
+    if (isVmess) {
+      return Future{
+        if (!Utils.isNumeric(v_add)) Utils.resolve(v_add, enableIPv6 = true, hostname="1.1.1.1") match {
+          case Some(addr) => v_add = addr
+          case None => throw new IOException("Name Not Resolved")
+        }
+        Tun2socks.testVmessLatency(this, app.getV2rayAssetsPath())
+      }.map(elapsed => {
+        this.elapsed = elapsed
+        app.profileManager.updateProfile(this)
+        elapsed
+      })
+    }
+    Future(throw new Exception("Not Supported!"))
+  }
 }

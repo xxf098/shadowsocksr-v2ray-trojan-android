@@ -117,38 +117,18 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
         var profile = item
         if (profile.isVmess) {
-         val future = Future{
-           if (!Utils.isNumeric(profile.v_add)) Utils.resolve(profile.v_add, enableIPv6 = true, hostname="1.1.1.1") match {
-             case Some(addr) => profile.v_add = addr
-             case None => throw new IOException("Name Not Resolved")
-           }
-           Tun2socks.testVmessLatency(profile, app.getV2rayAssetsPath())
-         }
-          future onSuccess {
-            case elapsed => {
-              runOnUiThread(() => {
-                profile.elapsed = elapsed
-                app.profileManager.updateProfile(profile)
-                this.updateText(0, 0, elapsed)
-                val result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
-                singleTestProgressDialog.dismiss()
-                Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
-              })
-            }
-            case _ =>
-          }
-          future onFailure {
+          profile.testLatency().map(elapsed => {
+            this.updateText(0, 0, elapsed)
+            getString(R.string.connection_test_available, elapsed: java.lang.Long)
+          }).recover {
             case e: Exception => {
-              runOnUiThread(() => {
-                singleTestProgressDialog.dismiss()
-                Log.e(TAG, e.getMessage)
-                e.printStackTrace()
-                val result = getString(R.string.connection_test_error, e.getMessage)
-                singleTestProgressDialog.dismiss()
-                Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
-              })
+              e.printStackTrace()
+              app.getString(R.string.connection_test_error, e.getMessage)
             }
-          }
+          }.foreach(result => {
+            singleTestProgressDialog.dismiss()
+            Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
+          })
         }
 
         if (!profile.isV2Ray) {
@@ -315,7 +295,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         case (`allGroup`, true) => app.profileManager.getAllProfilesByElapsed
         case (`allGroup`, false) => app.profileManager.getAllProfiles
         case (_, true) => app.profileManager.getAllProfilesByGroupOrderByElapse(groupName)
-        case (_, false) => app.profileManager.getAllProfilesByGroup(groupName)
+        case (_, false) => app.profileManager.getAllProfilesByGroup(groupName, -1)
       }}.getOrElse(List.empty[Profile])
     }
 
@@ -714,7 +694,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             ssrsubAdapter.notifyDataSetChanged()
           }): DialogInterface.OnClickListener)
           .setNeutralButton(R.string.ssrsub_remove_tip_delete,  ((_, _) => {
-            var delete_profiles = app.profileManager.getAllProfilesByGroup(viewHolder.asInstanceOf[SSRSubViewHolder].item.url_group) match {
+            val ssrsubItem = viewHolder.asInstanceOf[SSRSubViewHolder].item
+            val delete_profiles = app.profileManager.getAllProfilesByGroup(ssrsubItem.url_group, ssrsubItem.id) match {
               case Some(profiles) =>
                 profiles
               case _ => null
@@ -767,8 +748,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           app.ssrsubManager.getAllSSRSubs match {
             case Some(ssrsubs) =>
               ssrsubs.foreach((ssrsub: SSRSub) => {
-
-                  var delete_profiles = app.profileManager.getAllProfilesByGroup(ssrsub.url_group) match {
+                  var delete_profiles = app.profileManager.getAllProfilesByGroup(ssrsub.url_group, ssrsub.id) match {
                     case Some(profiles) =>
                       profiles
                     case _ => null
@@ -804,6 +784,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                       val profiles_vmess = Parser.findAllVmess(response_string)
                         .map(profile => {
                           profile.url_group = ssrsub.url_group
+                          profile.ssrsub_id = ssrsub.id
                           profile
                         })
                       val profiles = profiles_ssr ++ profiles_vmess
@@ -840,7 +821,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       }): DialogInterface.OnClickListener)
       .setNegativeButton(android.R.string.no, null)
       .setNeutralButton(R.string.ssrsub_add, ((_, _) => {
-        // add url
+        // add sub url
         val UrlAddEdit = new EditText(this);
         new AlertDialog.Builder(this)
           .setTitle(getString(R.string.ssrsub_add))
@@ -1126,6 +1107,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       startActivity(new Intent(this, classOf[V2RayConfigActivity]))
       true
     case R.id.action_full_test =>
+
+//      Option(ProfileManagerActivity.getProfilesByGroup(currentGroupName, is_sort)) match {
       app.profileManager.getAllProfiles match {
         case Some(profiles) =>
 
@@ -1147,16 +1130,41 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               }
           })
 
+          // TODO: refactor
           testAsyncJob = new Thread {
             override def run() {
               // Do some background work
               Looper.prepare()
-              profiles.filter(!_.isV2Ray).foreach((profile: Profile) => {
+              profiles.foreach((profile: Profile) => {
                 if (isTesting) {
 
                   if (testAsyncJob.isInterrupted()) {
                     isTesting = false
                   }
+
+                  // v2rayjson
+                  if (profile.isV2RayJSON) {
+                    return
+                  }
+
+                  // vmess
+                  if (profile.isVmess) {
+//                    profile.testLatency().map(elapsed => {
+//                      getString(R.string.connection_test_available, elapsed: java.lang.Long)
+//                    }).recover {
+//                      case e: Exception => {
+//                        e.printStackTrace()
+//                        app.getString(R.string.connection_test_error, e.getMessage)
+//                      }
+//                    }.foreach(result => {
+//                      val msg = Message.obtain()
+//                      msg.obj = profile.name + " " + result
+//                      msg.setTarget(showProgresshandler)
+//                      msg.sendToTarget()
+//                    })
+                    return
+                  }
+
                   // Resolve the server address
                   var host = profile.host
                   if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = true) match {

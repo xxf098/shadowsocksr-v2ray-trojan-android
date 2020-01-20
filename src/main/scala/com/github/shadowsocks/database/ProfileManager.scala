@@ -271,10 +271,29 @@ class ProfileManager(dbHelper: DBHelper) {
     }
   }
 
-  def getAllProfilesByGroup(group:String): Option[List[Profile]] = {
+//  def getAllProfilesByGroup(group:String): Option[List[Profile]] = {
+//    try {
+//      import scala.collection.JavaConversions._
+//      Option(dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.where().eq("url_group", group).prepare).toList)
+//    } catch {
+//      case ex: Exception =>
+//        Log.e(TAG, "getAllProfiles", ex)
+//        app.track(ex)
+//        None
+//    }
+//  }
+
+  def getAllProfilesByGroup(group:String, ssrsub_id: Int): Option[List[Profile]] = {
     try {
       import scala.collection.JavaConversions._
-      Option(dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.where().eq("url_group", group).prepare).toList)
+      ssrsub_id match {
+        case id if id > 0 => {
+          val profiles = Option(dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.where().eq("ssrsub_id", ssrsub_id).prepare).toList)
+            .getOrElse(dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.where().eq("url_group", group).prepare).toList)
+          Option(profiles)
+        }
+        case _ => Option(dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.where().eq("url_group", group).prepare).toList)
+      }
     } catch {
       case ex: Exception =>
         Log.e(TAG, "getAllProfiles", ex)

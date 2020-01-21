@@ -295,7 +295,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         case (`allGroup`, true) => app.profileManager.getAllProfilesByElapsed
         case (`allGroup`, false) => app.profileManager.getAllProfiles
         case (_, true) => app.profileManager.getAllProfilesByGroupOrderByElapse(groupName)
-        case (_, false) => app.profileManager.getAllProfilesByGroup(groupName, -1)
+        case (_, false) => app.profileManager.getAllProfilesByGroup(groupName)
       }}.getOrElse(List.empty[Profile])
     }
 
@@ -695,9 +695,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           }): DialogInterface.OnClickListener)
           .setNeutralButton(R.string.ssrsub_remove_tip_delete,  ((_, _) => {
             val ssrsubItem = viewHolder.asInstanceOf[SSRSubViewHolder].item
-            val delete_profiles = app.profileManager.getAllProfilesByGroup(ssrsubItem.url_group, ssrsubItem.id) match {
+            val delete_profiles = app.profileManager.getAllProfilesByGroup(ssrsubItem.url_group) match {
               case Some(profiles) =>
-                profiles
+                profiles.filter(profile=> profile.ssrsub_id <= 0 || profile.ssrsub_id == ssrsubItem.id)
               case _ => null
             }
 
@@ -748,9 +748,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           app.ssrsubManager.getAllSSRSubs match {
             case Some(ssrsubs) =>
               ssrsubs.foreach((ssrsub: SSRSub) => {
-                  var delete_profiles = app.profileManager.getAllProfilesByGroup(ssrsub.url_group, ssrsub.id) match {
+                  var delete_profiles = app.profileManager.getAllProfilesByGroup(ssrsub.url_group) match {
                     case Some(profiles) =>
-                      profiles
+                      profiles.filter(profile=> profile.ssrsub_id <= 0 || profile.ssrsub_id == ssrsub.id)
                     case _ => null
                   }
                   var result = ""
@@ -781,6 +781,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                       if (response_string.indexOf("MAX=") == 0) {
                         profiles_ssr = scala.util.Random.shuffle(profiles_ssr)
                       }
+                      profiles_ssr.foreach(p => p.ssrsub_id = ssrsub.id)
                       val profiles_vmess = Parser.findAllVmess(response_string)
                         .map(profile => {
                           profile.url_group = ssrsub.url_group

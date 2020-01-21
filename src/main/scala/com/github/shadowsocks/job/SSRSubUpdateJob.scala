@@ -44,9 +44,9 @@ class SSRSubUpdateJob() extends Job {
           var result = 1
           ssrsubs.foreach((ssrsub: SSRSub) => {
 
-              var delete_profiles = app.profileManager.getAllProfilesByGroup(ssrsub.url_group, ssrsub.id) match {
+              var delete_profiles = app.profileManager.getAllProfilesByGroup(ssrsub.url_group) match {
                 case Some(profiles) =>
-                  profiles
+                  profiles.filter(profile=> profile.ssrsub_id <= 0 || profile.ssrsub_id == ssrsub.id)
                 case _ => null
               }
 

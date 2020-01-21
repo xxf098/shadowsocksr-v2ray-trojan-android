@@ -1109,7 +1109,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       true
     case R.id.action_full_test =>
 
-//      Option(ProfileManagerActivity.getProfilesByGroup(currentGroupName, is_sort)) match {
+//      app.profileManager.getAllProfilesByGroup(currentGroupName) match {
       app.profileManager.getAllProfiles match {
         case Some(profiles) =>
 

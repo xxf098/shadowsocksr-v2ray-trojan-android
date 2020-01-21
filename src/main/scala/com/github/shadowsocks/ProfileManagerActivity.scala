@@ -738,6 +738,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       prefs_edit.apply()
     }): CompoundButton.OnCheckedChangeListener)
 
+    // update subscription
     new AlertDialog.Builder(this)
       .setTitle(getString(R.string.add_profile_methods_ssr_sub))
       .setPositiveButton(R.string.ssrsub_ok, ((_, _) => {
@@ -781,16 +782,15 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                       if (response_string.indexOf("MAX=") == 0) {
                         profiles_ssr = scala.util.Random.shuffle(profiles_ssr)
                       }
-                      profiles_ssr.foreach(p => p.ssrsub_id = ssrsub.id)
                       val profiles_vmess = Parser.findAllVmess(response_string)
                         .map(profile => {
                           profile.url_group = ssrsub.url_group
-                          profile.ssrsub_id = ssrsub.id
                           profile
                         })
                       val profiles = profiles_ssr ++ profiles_vmess
                       profiles.foreach((profile: Profile) => {
                         if (encounter_num < limit_num && limit_num != -1 || limit_num == -1) {
+                          profile.ssrsub_id = ssrsub.id
                           val result = app.profileManager.createProfile_sub(profile)
                           if (result != 0) {
                             delete_profiles = delete_profiles.filter(_.id != result)

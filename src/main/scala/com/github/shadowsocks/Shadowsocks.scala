@@ -143,7 +143,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
               connectionTestText.setText(getString(R.string.connection_test_pending))
             }
             // check connection
-            checkLatency(1, 3)
+            checkConnection(1, 3)
           case State.STOPPED =>
             fab.setBackgroundTintList(greyTint)
             fabProgressCircle.postDelayed(hideCircle, 1000)
@@ -281,14 +281,11 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
         .url("https://www.google.com/generate_204")
         .build()
       if (testCount!=id) return
-      val response = client.newCall(request).execute()
-      if (response.code != 204) {
-        throw new Exception(getString(R.string.connection_test_error_status_code, response.code: Integer))
-      }
+      client.newCall(request).execute().body().close()
       val start = SystemClock.elapsedRealtime()
-      val response1 = client.newCall(request).execute()
+      val response = client.newCall(request).execute()
       val elapsed = SystemClock.elapsedRealtime() - start
-      if (response1.code != 204) {
+      if (response.code != 204) {
         throw new Exception(getString(R.string.connection_test_error_status_code, response.code: Integer))
       }
       getString(R.string.connection_test_available, elapsed: java.lang.Long)
@@ -337,7 +334,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
             success = false
             if (retry > 1) {
               handler.post(() => connectionTestText.setText("retry..."))
-              Thread.sleep(600 * (Math.pow(0.5, retry).toLong + 1))
+              Thread.sleep(500 * (Math.pow(0.5, retry).toLong + 1))
               checkConnection(timeout, retry -1)
 //              handler.postDelayed(() => checkConnection(timeout, retry -1),
 //                500 * (Math.pow(0.5, retry).toLong + 1))
@@ -385,7 +382,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     txRateText = findViewById(R.id.txRate).asInstanceOf[TextView]
     rxText = findViewById(R.id.rx).asInstanceOf[TextView]
     rxRateText = findViewById(R.id.rxRate).asInstanceOf[TextView]
-    stat.setOnClickListener(_ => checkConnection())
+    stat.setOnClickListener(_ => checkLatency())
     fab = findViewById(R.id.fab).asInstanceOf[FloatingActionButton]
     fabProgressCircle = findViewById(R.id.fabProgressCircle).asInstanceOf[FABProgressCircle]
     fab.setOnClickListener(_ => if (serviceStarted) serviceStop()

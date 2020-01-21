@@ -55,6 +55,7 @@ import android.support.design.widget.{FloatingActionButton, Snackbar}
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
+import android.text.TextUtils
 import android.util.Log
 import android.view.{View, ViewGroup, WindowManager}
 import android.widget._
@@ -67,6 +68,8 @@ import com.github.shadowsocks.job.SSRSubUpdateJob
 import com.github.shadowsocks.ShadowsocksApplication.app
 import okhttp3._
 
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random
 // TODO: route
 
@@ -140,7 +143,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
               connectionTestText.setText(getString(R.string.connection_test_pending))
             }
             // check connection
-            checkConnection(3, 3)
+            checkLatency(1, 3)
           case State.STOPPED =>
             fab.setBackgroundTintList(greyTint)
             fabProgressCircle.postDelayed(hideCircle, 1000)
@@ -260,11 +263,45 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     }
   }
   
-//  def speedTest(): Unit = {
-//
-//  }
-  
-// future retrywith retryuntil
+  def checkLatency(timeout: Int = 2, retry: Int = 1): Unit = {
+    connectionTestText = findViewById(R.id.connection_test).asInstanceOf[TextView]
+    val id = synchronized {
+      testCount += 1
+      handler.post(() => connectionTestText.setText(R.string.connection_test_testing))
+      testCount
+    }
+    Future{
+      val client = new OkHttpClient.Builder()
+        .connectTimeout(timeout, TimeUnit.SECONDS)
+        .writeTimeout(timeout, TimeUnit.SECONDS)
+        .readTimeout(timeout, TimeUnit.SECONDS)
+        .retryOnConnectionFailure(false)
+        .build()
+      val request = new Request.Builder()
+        .url("https://www.google.com/generate_204")
+        .build()
+      if (testCount!=id) return
+      val response = client.newCall(request).execute()
+      if (response.code != 204) {
+        throw new Exception(getString(R.string.connection_test_error_status_code, response.code: Integer))
+      }
+      val start = SystemClock.elapsedRealtime()
+      val response1 = client.newCall(request).execute()
+      val elapsed = SystemClock.elapsedRealtime() - start
+      if (response1.code != 204) {
+        throw new Exception(getString(R.string.connection_test_error_status_code, response.code: Integer))
+      }
+      getString(R.string.connection_test_available, elapsed: java.lang.Long)
+    }
+      .recover{
+        case _ => getString(R.string.connection_test_fail)
+      }
+      .filter(testCount == id && app.isVpnEnabled && serviceStarted && !TextUtils.isEmpty(_))
+      .foreach(result => {
+        handler.post(() => connectionTestText.setText(result))
+      })
+  }
+
   def checkConnection(timeout: Int = 2, retry: Int = 1): Unit = {
     connectionTestText = findViewById(R.id.connection_test).asInstanceOf[TextView]
     val id = synchronized {

@@ -377,7 +377,7 @@ LOCAL_CFLAGS    := -DANDROID -Wall -O2 -I$(LOCAL_PATH)/pdnsd \
 LOCAL_STATIC_LIBRARIES := libancillary
 LOCAL_LDLIBS := -llog
 
-include $(BUILD_EXECUTABLE)
+include $(BUILD_SHARED_EXECUTABLE)
 
 ########################################################
 ## shadowsocks-libev local

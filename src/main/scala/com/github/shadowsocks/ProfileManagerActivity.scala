@@ -1155,24 +1155,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
                   // vmess
                   if (profile.isVmess) {
-                    var testResult = ""
-                    try {
-                      if (!Utils.isNumeric(profile.v_add)) Utils.resolve(profile.v_add, enableIPv6 = true, hostname="1.1.1.1") match {
-                        case Some(addr) => profile.v_add = addr
-                        case None => throw new IOException("Name Not Resolved")
-                      }
-                      val elapsed = Tun2socks.testVmessLatency(profile, app.getV2rayAssetsPath())
-                      profile.elapsed = elapsed
-                      app.profileManager.updateProfile(profile)
-                      testResult = getString(R.string.connection_test_available, elapsed: java.lang.Long)
-                    } catch {
-                      case e: Exception => getString(R.string.connection_test_error, e.getMessage)
-                    }
+                    val testResult = profile.testLatencyThread()
                     val msg = Message.obtain()
                     msg.obj = profile.name + " " + testResult
                     msg.setTarget(showProgresshandler)
                     msg.sendToTarget()
-                    Log.e(TAG, "finish====")
                   }
 
                   if (!profile.isV2Ray) {

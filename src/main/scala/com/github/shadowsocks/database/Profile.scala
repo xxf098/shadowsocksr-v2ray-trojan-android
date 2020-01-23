@@ -239,4 +239,24 @@ class Profile {
     }
     Future(throw new Exception("Not Supported!"))
   }
+
+  def testLatencyThread () : String = {
+    if (isVmess) {
+      var testResult = ""
+      try {
+        if (!Utils.isNumeric(v_add)) Utils.resolve(v_add, enableIPv6 = true, hostname="1.1.1.1") match {
+          case Some(addr) => v_add = addr
+          case None => throw new IOException("Name Not Resolved")
+        }
+        val elapsed = Tun2socks.testVmessLatency(this, app.getV2rayAssetsPath())
+        this.elapsed = elapsed
+        app.profileManager.updateProfile(this)
+        testResult = app.getString(R.string.connection_test_available, elapsed: java.lang.Long)
+      } catch {
+        case e: Exception => app.getString(R.string.connection_test_error, e.getMessage)
+      }
+      return testResult
+    }
+    ""
+  }
 }

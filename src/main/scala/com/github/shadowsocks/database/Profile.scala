@@ -41,7 +41,7 @@ package com.github.shadowsocks.database
 
 import java.io.IOException
 import java.net.URLEncoder
-import java.nio.charset.Charset
+import java.nio.charset.{Charset, StandardCharsets}
 import java.util.Locale
 
 import android.util.{Base64, Log}
@@ -51,12 +51,14 @@ import tun2socks.{Tun2socks, Vmess}
 
 import scala.language.implicitConversions
 import Profile._
+import android.text.TextUtils
 import com.github.shadowsocks.R
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.Utils
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Try
 
 
 object Profile {
@@ -224,39 +226,40 @@ class Profile {
   def isV2Ray = isVmess || isV2RayJSON
 
   def testLatency (): Future[Long] = {
-    if (isVmess) {
-      return Future{
-        if (!Utils.isNumeric(v_add)) Utils.resolve(v_add, enableIPv6 = true, hostname="1.1.1.1") match {
-          case Some(addr) => v_add = addr
-          case None => throw new IOException("Name Not Resolved")
-        }
-        Tun2socks.testVmessLatency(this, app.getV2rayAssetsPath())
-      }.map(elapsed => {
-        this.elapsed = elapsed
-        app.profileManager.updateProfile(this)
-        elapsed
-      })
-    }
-    Future(throw new Exception("Not Supported!"))
+    Future(getElapsed())
+    .map(elapsed => {
+      this.elapsed = elapsed
+      app.profileManager.updateProfile(this)
+      elapsed
+    })
   }
 
   def testLatencyThread () : String = {
-    if (isVmess) {
-      var testResult = ""
-      try {
-        if (!Utils.isNumeric(v_add)) Utils.resolve(v_add, enableIPv6 = true, hostname="1.1.1.1") match {
-          case Some(addr) => v_add = addr
-          case None => throw new IOException("Name Not Resolved")
-        }
-        val elapsed = Tun2socks.testVmessLatency(this, app.getV2rayAssetsPath())
-        this.elapsed = elapsed
-        app.profileManager.updateProfile(this)
-        testResult = app.getString(R.string.connection_test_available, elapsed: java.lang.Long)
-      } catch {
-        case e: Exception => app.getString(R.string.connection_test_error, e.getMessage)
-      }
-      return testResult
+    if (!isV2Ray) {
+      throw new Exception("Not Supported!")
     }
-    ""
+    Try(getElapsed()).map(elapsed => {
+      this.elapsed = elapsed
+      app.profileManager.updateProfile(this)
+      app.getString(R.string.connection_test_available, elapsed: java.lang.Long)
+    }).recover{
+      case e: Exception => app.getString(R.string.connection_test_error, e.getMessage)
+    }.get
+  }
+
+  def getElapsed (): Long = {
+    if (!isV2Ray) {
+      throw new Exception("Not Supported!")
+    }
+    if (isV2RayJSON && TextUtils.isEmpty(v_add)) throw new IOException("Server Address Not Found!")
+    if (!Utils.isNumeric(v_add)) Utils.resolve(v_add, enableIPv6 = true, hostname = "1.1.1.1") match {
+      case Some(addr) => v_add = addr
+      case None => throw new IOException("Name Not Resolved")
+    }
+    if (isV2RayJSON) {
+      val config = "\"address\":\\s*\".+?\"".r.replaceFirstIn(v_json_config, s""""address": "$v_add"""")
+      Tun2socks.testConfigLatency(config.getBytes(StandardCharsets.UTF_8), app.getV2rayAssetsPath())
+    }
+    else Tun2socks.testVmessLatency(this, app.getV2rayAssetsPath())
   }
 }

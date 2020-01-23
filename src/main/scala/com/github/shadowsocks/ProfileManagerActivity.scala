@@ -116,7 +116,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
 
         var profile = item
-        if (profile.isVmess) {
+        if (profile.isV2Ray) {
           profile.testLatency().map(elapsed => {
             this.updateText(0, 0, elapsed)
             getString(R.string.connection_test_available, elapsed: java.lang.Long)
@@ -1139,22 +1139,13 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               Looper.prepare()
               profiles.foreach((profile: Profile) => {
                 if (isTesting) {
-                  Log.e(TAG, profile.name)
 
                   if (testAsyncJob.isInterrupted()) {
                     isTesting = false
                   }
 
-                  // v2rayjson
-                  if (profile.isV2RayJSON) {
-                    var msg = Message.obtain()
-                    msg.obj = profile.name + " Not Support" +
-                    msg.setTarget(showProgresshandler)
-                    msg.sendToTarget()
-                  }
-
-                  // vmess
-                  if (profile.isVmess) {
+                 // v2ray
+                  if (profile.isV2Ray) {
                     val testResult = profile.testLatencyThread()
                     val msg = Message.obtain()
                     msg.obj = profile.name + " " + testResult

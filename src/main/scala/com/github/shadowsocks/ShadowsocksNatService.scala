@@ -90,7 +90,7 @@ class ShadowsocksNatService extends BaseService {
       p.println(conf)
     })
 
-    val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local", "-x"
+    val cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.SS_LOCAL), "-x"
           , "-b" , "127.0.0.1"
           , "-t" , "600"
           , "--host", host_arg
@@ -105,7 +105,7 @@ class ShadowsocksNatService extends BaseService {
     }
 
     if (proxychains_enable) {
-      cmd prepend "LD_PRELOAD=" + getApplicationInfo.dataDir + "/lib/libproxychains4.so"
+      cmd prepend "LD_PRELOAD=" + Utils.getAbsPath(ExeNative.PROXYCHAINS)
       cmd prepend "PROXYCHAINS_CONF_FILE=" + getApplicationInfo.dataDir + "/proxychains.conf"
       cmd prepend "PROXYCHAINS_PROTECT_FD_PREFIX=" + getApplicationInfo.dataDir
       cmd prepend "env"
@@ -127,7 +127,7 @@ class ShadowsocksNatService extends BaseService {
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
       p.println(conf)
     })
-    val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local"
+    val cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.SS_LOCAL)
       , "-u"
       , "-t" , "60"
       , "--host", host_arg
@@ -143,7 +143,7 @@ class ShadowsocksNatService extends BaseService {
       cmd += dns_address + ":" + dns_port.toString
 
     if (proxychains_enable) {
-      cmd prepend "LD_PRELOAD=" + getApplicationInfo.dataDir + "/lib/libproxychains4.so"
+      cmd prepend "LD_PRELOAD=" + Utils.getAbsPath(ExeNative.PROXYCHAINS)
       cmd prepend "PROXYCHAINS_CONF_FILE=" + getApplicationInfo.dataDir + "/proxychains.conf"
       cmd prepend "PROXYCHAINS_PROTECT_FD_PREFIX=" + getApplicationInfo.dataDir
       cmd prepend "env"
@@ -220,7 +220,7 @@ class ShadowsocksNatService extends BaseService {
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/pdnsd-nat.conf"))(p => {
        p.println(conf)
     })
-    val cmd = Array(getApplicationInfo.dataDir + "/pdnsd", "-c", getApplicationInfo.dataDir + "/pdnsd-nat.conf")
+    val cmd = Array(Utils.getAbsPath(ExeNative.PDNSD), "-c", getApplicationInfo.dataDir + "/pdnsd-nat.conf")
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
@@ -229,7 +229,7 @@ class ShadowsocksNatService extends BaseService {
 
   def startRedsocksDaemon() {
     val conf = ConfigUtils.REDSOCKS.formatLocal(Locale.ENGLISH, profile.localPort)
-    val cmd = Array(getApplicationInfo.dataDir + "/redsocks", "-c", getApplicationInfo.dataDir + "/redsocks-nat.conf")
+    val cmd = Array(Utils.getAbsPath(ExeNative.REDSOCKS), "-c", getApplicationInfo.dataDir + "/redsocks-nat.conf")
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/redsocks-nat.conf"))(p => {
       p.println(conf)
     })

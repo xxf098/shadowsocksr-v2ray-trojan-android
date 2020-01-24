@@ -48,6 +48,16 @@ object Executable {
   val KCPTUN = "kcptun"
 }
 
+object ExeNative {
+  val REDSOCKS = "libredsocks.so"
+  val PDNSD = "libpdnsd.so"
+  val SS_LOCAL = "libss-local.so"
+//  val SS_TUNNEL = "ss-tunnel"
+  val TUN2SOCKS = "libtun2socks.so"
+  val PROXYCHAINS = "libproxychains4.so"
+//  val KCPTUN = "kcptun"
+}
+
 object ConfigUtils {
 
   def EscapedJson(OriginString:String):String = {

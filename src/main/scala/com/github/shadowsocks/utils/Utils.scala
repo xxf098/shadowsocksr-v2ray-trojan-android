@@ -270,4 +270,6 @@ object Utils {
   def ThrowableFuture[T](f: => T) = Future(f) onComplete handleFailure
 
   def b64Encode (input: Array[Byte])(implicit flags: Int): String = Base64.encodeToString(input, flags)
+
+  def getAbsPath (fileName: String): String = new File(app.getApplicationInfo.nativeLibraryDir, fileName).getAbsolutePath
 }

@@ -116,7 +116,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
 
         var profile = item
-        if (profile.isVmess) {
+        if (profile.isV2Ray) {
           profile.testLatency().map(elapsed => {
             this.updateText(0, 0, elapsed)
             getString(R.string.connection_test_available, elapsed: java.lang.Long)
@@ -148,7 +148,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             p.println(conf)
           })
 
-          val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local"
+          val cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.SS_LOCAL)
             , "-t", "600"
             , "-L", "www.google.com:80"
             , "-c", getApplicationInfo.dataDir + "/ss-local-test.conf")
@@ -1109,8 +1109,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       true
     case R.id.action_full_test =>
 
-//      app.profileManager.getAllProfilesByGroup(currentGroupName) match {
-      app.profileManager.getAllProfiles match {
+      if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles
+      else app.profileManager.getAllProfilesByGroup(currentGroupName) match {
+//      app.profileManager.getAllProfiles match {
         case Some(profiles) =>
 
           isTesting = true
@@ -1143,169 +1144,96 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                     isTesting = false
                   }
 
-                  // v2rayjson
-                  if (profile.isV2RayJSON) {
-                    return
+                 // v2ray
+                  if (profile.isV2Ray) {
+                    val testResult = profile.testLatencyThread()
+                    val msg = Message.obtain()
+                    msg.obj = profile.name + " " + testResult
+                    msg.setTarget(showProgresshandler)
+                    msg.sendToTarget()
                   }
 
-                  // vmess
-                  if (profile.isVmess) {
-//                    profile.testLatency().map(elapsed => {
-//                      getString(R.string.connection_test_available, elapsed: java.lang.Long)
-//                    }).recover {
-//                      case e: Exception => {
-//                        e.printStackTrace()
-//                        app.getString(R.string.connection_test_error, e.getMessage)
-//                      }
-//                    }.foreach(result => {
-//                      val msg = Message.obtain()
-//                      msg.obj = profile.name + " " + result
-//                      msg.setTarget(showProgresshandler)
-//                      msg.sendToTarget()
-//                    })
-                    return
-                  }
+                  if (!profile.isV2Ray) {
+                    // Resolve the server address
+                    var host = profile.host
+                    if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = true) match {
+                      case Some(addr) => host = addr
+                      case None => throw new Exception("can't resolve")
+                    }
 
-                  // Resolve the server address
-                  var host = profile.host
-                  if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = true) match {
-                    case Some(addr) => host = addr
-                    case None => throw new Exception("can't resolve")
-                  }
-
-                  val conf = ConfigUtils
-                    .SHADOWSOCKS.formatLocal(Locale.ENGLISH, host, profile.remotePort, profile.localPort + 2,
+                    val conf = ConfigUtils
+                      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, host, profile.remotePort, profile.localPort + 2,
                       ConfigUtils.EscapedJson(profile.password), profile.method, 600, profile.protocol, profile.obfs, ConfigUtils.EscapedJson(profile.obfs_param), ConfigUtils.EscapedJson(profile.protocol_param))
-                  Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-test.conf"))(p => {
-                    p.println(conf)
-                  })
+                    Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-test.conf"))(p => {
+                      p.println(conf)
+                    })
 
-                  val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local"
-                    , "-t", "600"
-                    , "-L", "www.google.com:80"
-                    , "-c", getApplicationInfo.dataDir + "/ss-local-test.conf")
+                    val cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.SS_LOCAL)
+                      , "-t", "600"
+                      , "-L", "www.google.com:80"
+                      , "-c", getApplicationInfo.dataDir + "/ss-local-test.conf")
 
-                  if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
+                    if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
 
-                  if (ssTestProcess != null) {
-                    ssTestProcess.destroy()
-                    ssTestProcess = null
-                  }
-
-                  ssTestProcess = new GuardedProcess(cmd).start()
-
-                  val start = currentTimeMillis
-                  while (start - currentTimeMillis < 5 * 1000 && isPortAvailable(profile.localPort + 2)) {
-                    try {
-                      Thread.sleep(50)
-                    } catch{
-                      case e: InterruptedException => isTesting = false
+                    if (ssTestProcess != null) {
+                      ssTestProcess.destroy()
+                      ssTestProcess = null
                     }
-                  }
 
-                  var result = ""
-                  val builder = new OkHttpClient.Builder()
-                                  .connectTimeout(5, TimeUnit.SECONDS)
-                                  .writeTimeout(5, TimeUnit.SECONDS)
-                                  .readTimeout(5, TimeUnit.SECONDS)
+                    ssTestProcess = new GuardedProcess(cmd).start()
 
-                  val client = builder.build();
+                    val start = currentTimeMillis
+                    while (start - currentTimeMillis < 5 * 1000 && isPortAvailable(profile.localPort + 2)) {
+                      try {
+                        Thread.sleep(50)
+                      } catch {
+                        case e: InterruptedException => isTesting = false
+                      }
+                    }
 
-                  val request = new Request.Builder()
-                    .url("http://127.0.0.1:" + (profile.localPort + 2) + "/generate_204").removeHeader("Host").addHeader("Host", "www.google.com")
-                    .build();
+                    var result = ""
+                    val builder = new OkHttpClient.Builder()
+                      .connectTimeout(5, TimeUnit.SECONDS)
+                      .writeTimeout(5, TimeUnit.SECONDS)
+                      .readTimeout(5, TimeUnit.SECONDS)
 
-                  try {
-                    val response = client.newCall(request).execute()
-                    val code = response.code()
-                    if (code == 204 || code == 200 && response.body().contentLength == 0) {
-                      val start = currentTimeMillis
+                    val client = builder.build();
+
+                    val request = new Request.Builder()
+                      .url("http://127.0.0.1:" + (profile.localPort + 2) + "/generate_204").removeHeader("Host").addHeader("Host", "www.google.com")
+                      .build();
+
+                    try {
                       val response = client.newCall(request).execute()
-                      val elapsed = currentTimeMillis - start
                       val code = response.code()
-                      if (code == 204 || code == 200 && response.body().contentLength == 0)
-                      {
-                        result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
-                        profile.elapsed = elapsed
-                        app.profileManager.updateProfile(profile)
-                      }
-                      else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
-                      response.body().close()
-                    } else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
-                    response.body().close()
-                  } catch {
-                    case e: IOException =>
-                      result = getString(R.string.connection_test_error, e.getMessage)
-                  }
-
-                  var msg = Message.obtain()
-                  msg.obj = profile.name + " " + result
-                  msg.setTarget(showProgresshandler)
-                  msg.sendToTarget()
-
-                  //val proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", profile.localPort + 2))
-
-                  // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
-                  /*autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection(proxy)
-                    .asInstanceOf[HttpURLConnection]) { conn =>
-                    conn.setConnectTimeout(5 * 1000)
-                    conn.setReadTimeout(5 * 1000)
-                    conn.setInstanceFollowRedirects(false)
-                    conn.setUseCaches(false)
-                    var result: String = null
-                    var success = true
-                    try {
-                      conn.getInputStream
-                      val code = conn.getResponseCode
-                      if (code == 204 || code == 200 && conn.getContentLength == 0)
-                      {
-                        autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection(proxy)
-                          .asInstanceOf[HttpURLConnection]) { conn =>
-                          conn.setConnectTimeout(5 * 1000)
-                          conn.setReadTimeout(5 * 1000)
-                          conn.setInstanceFollowRedirects(false)
-                          conn.setUseCaches(false)
-                          var result: String = null
-                          var success = true
-                          try {
-                            val start = currentTimeMillis
-                            conn.getInputStream
-                            val elapsed = currentTimeMillis - start
-                            val code = conn.getResponseCode
-                            if (code == 204 || code == 200 && conn.getContentLength == 0)
-                            {
-                              result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
-                              profile.elapsed = elapsed
-                              app.profileManager.updateProfile(profile)
-                            }
-                            else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
-                          } catch {
-                            case e: Exception =>
-                              success = false
-                              result = getString(R.string.connection_test_error, e.getMessage)
-                          }
-
-                          var msg = Message.obtain()
-                          msg.obj = profile.name + " " + result
-                          msg.setTarget(showProgresshandler)
-                          msg.sendToTarget()
+                      if (code == 204 || code == 200 && response.body().contentLength == 0) {
+                        val start = currentTimeMillis
+                        val response = client.newCall(request).execute()
+                        val elapsed = currentTimeMillis - start
+                        val code = response.code()
+                        if (code == 204 || code == 200 && response.body().contentLength == 0) {
+                          result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
+                          profile.elapsed = elapsed
+                          app.profileManager.updateProfile(profile)
                         }
-                      }
-                      else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
+                        else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
+                        response.body().close()
+                      } else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
+                      response.body().close()
                     } catch {
-                      case e: Exception =>
-                        success = false
+                      case e: IOException =>
                         result = getString(R.string.connection_test_error, e.getMessage)
-                        var msg = Message.obtain()
-                        msg.obj = profile.name + " " + result;
-                        msg.setTarget(showProgresshandler)
-                        msg.sendToTarget()
                     }
-                  }*/
 
-                  if (ssTestProcess != null) {
-                    ssTestProcess.destroy()
-                    ssTestProcess = null
+                    var msg = Message.obtain()
+                    msg.obj = profile.name + " " + result
+                    msg.setTarget(showProgresshandler)
+                    msg.sendToTarget()
+
+                    if (ssTestProcess != null) {
+                      ssTestProcess.destroy()
+                      ssTestProcess = null
+                    }
                   }
                 }
               })

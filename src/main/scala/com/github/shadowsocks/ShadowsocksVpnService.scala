@@ -260,7 +260,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     //Os.setenv("LD_PRELOAD", getApplicationInfo.dataDir + "/lib/libproxychains4.so", true)
     //Os.setenv("PROXYCHAINS_CONF_FILE", getApplicationInfo.dataDir + "/proxychains.conf", true)
 
-    var cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local", "-V", "-U"
+    var cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.SS_LOCAL), "-V", "-U"
       , "-b", "127.0.0.1"
       , "-t", "600"
       , "--host", host_arg
@@ -268,7 +268,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       , "-c", getApplicationInfo.dataDir + "/ss-local-udp-vpn.conf")
 
     if (proxychains_enable) {
-      cmd prepend "LD_PRELOAD=" + getApplicationInfo.dataDir + "/lib/libproxychains4.so"
+      cmd prepend "LD_PRELOAD=" + Utils.getAbsPath(ExeNative.PROXYCHAINS)
       cmd prepend "PROXYCHAINS_CONF_FILE=" + getApplicationInfo.dataDir + "/proxychains.conf"
       cmd prepend "PROXYCHAINS_PROTECT_FD_PREFIX=" + getApplicationInfo.dataDir
       cmd prepend "env"
@@ -295,7 +295,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     //Os.setenv("LD_PRELOAD", getApplicationInfo.dataDir + "/lib/libproxychains4.so", true)
     //Os.setenv("PROXYCHAINS_CONF_FILE", getApplicationInfo.dataDir + "/proxychains.conf", true)
 
-    val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local", "-V", "-x"
+    val cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.SS_LOCAL), "-V", "-x"
       , "-b", "127.0.0.1"
       , "-t", "600"
       , "--host", host_arg
@@ -312,7 +312,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
 
     if (proxychains_enable) {
-      cmd prepend "LD_PRELOAD=" + getApplicationInfo.dataDir + "/lib/libproxychains4.so"
+      cmd prepend "LD_PRELOAD=" + Utils.getAbsPath(ExeNative.PROXYCHAINS)
       cmd prepend "PROXYCHAINS_CONF_FILE=" + getApplicationInfo.dataDir + "/proxychains.conf"
       cmd prepend "PROXYCHAINS_PROTECT_FD_PREFIX=" + getApplicationInfo.dataDir
       cmd prepend "env"
@@ -338,7 +338,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     //Os.setenv("LD_PRELOAD", getApplicationInfo.dataDir + "/lib/libproxychains4.so", true)
     //Os.setenv("PROXYCHAINS_CONF_FILE", getApplicationInfo.dataDir + "/proxychains.conf", true)
 
-    val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local"
+    val cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.SS_LOCAL)
       , "-V"
       , "-u"
       , "-t", "60"
@@ -354,7 +354,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       cmd += dns_address + ":" + dns_port.toString
 
     if (proxychains_enable) {
-      cmd prepend "LD_PRELOAD=" + getApplicationInfo.dataDir + "/lib/libproxychains4.so"
+      cmd prepend "LD_PRELOAD=" + Utils.getAbsPath(ExeNative.PROXYCHAINS)
       cmd prepend "PROXYCHAINS_CONF_FILE=" + getApplicationInfo.dataDir + "/proxychains.conf"
       cmd prepend "PROXYCHAINS_PROTECT_FD_PREFIX=" + getApplicationInfo.dataDir
       cmd prepend "env"
@@ -435,7 +435,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       Route.BLOCK_DOMAIN.foreach(domain => p.println(s"neg { name = $domain; types = domain; }"))
       app.BLOCK_DOMAIN.foreach(domain => p.println(s"neg { name = $domain; types = A,AAAA; }"))
     })
-    val cmd = Array(getApplicationInfo.dataDir + "/pdnsd", "-c", getApplicationInfo.dataDir + "/pdnsd-vpn.conf")
+    val cmd = Array(Utils.getAbsPath(ExeNative.PDNSD), "-c", getApplicationInfo.dataDir + "/pdnsd-vpn.conf")
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
@@ -503,7 +503,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     val fd = conn.getFd
 
-    var cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/tun2socks",
+    var cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.TUN2SOCKS),
       "--netif-ipaddr", PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "2"),
       "--netif-netmask", "255.255.255.0",
       "--socks-server-addr", "127.0.0.1:" + profile.localPort,

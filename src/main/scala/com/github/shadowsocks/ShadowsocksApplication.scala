@@ -242,7 +242,7 @@ class ShadowsocksApplication extends Application {
   def crashRecovery() {
     val cmd = new ArrayBuffer[String]()
 
-    for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks", "tun2socks", "proxychains")) {
+    for (task <- Array(ExeNative.SS_LOCAL, "ss-tunnel", ExeNative.PDNSD, ExeNative.REDSOCKS, ExeNative.TUN2SOCKS, ExeNative.PROXYCHAINS)) {
       cmd.append("killall %s".formatLocal(Locale.ENGLISH, task))
       cmd.append("rm -f %1$s/%2$s-nat.conf %1$s/%2$s-vpn.conf"
         .formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, task))
@@ -262,7 +262,7 @@ class ShadowsocksApplication extends Application {
     copyAssets("acl")
     val assetPath = getApplicationInfo.dataDir + "/files/"
     app.copyAssets("dat", assetPath)
-    Shell.SH.run(EXECUTABLES.map("chmod 755 " + getApplicationInfo.dataDir + '/' + _))
+//    Shell.SH.run(EXECUTABLES.map("chmod 755 " + getApplicationInfo.dataDir + '/' + _))
     editor.putInt(Key.currentVersionCode, BuildConfig.VERSION_CODE).apply()
   }
 

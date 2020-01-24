@@ -148,7 +148,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             p.println(conf)
           })
 
-          val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local"
+          val cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.SS_LOCAL)
             , "-t", "600"
             , "-L", "www.google.com:80"
             , "-c", getApplicationInfo.dataDir + "/ss-local-test.conf")
@@ -1168,7 +1168,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                       p.println(conf)
                     })
 
-                    val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local"
+                    val cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.SS_LOCAL)
                       , "-t", "600"
                       , "-L", "www.google.com:80"
                       , "-c", getApplicationInfo.dataDir + "/ss-local-test.conf")

@@ -58,6 +58,8 @@ import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
 import okhttp3.{Dns, FormBody, OkHttpClient, Request}
 import go.Seq
+import scala.language.implicitConversions
+import com.github.shadowsocks.database.ProfileMixin._
 
 
 import scala.util.Random
@@ -136,25 +138,10 @@ trait BaseService extends Service {
   }
 
   def checkProfile(profile: Profile): Boolean = {
-    if (profile.isVmess) {
-      if (TextUtils.isEmpty(profile.v_add) ||
-        TextUtils.isEmpty(profile.v_port) ||
-        TextUtils.isEmpty(profile.v_id) ||
-        TextUtils.isEmpty(profile.v_aid) ||
-        TextUtils.isEmpty(profile.v_net)) {
-        stopRunner(true, getString(R.string.proxy_empty))
-        return false
-      } else {
-        return true
-      }
-    }
-    if (profile.isV2RayJSON) {
-      return !TextUtils.isEmpty(profile.v_json_config)
-    }
-    if (TextUtils.isEmpty(profile.host) || TextUtils.isEmpty(profile.password)) {
+    Option(profile.isOK()).filter(ok => ok).getOrElse{
       stopRunner(true, getString(R.string.proxy_empty))
       false
-    } else true
+    }
   }
 
   def connect() : Any = {

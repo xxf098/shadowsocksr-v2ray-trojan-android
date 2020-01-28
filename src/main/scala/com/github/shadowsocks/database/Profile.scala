@@ -236,9 +236,6 @@ class Profile {
   }
 
   def testLatencyThread () : String = {
-    if (!isV2Ray) {
-      throw new Exception("Not Supported!")
-    }
     Try(this.getElapsed()).map(elapsed => {
       this.elapsed = elapsed
       app.profileManager.updateProfile(this)

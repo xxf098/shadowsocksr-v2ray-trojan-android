@@ -405,15 +405,6 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
 //    SSRSubUpdateJob.schedule()
 
     handler.post(() => attachService)
-    val path = getApplicationInfo.nativeLibraryDir
-    import java.io.File
-    val f = new File(path)
-    val files = f.listFiles
-    for (inFile <- files) {
-      if (inFile.isFile) {
-        Log.e(TAG, inFile.getAbsolutePath)
-      }
-    }
   }
 
   private def hideCircle() {

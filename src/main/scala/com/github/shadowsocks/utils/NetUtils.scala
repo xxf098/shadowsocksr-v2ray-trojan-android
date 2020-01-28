@@ -30,9 +30,9 @@ object NetUtils {
   def testConnection(url: String): Long = {
     var elapsed = 0L
     val builder = new OkHttpClient.Builder()
-      .connectTimeout(5, TimeUnit.SECONDS)
-      .writeTimeout(5, TimeUnit.SECONDS)
-      .readTimeout(5, TimeUnit.SECONDS)
+      .connectTimeout(3, TimeUnit.SECONDS)
+      .writeTimeout(3, TimeUnit.SECONDS)
+      .readTimeout(3, TimeUnit.SECONDS)
     val client = builder.build()
     val request = new Request.Builder()
       .url(url).removeHeader("Host").addHeader("Host", "www.google.com")

@@ -122,9 +122,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       conn = null
     }
 
-    if (profile != null && profile.isV2Ray && v2rayThread != null) {
-      v2rayThread.stopTun2Socks()
-    }
+    Option(profile).filter(_.isV2Ray).flatMap(_ => Option(v2rayThread))
+      .foreach(_ => v2rayThread.stopTun2Socks())
 
     super.stopRunner(stopService, msg)
   }

@@ -163,7 +163,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def v2rayConnected(): Unit = {
     changeState(State.CONNECTED)
-    notification = new ShadowsocksNotification(this, profile.name)
+    notification = new ShadowsocksNotification(this, profile.name, "service-v2ray")
   }
 
   override def connect() : Any = {
@@ -224,7 +224,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (profile.route != Route.ALL)
       AclSyncJob.schedule(profile.route)
 
-    notification = new ShadowsocksNotification(this, profile.name)
+    notification = new ShadowsocksNotification(this, profile.name, "service-ssr")
   }
 
   /** Called when the activity is first created. */
@@ -531,7 +531,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (fd != -1) {
       var tries = 1
       while (tries < 5) {
-        Thread.sleep(1000 * tries)
+        Thread.sleep(80 >> tries)
         if (System.sendfd(fd, getApplicationInfo.dataDir + "/sock_path") != -1) {
           return true
         }

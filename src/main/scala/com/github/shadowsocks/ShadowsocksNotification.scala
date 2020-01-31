@@ -9,13 +9,13 @@ import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationCompat.BigTextStyle
 import android.support.v4.content.ContextCompat
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback.Stub
-import com.github.shadowsocks.utils.{TrafficMonitor, Action, State, Utils}
+import com.github.shadowsocks.utils.{Action, State, TrafficMonitor, Utils}
 import com.github.shadowsocks.ShadowsocksApplication.app
 
 /**
   * @author Mygod
   */
-class ShadowsocksNotification(private val service: BaseService, profileName: String, visible: Boolean = false) {
+class ShadowsocksNotification(private val service: BaseService, profileName: String, channel: String, visible: Boolean = false) {
   private val keyGuard = service.getSystemService(Context.KEYGUARD_SERVICE).asInstanceOf[KeyguardManager]
   private lazy val nm = service.getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
   private lazy val callback = new Stub {
@@ -32,7 +32,7 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
   private var lockReceiver: BroadcastReceiver = _
   private var callbackRegistered: Boolean = _
 
-  private val builder = new NotificationCompat.Builder(service)
+  private val builder = new NotificationCompat.Builder(service, channel)
     .setWhen(0)
     .setColor(ContextCompat.getColor(service, R.color.material_accent_500))
     .setTicker(service.getString(R.string.forward_success))
@@ -40,8 +40,13 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     .setContentIntent(PendingIntent.getActivity(service, 0, new Intent(service, classOf[Shadowsocks])
       .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0))
     .setSmallIcon(R.drawable.ic_stat_shadowsocks)
-  builder.addAction(R.drawable.ic_navigation_close,
-    service.getString(R.string.stop), PendingIntent.getBroadcast(service, 0, new Intent(Action.CLOSE), 0))
+    .setCategory(NotificationCompat.CATEGORY_SERVICE)
+  val closeAction = new NotificationCompat.Action.Builder(
+    R.drawable.ic_navigation_close,
+    service.getString(R.string.stop),
+    PendingIntent.getBroadcast(service, 0, new Intent(Action.CLOSE).setPackage(service.getPackageName), 0)
+  ).build()
+  builder.addAction(closeAction)
   app.profileManager.getAllProfiles match {
     case Some(profiles) => if (profiles.length > 1)
       builder.addAction(R.drawable.ic_action_settings, service.getString(R.string.quick_switch),

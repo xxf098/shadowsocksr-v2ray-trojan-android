@@ -45,7 +45,8 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 import android.annotation.SuppressLint
-import android.app.Application
+import android.app.{Application, NotificationChannel, NotificationManager}
+import android.content.Context
 import android.content.res.Configuration
 import android.os.{Build, LocaleList}
 import android.preference.PreferenceManager
@@ -61,6 +62,7 @@ import com.google.android.gms.common.api.ResultCallback
 import com.google.android.gms.tagmanager.{ContainerHolder, TagManager}
 import com.j256.ormlite.logger.LocalLog
 import eu.chainfire.libsuperuser.Shell
+import scala.collection.JavaConverters._
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -173,6 +175,7 @@ class ShadowsocksApplication extends Application {
   override def onConfigurationChanged(newConfig: Configuration) {
     super.onConfigurationChanged(newConfig)
     checkChineseLocale(newConfig)
+    updateNotificationChannels
   }
 
   override def onCreate() {
@@ -213,6 +216,20 @@ class ShadowsocksApplication extends Application {
     Utils.ThrowableFuture(autoClose(getAssets.open("block_hosts.txt"))(in => {
       BLOCK_DOMAIN = scala.io.Source.fromInputStream(in).getLines().toList
     }))
+    updateNotificationChannels
+  }
+
+
+  def updateNotificationChannels: Unit = {
+    if (Build.VERSION.SDK_INT >= 26) {
+      val notification = getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
+      val importance = if (Build.VERSION.SDK_INT >= 28) NotificationManager.IMPORTANCE_MIN else NotificationManager.IMPORTANCE_LOW
+      notification.createNotificationChannels(List(
+        new NotificationChannel("service-ssr", getText(R.string.service_ssr), importance),
+        new NotificationChannel("service-v2ray", getText(R.string.service_v2ray), importance),
+        new NotificationChannel("service-nat", getText(R.string.service_nat), importance)
+      ).asJava)
+    }
   }
 
   def refreshContainerHolder {

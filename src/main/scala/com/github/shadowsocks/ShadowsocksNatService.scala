@@ -395,7 +395,7 @@ class ShadowsocksNatService extends BaseService {
 
     changeState(State.CONNECTED)
 
-    notification = new ShadowsocksNotification(this, profile.name, true)
+    notification = new ShadowsocksNotification(this, profile.name, "service-nat",true)
   }
 
   override def stopRunner(stopService: Boolean, msg: String = null) {

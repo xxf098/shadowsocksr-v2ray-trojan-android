@@ -1012,9 +1012,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       startActivity(new Intent(this, classOf[V2RayConfigActivity]))
       true
     case R.id.action_full_test =>
-
-      if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles
-      else app.profileManager.getAllProfilesByGroup(currentGroupName) match {
+      val testProfiles = if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles
+      else app.profileManager.getAllProfilesByGroup(currentGroupName)
+      testProfiles match {
 //      app.profileManager.getAllProfiles match {
         case Some(profiles) =>
 

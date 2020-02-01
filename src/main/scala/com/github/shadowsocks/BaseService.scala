@@ -60,9 +60,11 @@ import okhttp3.{Dns, FormBody, OkHttpClient, Request}
 import go.Seq
 import scala.language.implicitConversions
 import com.github.shadowsocks.database.ProfileMixin._
-
-
 import scala.util.Random
+
+trait BroadcastWork {
+  def work(shadowsocksServiceCallback: IShadowsocksServiceCallback): Unit
+}
 
 trait BaseService extends Service {
 
@@ -242,41 +244,27 @@ trait BaseService extends Service {
     profile = null
   }
 
-//  def updateTrafficTotal(tx: Long, rx: Long) {
-//    val profile = this.profile  // avoid race conditions without locking
-//    if (profile != null) {
-//      app.profileManager.getProfile(profile.id) match {
-//        case Some(p) =>         // default profile may have host, etc. modified
-//          p.tx += tx
-//          p.rx += rx
-//          app.profileManager.updateProfile(p)
-//        case None =>
-//      }
-//    }
-//  }
-
   def getState: Int = {
     state
   }
 
-  def updateTrafficRate() {
-    handler.post(() => {
-      if (callbacksCount > 0) {
-        val txRate = TrafficMonitor.txRate
-        val rxRate = TrafficMonitor.rxRate
-        val txTotal = TrafficMonitor.txTotal
-        val rxTotal = TrafficMonitor.rxTotal
-        val n = callbacks.beginBroadcast()
-        for (i <- 0 until n) {
-          try {
-            callbacks.getBroadcastItem(i).trafficUpdated(txRate, rxRate, txTotal, rxTotal)
-          } catch {
-            case _: Exception => // Ignore
-          }
-        }
-        callbacks.finishBroadcast()
+  def broadcast(broadcastWork: BroadcastWork): Unit = {
+    if (callbacksCount < 1) return
+    val n = callbacks.beginBroadcast()
+    for (i <- 0 until n) {
+      try {
+        broadcastWork.work(callbacks.getBroadcastItem(i))
+      } catch {
+        case _: Exception => // Ignore
       }
-    })
+    }
+    callbacks.finishBroadcast()
+  }
+
+  def updateTrafficRate() {
+    handler.post(() => broadcast(cb =>
+      cb.trafficUpdated(TrafficMonitor.txRate, TrafficMonitor.rxRate, TrafficMonitor.txTotal, TrafficMonitor.rxTotal))
+    )
   }
 
 
@@ -292,17 +280,7 @@ trait BaseService extends Service {
   protected def changeState(s: Int, msg: String = null) {
     val handler = new Handler(getMainLooper)
     handler.post(() => if (state != s || msg != null) {
-      if (callbacksCount > 0) {
-        val n = callbacks.beginBroadcast()
-        for (i <- 0 until n) {
-          try {
-            callbacks.getBroadcastItem(i).stateChanged(s, binder.getProfileName, msg)
-          } catch {
-            case _: Exception => // Ignore
-          }
-        }
-        callbacks.finishBroadcast()
-      }
+      broadcast(cb => cb.stateChanged(s, binder.getProfileName, msg))
       state = s
     })
   }

@@ -1041,7 +1041,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             override def run() {
               // Do some background work
               Looper.prepare()
-              profiles.foreach((profile: Profile) => {
+              profiles.zipWithIndex.foreach{case (profile: Profile, index: Int) => {
                 if (isTesting) {
 
                   if (testAsyncJob.isInterrupted()) {
@@ -1052,7 +1052,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                   if (profile.isV2Ray) {
                     val testResult = profile.testLatencyThread()
                     val msg = Message.obtain()
-                    msg.obj = profile.name + " " + testResult
+                    msg.obj = s"${index+1} ${profile.name} $testResult"
                     msg.setTarget(showProgresshandler)
                     msg.sendToTarget()
                   }
@@ -1129,8 +1129,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                         result = getString(R.string.connection_test_error, e.getMessage)
                     }
 
-                    var msg = Message.obtain()
-                    msg.obj = profile.name + " " + result
+                    val msg = Message.obtain()
+                    msg.obj = s"${index+1} ${profile.name} $result"
                     msg.setTarget(showProgresshandler)
                     msg.sendToTarget()
 
@@ -1140,7 +1140,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                     }
                   }
                 }
-              })
+              }}
 
               if (testProgressDialog != null) {
                 testProgressDialog.dismiss

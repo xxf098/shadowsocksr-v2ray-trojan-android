@@ -70,7 +70,7 @@ import okhttp3._
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Random
+import scala.util.{Random, Try}
 // TODO: route
 
 object Typefaces {
@@ -303,45 +303,29 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     connectionTestText = findViewById(R.id.connection_test).asInstanceOf[TextView]
     val id = synchronized {
       testCount += 1
-      handler.post(() => connectionTestText.setText(R.string.connection_test_testing))
+//      handler.post(() => connectionTestText.setText(R.string.connection_test_testing))
       testCount
     }
     Utils.ThrowableFuture {
-      val builder = new OkHttpClient.Builder()
-        .connectTimeout(timeout, TimeUnit.SECONDS)
-        .writeTimeout(timeout, TimeUnit.SECONDS)
-        .readTimeout(timeout, TimeUnit.SECONDS)
-      val client = builder.build
-      val request = new Request.Builder()
-        .url("https://www.google.com/generate_204")
-        .removeHeader("Host")
-        .addHeader("Host", "www.google.com")
-        .build();
       if (testCount == id) {
         var result: String = null
-        var success = true
-        try {
-          val start = SystemClock.elapsedRealtime()
-          val response = client.newCall(request).execute()
-          val elapsed = SystemClock.elapsedRealtime() - start
-          val code = response.code()
-          if (code == 204 || (code == 200 && response.body().contentLength == 0))
-            result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
-          else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
-          response.body().close()
-        } catch {
-          case e: Exception =>
-            success = false
-            if (retry > 1) {
-              handler.post(() => connectionTestText.setText("retry..."))
-              Thread.sleep(500 * (Math.pow(0.5, retry).toLong + 1))
-              checkConnection(timeout, retry -1)
-//              handler.postDelayed(() => checkConnection(timeout, retry -1),
-//                500 * (Math.pow(0.5, retry).toLong + 1))
-              return
-            }
-            e.printStackTrace()
-            result = getString(R.string.connection_test_error, e.getMessage)
+        var success = false
+        for (i <- 1 to retry if !success) {
+          handler.post(() => connectionTestText.setText(R.string.connection_test_testing))
+          result = Try(NetUtils.testConnection("https://www.google.com/generate_204"))
+            .map(elapsed => {
+              success = true
+              getString(R.string.connection_test_available, elapsed: java.lang.Long)
+            })
+            .recover {
+              case e: Exception => {
+                if (i < retry - 1) {
+                  handler.post(() => connectionTestText.setText("retry..."))
+                  Thread.sleep(500 * (Math.pow(0.5, retry).toLong + 1))
+                }
+                getString(R.string.connection_test_error, e.getMessage)
+              }
+            }.get
         }
         synchronized(if (testCount == id && app.isVpnEnabled && serviceStarted) handler.post(() =>
           if (success) connectionTestText.setText(result)
@@ -405,15 +389,6 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
 //    SSRSubUpdateJob.schedule()
 
     handler.post(() => attachService)
-    val path = getApplicationInfo.nativeLibraryDir
-    import java.io.File
-    val f = new File(path)
-    val files = f.listFiles
-    for (inFile <- files) {
-      if (inFile.isFile) {
-        Log.e(TAG, inFile.getAbsolutePath)
-      }
-    }
   }
 
   private def hideCircle() {

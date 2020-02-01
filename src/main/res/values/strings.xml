@@ -106,6 +106,9 @@
   <string name="vpn_error">%s</string>
   <string name="reboot_required">Failed to start VPN service. You might need to reboot your device.</string>
   <string name="quick_switch">Switch</string>
+  <string name="service_ssr" translatable="false">SSR Service</string>
+  <string name="service_v2ray" translatable="false">V2Ray Service</string>
+  <string name="service_nat" translatable="false">Nat Service</string>
 
   <!-- alert category -->
   <string name="close">Close</string>

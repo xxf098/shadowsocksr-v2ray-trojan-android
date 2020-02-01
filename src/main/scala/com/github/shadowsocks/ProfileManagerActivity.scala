@@ -114,114 +114,18 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       pingBtn.setOnClickListener(_ => {
 
         val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
-
-        var profile = item
-        if (profile.isV2Ray) {
-          profile.testLatency().map(elapsed => {
-            this.updateText(0, 0, elapsed)
-            getString(R.string.connection_test_available, elapsed: java.lang.Long)
-          }).recover {
-            case e: Exception => {
-              e.printStackTrace()
-              app.getString(R.string.connection_test_error, e.getMessage)
-            }
-          }.foreach(result => {
-            singleTestProgressDialog.dismiss()
-            Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
-          })
-        }
-
-        if (!profile.isV2Ray) {
-        Utils.ThrowableFuture {
-
-          // Resolve the server address
-          var host = profile.host;
-          if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = true) match {
-            case Some(addr) => host = addr
-            case None => throw new Exception("can't resolve")
+        item.testLatency().map(elapsed => {
+          this.updateText(0, 0, elapsed)
+          getString(R.string.connection_test_available, elapsed: java.lang.Long)
+        }).recover {
+          case e: Exception => {
+            e.printStackTrace()
+            app.getString(R.string.connection_test_error, e.getMessage)
           }
-
-          val conf = ConfigUtils
-            .SHADOWSOCKS.formatLocal(Locale.ENGLISH, host, profile.remotePort, profile.localPort + 2,
-              ConfigUtils.EscapedJson(profile.password), profile.method, 600, profile.protocol, profile.obfs, ConfigUtils.EscapedJson(profile.obfs_param), ConfigUtils.EscapedJson(profile.protocol_param))
-          Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-test.conf"))(p => {
-            p.println(conf)
-          })
-
-          val cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.SS_LOCAL)
-            , "-t", "600"
-            , "-L", "www.google.com:80"
-            , "-c", getApplicationInfo.dataDir + "/ss-local-test.conf")
-
-          if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
-
-          if (ssTestProcess != null) {
-            ssTestProcess.destroy()
-            ssTestProcess = null
-          }
-
-          ssTestProcess = new GuardedProcess(cmd).start()
-
-          val start = currentTimeMillis
-          while (start - currentTimeMillis < 5 * 1000 && isPortAvailable(profile.localPort + 2)) {
-            try {
-              Thread.sleep(50)
-            } catch{
-              case e: InterruptedException => Unit
-            }
-          }
-          //val proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", profile.localPort + 2))
-
-          // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
-
-          //okhttp
-          var result = ""
-          val builder = new OkHttpClient.Builder()
-                          .connectTimeout(5, TimeUnit.SECONDS)
-                          .writeTimeout(5, TimeUnit.SECONDS)
-                          .readTimeout(5, TimeUnit.SECONDS)
-
-          val client = builder.build();
-
-          val request = new Request.Builder()
-            .url("http://127.0.0.1:" + (profile.localPort + 2) + "/generate_204").removeHeader("Host").addHeader("Host", "www.google.com")
-            .build();
-
-          try {
-            val response = client.newCall(request).execute()
-            val code = response.code()
-            if (code == 204 || code == 200 && response.body().contentLength == 0) {
-              val start = currentTimeMillis
-              val response = client.newCall(request).execute()
-              val elapsed = currentTimeMillis - start
-              val code = response.code()
-              if (code == 204 || code == 200 && response.body().contentLength == 0)
-              {
-                result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
-                profile.elapsed = elapsed
-                app.profileManager.updateProfile(profile)
-
-                this.updateText(0, 0, elapsed)
-              }
-              else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
-              response.body().close()
-            } else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
-            response.body().close()
-          } catch {
-            case e: IOException =>
-              result = getString(R.string.connection_test_error, e.getMessage)
-          }
-
-          Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
-          if (ssTestProcess != null) {
-            ssTestProcess.destroy()
-            ssTestProcess = null
-          }
+        }.foreach(result => {
           singleTestProgressDialog.dismiss()
-        }
-        }
-
-
+          Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
+        })
         // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
       })
       pingBtn.setOnLongClickListener(_ => {
@@ -1137,7 +1041,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             override def run() {
               // Do some background work
               Looper.prepare()
-              profiles.foreach((profile: Profile) => {
+              profiles.zipWithIndex.foreach{case (profile: Profile, index: Int) => {
                 if (isTesting) {
 
                   if (testAsyncJob.isInterrupted()) {
@@ -1148,7 +1052,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                   if (profile.isV2Ray) {
                     val testResult = profile.testLatencyThread()
                     val msg = Message.obtain()
-                    msg.obj = profile.name + " " + testResult
+                    msg.obj = s"${index+1} ${profile.name} $testResult"
                     msg.setTarget(showProgresshandler)
                     msg.sendToTarget()
                   }
@@ -1225,8 +1129,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                         result = getString(R.string.connection_test_error, e.getMessage)
                     }
 
-                    var msg = Message.obtain()
-                    msg.obj = profile.name + " " + result
+                    val msg = Message.obtain()
+                    msg.obj = s"${index+1} ${profile.name} $result"
                     msg.setTarget(showProgresshandler)
                     msg.sendToTarget()
 
@@ -1236,7 +1140,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                     }
                   }
                 }
-              })
+              }}
 
               if (testProgressDialog != null) {
                 testProgressDialog.dismiss

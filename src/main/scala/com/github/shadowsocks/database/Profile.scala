@@ -59,7 +59,8 @@ import com.github.shadowsocks.utils.Utils
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
-
+import ProfileMixin._
+// automatic from Android without pc
 
 object Profile {
   implicit def profileToVmess(profile: Profile): Vmess = {
@@ -226,7 +227,7 @@ class Profile {
   def isV2Ray = isVmess || isV2RayJSON
 
   def testLatency (): Future[Long] = {
-    Future(getElapsed())
+    Future(this.getElapsed())
     .map(elapsed => {
       this.elapsed = elapsed
       app.profileManager.updateProfile(this)
@@ -235,10 +236,7 @@ class Profile {
   }
 
   def testLatencyThread () : String = {
-    if (!isV2Ray) {
-      throw new Exception("Not Supported!")
-    }
-    Try(getElapsed()).map(elapsed => {
+    Try(this.getElapsed()).map(elapsed => {
       this.elapsed = elapsed
       app.profileManager.updateProfile(this)
       app.getString(R.string.connection_test_available, elapsed: java.lang.Long)
@@ -247,19 +245,4 @@ class Profile {
     }.get
   }
 
-  def getElapsed (): Long = {
-    if (!isV2Ray) {
-      throw new Exception("Not Supported!")
-    }
-    if (isV2RayJSON && TextUtils.isEmpty(v_add)) throw new IOException("Server Address Not Found!")
-    if (!Utils.isNumeric(v_add)) Utils.resolve(v_add, enableIPv6 = true, hostname = "1.1.1.1") match {
-      case Some(addr) => v_add = addr
-      case None => throw new IOException("Name Not Resolved")
-    }
-    if (isV2RayJSON) {
-      val config = "\"address\":\\s*\".+?\"".r.replaceFirstIn(v_json_config, s""""address": "$v_add"""")
-      Tun2socks.testConfigLatency(config.getBytes(StandardCharsets.UTF_8), app.getV2rayAssetsPath())
-    }
-    else Tun2socks.testVmessLatency(this, app.getV2rayAssetsPath())
-  }
 }

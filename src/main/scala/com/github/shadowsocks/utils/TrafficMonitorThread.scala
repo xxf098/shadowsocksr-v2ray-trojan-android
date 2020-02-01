@@ -48,6 +48,7 @@ import android.net.{LocalServerSocket, LocalSocket, LocalSocketAddress}
 import android.util.Log
 import com.github.shadowsocks.ShadowsocksApplication.app
 
+// support v2ray
 class TrafficMonitorThread(context: Context) extends Thread {
 
   val TAG = "TrafficMonitorThread"

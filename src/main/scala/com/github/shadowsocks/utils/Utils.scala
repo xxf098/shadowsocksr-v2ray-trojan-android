@@ -62,6 +62,8 @@ import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Try}
+import android.system.Os
+import android.system.OsConstants
 
 object Utils {
   private val TAG = "Shadowsocks"
@@ -229,7 +231,14 @@ object Utils {
   }
 
   private lazy val isNumericMethod = classOf[InetAddress].getMethod("isNumeric", classOf[String])
-  def isNumeric(address: String): Boolean = isNumericMethod.invoke(null, address).asInstanceOf[Boolean]
+  def isNumeric(address: String): Boolean = {
+    if (Build.VERSION.SDK_INT >= 29) {
+      Option(Os.inet_pton(OsConstants.AF_INET, address)) match {
+        case Some(_) => true
+        case None => Option(Os.inet_pton(OsConstants.AF_INET6, address)).nonEmpty
+      }
+    } else isNumericMethod.invoke(null, address).asInstanceOf[Boolean]
+  }
 
   /**
    * If there exists a valid IPv6 interface

@@ -224,7 +224,8 @@ trait BaseService extends Service {
     }
 
     // Make sure update total traffic when stopping the runner
-    updateTrafficTotal(TrafficMonitor.txTotal, TrafficMonitor.rxTotal)
+//    updateTrafficTotal(TrafficMonitor.txTotal, TrafficMonitor.rxTotal)
+    Option(this.profile).foreach(p => TrafficMonitor.persistStats(p.id))
 
     TrafficMonitor.reset()
     if (trafficMonitorThread != null) {
@@ -241,18 +242,18 @@ trait BaseService extends Service {
     profile = null
   }
 
-  def updateTrafficTotal(tx: Long, rx: Long) {
-    val profile = this.profile  // avoid race conditions without locking
-    if (profile != null) {
-      app.profileManager.getProfile(profile.id) match {
-        case Some(p) =>         // default profile may have host, etc. modified
-          p.tx += tx
-          p.rx += rx
-          app.profileManager.updateProfile(p)
-        case None =>
-      }
-    }
-  }
+//  def updateTrafficTotal(tx: Long, rx: Long) {
+//    val profile = this.profile  // avoid race conditions without locking
+//    if (profile != null) {
+//      app.profileManager.getProfile(profile.id) match {
+//        case Some(p) =>         // default profile may have host, etc. modified
+//          p.tx += tx
+//          p.rx += rx
+//          app.profileManager.updateProfile(p)
+//        case None =>
+//      }
+//    }
+//  }
 
   def getState: Int = {
     state

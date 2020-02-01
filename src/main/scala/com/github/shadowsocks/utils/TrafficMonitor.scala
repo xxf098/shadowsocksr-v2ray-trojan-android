@@ -80,4 +80,15 @@ object TrafficMonitor {
     rxLast = 0
     dirty = true
   }
+
+  def persistStats(id: Int): Unit = {
+    app.profileManager.getProfile(id) match {
+      case Some(p) => {
+        p.tx += txTotal
+        p.rx += rxTotal
+        app.profileManager.updateProfile(p)
+      }
+      case None =>
+    }
+  }
 }

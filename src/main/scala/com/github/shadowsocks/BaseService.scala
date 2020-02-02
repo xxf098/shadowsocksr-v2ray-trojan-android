@@ -62,9 +62,6 @@ import scala.language.implicitConversions
 import com.github.shadowsocks.database.ProfileMixin._
 import scala.util.Random
 
-trait BroadcastWork {
-  def work(shadowsocksServiceCallback: IShadowsocksServiceCallback): Unit
-}
 
 trait BaseService extends Service {
 
@@ -248,12 +245,12 @@ trait BaseService extends Service {
     state
   }
 
-  def broadcast(broadcastWork: BroadcastWork): Unit = {
+  def broadcast(work: IShadowsocksServiceCallback => Unit): Unit = {
     if (callbacksCount < 1) return
     val n = callbacks.beginBroadcast()
     for (i <- 0 until n) {
       try {
-        broadcastWork.work(callbacks.getBroadcastItem(i))
+        work(callbacks.getBroadcastItem(i))
       } catch {
         case _: Exception => // Ignore
       }

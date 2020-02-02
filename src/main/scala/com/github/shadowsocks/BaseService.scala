@@ -47,7 +47,7 @@ import java.util.{Timer, TimerTask}
 
 import android.app.Service
 import android.content.{BroadcastReceiver, Context, Intent, IntentFilter}
-import android.os.{Handler, RemoteCallbackList}
+import android.os.{Build, Handler, RemoteCallbackList}
 import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
@@ -58,8 +58,10 @@ import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
 import okhttp3.{Dns, FormBody, OkHttpClient, Request}
 import go.Seq
+
 import scala.language.implicitConversions
 import com.github.shadowsocks.database.ProfileMixin._
+
 import scala.util.Random
 
 
@@ -182,7 +184,8 @@ trait BaseService extends Service {
   def startRunner(profile: Profile) {
     this.profile = profile
 
-    startService(new Intent(this, getClass))
+    if (Build.VERSION.SDK_INT >= 26) startForegroundService(new Intent(this, getClass))
+    else startService(new Intent(this, getClass))
     TrafficMonitor.reset()
     trafficMonitorThread = new TrafficMonitorThread(getApplicationContext)
     trafficMonitorThread.start()

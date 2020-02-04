@@ -39,7 +39,14 @@ jobs:
       uses: actions/cache@v1
       with:
         path: ~/.sbt
-        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}        
+        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}    
+    - name: Cache NDK
+      uses: actions/cache@v1
+      env:
+        ndk: android-ndk-r12b
+      with:
+        path: ~/.android-cache
+        key: ${{ runner.os }}-android-${{ env.ndk-version }}              
     - name: Build apk
       run: |
         ./travis-ci/setup.sh
@@ -50,7 +57,5 @@ jobs:
         path: target/android/output/shadowsocksr-release.apk
     - name: Check Build
       run: |
-        ls -lh ./src/main/libs/armeabi-v7a
-        ls -lh ./target/android/intermediates/ndk/collect-jni/lib/armeabi-v7a
         ls -lh ./target/android/output/
         echo test, and deploy your project.

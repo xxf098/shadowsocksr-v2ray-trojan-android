@@ -6,6 +6,7 @@ ANDROID_SDK_TOOLS="4333796"
 export ARCH=`uname -m`
 export ANDROID_NDK_HOME=$HOME/.android/android-ndk-r12b
 export ANDROID_HOME=$HOME/.android
+export ANDROID_CACHE_DIR=$HOME/.android-cache
 export PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools:${PATH}
 
 if [ ! -d "$ANDROID_HOME" ]; then
@@ -17,9 +18,13 @@ if [ ! -d "$ANDROID_HOME" ]; then
 fi
 
 if [ ! -d "$ANDROID_NDK_HOME" ]; then
-    mkdir -p $ANDROID_NDK_HOME
+    mkdir -p $ANDROID_NDK_HOME $ANDROID_CACHE_DIR
     pushd $HOME/.android
-    wget -q http://dl.google.com/android/repository/android-ndk-r12b-linux-${ARCH}.zip
+    CAHCE_NDK_ZIP=$ANDROID_CACHE_DIR/android-ndk-r12b-linux-${ARCH}.zip
+    if [ ! -f  "$CAHCE_NDK_ZIP"]; then
+        wget -q -O "$CAHCE_NDK_ZIP" http://dl.google.com/android/repository/android-ndk-r12b-linux-${ARCH}.zip
+    fi
+    cp "$CAHCE_NDK_ZIP" ./android-ndk-r12b-linux-${ARCH}.zip
     unzip -q android-ndk-r12b-linux-${ARCH}.zip
     popd
 fi

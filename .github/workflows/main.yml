@@ -30,13 +30,23 @@ jobs:
     - name: Setup Package
       run: |
         sudo apt-get --quiet install --yes wget tar unzip gcc-multilib g++-multilib libstdc++6 libgcc1 zlib1g libncurses5  
+    - name: Cache SBT ivy cache
+      uses: actions/cache@v1
+      with:
+        path: ~/.ivy2/cache
+        key: ${{ runner.os }}-sbt-ivy-cache-${{ hashFiles('**/build.sbt') }}
+    - name: Cache SBT
+      uses: actions/cache@v1
+      with:
+        path: ~/.sbt
+        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}        
     - name: Build apk
       run: |
         ./travis-ci/setup.sh
     - name: Upload APK
       uses: actions/upload-artifact@v1
       with:
-        name: shadowsocksr-v2ray-release.apk
+        name: shadowsocksr-v2ray-release
         path: target/android/output/shadowsocksr-release.apk
     - name: Check Build
       run: |

@@ -27,7 +27,7 @@ fi
 echo y | sdkmanager "platforms;android-${ANDROID_COMPILE_SDK}" >/dev/null
 echo y | sdkmanager "platform-tools" >/dev/null
 echo y | sdkmanager "build-tools;${ANDROID_BUILD_TOOLS}" >/dev/null
-cp local.properties.travis local.properties
+cp local.properties.github local.properties
 git submodule update --init
 # backup
 mkdir -p ./backup/armeabi-v7a ./backup/x86

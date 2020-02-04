@@ -2,7 +2,7 @@
 
 A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) and [V2Ray](https://github.com/v2ray/v2ray-core) client for Android, integrate SSR and V2Ray in one application, written in Scala.
 
- [![Gitter](https://badges.gitter.im/shadowsocksr-v2ray-android/community.svg)](https://gitter.im/shadowsocksr-v2ray-android/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+ ![build](https://github.com/xxf098/shadowsocksr-v2ray-android/workflows/build/badge.svg?branch=xxf098%2Fdevelop&event=push)  [![Gitter](https://badges.gitter.im/shadowsocksr-v2ray-android/community.svg)](https://gitter.im/shadowsocksr-v2ray-android/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 
 ### PREREQUISITES

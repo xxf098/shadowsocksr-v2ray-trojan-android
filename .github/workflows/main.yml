@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'xxf098/develop'
+      - 'xxf098/master'
 
 jobs:
   build:

@@ -16,9 +16,13 @@ jobs:
       uses: actions/setup-java@v1
       with:
         - java-version: 1.8
-    - name: Run a one-line script
-      run: echo Hello, world!
+    - name: install scala
+      run: |
+        sudo apt-get remove scala-library scala
+        sudo wget www.scala-lang.org/files/archive/scala-2.11.8.deb
+        sudo dpkg -i scala-2.11.8.deb
     - name: Run a multi-line script
       run: |
-        echo Add other actions to build,
+        echo "$JAVA_HOME",
+        which scala
         echo test, and deploy your project.

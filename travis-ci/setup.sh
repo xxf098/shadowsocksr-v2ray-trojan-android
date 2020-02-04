@@ -11,8 +11,8 @@ export PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-t
 if [ ! -d "$ANDROID_HOME" ]; then
     mkdir -p $ANDROID_HOME
     pushd $HOME/.android
-    wget --quiet --output-document=android-sdk.zip https://dl.google.com/android/repository/sdk-tools-linux-${ANDROID_BUILD_TOOLS}.zip
-    unzip -q android-sdk.zip
+    wget -q https://dl.google.com/android/repository/sdk-tools-linux-${ANDROID_SDK_TOOLS}.zip
+    unzip -q sdk-tools-linux-${ANDROID_SDK_TOOLS}.zip
     popd
 fi
 
@@ -23,6 +23,7 @@ if [ ! -d "$ANDROID_NDK_HOME" ]; then
     unzip -q android-ndk-r12b-linux-${ARCH}.zip
     popd
 fi
+
 
 ( sleep 5 && while [ 1   ]; do sleep 1; echo y; done ) | android update sdk --filter tools,platform-tools,build-tools-${ANDROID_BUILD_TOOLS},android-${ANDROID_COMPILE_SDK},extra-google-m2repository --no-ui -a
 ( sleep 5 && while [ 1 ]; do sleep 1; echo y; done ) | android update sdk --filter extra-android-m2repository --no-ui -a

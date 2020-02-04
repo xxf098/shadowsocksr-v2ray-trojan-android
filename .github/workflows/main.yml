@@ -1,4 +1,4 @@
-name: Build CI
+name: build
 
 on:
   push:
@@ -36,7 +36,7 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v1
       with:
-        name: app-test
+        name: shadowsocksr-v2ray-release.apk
         path: target/android/output/shadowsocksr-release.apk
     - name: Check Build
       run: |

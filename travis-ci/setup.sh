@@ -24,13 +24,14 @@ if [ ! -d "$ANDROID_NDK_HOME" ]; then
     popd
 fi
 
-# INDEX=0
-# ( sleep 5 && while [ $INDEX -lt 10 ]; do sleep 1; INDEX=$((INDEX + 1)); echo y; done ) | android update sdk --filter tools,platform-tools,build-tools-${ANDROID_BUILD_TOOLS},android-${ANDROID_COMPILE_SDK},extra-google-m2repository --no-ui -a
-# INDEX=0
-# ( sleep 5 && while [ $INDEX -lt 10 ]; do sleep 1; INDEX=$((INDEX + 1)); echo y; done ) | android update sdk --filter extra-android-m2repository --no-ui -a
 echo y | sdkmanager "platforms;android-${ANDROID_COMPILE_SDK}" >/dev/null
 echo y | sdkmanager "platform-tools" >/dev/null
 echo y | sdkmanager "build-tools;${ANDROID_BUILD_TOOLS}" >/dev/null
 cp local.properties.travis local.properties
 git submodule update --init
-sbt native-build android:package-release
+# backup
+mkdir -p ./backup/armeabi-v7a ./backup/x86
+cp ./src/main/libs/armeabi-v7a/libgojni.so ./backup/armeabi-v7a; cp ./src/main/libs/x86/libgojni.so ./backup/x86
+sbt native-build
+cp ./backup/armeabi-v7a/libgojni.so ./src/main/libs/armeabi-v7a; cp ./backup/x86/libgojni.so ./src/main/libs/x86
+sbt android:package-release

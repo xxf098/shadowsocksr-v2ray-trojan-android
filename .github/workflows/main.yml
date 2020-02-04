@@ -18,7 +18,7 @@ jobs:
         java-version: 1.8
     - name: Install scala
       run: |
-        sudo apt-get remove scala-library scala
+        # sudo apt-get remove scala-library scala
         sudo wget www.scala-lang.org/files/archive/scala-2.11.8.deb
         sudo dpkg -i scala-2.11.8.deb
     - name: Install SBT
@@ -27,10 +27,15 @@ jobs:
          sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2EE0EA64E40A89B84B2DF73499E82A75642AC823
          sudo apt-get update
          sudo apt-get install sbt
-    - name: Check Install
+    - name: Install Android SDK
+      run: |
+        ./travis-ci/setup.sh    
+    - name: Check Setup
       run: |
         pwd
         echo "$JAVA_HOME",
         scala -version
-        sbt sbtVersion
+        which scala
+        which sbt
+        ls $HOME/.android/tools
         echo test, and deploy your project.

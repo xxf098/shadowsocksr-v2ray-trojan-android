@@ -44,9 +44,10 @@ jobs:
       uses: actions/cache@v1
       env:
         ndk: android-ndk-r12b
+        sdk-tools: 4333796
       with:
         path: ~/.android-cache
-        key: ${{ runner.os }}-android-${{ env.ndk-version }}              
+        key: ${{ runner.os }}-android-${{ env.ndk-version }}-${{ env.sdk-tools }}
     - name: Build apk
       run: |
         ./travis-ci/setup.sh

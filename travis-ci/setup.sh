@@ -9,16 +9,21 @@ export ANDROID_HOME=$HOME/.android
 export ANDROID_CACHE_DIR=$HOME/.android-cache
 export PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools:${PATH}
 
+mkdir -p $ANDROID_CACHE_DIR
 if [ ! -d "$ANDROID_HOME" ]; then
     mkdir -p $ANDROID_HOME
     pushd $HOME/.android
-    wget -q https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip
-    unzip -q sdk-tools-linux-4333796.zip
+    CAHCE_ANDROID_SDK_TOOLS_ZIP=$ANDROID_CACHE_DIR/sdk-tools-linux-${ANDROID_SDK_TOOLS}.zip
+    if [ ! -f  "$CAHCE_ANDROID_SDK_TOOLS_ZIP"]; then
+        wget -q -O "$CAHCE_ANDROID_SDK_TOOLS_ZIP" https://dl.google.com/android/repository/sdk-tools-linux-${ANDROID_SDK_TOOLS}.zip
+    fi
+    cp "$CAHCE_ANDROID_SDK_TOOLS_ZIP" ./sdk-tools-linux-${ANDROID_SDK_TOOLS}.zip
+    unzip -q sdk-tools-linux-${ANDROID_SDK_TOOLS}.zip
     popd
 fi
 
 if [ ! -d "$ANDROID_NDK_HOME" ]; then
-    mkdir -p $ANDROID_NDK_HOME $ANDROID_CACHE_DIR
+    mkdir -p $ANDROID_NDK_HOME
     pushd $HOME/.android
     CAHCE_NDK_ZIP=$ANDROID_CACHE_DIR/android-ndk-r12b-linux-${ARCH}.zip
     if [ ! -f  "$CAHCE_NDK_ZIP"]; then

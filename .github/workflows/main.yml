@@ -33,8 +33,14 @@ jobs:
     - name: Build apk
       run: |
         ./travis-ci/setup.sh
+    - name: Upload APK
+      uses: actions/upload-artifact@v1
+      with:
+        name: app-test
+        path: target/android/output/shadowsocksr-release.apk
     - name: Check Build
       run: |
-        pwd
+        ls -lh ./src/main/libs/armeabi-v7a
+        ls -lh ./target/android/intermediates/ndk/collect-jni/lib/armeabi-v7a
         ls -lh ./target/android/output/
         echo test, and deploy your project.

@@ -5,7 +5,7 @@ ANDROID_BUILD_TOOLS="29.0.0"
 ANDROID_SDK_TOOLS="4333796"
 export ARCH=`uname -m`
 export ANDROID_NDK_HOME=$HOME/.android/android-ndk-r12b
-export ANDROID_HOME=$HOME/.android/tools
+export ANDROID_HOME=$HOME/.android
 export PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}
 
 if [ ! -d "$ANDROID_HOME" ]; then

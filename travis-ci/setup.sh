@@ -12,7 +12,7 @@ if [ ! -d "$ANDROID_HOME" ]; then
     mkdir -p $ANDROID_HOME
     pushd $HOME/.android
     wget --quiet --output-document=android-sdk.zip https://dl.google.com/android/repository/sdk-tools-linux-${ANDROID_BUILD_TOOLS}.zip
-    unzip --quiet android-sdk.zip
+    unzip -q android-sdk.zip
     popd
 fi
 
@@ -24,5 +24,5 @@ if [ ! -d "$ANDROID_NDK_HOME" ]; then
     popd
 fi
 
-( sleep 5 && while [ 1 ]; do sleep 1; echo y; done ) | android update sdk --filter tools,platform-tools,build-tools-${ANDROID_BUILD_TOOLS},android-${ANDROID_COMPILE_SDK},extra-google-m2repository --no-ui -a
+( sleep 5 && while [ 1   ]; do sleep 1; echo y; done ) | android update sdk --filter tools,platform-tools,build-tools-${ANDROID_BUILD_TOOLS},android-${ANDROID_COMPILE_SDK},extra-google-m2repository --no-ui -a
 ( sleep 5 && while [ 1 ]; do sleep 1; echo y; done ) | android update sdk --filter extra-android-m2repository --no-ui -a

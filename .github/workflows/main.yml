@@ -30,13 +30,11 @@ jobs:
     - name: Setup Package
       run: |
         sudo apt-get --quiet install --yes wget tar unzip gcc-multilib g++-multilib libstdc++6 libgcc1 zlib1g libncurses5  
-    - name: Setup Android SDK
+    - name: Build apk
       run: |
         ./travis-ci/setup.sh
-    - name: Check Setup
+    - name: Check Build
       run: |
         pwd
-        ls $HOME/.android
-        ls
-        ls ./target/android/output/
+        ls -lh ./target/android/output/
         echo test, and deploy your project.

@@ -6,7 +6,7 @@ ANDROID_SDK_TOOLS="4333796"
 export ARCH=`uname -m`
 export ANDROID_NDK_HOME=$HOME/.android/android-ndk-r12b
 export ANDROID_HOME=$HOME/.android
-export PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}
+export PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools:${PATH}
 
 if [ ! -d "$ANDROID_HOME" ]; then
     mkdir -p $ANDROID_HOME
@@ -24,11 +24,13 @@ if [ ! -d "$ANDROID_NDK_HOME" ]; then
     popd
 fi
 
-INDEX=0
-( sleep 5 && while [ $INDEX -lt 10 ]; do sleep 1; INDEX=$((INDEX + 1)); echo y; done ) | android update sdk --filter tools,platform-tools,build-tools-${ANDROID_BUILD_TOOLS},android-${ANDROID_COMPILE_SDK},extra-google-m2repository --no-ui -a
-INDEX=0
-( sleep 5 && while [ $INDEX -lt 10 ]; do sleep 1; INDEX=$((INDEX + 1)); echo y; done ) | android update sdk --filter extra-android-m2repository --no-ui -a
-
+# INDEX=0
+# ( sleep 5 && while [ $INDEX -lt 10 ]; do sleep 1; INDEX=$((INDEX + 1)); echo y; done ) | android update sdk --filter tools,platform-tools,build-tools-${ANDROID_BUILD_TOOLS},android-${ANDROID_COMPILE_SDK},extra-google-m2repository --no-ui -a
+# INDEX=0
+# ( sleep 5 && while [ $INDEX -lt 10 ]; do sleep 1; INDEX=$((INDEX + 1)); echo y; done ) | android update sdk --filter extra-android-m2repository --no-ui -a
+echo y | sdkmanager "platforms;android-${ANDROID_COMPILE_SDK}" >/dev/null
+echo y | sdkmanager "platform-tools" >/dev/null
+echo y | sdkmanager "build-tools;${ANDROID_BUILD_TOOLS}" >/dev/null
 cp local.properties.travis local.properties
 git submodule update --init
 sbt native-build android:package-release

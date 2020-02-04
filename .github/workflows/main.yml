@@ -27,15 +27,16 @@ jobs:
          sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2EE0EA64E40A89B84B2DF73499E82A75642AC823
          sudo apt-get update
          sudo apt-get install sbt
+    - name: Setup Package
+      run: |
+        apt-get --quiet install --yes wget tar unzip gcc-multilib g++-multilib libstdc++6:i386 libgcc1:i386 zlib1g:i386 libncurses5:i386  
     - name: Setup Android SDK
       run: |
-        ./travis-ci/setup.sh    
+        ./travis-ci/setup.sh
     - name: Check Setup
       run: |
         pwd
-        echo "$JAVA_HOME",
-        scala -version
-        which scala
-        which sbt
-        ls $HOME/.android/tools
+        ls $HOME/.android
+        ls
+        ls ./target/android/output/
         echo test, and deploy your project.

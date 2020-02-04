@@ -39,7 +39,7 @@ A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) and [V2Ray](http
         key.store.password: abc
 
 * if you installed multiple versions of Java, use `sudo update-alternatives --config java` to select Java 8
-* Before build apk, make sure inside `./project/build.properties`, sbt.version=0.13.15 
+* Before build apk, make sure inside `./project/build.properties`, sbt.version=0.13.18 
 * Invoke the building like this
 
 ```bash

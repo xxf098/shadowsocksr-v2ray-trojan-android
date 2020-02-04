@@ -2,6 +2,7 @@
 
 A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) and [V2Ray](https://github.com/v2ray/v2ray-core) client for Android, integrate SSR and V2Ray in one application, written in Scala.
 
+ ![build](https://github.com/xxf098/shadowsocksr-v2ray-android/workflows/build/badge.svg?branch=xxf098%2Fdevelop&event=push) [![GitHub release](https://img.shields.io/github/release/xxf098/shadowsocksr-v2ray-android)](https://github.com/xxf098/shadowsocksr-v2ray-android/releases) [![GitHub issues](https://img.shields.io/github/issues/xxf098/shadowsocksr-v2ray-android.svg)](https://GitHub.com/xxf098/shadowsocksr-v2ray-android/issues/) 
  [![Gitter](https://badges.gitter.im/shadowsocksr-v2ray-android/community.svg)](https://gitter.im/shadowsocksr-v2ray-android/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 
@@ -39,7 +40,7 @@ A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) and [V2Ray](http
         key.store.password: abc
 
 * if you installed multiple versions of Java, use `sudo update-alternatives --config java` to select Java 8
-* Before build apk, make sure inside `./project/build.properties`, sbt.version=0.13.15 
+* Before build apk, make sure inside `./project/build.properties`, sbt.version=0.13.18 
 * Invoke the building like this
 
 ```bash

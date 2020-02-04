@@ -1,11 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools" package="com.github.shadowsocks"
           android:versionCode="326"
-          android:versionName="3.6.3">
+          android:versionName="3.7.0">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="android.permission.CAMERA" /> 
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
@@ -23,18 +24,19 @@
 
     <uses-sdk
             android:minSdkVersion="16"
-            android:targetSdkVersion="25"/>
+            android:targetSdkVersion="29"/>
 
     <application
-            android:allowBackup="true"
-            android:name=".ShadowsocksApplication"
-            android:hardwareAccelerated="true"
-            android:icon="@mipmap/ic_launcher"
-            android:roundIcon="@mipmap/ic_launcher"
-            android:backupAgent=".ShadowsocksBackupAgent"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.Material"
-            android:banner="@drawable/ic_start_connected">
+        android:name=".ShadowsocksApplication"
+        android:allowBackup="true"
+        android:backupAgent=".ShadowsocksBackupAgent"
+        android:banner="@drawable/ic_start_connected"
+        android:hardwareAccelerated="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:theme="@style/Theme.Material">
 
         <meta-data android:name="com.google.android.gms.version"
                    android:value="@integer/google_play_services_version"/>

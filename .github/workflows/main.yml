@@ -17,11 +17,22 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-    - name: Setup scala
+    - name: Cache Data
+      uses: actions/cache@v1
+      env:
+        ndk: android-ndk-r12b
+        sdk-tools: 4333796
+        scala-version: scala-2.11.8
+      with:
+        path: ~/.android-cache
+        key: ${{ runner.os }}-android-${{ env.ndk-version }}-${{ env.sdk-tools }}-${{ env.scala-version }}
+        restore-keys: |
+          ${{ runner.os }}-android-${{ env.ndk-version }}-${{ env.sdk-tools }}        
+    - name: Setup Scala
       run: |
         # sudo apt-get remove scala-library scala
-        sudo wget www.scala-lang.org/files/archive/scala-2.11.8.deb
-        sudo dpkg -i scala-2.11.8.deb
+        if [! -f ~/.android-cache/scala-2.11.8.deb ]; then sudo wget -O ~/.android-cache/scala-2.11.8.deb www.scala-lang.org/files/archive/scala-2.11.8.deb; fi
+        sudo dpkg -i ~/.android-cache/scala-2.11.8.deb
     - name: Setup SBT
       run: |
          echo "deb https://dl.bintray.com/sbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
@@ -41,14 +52,6 @@ jobs:
       with:
         path: ~/.sbt
         key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}    
-    - name: Cache Android
-      uses: actions/cache@v1
-      env:
-        ndk: android-ndk-r12b
-        sdk-tools: 4333796
-      with:
-        path: ~/.android-cache
-        key: ${{ runner.os }}-android-${{ env.ndk-version }}-${{ env.sdk-tools }}
     - name: Build apk
       run: |
         ./travis-ci/setup.sh

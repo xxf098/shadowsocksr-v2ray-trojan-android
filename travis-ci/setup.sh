@@ -34,7 +34,7 @@ if [ ! -d "$ANDROID_NDK_HOME" ]; then
     popd
 fi
 
-echo y | sdkmanager "platforms;android-${ANDROID_COMPILE_SDK}" >/dev/null &
+echo y | sdkmanager "platforms;android-${ANDROID_COMPILE_SDK}" >/dev/null
 echo y | sdkmanager "platform-tools" >/dev/null &
 echo y | sdkmanager "build-tools;${ANDROID_BUILD_TOOLS}" >/dev/null &
 wait

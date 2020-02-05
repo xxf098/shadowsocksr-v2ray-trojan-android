@@ -8,7 +8,7 @@ name := "shadowsocksr"
 
 applicationId := "in.zhaoj.shadowsocksrr"
 
-val supportLibVersion = "28.0.0"
+val supportLibVersion = "28.0.0-rc02"
 platformTarget := "android-29"
 
 compileOrder := CompileOrder.JavaThenScala

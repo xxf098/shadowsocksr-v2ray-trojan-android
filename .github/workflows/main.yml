@@ -31,7 +31,8 @@ jobs:
     - name: Setup Scala
       run: |
         # sudo apt-get remove scala-library scala
-        sudo /bin/sh -c 'if [! -f ~/.android-cache/scala-2.11.8.deb ]; then sudo wget -O ~/.android-cache/scala-2.11.8.deb www.scala-lang.org/files/archive/scala-2.11.8.deb; fi'
+        mkdir -p ~/.android-cache
+        sudo /bin/sh -c 'if [ ! -f ~/.android-cache/scala-2.11.8.deb ]; then sudo wget -O ~/.android-cache/scala-2.11.8.deb www.scala-lang.org/files/archive/scala-2.11.8.deb; fi'
         sudo dpkg -i ~/.android-cache/scala-2.11.8.deb
     - name: Setup SBT
       run: |

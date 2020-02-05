@@ -63,5 +63,6 @@ jobs:
         path: target/android/output/shadowsocksr-release.apk
     - name: Check Build
       run: |
+        ls -thls ~/.android-cache
         ls -thla ./target/android/output/
         echo test, and deploy your project.

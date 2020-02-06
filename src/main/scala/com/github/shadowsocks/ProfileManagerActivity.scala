@@ -391,9 +391,12 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
     app.profileManager.setProfileAddedListener(profilesAdapter.add)
     val profilesList = findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
-    val layoutManager = new LinearLayoutManager(this)
+    val layoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false)
     profilesList.setLayoutManager(layoutManager)
-    profilesList.setItemAnimator(new DefaultItemAnimator)
+//    profilesList.addItemDecoration(new DividerItemDecoration(this, layoutManager.getOrientation))
+    val animator = new DefaultItemAnimator
+    animator.setSupportsChangeAnimations(false)
+    profilesList.setItemAnimator(animator)
     profilesList.setAdapter(profilesAdapter)
     layoutManager.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {
       case (profile, i) if profile.id == app.profileId => i

@@ -461,11 +461,12 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (Utils.isLollipopOrAbove) {
 
       if (profile.proxyApps) {
+        if (!profile.bypass) builder.addAllowedApplication(getPackageName)
         for (pkg <- profile.individual.split('\n')) {
           try {
             if (!profile.bypass) {
               builder.addAllowedApplication(pkg)
-            } else {
+            } else if (pkg != getPackageName) {
               builder.addDisallowedApplication(pkg)
             }
           } catch {

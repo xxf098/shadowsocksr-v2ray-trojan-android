@@ -83,7 +83,7 @@ object AppManager {
     }
     synchronized {
       if (cachedApps == null) cachedApps = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
-        .filter(p => p.requestedPermissions != null && p.requestedPermissions.contains(permission.INTERNET))
+        .filter(p => p.requestedPermissions != null && p.requestedPermissions.contains(permission.INTERNET) && p.packageName != app.getPackageName)
         .map(p => ProxiedApp(pm.getApplicationLabel(p.applicationInfo).toString, p.packageName,
           p.applicationInfo.loadIcon(pm))).toArray
       cachedApps

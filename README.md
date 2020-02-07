@@ -2,16 +2,18 @@
 
 A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) and [V2Ray](https://github.com/v2ray/v2ray-core) client for Android, integrate SSR and V2Ray in one application, written in Scala.
 
- ![build](https://github.com/xxf098/shadowsocksr-v2ray-android/workflows/build/badge.svg?branch=xxf098%2Fdevelop&event=push) [![GitHub release](https://img.shields.io/github/release/xxf098/shadowsocksr-v2ray-android)](https://github.com/xxf098/shadowsocksr-v2ray-android/releases) [![GitHub issues](https://img.shields.io/github/issues/xxf098/shadowsocksr-v2ray-android.svg)](https://GitHub.com/xxf098/shadowsocksr-v2ray-android/issues/) 
+ ![build](https://github.com/xxf098/shadowsocksr-v2ray-android/workflows/build/badge.svg?branch=xxf098%2Fmaster&event=push) 
+ [![GitHub release](https://img.shields.io/github/release/xxf098/shadowsocksr-v2ray-android)](https://github.com/xxf098/shadowsocksr-v2ray-android/releases) 
+ [![GitHub issues](https://img.shields.io/github/issues/xxf098/shadowsocksr-v2ray-android.svg)](https://GitHub.com/xxf098/shadowsocksr-v2ray-android/issues/) 
  [![Gitter](https://badges.gitter.im/shadowsocksr-v2ray-android/community.svg)](https://gitter.im/shadowsocksr-v2ray-android/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 
 ### PREREQUISITES
 
 * JDK 1.8
-* SBT 0.13.0+
+* SBT 0.13.8
 * Android SDK
-  - Build Tools 27+
+  - Build Tools 29+
   - Android Support Repository and Google Repository (see `build.sbt` for version)
 * Android NDK r12b `High version may case something build fail`
 

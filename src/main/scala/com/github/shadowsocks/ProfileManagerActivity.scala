@@ -56,6 +56,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 // TODO: AndroidX
+// todo: import export
 final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext
   with View.OnClickListener with CreateNdefMessageCallback {
 
@@ -390,9 +391,12 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
     app.profileManager.setProfileAddedListener(profilesAdapter.add)
     val profilesList = findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
-    val layoutManager = new LinearLayoutManager(this)
+    val layoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false)
     profilesList.setLayoutManager(layoutManager)
-    profilesList.setItemAnimator(new DefaultItemAnimator)
+//    profilesList.addItemDecoration(new DividerItemDecoration(this, layoutManager.getOrientation))
+    val animator = new DefaultItemAnimator
+    animator.setSupportsChangeAnimations(false)
+    profilesList.setItemAnimator(animator)
     profilesList.setAdapter(profilesAdapter)
     layoutManager.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {
       case (profile, i) if profile.id == app.profileId => i
@@ -400,7 +404,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     undoManager = new UndoSnackbarManager[Profile](profilesList, profilesAdapter.undo, profilesAdapter.commit)
     if (is_sort == false) {
       new ItemTouchHelper(new SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
-        ItemTouchHelper.START | ItemTouchHelper.END) {
+        ItemTouchHelper.START) {
+
         def onSwiped(viewHolder: ViewHolder, direction: Int) = {
           val index = viewHolder.getAdapterPosition
           profilesAdapter.remove(index)
@@ -982,6 +987,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       }
       Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show
       true
+      // startFilesForResult
     case R.id.action_export_file =>
       val dateFormat = new SimpleDateFormat("yyyyMMddhhmmss")
       val date = dateFormat.format(new Date())

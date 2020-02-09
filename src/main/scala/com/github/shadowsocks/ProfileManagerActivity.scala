@@ -141,16 +141,13 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     }
 
     def updateText(txTotal: Long = 0, rxTotal: Long = 0, elapsedInput: Long = -1) {
-//      val builder = new SpannableStringBuilder
       val tx = item.tx + txTotal
       val rx = item.rx + rxTotal
       val elapsed = if (elapsedInput != -1) elapsedInput else item.elapsed
-      var trafficStatus = ""
-      if (tx != 0 || rx != 0 || elapsed != 0 || item.url_group != "") {
-        trafficStatus = getString(R.string.stat_profiles,
-          TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx), String.valueOf(elapsed), item.url_group)
-        trafficStatus = trafficStatus.trim
-      }
+      val trafficStatus = if (tx != 0 || rx != 0 || elapsed != 0 || item.url_group != "") {
+        getString(R.string.stat_profiles,
+          TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx), String.valueOf(elapsed), item.url_group).trim
+      } else ""
       handler.post(() => {
         text1.setText(item.name)
         tvTraffic.setText(trafficStatus)
@@ -161,11 +158,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       this.item = item
       updateText()
       if (item.id == app.profileId) {
-//        text.setChecked(true)
         itemView.setSelected(true)
         selectedItem = this
       } else {
-//        text.setChecked(false)
         itemView.setSelected(false)
         if (selectedItem eq this) selectedItem = null
       }
@@ -188,6 +183,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     } else false
   }
 
+  // TODO: update adapter
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
     var profiles = new ArrayBuffer[Profile]
     profiles ++= getProfilesByGroup(currentGroupName)
@@ -397,7 +393,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     val profilesList = findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
     val layoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false)
     profilesList.setLayoutManager(layoutManager)
-//    profilesList.addItemDecoration(new DividerItemDecoration(this, layoutManager.getOrientation))
+    profilesList.addItemDecoration(new DividerItemDecoration(this, layoutManager.getOrientation))
     val animator = new DefaultItemAnimator
     animator.setSupportsChangeAnimations(false)
     profilesList.setItemAnimator(animator)

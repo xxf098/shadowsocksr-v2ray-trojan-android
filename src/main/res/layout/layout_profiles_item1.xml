@@ -65,6 +65,7 @@
         android:layout_marginBottom="@dimen/profile_padding"
         android:layout_marginEnd="12dp"
         android:ellipsize="end"
+        android:maxLines="2"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="?android:attr/textColorSecondary"
         android:layout_gravity="center_vertical"

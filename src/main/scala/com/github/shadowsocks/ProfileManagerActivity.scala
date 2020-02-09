@@ -64,7 +64,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     with View.OnClickListener with View.OnKeyListener {
 
     var item: Profile = _
-    private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
+//    private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
+    // profile name
+    private val text1 = itemView.findViewById(android.R.id.text1).asInstanceOf[TextView]
+    // trafic
+    private val tvTraffic = itemView.findViewById(R.id.traffic).asInstanceOf[TextView]
     itemView.setOnClickListener(this)
     itemView.setOnKeyListener(this)
 
@@ -137,32 +141,32 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     }
 
     def updateText(txTotal: Long = 0, rxTotal: Long = 0, elapsedInput: Long = -1) {
-      val builder = new SpannableStringBuilder
+//      val builder = new SpannableStringBuilder
       val tx = item.tx + txTotal
       val rx = item.rx + rxTotal
-      var elapsed = item.elapsed
-      if (elapsedInput != -1) {
-        elapsed = elapsedInput
-      }
-      builder.append(item.name)
+      val elapsed = if (elapsedInput != -1) elapsedInput else item.elapsed
+      var trafficStatus = ""
       if (tx != 0 || rx != 0 || elapsed != 0 || item.url_group != "") {
-        val start = builder.length
-        builder.append(getString(R.string.stat_profiles,
-          TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx), String.valueOf(elapsed), item.url_group))
-        builder.setSpan(new TextAppearanceSpan(ProfileManagerActivity.this, android.R.style.TextAppearance_Small),
-          start + 1, builder.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        trafficStatus = getString(R.string.stat_profiles,
+          TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx), String.valueOf(elapsed), item.url_group)
+        trafficStatus = trafficStatus.trim
       }
-      handler.post(() => text.setText(builder))
+      handler.post(() => {
+        text1.setText(item.name)
+        tvTraffic.setText(trafficStatus)
+      })
     }
 
     def bind(item: Profile) {
       this.item = item
       updateText()
       if (item.id == app.profileId) {
-        text.setChecked(true)
+//        text.setChecked(true)
+        itemView.setSelected(true)
         selectedItem = this
       } else {
-        text.setChecked(false)
+//        text.setChecked(false)
+        itemView.setSelected(false)
         if (selectedItem eq this) selectedItem = null
       }
     }
@@ -209,7 +213,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     def onBindViewHolder(vh: ProfileViewHolder, i: Int) = vh.bind(profiles(i))
 
     def onCreateViewHolder(vg: ViewGroup, i: Int) =
-      new ProfileViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_profiles_item, vg, false))
+      new ProfileViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_profiles_item1, vg, false))
 
     def add(item: Profile) {
       undoManager.flush

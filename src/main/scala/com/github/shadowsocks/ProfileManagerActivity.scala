@@ -64,7 +64,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     with View.OnClickListener with View.OnKeyListener {
 
     var item: Profile = _
-    private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
+//    private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
+    // profile name
+    private val text1 = itemView.findViewById(android.R.id.text1).asInstanceOf[TextView]
+    // trafic
+    private val tvTraffic = itemView.findViewById(R.id.traffic).asInstanceOf[TextView]
     itemView.setOnClickListener(this)
     itemView.setOnKeyListener(this)
 
@@ -137,32 +141,27 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     }
 
     def updateText(txTotal: Long = 0, rxTotal: Long = 0, elapsedInput: Long = -1) {
-      val builder = new SpannableStringBuilder
       val tx = item.tx + txTotal
       val rx = item.rx + rxTotal
-      var elapsed = item.elapsed
-      if (elapsedInput != -1) {
-        elapsed = elapsedInput
-      }
-      builder.append(item.name)
-      if (tx != 0 || rx != 0 || elapsed != 0 || item.url_group != "") {
-        val start = builder.length
-        builder.append(getString(R.string.stat_profiles,
-          TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx), String.valueOf(elapsed), item.url_group))
-        builder.setSpan(new TextAppearanceSpan(ProfileManagerActivity.this, android.R.style.TextAppearance_Small),
-          start + 1, builder.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-      }
-      handler.post(() => text.setText(builder))
+      val elapsed = if (elapsedInput != -1) elapsedInput else item.elapsed
+      val trafficStatus = if (tx != 0 || rx != 0 || elapsed != 0 || item.url_group != "") {
+        getString(R.string.stat_profiles,
+          TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx), String.valueOf(elapsed), item.url_group).trim
+      } else ""
+      handler.post(() => {
+        text1.setText(item.name)
+        tvTraffic.setText(trafficStatus)
+      })
     }
 
     def bind(item: Profile) {
       this.item = item
       updateText()
       if (item.id == app.profileId) {
-        text.setChecked(true)
+        itemView.setSelected(true)
         selectedItem = this
       } else {
-        text.setChecked(false)
+        itemView.setSelected(false)
         if (selectedItem eq this) selectedItem = null
       }
     }
@@ -184,6 +183,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     } else false
   }
 
+  // TODO: update adapter
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
     var profiles = new ArrayBuffer[Profile]
     profiles ++= getProfilesByGroup(currentGroupName)
@@ -209,7 +209,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     def onBindViewHolder(vh: ProfileViewHolder, i: Int) = vh.bind(profiles(i))
 
     def onCreateViewHolder(vg: ViewGroup, i: Int) =
-      new ProfileViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_profiles_item, vg, false))
+      new ProfileViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_profiles_item1, vg, false))
 
     def add(item: Profile) {
       undoManager.flush
@@ -393,7 +393,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     val profilesList = findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
     val layoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false)
     profilesList.setLayoutManager(layoutManager)
-//    profilesList.addItemDecoration(new DividerItemDecoration(this, layoutManager.getOrientation))
+    profilesList.addItemDecoration(new DividerItemDecoration(this, layoutManager.getOrientation))
     val animator = new DefaultItemAnimator
     animator.setSupportsChangeAnimations(false)
     profilesList.setItemAnimator(animator)

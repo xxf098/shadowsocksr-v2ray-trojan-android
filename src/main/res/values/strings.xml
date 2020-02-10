@@ -12,7 +12,7 @@
   <string name="nat_summary">Use NAT mode instead of VPN mode. Requires ROOT permission.</string>
   <string name="stat">Network Traffic</string>
   <string name="stat_summary">Sent: \t\t\t\t\t%3$s\t↑\t%1$s/s\nReceived: \t%4$s\t↓\t%2$s/s</string>
-  <string name="stat_profiles">\n%1$s↑\t%2$s↓\t%3$sms\t%4$s</string>
+  <string name="stat_profiles" translatable="false">\n%1$s↑\t%2$s↓\t%3$sms\t%4$s</string>
   <string name="traffic_summary">%1$s/s↑\t%2$s/s↓</string>
   <plurals name="bytes" translatable="false">
     <item quantity="one">Byte</item>
@@ -226,7 +226,7 @@
   <!-- status -->
   <string name="sent">Sent:</string>
   <string name="received">Received:</string>
-  <string name="allgroups">All Groups</string>
+  <string name="allgroups" translatable="false">All Groups</string>
 
 <!--  PreferenceScreen-->
   <string name="preferenceScreen" translatable="false">preferenceScreen</string>
@@ -235,5 +235,8 @@
   <string name="ssrPreferenceGroup" translatable="false">ssrPreferenceGroup</string>
   <string name="featurePreferenceGroup" translatable="false">featurePreferenceGroup</string>
   <string name="miscPreferenceGroup" translatable="false">miscPreferenceGroup</string>
+
+  <string name="traffic" translatable="false">%1$s↑\t%2$s↓</string>
+  <string name="default_group" translatable="false">Default Group</string>
 
 </resources>

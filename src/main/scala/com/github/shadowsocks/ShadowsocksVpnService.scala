@@ -50,7 +50,7 @@ import java.nio.charset.{Charset, StandardCharsets}
 import android.annotation.SuppressLint
 import android.content._
 import android.content.pm.PackageManager.NameNotFoundException
-import android.net.{LocalSocket, LocalSocketAddress, VpnService}
+import android.net.{ConnectivityManager, LocalSocket, LocalSocketAddress, Network, NetworkCapabilities, NetworkInfo, NetworkRequest, VpnService}
 import android.os._
 import android.system.Os
 import android.util.Log
@@ -59,6 +59,11 @@ import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.job.AclSyncJob
 import com.github.shadowsocks.utils._
 import com.github.shadowsocks.utils.CloseUtils._
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.LinkAddress
+import android.net.LinkProperties
+import android.net.Network
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -491,6 +496,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       builder.addRoute(china_dns_address, 32)
     else
       builder.addRoute(dns_address, 32)
+    if (Build.VERSION.SDK_INT >= 29) {
+      val cm = getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
+      builder.setMetered(cm.isActiveNetworkMetered)
+    }
     builder
   }
 
@@ -541,4 +550,46 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     }
     false
   }
+
+  class NetworkConnectivityMonitor extends ConnectivityManager.NetworkCallback {
+    lazy val connectivityManager = getSystemService(classOf[ConnectivityManager])
+    var underlyingNetwork : Network = _
+
+    override def onAvailable(network: Network): Unit = {
+      val networkInfo = connectivityManager.getNetworkInfo(network)
+//      underlyingNetwork = network
+      Log.e(TAG,  "onAvailable " + connectivityManager.isActiveNetworkMetered)
+//      if (networkInfo == null || networkInfo.getState != NetworkInfo.State.CONNECTED) {
+//        return
+//      }
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) setUnderlyingNetworks(Array(underlyingNetwork))
+    }
+
+
+    override def onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities): Unit = {
+      val networkInfo = connectivityManager.getNetworkInfo(network)
+//      underlyingNetwork = network
+      Log.e(TAG,  "onCapabilitiesChanged " + connectivityManager.isActiveNetworkMetered)
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) setUnderlyingNetworks(Array(underlyingNetwork))
+    }
+
+    override def onLost(network: Network): Unit = {
+//      underlyingNetwork = network
+//      val activeNetworkInfo = connectivityManager.getActiveNetworkInfo
+//      if (activeNetworkInfo != null && activeNetworkInfo.getState == NetworkInfo.State.CONNECTED) {
+//          return
+//      }
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) setUnderlyingNetworks(null)
+    }
+  }
+
+  def startNetworkConnectivityMonitor(): Unit = {
+
+  }
+
+
+  def stopNetworkConnectivityMonitor (): Unit = {
+  }
 }
+
+

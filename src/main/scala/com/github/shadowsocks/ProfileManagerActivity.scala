@@ -145,8 +145,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val rx = item.rx + rxTotal
       val elapsed = if (elapsedInput != -1) elapsedInput else item.elapsed
       val trafficStatus = if (tx != 0 || rx != 0 || elapsed != 0 || item.url_group != "") {
+        val serverAddress = if(item.isV2Ray) item.v_add else item.host
         getString(R.string.stat_profiles,
-          TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx), String.valueOf(elapsed), item.url_group).trim
+          TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx), String.valueOf(elapsed), serverAddress).trim
       } else ""
       handler.post(() => {
         text1.setText(item.name)

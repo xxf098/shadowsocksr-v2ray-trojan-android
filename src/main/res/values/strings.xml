@@ -183,6 +183,7 @@
   <string name="action_full_test">Full latency test</string>
   <string name="action_sort">Auto sort by latency</string>
   <string name="ping">Ping</string>
+  <string name="clear_current_group">Clear Current Group</string>
 
   <string name="frontproxy_enable">Enable</string>
   <string name="frontproxy_addr">Address</string>

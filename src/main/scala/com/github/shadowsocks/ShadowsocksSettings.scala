@@ -37,7 +37,7 @@ object ShadowsocksSettings {
   private final val TAG = "ShadowsocksSettings"
   private val PROXY_PREFS = Array(Key.group_name, Key.name, Key.host, Key.remotePort, Key.localPort, Key.password, Key.method,
     Key.protocol, Key.obfs, Key.obfs_param, Key.dns, Key.china_dns, Key.protocol_param, Key.v_ps,
-    Key.v_id, Key.v_add, Key.v_host, Key.v_port, Key.v_path, Key.v_id_json, Key.v_add_json)
+    Key.v_id, Key.v_add, Key.v_host, Key.v_port, Key.v_path, Key.v_aid, Key.v_id_json, Key.v_add_json)
   private val FEATURE_PREFS = Array(Key.route, Key.proxyApps, Key.udpdns, Key.ipv6, Key.tfo)
 
   // Helper functions
@@ -69,6 +69,7 @@ object ShadowsocksSettings {
         case Key.group_name => updateSummaryEditTextPreference(pref, profile.url_group)
         case Key.v_ps => updateSummaryEditTextPreference(pref, profile.v_ps)
         case Key.v_port => updateNumberPickerPreference(pref, Option(profile.v_port).getOrElse("0").toInt)
+        case Key.v_aid => updateNumberPickerPreference(pref, Option(profile.v_aid).getOrElse("0").toInt)
         case Key.v_path => updateSummaryEditTextPreference(pref, profile.v_path)
         case Key.v_host => updateSummaryEditTextPreference(pref, profile.v_host)
         case Key.route => updateDropDownPreference(pref, profile.route)

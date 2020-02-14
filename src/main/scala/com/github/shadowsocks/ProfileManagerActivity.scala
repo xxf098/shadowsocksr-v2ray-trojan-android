@@ -55,6 +55,18 @@ import Profile._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+object ProfileManagerActivity {
+  def getProfilesByGroup (groupName: String, is_sort: Boolean): List[Profile] = {
+    val allGroup = app.getString(R.string.allgroups)
+    return {(groupName, is_sort) match {
+      case (`allGroup`, true) => app.profileManager.getAllProfilesByElapsed
+      case (`allGroup`, false) => app.profileManager.getAllProfiles
+      case (_, true) => app.profileManager.getAllProfilesByGroupOrderByElapse(groupName)
+      case (_, false) => app.profileManager.getAllProfilesByGroup(groupName)
+    }}.getOrElse(List.empty[Profile])
+  }
+}
+
 // TODO: AndroidX
 // todo: import export
 final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext
@@ -197,15 +209,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       notifyDataSetChanged()
     }
 
-    def getProfilesByGroup (groupName: String): List[Profile] = {
-      val allGroup = app.getString(R.string.allgroups)
-      return {(groupName, is_sort) match {
-        case (`allGroup`, true) => app.profileManager.getAllProfilesByElapsed
-        case (`allGroup`, false) => app.profileManager.getAllProfiles
-        case (_, true) => app.profileManager.getAllProfilesByGroupOrderByElapse(groupName)
-        case (_, false) => app.profileManager.getAllProfilesByGroup(groupName)
-      }}.getOrElse(List.empty[Profile])
-    }
+    def getProfilesByGroup (groupName: String): List[Profile] = ProfileManagerActivity.getProfilesByGroup(groupName, is_sort)
 
     def getItemCount = profiles.length
 
@@ -1171,6 +1175,21 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       finish()
       val intent = new Intent(Action.SORT)
       startActivity(intent)
+      true
+    case R.id.batch_delete =>
+      val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
+        .setTitle("Batch Delete")
+        .setPositiveButton(android.R.string.yes, ((_, _) =>{
+          ProfileManagerActivity.getProfilesByGroup(currentGroupName, is_sort)
+            .filter(_.id != app.profileId)
+            .foreach(profile => app.profileManager.delProfile(profile.id))
+          finish()
+          startActivity(new Intent(getIntent()))
+        }): DialogInterface.OnClickListener)
+        .setNegativeButton(android.R.string.no, null)
+        .setMessage(getString(R.string.batch_delete_msg, currentGroupName))
+        .create()
+      dialog.show()
       true
     case _ => false
   }

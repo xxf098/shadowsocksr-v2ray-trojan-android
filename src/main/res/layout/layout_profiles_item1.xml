@@ -56,20 +56,38 @@
             app:srcCompat="@drawable/ic_social_share"/>
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/traffic"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
-        android:layout_alignParentStart="true"
-        android:layout_marginBottom="@dimen/profile_padding"
-        android:layout_marginEnd="12dp"
-        android:ellipsize="end"
-        android:maxLines="2"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="?android:attr/textColorSecondary"
-        android:layout_gravity="center_vertical"
-        android:gravity="center_vertical"
-        tools:text="@string/traffic"/>
+        >
+
+        <TextView
+            android:id="@android:id/text2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="@dimen/profile_padding"
+            android:layout_marginEnd="12dp"
+            android:layout_toStartOf="@+id/traffic"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="?android:attr/textColorSecondary"
+            tools:text="Address"/>
+
+        <TextView
+            android:id="@+id/traffic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="@dimen/profile_padding"
+            android:layout_marginEnd="12dp"
+            android:ellipsize="end"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="?android:attr/textColorSecondary"
+            tools:text="@string/traffic"/>
+    </RelativeLayout>
 
 </LinearLayout>

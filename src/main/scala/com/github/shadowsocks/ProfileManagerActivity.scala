@@ -67,6 +67,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 //    private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
     // profile name
     private val text1 = itemView.findViewById(android.R.id.text1).asInstanceOf[TextView]
+    private val text2 = itemView.findViewById(android.R.id.text2).asInstanceOf[TextView]
     // trafic
     private val tvTraffic = itemView.findViewById(R.id.traffic).asInstanceOf[TextView]
     itemView.setOnClickListener(this)
@@ -145,12 +146,13 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val rx = item.rx + rxTotal
       val elapsed = if (elapsedInput != -1) elapsedInput else item.elapsed
       val trafficStatus = if (tx != 0 || rx != 0 || elapsed != 0 || item.url_group != "") {
-        val serverAddress = if(item.isV2Ray) item.v_add else item.host
         getString(R.string.stat_profiles,
-          TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx), String.valueOf(elapsed), serverAddress).trim
+          TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx), String.valueOf(elapsed), "").trim
       } else ""
       handler.post(() => {
         text1.setText(item.name)
+        val serverAddress = if(item.isV2Ray) item.v_add else item.host
+        text2.setText(serverAddress)
         tvTraffic.setText(trafficStatus)
       })
     }

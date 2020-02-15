@@ -25,10 +25,10 @@ import scala.concurrent.Future
 
 
 
-class V2RayConfigActivity extends AppCompatActivity with
+class ConfigActivity extends AppCompatActivity with
   OnMenuItemClickListener{
 
-  private final val TAG = "V2RayConfigActivity"
+  private final val TAG = "ConfigActivity"
   private var etConfig: EditText = _
   private var profile: Profile = _
 

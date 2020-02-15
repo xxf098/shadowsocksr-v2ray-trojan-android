@@ -1022,7 +1022,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       startActivityForResult(Intent.createChooser(intent, "SSR"), REQUEST_IMPORT_QRCODE_IMAGE)
       true
     case R.id.action_add_v2ray_config =>
-      startActivity(new Intent(this, classOf[V2RayConfigActivity]))
+      startActivity(new Intent(this, classOf[ConfigActivity]))
       true
     case R.id.action_full_test =>
       val testProfiles = if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles

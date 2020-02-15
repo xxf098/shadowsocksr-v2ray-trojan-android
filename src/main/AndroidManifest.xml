@@ -121,8 +121,8 @@
                 android:excludeFromRecents="true"/>
 
         <activity
-            android:name=".V2RayConfigActivity"
-            android:label="@string/v2ray_config"
+            android:name=".ConfigActivity"
+            android:label="@string/config_activity"
             android:parentActivityName=".ProfileManagerActivity"
             android:excludeFromRecents="true"
             android:windowSoftInputMode="stateHidden"/>

@@ -60,7 +60,7 @@ libraryDependencies ++=
   "com.mikepenz" % "materialize" % "1.0.0" ::
   "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2" ::
   "dnsjava" % "dnsjava" % "2.1.9" ::
-  "eu.chainfire" % "libsuperuser" % "1.0.0.+" ::
+  "eu.chainfire" % "libsuperuser" % "1.0.0.201704021214" ::
   "me.dm7.barcodescanner" % "zxing" % "1.9.8" ::
   "net.glxn.qrgen" % "android" % "2.0" ::
   "com.squareup.okhttp3" % "okhttp" % "4.2.2" ::

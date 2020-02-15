@@ -15,6 +15,7 @@ import com.github.shadowsocks.utils.Parser.TAG
 import com.github.shadowsocks.utils.{ConfigUtils, Key, Parser}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
+import com.github.shadowsocks.fragments.V2RayConfigFragment
 import com.google.gson.{Gson, GsonBuilder, JsonParser}
 import go.Seq
 import org.json.JSONObject
@@ -25,21 +26,21 @@ import scala.concurrent.Future
 
 
 
-class ConfigActivity extends AppCompatActivity with
-  OnMenuItemClickListener{
+class ConfigActivity extends AppCompatActivity{
 
   private final val TAG = "ConfigActivity"
   private var etConfig: EditText = _
   private var profile: Profile = _
+  var toolbar: Toolbar = _
 
   override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
     Seq.setContext(getApplicationContext)
     getWindow.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
     getWindow.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
-    setContentView(R.layout.layout_v2ray_config)
+    setContentView(R.layout.layout_config)
 
-    val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
+    toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
     toolbar.setTitle(R.string.v2ray_config)
     toolbar.setNavigationIcon(R.drawable.ic_navigation_close)
     toolbar.setNavigationOnClickListener(_ => {
@@ -48,34 +49,16 @@ class ConfigActivity extends AppCompatActivity with
         TaskStackBuilder.create(this).addNextIntentWithParentStack(intent).startActivities()
       else finish()
     })
-    toolbar.inflateMenu(R.menu.v2ray_config_menu)
-    toolbar.setOnMenuItemClickListener(this)
-    etConfig = findViewById(R.id.config_view).asInstanceOf[EditText]
-    val profileId = getIntent.getIntExtra(Key.EXTRA_PROFILE_ID, -1)
-    profileId match {
-      case -1 => etConfig.setText(ConfigUtils.V2RAY_CONFIG, TextView.BufferType.EDITABLE)
-      case _ => {
-        app.profileManager.getProfile(profileId) match {
-          case Some(p) => {
-            profile = p
-            etConfig.setText(profile.v_json_config, TextView.BufferType.EDITABLE)
-          }
-          case None => finish()
-        }
-      }
-    }
-  }
+    // start fragment
+    val v2rayConfigFragment = new V2RayConfigFragment()
+    val bundle = new Bundle()
+    bundle.putInt(Key.EXTRA_PROFILE_ID, getIntent.getIntExtra(Key.EXTRA_PROFILE_ID, -1))
+    v2rayConfigFragment.setArguments(bundle)
+    getSupportFragmentManager()
+      .beginTransaction()
+      .replace(R.id.config_fragment_holder, v2rayConfigFragment)
+      .commitAllowingStateLoss()
 
-  def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
-    case R.id.action_save_v2ray_config => {
-      saveConfig(etConfig.getText.toString)
-      true
-    }
-    case R.id.action_clear_v2ray_config => {
-      etConfig.setText("", TextView.BufferType.EDITABLE)
-      true
-    }
-    case _ => false
   }
 
   def saveConfig(config: String): Unit = {

@@ -188,7 +188,7 @@
   <string name="frontproxy_type">类型</string>
   <string name="frontproxy_set">前置代理</string>
 
-  <string name="add_profile_methods_ssr_sub">添加/升级 SSR 订阅</string>
+  <string name="add_profile_methods_ssr_sub">管理 SSR|V2Ray 订阅</string>
   <string name="ssrsub_autoupdate_enable">自动更新</string>
   <string name="ssrsub_add">添加订阅地址</string>
   <string name="ssrsub_ok">确定并升级</string>

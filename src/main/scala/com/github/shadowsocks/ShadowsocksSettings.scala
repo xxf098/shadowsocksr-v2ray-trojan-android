@@ -213,6 +213,26 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       true
     })
 
+    findPreference(Key.v_port).setOnPreferenceChangeListener((_, value) => {
+      profile.v_port = value.asInstanceOf[String]
+      app.profileManager.updateProfile(profile)
+    })
+
+    findPreference(Key.v_aid).setOnPreferenceChangeListener((_, value) => {
+      profile.v_aid = value.asInstanceOf[String]
+      app.profileManager.updateProfile(profile)
+    })
+
+    findPreference(Key.v_host).setOnPreferenceChangeListener((_, value) => {
+      profile.v_host = value.asInstanceOf[String]
+      app.profileManager.updateProfile(profile)
+    })
+
+    findPreference(Key.v_path).setOnPreferenceChangeListener((_, value) => {
+      profile.v_path = value.asInstanceOf[String]
+      app.profileManager.updateProfile(profile)
+    })
+
     findPreference(Key.v_id).setOnPreferenceClickListener((preference: Preference) => {
       val HostEditText = new EditText(activity)
       HostEditText.setText(profile.v_id)

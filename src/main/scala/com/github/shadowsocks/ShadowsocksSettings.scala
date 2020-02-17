@@ -214,12 +214,12 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     })
 
     findPreference(Key.v_port).setOnPreferenceChangeListener((_, value) => {
-      profile.v_port = value.asInstanceOf[String]
+      profile.v_port = value.asInstanceOf[Int].toString
       app.profileManager.updateProfile(profile)
     })
 
     findPreference(Key.v_aid).setOnPreferenceChangeListener((_, value) => {
-      profile.v_aid = value.asInstanceOf[String]
+      profile.v_aid = value.asInstanceOf[Int].toString
       app.profileManager.updateProfile(profile)
     })
 

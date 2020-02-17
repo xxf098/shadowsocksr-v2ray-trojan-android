@@ -72,7 +72,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Random, Try}
 // TODO: route
-
+// TODO: update shadowsocks-libev
 object Typefaces {
   def get(c: Context, assetPath: String): Typeface = {
     cache synchronized {
@@ -344,7 +344,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     setContentView(R.layout.layout_main)
     // Initialize Toolbar
     val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
-    toolbar.setTitle("shadowsocksr Ray") // non-translatable logo
+    updateTitle(toolbar)
     toolbar.setTitleTextAppearance(toolbar.getContext, R.style.Toolbar_Logo)
     val field = classOf[Toolbar].getDeclaredField("mTitleTextView")
     field.setAccessible(true)
@@ -465,9 +465,19 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   protected override def onResume() {
     super.onResume()
 
+    val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
+    updateTitle(toolbar)
+
     app.refreshContainerHolder
 
     updateState(updateCurrentProfile())
+  }
+
+  private[this] def updateTitle (toolbar: Toolbar): Unit = {
+    app.currentProfile.filter(_.isV2Ray) match {
+      case Some(_) => toolbar.setTitle("V2Ray")
+      case None => toolbar.setTitle("shadowsocks R")
+    }
   }
 
   private def updatePreferenceScreen(profile: Profile) {

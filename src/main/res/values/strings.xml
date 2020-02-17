@@ -155,6 +155,7 @@
   <string name="action_import_msg">Successfully imported profiles.</string>
   <string name="action_import_err">Failed to import profiles!</string>
   <string name="v2ray_config">V2Ray Config</string>
+  <string name="config_activity">Config Activity</string>
   <string name="action_add_v2ray_config">Import from V2Ray Config</string>
   <string name="action_save_v2ray_config">Save</string>
   <string name="action_clear_v2ray_config">Clear</string>
@@ -183,6 +184,8 @@
   <string name="action_full_test">Full latency test</string>
   <string name="action_sort">Auto sort by latency</string>
   <string name="ping">Ping</string>
+  <string name="batch_delete">Batch Delete</string>
+  <string name="batch_delete_msg">Delete all profiles in %s</string>
 
   <string name="frontproxy_enable">Enable</string>
   <string name="frontproxy_addr">Address</string>
@@ -193,7 +196,7 @@
   <string name="frontproxy_set">FrontProxy</string>
 
 
-  <string name="add_profile_methods_ssr_sub">Add/Update SSR Subscription</string>
+  <string name="add_profile_methods_ssr_sub">Manage SSR|V2Ray Subscription</string>
   <string name="ssrsub_autoupdate_enable">Auto Update</string>
   <string name="ssrsub_add">Add URL</string>
   <string name="ssrsub_ok">Save and Update</string>

@@ -101,6 +101,13 @@
             android:persistent="false"
             android:summary="Click to see user id"
             android:title="UserID" />
+        <com.github.shadowsocks.preferences.NumberPickerPreference
+            android:key="v_aid"
+            android:persistent="false"
+            android:summary="%d"
+            android:title="AlterId"
+            app:max="65535"
+            app:min="1" />
         <com.github.shadowsocks.preferences.SummaryEditTextPreference
             android:key="v_path"
             android:summary="Path"

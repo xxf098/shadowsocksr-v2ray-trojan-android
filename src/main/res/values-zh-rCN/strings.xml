@@ -176,6 +176,9 @@
   <string name="action_full_test">完整延时测试</string>
   <string name="action_sort">基于延时自动排序</string>
   <string name="ping">测试延时</string>
+  <string name="batch_delete">批量删除</string>
+  <string name="batch_delete_msg">删除"%s"所有节点</string>
+
 
   <string name="frontproxy_enable">启用</string>
   <string name="frontproxy_addr">地址</string>
@@ -185,7 +188,7 @@
   <string name="frontproxy_type">类型</string>
   <string name="frontproxy_set">前置代理</string>
 
-  <string name="add_profile_methods_ssr_sub">添加/升级 SSR 订阅</string>
+  <string name="add_profile_methods_ssr_sub">管理 SSR|V2Ray 订阅</string>
   <string name="ssrsub_autoupdate_enable">自动更新</string>
   <string name="ssrsub_add">添加订阅地址</string>
   <string name="ssrsub_ok">确定并升级</string>

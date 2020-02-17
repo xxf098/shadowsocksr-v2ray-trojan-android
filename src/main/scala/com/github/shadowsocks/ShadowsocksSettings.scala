@@ -133,10 +133,13 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     addPreferencesFromResource(R.xml.pref_all)
     getPreferenceManager.getSharedPreferences.registerOnSharedPreferenceChangeListener(this)
 
-    findPreference(Key.group_name).setOnPreferenceChangeListener((_, value) => {
+    ssrCategory = Option(ssrCategory).getOrElse(findPreference(getResources.getString(R.string.ssrPreferenceGroup)).asInstanceOf[PreferenceGroup])
+    vmessCategory  = Option(vmessCategory).getOrElse(findPreference(getResources.getString(R.string.vmessPreferenceGroup)).asInstanceOf[PreferenceGroup])
+    val categories = List(ssrCategory, vmessCategory).filter(category => category != null)
+    categories.foreach(_.findPreference(Key.group_name).setOnPreferenceChangeListener((_, value) => {
       profile.url_group = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
-    })
+    }))
     findPreference(Key.name).setOnPreferenceChangeListener((_, value) => {
       profile.name = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)

@@ -330,6 +330,10 @@ object Key {
   val currentGroupName = "currentGroupName"
 
   val EXTRA_PROFILE_ID = "EXTRA_PROFILE_ID"
+
+  val FRAGMENT_NAME = "FRAGMENT_NAME"
+  val FRAGMENT_V2RAY_CONFIG = "FRAGMENT_V2RAY_CONFIG"
+  val FRAGMENT_SUBSCRIPTION = "FRAGMENT_SUBSCRIPTION"
 }
 
 object State {

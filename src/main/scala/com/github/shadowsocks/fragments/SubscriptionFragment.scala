@@ -1,18 +1,29 @@
 package com.github.shadowsocks.fragments
 
+import java.io.IOException
+import java.util.concurrent.TimeUnit
+
+import android.app.ProgressDialog
+import android.content.{DialogInterface, Intent}
 import android.os.{Bundle, Handler}
 import android.support.v4.app.Fragment
+import android.support.v7.app.AlertDialog
+import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
+import android.support.v7.widget.helper.ItemTouchHelper
+import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
 import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, RecyclerView}
 import android.text.style.TextAppearanceSpan
-import android.text.{SpannableStringBuilder, Spanned}
+import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.util.Log
 import android.view.{KeyEvent, LayoutInflater, MenuItem, View, ViewGroup}
-import android.widget.{TextView, Toast}
+import android.widget.{EditText, TextView, Toast}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.{Profile, SSRSub}
+import com.github.shadowsocks.utils.{Parser, Utils}
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.github.shadowsocks.{ConfigActivity, ProfileManagerActivity, R}
+import okhttp3.{OkHttpClient, Request}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -21,6 +32,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener  {
   private final val TAG = "SubscriptionFragment"
   private val handler = new Handler
   private lazy val ssrsubAdapter = new SSRSubAdapter
+  private var testProgressDialog: ProgressDialog = _
 
   override def onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle): View = {
     inflater.inflate(R.layout.layout_subscriptions, container, false)
@@ -40,18 +52,194 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener  {
     ssusubsList.setLayoutManager(layoutManager)
     ssusubsList.setItemAnimator(new DefaultItemAnimator)
     ssusubsList.setAdapter(ssrsubAdapter)
-
+    removeSubscription(ssusubsList)
   }
+
 
   def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
     case R.id.action_add_subscription => {
+      addSubscription()
       true
     }
     case R.id.action_update_subscription => {
+      updateSubscription()
       true
     }
     case _ => false
   }
+
+  private[this] def addSubscription(): Unit = {
+    val context = getActivity
+    val UrlAddEdit = new EditText(context)
+    new AlertDialog.Builder(context)
+      .setTitle(getString(R.string.ssrsub_add))
+      .setPositiveButton(android.R.string.ok, ((_, _) => {
+        if(!TextUtils.isEmpty(UrlAddEdit.getText().toString())) {
+          Utils.ThrowableFuture {
+            handler.post(() => {
+              testProgressDialog = ProgressDialog.show(context, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true)
+            })
+            var result = ""
+            val builder = new OkHttpClient.Builder()
+              .connectTimeout(5, TimeUnit.SECONDS)
+              .writeTimeout(5, TimeUnit.SECONDS)
+              .readTimeout(5, TimeUnit.SECONDS)
+
+            val client = builder.build();
+
+            try {
+              val request = new Request.Builder()
+                .url(UrlAddEdit.getText().toString())
+                .build();
+              val response = client.newCall(request).execute()
+              val code = response.code()
+              if (code == 200) {
+                val responseString = SSRSub.getResponseString(response)
+                SSRSub.createSSRSub(responseString, response.request().url().toString) match {
+                  case Some(ssrsub) => handler.post(() => app.ssrsubManager.createSSRSub(ssrsub))
+                  case None =>
+                }
+              } else throw new Exception(getString(R.string.ssrsub_error, code: Integer))
+              response.body().close()
+            } catch {
+              case e: Exception =>
+                e.printStackTrace()
+                result = getString(R.string.ssrsub_error, e.getMessage)
+            }
+            handler.post(() => testProgressDialog.dismiss)
+          }
+        }
+      }): DialogInterface.OnClickListener)
+      .setNegativeButton(android.R.string.no, null)
+      .setView(UrlAddEdit)
+      .create()
+      .show()
+  }
+
+  private[this] def updateSubscription (): Unit = {
+    Utils.ThrowableFuture {
+      handler.post(() => {
+        testProgressDialog = ProgressDialog.show(getActivity, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true)
+      })
+      app.ssrsubManager.getAllSSRSubs match {
+        case Some(ssrsubs) =>
+          ssrsubs.foreach((ssrsub: SSRSub) => {
+            var delete_profiles = app.profileManager.getAllProfilesByGroup(ssrsub.url_group) match {
+              case Some(profiles) =>
+                profiles.filter(profile=> profile.ssrsub_id <= 0 || profile.ssrsub_id == ssrsub.id)
+              case _ => null
+            }
+            var result = ""
+            val builder = new OkHttpClient.Builder()
+              .connectTimeout(5, TimeUnit.SECONDS)
+              .writeTimeout(5, TimeUnit.SECONDS)
+              .readTimeout(5, TimeUnit.SECONDS)
+
+            val client = builder.build();
+
+            val request = new Request.Builder()
+              .url(ssrsub.url)
+              .build();
+
+            try {
+              val response = client.newCall(request).execute()
+              val code = response.code()
+              if (code == 200) {
+                //
+                //                      val response_string = new String(Base64.decode(response.body().string, Base64.URL_SAFE))
+                val response_string = SSRSub.getResponseString(response)
+                var limit_num = -1
+                var encounter_num = 0
+                if (response_string.indexOf("MAX=") == 0) {
+                  limit_num = response_string.split("\\n")(0).split("MAX=")(1).replaceAll("\\D+","").toInt
+                }
+                var profiles_ssr = Parser.findAll_ssr(response_string)
+                if (response_string.indexOf("MAX=") == 0) {
+                  profiles_ssr = scala.util.Random.shuffle(profiles_ssr)
+                }
+                val profiles_vmess = Parser.findAllVmess(response_string)
+                  .map(profile => {
+                    profile.url_group = ssrsub.url_group
+                    profile
+                  })
+                val profiles = profiles_ssr ++ profiles_vmess
+                profiles.foreach((profile: Profile) => {
+                  if (encounter_num < limit_num && limit_num != -1 || limit_num == -1) {
+                    profile.ssrsub_id = ssrsub.id
+                    val result = app.profileManager.createProfile_sub(profile)
+                    if (result != 0) {
+                      delete_profiles = delete_profiles.filter(_.id != result)
+                    }
+                  }
+                  encounter_num += 1
+                })
+
+                delete_profiles.foreach((profile: Profile) => {
+                  if (profile.id != app.profileId) {
+                    app.profileManager.delProfile(profile.id)
+                  }
+                })
+              } else throw new Exception(getString(R.string.ssrsub_error, code: Integer))
+              response.body().close()
+            } catch {
+              case e: IOException =>
+                result = getString(R.string.ssrsub_error, e.getMessage)
+            }
+          })
+        case _ => Toast.makeText(getActivity, R.string.action_export_err, Toast.LENGTH_SHORT).show
+      }
+      handler.post(() => testProgressDialog.dismiss)
+//      finish()
+//      startActivity(new Intent(getIntent()))
+    }
+  }
+
+  private[this] def removeSubscription (ssusubsList: RecyclerView): Unit = {
+    new ItemTouchHelper(new SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
+      ItemTouchHelper.START | ItemTouchHelper.END) {
+      def onSwiped(viewHolder: ViewHolder, direction: Int) = {
+        val index = viewHolder.getAdapterPosition
+        new AlertDialog.Builder(getActivity)
+          .setTitle(getString(R.string.ssrsub_remove_tip_title))
+          .setPositiveButton(R.string.ssrsub_remove_tip_direct, ((_, _) => {
+            ssrsubAdapter.remove(index)
+            app.ssrsubManager.delSSRSub(viewHolder.asInstanceOf[SSRSubViewHolder].item.id)
+          }): DialogInterface.OnClickListener)
+          .setNegativeButton(android.R.string.no,  ((_, _) => {
+            ssrsubAdapter.notifyDataSetChanged()
+          }): DialogInterface.OnClickListener)
+          .setNeutralButton(R.string.ssrsub_remove_tip_delete,  ((_, _) => {
+            val ssrsubItem = viewHolder.asInstanceOf[SSRSubViewHolder].item
+            val delete_profiles = app.profileManager.getAllProfilesByGroup(ssrsubItem.url_group) match {
+              case Some(profiles) =>
+                profiles.filter(profile=> profile.ssrsub_id <= 0 || profile.ssrsub_id == ssrsubItem.id)
+              case _ => null
+            }
+
+            delete_profiles.foreach((profile: Profile) => {
+              if (profile.id != app.profileId) {
+                app.profileManager.delProfile(profile.id)
+              }
+            })
+
+            val index = viewHolder.getAdapterPosition
+            ssrsubAdapter.remove(index)
+            app.ssrsubManager.delSSRSub(viewHolder.asInstanceOf[SSRSubViewHolder].item.id)
+//            finish()
+//            startActivity(new Intent(getIntent()))
+          }): DialogInterface.OnClickListener)
+          .setMessage(getString(R.string.ssrsub_remove_tip))
+          .setCancelable(false)
+          .create()
+          .show()
+      }
+      def onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder) = {
+        true
+      }
+    }).attachToRecyclerView(ssusubsList)
+  }
+
+
 
   private final class SSRSubViewHolder(val view: View) extends RecyclerView.ViewHolder(view)
     with View.OnClickListener with View.OnKeyListener {

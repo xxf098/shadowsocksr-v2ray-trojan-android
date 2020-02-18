@@ -213,6 +213,7 @@
   <string name="ssrsub_remove_tip">Delete this subscription without removing its nodes (nodes that bear its group name)?</string>
   <string name="ssrsub_remove_tip_direct">Delete the URL only</string>
   <string name="ssrsub_remove_tip_delete">Delete the nodes too</string>
+  <string name="subscriptions">Subscriptions</string>
 
 
   <string name="scan_qrcode_install_title">Scanner installation</string>

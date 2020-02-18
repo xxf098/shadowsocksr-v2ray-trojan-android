@@ -206,6 +206,8 @@
   <string name="ssrsub_remove_tip_direct">直接删除</string>
   <string name="ssrsub_remove_tip_delete">与节点一起删除</string>
   <string name="subscriptions">"订阅"</string>
+  <string name="add_subscription">"添加订阅"</string>
+  <string name="update_subscription">"更新订阅"</string>
 
 
 

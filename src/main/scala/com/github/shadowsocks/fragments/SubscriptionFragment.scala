@@ -245,19 +245,28 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener  {
     with View.OnClickListener with View.OnKeyListener {
 
     var item: SSRSub = _
-    private val text = itemView.findViewById(android.R.id.text2).asInstanceOf[TextView]
+    private val text1 = itemView.findViewById(android.R.id.text1).asInstanceOf[TextView]
+    private val text2 = itemView.findViewById(android.R.id.text2).asInstanceOf[TextView]
     itemView.setOnClickListener(this)
 
     def updateText(isShowUrl: Boolean = false) {
       val builder = new SpannableStringBuilder
-      builder.append(this.item.url_group)
+//      builder.append(this.item.url_group)
       if (isShowUrl) {
         val start = builder.length
-        builder.append("\n" + this.item.url)
+        builder.append(this.item.url)
         builder.setSpan(new TextAppearanceSpan(getActivity, android.R.style.TextAppearance_Small),
           start, builder.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
       }
-      handler.post(() => text.setText(builder))
+      handler.post(() => {
+        text1.setText(this.item.url_group)
+        if (!TextUtils.isEmpty(builder)) {
+          text2.setText(builder)
+          text2.setVisibility(View.VISIBLE)
+        } else {
+          text2.setVisibility(View.GONE)
+        }
+      })
     }
 
     def bind(item: SSRSub) {
@@ -283,7 +292,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener  {
     def onBindViewHolder(vh: SSRSubViewHolder, i: Int) = vh.bind(profiles(i))
 
     def onCreateViewHolder(vg: ViewGroup, i: Int) =
-      new SSRSubViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_ssr_sub_item, vg, false))
+      new SSRSubViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_ssr_sub_item1, vg, false))
 
     def add(item: SSRSub) {
       val pos = getItemCount

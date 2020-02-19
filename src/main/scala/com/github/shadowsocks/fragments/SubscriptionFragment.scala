@@ -17,7 +17,7 @@ import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.util.Log
 import android.view.{KeyEvent, LayoutInflater, MenuItem, View, ViewGroup}
-import android.widget.{EditText, TextView, Toast}
+import android.widget.{EditText, ImageView, TextView, Toast}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.{Profile, SSRSub}
 import com.github.shadowsocks.utils.{Parser, Utils}
@@ -52,7 +52,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener  {
     ssusubsList.setLayoutManager(layoutManager)
     ssusubsList.setItemAnimator(new DefaultItemAnimator)
     ssusubsList.setAdapter(ssrsubAdapter)
-    removeSubscription(ssusubsList)
+    setupRemoveSubscription(ssusubsList)
   }
 
 
@@ -197,7 +197,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener  {
     }
   }
 
-  private[this] def removeSubscription (ssusubsList: RecyclerView): Unit = {
+  private[this] def setupRemoveSubscription (ssusubsList: RecyclerView): Unit = {
     new ItemTouchHelper(new SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
       ItemTouchHelper.START | ItemTouchHelper.END) {
       def onSwiped(viewHolder: ViewHolder, direction: Int) = {
@@ -250,7 +250,17 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener  {
     var item: SSRSub = _
     private val text1 = itemView.findViewById(android.R.id.text1).asInstanceOf[TextView]
     private val text2 = itemView.findViewById(android.R.id.text2).asInstanceOf[TextView]
-    itemView.setOnClickListener(this)
+    private val ivUpdateSubscription = itemView.findViewById(R.id.update_subscription).asInstanceOf[ImageView]
+    text1.setOnClickListener(this)
+    ivUpdateSubscription.setOnClickListener(_ => {
+      Utils.ThrowableFuture {
+        handler.post(() => {
+          testProgressDialog = ProgressDialog.show(getActivity, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true)
+        })
+        updateSingleSubscription(item)
+        handler.post(() => testProgressDialog.dismiss)
+      }
+    })
 
     def updateText(isShowUrl: Boolean = false) {
       val builder = new SpannableStringBuilder

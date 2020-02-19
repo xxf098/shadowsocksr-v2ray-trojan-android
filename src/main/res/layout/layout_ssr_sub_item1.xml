@@ -31,7 +31,7 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="?android:attr/textColorPrimary"
             android:textStyle="bold"
-            tools:text="@string/profile_name"/>
+            tools:text="Subscription Name"/>
 
         <ImageView
             android:id="@+id/update_subscription"

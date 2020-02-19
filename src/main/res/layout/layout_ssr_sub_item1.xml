@@ -53,6 +53,7 @@
             android:contentDescription="@string/edit"
             android:focusable="true"
             android:padding="12dp"
+            android:visibility="gone"
             app:srcCompat="@drawable/ic_image_edit"/>
 
     </LinearLayout>

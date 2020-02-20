@@ -16,7 +16,7 @@ import com.github.shadowsocks.utils.Parser.TAG
 import com.github.shadowsocks.utils.{ConfigUtils, Key, Parser}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.fragments.{BackPress, SubscriptionFragment, V2RayConfigFragment}
+import com.github.shadowsocks.fragments.{SubscriptionFragment, V2RayConfigFragment}
 import com.google.gson.{Gson, GsonBuilder, JsonParser}
 import go.Seq
 import org.json.JSONObject

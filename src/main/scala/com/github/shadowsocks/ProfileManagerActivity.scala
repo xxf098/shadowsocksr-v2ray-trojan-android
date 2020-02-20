@@ -582,7 +582,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 //        Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show
       case R.id.fab_ssr_sub =>
         menu.toggle(true)
-        ssrsubDialog()
+//        ssrsubDialog()
+        val intent = new Intent(this, classOf[ConfigActivity])
+        intent.putExtra(Key.FRAGMENT_NAME, Key.FRAGMENT_SUBSCRIPTION)
+        startActivity(intent)
     }
   }
 

@@ -369,8 +369,8 @@ object Route {
 //    "umengcloud.com",
 //    "uc.cn",
 //    "uc.com",
-    "snssdk.com",
-    "ixigua.com",
+//    "snssdk.com",
+//    "ixigua.com",
 //    "byteimg.com",
     "doubleclick.net"
   )

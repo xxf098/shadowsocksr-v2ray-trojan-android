@@ -16,6 +16,7 @@ import com.google.gson.{GsonBuilder, JsonParser}
 import scala.language.implicitConversions
 import Profile._
 
+// TODO: connect error under some network
 class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 
   val TAG = "V2RayVpnService"

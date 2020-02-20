@@ -27,7 +27,7 @@ import okhttp3.{OkHttpClient, Request}
 
 import scala.collection.mutable.ArrayBuffer
 
-class SubscriptionFragment extends Fragment with OnMenuItemClickListener  {
+class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
 
   private final val TAG = "SubscriptionFragment"
   private val handler = new Handler
@@ -55,8 +55,6 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener  {
     setupRemoveSubscription(ssusubsList)
   }
 
-
-  // TODO: add from scan qrcode
   def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
     case R.id.action_add_subscription => {
       addSubscription(None)
@@ -176,7 +174,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener  {
         profiles.foreach((profile: Profile) => {
           if (encounter_num < limit_num && limit_num != -1 || limit_num == -1) {
             profile.ssrsub_id = ssrsub.id
-            val result = app.profileManager.createProfile_sub(profile)
+            val result = app.profileManager.createProfile_sub(profile, true)
             if (result != 0) {
               delete_profiles = delete_profiles.filter(_.id != result)
             }

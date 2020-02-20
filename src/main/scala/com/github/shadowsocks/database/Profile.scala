@@ -220,6 +220,7 @@ class Profile {
 
   def isMethodUnsafe = "table".equalsIgnoreCase(method) || "rc4".equalsIgnoreCase(method)
 
+  // to ADT
   def isVmess = this.proxy_protocol == "vmess"
 
   def isV2RayJSON = this.proxy_protocol == "v2ray_json"

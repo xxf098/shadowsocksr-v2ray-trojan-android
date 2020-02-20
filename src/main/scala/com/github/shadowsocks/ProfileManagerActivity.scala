@@ -222,8 +222,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       undoManager.flush
       val pos = getItemCount
       profiles += item
-      initGroupSpinner(Some(item.url_group))
-      notifyItemInserted(pos)
+      handler.post(() => {
+        if (item.url_group != currentGroupName) initGroupSpinner(Some(item.url_group))
+        notifyItemInserted(pos)
+      })
     }
 
     def move(from: Int, to: Int) {

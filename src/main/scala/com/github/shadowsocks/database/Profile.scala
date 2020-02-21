@@ -76,10 +76,10 @@ object Profile {
       profile.v_aid.toLong,
       profile.v_net,
       profile.v_id,
+      profile.v_type,
       "error"
     )
   }
-
 
   // TODO:
   def profileToBytes(profile: Profile) = ???

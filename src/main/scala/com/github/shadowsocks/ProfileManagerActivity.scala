@@ -228,6 +228,14 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       })
     }
 
+    def removeSubscription(ssrSub: SSRSub): Unit = {
+      undoManager.flush
+      handler.post(() => {
+        initGroupSpinner()
+        notifyDataSetChanged()
+      })
+    }
+
     def move(from: Int, to: Int) {
       undoManager.flush
       val step = if (from < to) 1 else -1
@@ -399,6 +407,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     initGroupSpinner(Some(app.settings.getString(Key.currentGroupName, getString(R.string.allgroups))))
 
     app.profileManager.setProfileAddedListener(profilesAdapter.add)
+    app.ssrsubManager.setSSRSubDeletedListener(profilesAdapter.removeSubscription)
     val profilesList = findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
     val layoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false)
     profilesList.setLayoutManager(layoutManager)

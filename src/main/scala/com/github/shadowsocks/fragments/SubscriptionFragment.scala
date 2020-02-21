@@ -212,7 +212,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
             val delete_profiles = app.profileManager.getAllProfilesByGroup(ssrsubItem.url_group) match {
               case Some(profiles) =>
                 profiles.filter(profile=> profile.ssrsub_id <= 0 || profile.ssrsub_id == ssrsubItem.id)
-              case _ => null
+              case _ => List()
             }
 
             delete_profiles.foreach((profile: Profile) => {
@@ -222,10 +222,11 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
             })
 
             val index = viewHolder.getAdapterPosition
+            val item = viewHolder.asInstanceOf[SSRSubViewHolder].item
             ssrsubAdapter.remove(index)
-            app.ssrsubManager.delSSRSub(viewHolder.asInstanceOf[SSRSubViewHolder].item.id)
-//            finish()
-//            startActivity(new Intent(getIntent()))
+            app.ssrsubManager.delSSRSub(item.id)
+            Option(app.ssrsubManager.ssrsubDeletedListener)
+              .foreach(listener => listener(item))
           }): DialogInterface.OnClickListener)
           .setMessage(getString(R.string.ssrsub_remove_tip))
           .setCancelable(false)

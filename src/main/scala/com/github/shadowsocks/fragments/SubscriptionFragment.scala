@@ -75,9 +75,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       .setPositiveButton(android.R.string.ok, ((_, _) => {
         if(!TextUtils.isEmpty(UrlAddEdit.getText().toString())) {
           Utils.ThrowableFuture {
-            handler.post(() => {
-              testProgressDialog = ProgressDialog.show(context, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true)
-            })
+            handler.post(() => testProgressDialog = ProgressDialog.show(context, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true))
             var result = ""
             val builder = new OkHttpClient.Builder()
               .connectTimeout(5, TimeUnit.SECONDS)

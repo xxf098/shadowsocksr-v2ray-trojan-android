@@ -26,7 +26,9 @@ import com.github.shadowsocks.{ConfigActivity, ProfileManagerActivity, R}
 import okhttp3.{OkHttpClient, Request}
 
 import scala.collection.mutable.ArrayBuffer
+import scala.util.{Failure, Success, Try}
 
+// TODO: refactor
 class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
 
   private final val TAG = "SubscriptionFragment"
@@ -74,35 +76,19 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     new AlertDialog.Builder(context)
       .setTitle(getString(R.string.ssrsub_add))
       .setPositiveButton(android.R.string.ok, ((_, _) => {
-        if(!TextUtils.isEmpty(UrlAddEdit.getText().toString())) {
+        val url = UrlAddEdit.getText().toString()
+        if(!TextUtils.isEmpty(url)) {
           Utils.ThrowableFuture {
             handler.post(() => testProgressDialog = ProgressDialog.show(context, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true))
-            var result = ""
-            val builder = new OkHttpClient.Builder()
-              .connectTimeout(5, TimeUnit.SECONDS)
-              .writeTimeout(5, TimeUnit.SECONDS)
-              .readTimeout(5, TimeUnit.SECONDS)
-
-            val client = builder.build();
-
-            try {
-              val request = new Request.Builder()
-                .url(UrlAddEdit.getText().toString())
-                .build();
-              val response = client.newCall(request).execute()
-              val code = response.code()
-              if (code == 200) {
-                val responseString = SSRSub.getResponseString(response)
-                SSRSub.createSSRSub(responseString, response.request().url().toString) match {
-                  case Some(ssrsub) => handler.post(() => app.ssrsubManager.createSSRSub(ssrsub))
-                  case None =>
+            getSubscriptionResponse(url) match {
+              case Failure(e) => getString(R.string.ssrsub_error, e.getMessage)
+              case Success(responseString) => SSRSub.createSSRSub(responseString, url) match {
+                case Some(ssrsub) => {
+                  handler.post(() => app.ssrsubManager.createSSRSub(ssrsub))
+                  addProfilesFromSubscription(ssrsub, responseString)
                 }
-              } else throw new Exception(getString(R.string.ssrsub_error, code: Integer))
-              response.body().close()
-            } catch {
-              case e: Exception =>
-                e.printStackTrace()
-                result = getString(R.string.ssrsub_error, e.getMessage)
+                case None =>
+              }
             }
             handler.post(() => testProgressDialog.dismiss)
           }
@@ -132,69 +118,75 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     }
   }
 
-  private def updateSingleSubscription (ssrsub: SSRSub): Unit = {
-    var delete_profiles = app.profileManager.getAllProfilesByGroup(ssrsub.url_group) match {
-      case Some(profiles) =>
-        profiles.filter(profile=> profile.ssrsub_id <= 0 || profile.ssrsub_id == ssrsub.id)
-      case _ => null
+  private def updateSingleSubscription (ssrsub: SSRSub): Option[String] = {
+    getSubscriptionResponse(ssrsub.url) match {
+      case Failure(e) => Some(getString(R.string.ssrsub_error, e.getMessage))
+      case Success(response) => {
+        addProfilesFromSubscription(ssrsub, response)
+        None
+      }
     }
-    var result = ""
+  }
+
+  private[this] def getSubscriptionResponse (url: String): Try[String] = Try{
     val builder = new OkHttpClient.Builder()
       .connectTimeout(5, TimeUnit.SECONDS)
       .writeTimeout(5, TimeUnit.SECONDS)
       .readTimeout(5, TimeUnit.SECONDS)
-
-    val client = builder.build();
-
+    val client = builder.build()
     val request = new Request.Builder()
-      .url(ssrsub.url)
-      .build();
-
-    try {
-      val response = client.newCall(request).execute()
-      val code = response.code()
-      if (code == 200) {
-        //
-        //                      val response_string = new String(Base64.decode(response.body().string, Base64.URL_SAFE))
-        val response_string = SSRSub.getResponseString(response)
-        var limit_num = -1
-        var encounter_num = 0
-        if (response_string.indexOf("MAX=") == 0) {
-          limit_num = response_string.split("\\n")(0).split("MAX=")(1).replaceAll("\\D+","").toInt
-        }
-        var profiles_ssr = Parser.findAll_ssr(response_string)
-        if (response_string.indexOf("MAX=") == 0) {
-          profiles_ssr = scala.util.Random.shuffle(profiles_ssr)
-        }
-        val profiles_vmess = Parser.findAllVmess(response_string)
-          .map(profile => {
-            profile.url_group = ssrsub.url_group
-            profile
-          })
-        val profiles = profiles_ssr ++ profiles_vmess
-        profiles.foreach((profile: Profile) => {
-          if (encounter_num < limit_num && limit_num != -1 || limit_num == -1) {
-            profile.ssrsub_id = ssrsub.id
-            configActivity.putStringExtra(Key.SUBSCRIPTION_GROUP_NAME, profile.url_group)
-            val result = app.profileManager.createProfile_sub(profile)
-            if (result != 0) {
-              delete_profiles = delete_profiles.filter(_.id != result)
-            }
-          }
-          encounter_num += 1
-        })
-
-        delete_profiles.foreach((profile: Profile) => {
-          if (profile.id != app.profileId) {
-            app.profileManager.delProfile(profile.id)
-          }
-        })
-      } else throw new Exception(getString(R.string.ssrsub_error, code: Integer))
+      .url(url)
+      .build()
+    val response = client.newCall(request).execute()
+    val code = response.code()
+    if (code == 200) {
+      val result = SSRSub.getResponseString(response)
       response.body().close()
-    } catch {
-      case e: IOException =>
-        result = getString(R.string.ssrsub_error, e.getMessage)
+      result
+    } else {
+      response.body().close()
+      throw new Exception(getString(R.string.ssrsub_error, code: Integer))
     }
+  }
+
+  private[this] def addProfilesFromSubscription (ssrsub: SSRSub, response_string: String): Unit = {
+    var delete_profiles = app.profileManager.getAllProfilesByGroup(ssrsub.url_group) match {
+      case Some(subProfiles) =>
+        subProfiles.filter(profile=> profile.ssrsub_id <= 0 || profile.ssrsub_id == ssrsub.id)
+      case _ => null
+    }
+    var limit_num = -1
+    var encounter_num = 0
+    if (response_string.indexOf("MAX=") == 0) {
+      limit_num = response_string.split("\\n")(0).split("MAX=")(1).replaceAll("\\D+","").toInt
+    }
+    var profiles_ssr = Parser.findAll_ssr(response_string)
+    if (response_string.indexOf("MAX=") == 0) {
+      profiles_ssr = scala.util.Random.shuffle(profiles_ssr)
+    }
+    val profiles_vmess = Parser.findAllVmess(response_string)
+      .map(profile => {
+        profile.url_group = ssrsub.url_group
+        profile
+      })
+    val profiles = profiles_ssr ++ profiles_vmess
+    profiles.foreach((profile: Profile) => {
+      if (encounter_num < limit_num && limit_num != -1 || limit_num == -1) {
+        profile.ssrsub_id = ssrsub.id
+        configActivity.putStringExtra(Key.SUBSCRIPTION_GROUP_NAME, profile.url_group)
+        val result = app.profileManager.createProfile_sub(profile)
+        if (result != 0) {
+          delete_profiles = delete_profiles.filter(_.id != result)
+        }
+      }
+      encounter_num += 1
+    })
+
+    delete_profiles.foreach((profile: Profile) => {
+      if (profile.id != app.profileId) {
+        app.profileManager.delProfile(profile.id)
+      }
+    })
   }
 
   private[this] def setupRemoveSubscription (ssusubsList: RecyclerView): Unit = {

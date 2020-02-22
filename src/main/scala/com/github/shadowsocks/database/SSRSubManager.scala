@@ -50,9 +50,9 @@ class SSRSubManager(dbHelper: DBHelper) {
   import SSRSubManager._
 
   var ssrsubAddedListener: SSRSub => Any = _
-  var ssrsubDeletedListener: SSRSub => Any = _
+//  var ssrsubDeletedListener: SSRSub => Any = _
   def setSSRSubAddedListener(listener: SSRSub => Any) = this.ssrsubAddedListener = listener
-  def setSSRSubDeletedListener(listener: SSRSub => Any) = this.ssrsubDeletedListener = listener
+//  def setSSRSubDeletedListener(listener: SSRSub => Any) = this.ssrsubDeletedListener = listener
 
   def createSSRSub(p: SSRSub = null): SSRSub = {
     val ssrsub = if (p == null) new SSRSub else p

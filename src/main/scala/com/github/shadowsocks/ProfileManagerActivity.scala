@@ -228,14 +228,6 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       })
     }
 
-    def removeSubscription(ssrSub: SSRSub): Unit = {
-      undoManager.flush
-      handler.post(() => {
-        initGroupSpinner()
-        notifyDataSetChanged()
-      })
-    }
-
     def move(from: Int, to: Int) {
       undoManager.flush
       val step = if (from < to) 1 else -1
@@ -356,6 +348,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   private final val REQUEST_CREATE_DOCUMENT = 40
   private final val REQUEST_IMPORT_PROFILES = 41
   private final val REQUEST_IMPORT_QRCODE_IMAGE = 42
+  private final val REQUEST_CONFIG_RESULT = 43
   private final val TAG = "ProfileManagerActivity"
   private var currentGroupName: String = _
 
@@ -407,7 +400,6 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     initGroupSpinner(Some(app.settings.getString(Key.currentGroupName, getString(R.string.allgroups))))
 
     app.profileManager.setProfileAddedListener(profilesAdapter.add)
-    app.ssrsubManager.setSSRSubDeletedListener(profilesAdapter.removeSubscription)
     val profilesList = findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
     val layoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false)
     profilesList.setLayoutManager(layoutManager)
@@ -594,7 +586,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 //        ssrsubDialog()
         val intent = new Intent(this, classOf[ConfigActivity])
         intent.putExtra(Key.FRAGMENT_NAME, Key.FRAGMENT_SUBSCRIPTION)
-        startActivity(intent)
+        startActivityForResult(intent, REQUEST_CONFIG_RESULT)
     }
   }
 
@@ -890,6 +882,12 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           val profiles = profiles_ssr ::: profiles_v2ray
           profiles.foreach(app.profileManager.createProfile)
         })
+      }
+      case REQUEST_CONFIG_RESULT => {
+        val groupName = Option(data.getStringExtra(Key.SUBSCRIPTION_GROUP_NAME))
+        undoManager.flush
+        initGroupSpinner(groupName)
+        profilesAdapter.notifyDataSetChanged()
       }
       case REQUEST_IMPORT_QRCODE_IMAGE => {
         val uri = data.getData

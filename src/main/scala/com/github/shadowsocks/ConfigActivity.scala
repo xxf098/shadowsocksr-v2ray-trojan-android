@@ -3,7 +3,8 @@ package com.github.shadowsocks
 import java.io.File
 import java.lang.Exception
 
-import android.app.TaskStackBuilder
+import android.app.{Activity, TaskStackBuilder}
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
@@ -22,6 +23,7 @@ import go.Seq
 import org.json.JSONObject
 import tun2socks.Tun2socks
 
+import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -33,6 +35,7 @@ class ConfigActivity extends AppCompatActivity{
   private var etConfig: EditText = _
   private var profile: Profile = _
   var toolbar: Toolbar = _
+  private val nameValues = mutable.Map[String, String]()
 
   override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
@@ -44,15 +47,23 @@ class ConfigActivity extends AppCompatActivity{
     toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
     toolbar.setTitle(R.string.v2ray_config)
     toolbar.setNavigationIcon(R.drawable.ic_navigation_close)
-    toolbar.setNavigationOnClickListener(_ => {
-      val intent = getParentActivityIntent
-      if (shouldUpRecreateTask(intent) || isTaskRoot)
-        TaskStackBuilder.create(this).addNextIntentWithParentStack(intent).startActivities()
-      else finish()
-    })
+    toolbar.setNavigationOnClickListener(_ => onBackPressed())
     // start fragment
     val fragmentName = Option(getIntent.getStringExtra(Key.FRAGMENT_NAME))
     navigateToFragment(fragmentName)
+  }
+
+  override def onBackPressed(): Unit = {
+    Log.e(TAG, "onBackPressed")
+    val intent = new Intent(this, classOf[ProfileManagerActivity])
+    nameValues match {
+      case nv if nv.isEmpty => super.onBackPressed()
+      case nv => {
+        for ((name, value) <- nv) { intent.putExtra(name, value) }
+        setResult(Activity.RESULT_OK, intent)
+        finish()
+      }
+    }
   }
 
   def navigateToFragment (name: Option[String]): Unit = {
@@ -74,5 +85,9 @@ class ConfigActivity extends AppCompatActivity{
       .beginTransaction()
       .replace(R.id.config_fragment_holder, fragment)
       .commitAllowingStateLoss()
+  }
+
+  def putStringExtra(name: String, value: String): Unit = {
+    nameValues += (name -> value)
   }
 }

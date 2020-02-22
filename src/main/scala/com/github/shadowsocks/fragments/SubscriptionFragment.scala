@@ -20,7 +20,7 @@ import android.view.{KeyEvent, LayoutInflater, MenuItem, View, ViewGroup}
 import android.widget.{EditText, ImageView, TextView, Toast}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.{Profile, SSRSub}
-import com.github.shadowsocks.utils.{Parser, Utils}
+import com.github.shadowsocks.utils.{Key, Parser, Utils}
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.github.shadowsocks.{ConfigActivity, ProfileManagerActivity, R}
 import okhttp3.{OkHttpClient, Request}
@@ -33,6 +33,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
   private val handler = new Handler
   private lazy val ssrsubAdapter = new SSRSubAdapter
   private var testProgressDialog: ProgressDialog = _
+  private lazy val configActivity = getActivity.asInstanceOf[ConfigActivity]
 
   override def onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle): View = {
     inflater.inflate(R.layout.layout_subscriptions, container, false)
@@ -123,7 +124,9 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
         case Some(ssrsubs) => ssrsubs.foreach(updateSingleSubscription)
         case _ => Toast.makeText(getActivity, R.string.action_export_err, Toast.LENGTH_SHORT).show
       }
-      handler.post(() => testProgressDialog.dismiss)
+      handler.post(() => {
+        testProgressDialog.dismiss
+      })
 //      finish()
 //      startActivity(new Intent(getIntent()))
     }
@@ -172,7 +175,8 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
         profiles.foreach((profile: Profile) => {
           if (encounter_num < limit_num && limit_num != -1 || limit_num == -1) {
             profile.ssrsub_id = ssrsub.id
-            val result = app.profileManager.createProfile_sub(profile, true)
+            configActivity.putStringExtra(Key.SUBSCRIPTION_GROUP_NAME, profile.url_group)
+            val result = app.profileManager.createProfile_sub(profile)
             if (result != 0) {
               delete_profiles = delete_profiles.filter(_.id != result)
             }
@@ -225,8 +229,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
             val item = viewHolder.asInstanceOf[SSRSubViewHolder].item
             ssrsubAdapter.remove(index)
             app.ssrsubManager.delSSRSub(item.id)
-            Option(app.ssrsubManager.ssrsubDeletedListener)
-              .foreach(listener => listener(item))
+            configActivity.putStringExtra(Key.SUBSCRIPTION_GROUP_NAME, getString(R.string.allgroups))
           }): DialogInterface.OnClickListener)
           .setMessage(getString(R.string.ssrsub_remove_tip))
           .setCancelable(false)
@@ -255,7 +258,9 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
           testProgressDialog = ProgressDialog.show(getActivity, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true)
         })
         updateSingleSubscription(item)
-        handler.post(() => testProgressDialog.dismiss)
+        handler.post(() => {
+          testProgressDialog.dismiss
+        })
       }
     })
 

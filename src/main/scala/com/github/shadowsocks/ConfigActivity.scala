@@ -54,7 +54,6 @@ class ConfigActivity extends AppCompatActivity{
   }
 
   override def onBackPressed(): Unit = {
-    Log.e(TAG, "onBackPressed")
     val intent = new Intent(this, classOf[ProfileManagerActivity])
     nameValues match {
       case nv if nv.isEmpty => super.onBackPressed()

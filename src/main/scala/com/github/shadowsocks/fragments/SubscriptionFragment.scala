@@ -12,7 +12,7 @@ import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
-import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, RecyclerView}
+import android.support.v7.widget.{DefaultItemAnimator, DividerItemDecoration, LinearLayoutManager, RecyclerView}
 import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.util.Log
@@ -53,6 +53,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     val ssusubsList = view.findViewById(R.id.ssrsubList).asInstanceOf[RecyclerView]
     val layoutManager = new LinearLayoutManager(activity)
     ssusubsList.setLayoutManager(layoutManager)
+    ssusubsList.addItemDecoration(new DividerItemDecoration(configActivity, layoutManager.getOrientation))
     ssusubsList.setItemAnimator(new DefaultItemAnimator)
     ssusubsList.setAdapter(ssrsubAdapter)
     setupRemoveSubscription(ssusubsList)
@@ -108,7 +109,9 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       })
       app.ssrsubManager.getAllSSRSubs match {
         case Some(ssrsubs) => ssrsubs.foreach(updateSingleSubscription)
-        case _ => Toast.makeText(getActivity, R.string.action_export_err, Toast.LENGTH_SHORT).show
+        case _ => configActivity.runOnUiThread(() => {
+          Toast.makeText(getActivity, R.string.action_export_err, Toast.LENGTH_SHORT).show
+        })
       }
       handler.post(() => {
         testProgressDialog.dismiss
@@ -120,7 +123,13 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
 
   private def updateSingleSubscription (ssrsub: SSRSub): Option[String] = {
     getSubscriptionResponse(ssrsub.url) match {
-      case Failure(e) => Some(getString(R.string.ssrsub_error, e.getMessage))
+      case Failure(e) => {
+        val message = getString(R.string.ssrsub_error, e.getMessage)
+        configActivity.runOnUiThread(() => {
+          Toast.makeText(getActivity, message, Toast.LENGTH_SHORT).show
+        })
+        Some(message)
+      }
       case Success(response) => {
         addProfilesFromSubscription(ssrsub, response)
         None
@@ -130,9 +139,9 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
 
   private[this] def getSubscriptionResponse (url: String): Try[String] = Try{
     val builder = new OkHttpClient.Builder()
-      .connectTimeout(5, TimeUnit.SECONDS)
-      .writeTimeout(5, TimeUnit.SECONDS)
-      .readTimeout(5, TimeUnit.SECONDS)
+      .connectTimeout(3, TimeUnit.SECONDS)
+      .writeTimeout(3, TimeUnit.SECONDS)
+      .readTimeout(3, TimeUnit.SECONDS)
     val client = builder.build()
     val request = new Request.Builder()
       .url(url)

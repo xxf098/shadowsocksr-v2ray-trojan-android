@@ -60,7 +60,7 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: shadowsocksr-v2ray-release
-        path: target/android/output/shadowsocksr-release.apk
+        path: target/android/output/shadowsocksr-v2ray-release.apk
     - name: Check Build
       run: |
         ls -thls ~/.android-cache

@@ -42,7 +42,7 @@
             android:contentDescription="@string/subscriptions"
             android:focusable="true"
             android:padding="12dp"
-            app:srcCompat="@drawable/ic_file_cloud_queue"/>
+            app:srcCompat="@drawable/ic_update"/>
 
         <ImageView
             android:id="@+id/edit_subscription"

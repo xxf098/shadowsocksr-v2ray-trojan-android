@@ -159,6 +159,7 @@
   <string name="action_add_v2ray_config">Import from V2Ray Config</string>
   <string name="action_save_v2ray_config">Save</string>
   <string name="action_clear_v2ray_config">Clear</string>
+  <string name="edit">Edit</string>
 
 
   <!-- profile -->
@@ -196,7 +197,7 @@
   <string name="frontproxy_set">FrontProxy</string>
 
 
-  <string name="add_profile_methods_ssr_sub">Manage SSR|V2Ray Subscription</string>
+  <string name="add_profile_methods_ssr_sub">Manage Subscriptions</string>
   <string name="ssrsub_autoupdate_enable">Auto Update</string>
   <string name="ssrsub_add">Add URL</string>
   <string name="ssrsub_ok">Save and Update</string>
@@ -213,6 +214,9 @@
   <string name="ssrsub_remove_tip">Delete this subscription without removing its nodes (nodes that bear its group name)?</string>
   <string name="ssrsub_remove_tip_direct">Delete the URL only</string>
   <string name="ssrsub_remove_tip_delete">Delete the nodes too</string>
+  <string name="subscriptions">Subscriptions</string>
+    <string name="add_subscription">Add a subscription</string>
+    <string name="update_subscription">Refresh servers from subscription</string>
 
 
   <string name="scan_qrcode_install_title">Scanner installation</string>

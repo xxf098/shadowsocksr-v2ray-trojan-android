@@ -330,6 +330,11 @@ object Key {
   val currentGroupName = "currentGroupName"
 
   val EXTRA_PROFILE_ID = "EXTRA_PROFILE_ID"
+
+  val FRAGMENT_NAME = "FRAGMENT_NAME"
+  val FRAGMENT_V2RAY_CONFIG = "FRAGMENT_V2RAY_CONFIG"
+  val FRAGMENT_SUBSCRIPTION = "FRAGMENT_SUBSCRIPTION"
+  val SUBSCRIPTION_GROUP_NAME = "SUBSCRIPTION_GROUP_NAME"
 }
 
 object State {
@@ -365,8 +370,8 @@ object Route {
 //    "umengcloud.com",
 //    "uc.cn",
 //    "uc.com",
-    "snssdk.com",
-    "ixigua.com",
+//    "snssdk.com",
+//    "ixigua.com",
 //    "byteimg.com",
     "doubleclick.net"
   )

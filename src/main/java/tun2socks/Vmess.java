@@ -55,6 +55,10 @@ public final class Vmess implements Seq.Proxy
 
     public final native void setID(final String p0);
 
+    public final native String getType();
+
+    public final native void setType(final String p0);
+
     public final native String getLoglevel();
 
     public final native void setLoglevel(final String p0);
@@ -131,6 +135,16 @@ public final class Vmess implements Seq.Proxy
         else if (!id.equals(id2)) {
             return false;
         }
+        final String type = this.getType();
+        final String type2 = vmess.getType();
+        if (type == null) {
+            if (type2 != null) {
+                return false;
+            }
+        }
+        else if (!type.equals(type2)) {
+            return false;
+        }
         final String loglevel = this.getLoglevel();
         final String loglevel2 = vmess.getLoglevel();
         if (loglevel == null) {
@@ -146,7 +160,7 @@ public final class Vmess implements Seq.Proxy
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[] { this.getHost(), this.getPath(), this.getTLS(), this.getAdd(), this.getPort(), this.getAid(), this.getNet(), this.getID(), this.getLoglevel() });
+        return Arrays.hashCode(new Object[] { this.getHost(), this.getPath(), this.getTLS(), this.getAdd(), this.getPort(), this.getAid(), this.getNet(), this.getID(), this.getType(), this.getLoglevel() });
     }
 
     @Override
@@ -161,6 +175,7 @@ public final class Vmess implements Seq.Proxy
         sb.append("Aid:").append(this.getAid()).append(",");
         sb.append("Net:").append(this.getNet()).append(",");
         sb.append("ID:").append(this.getID()).append(",");
+        sb.append("Type:").append(this.getType()).append(",");
         sb.append("Loglevel:").append(this.getLoglevel()).append(",");
         return sb.append("}").toString();
     }

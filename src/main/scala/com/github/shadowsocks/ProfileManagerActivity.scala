@@ -222,8 +222,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       undoManager.flush
       val pos = getItemCount
       profiles += item
-      initGroupSpinner(Some(item.url_group))
-      notifyItemInserted(pos)
+      handler.post(() => {
+        if (item.url_group != currentGroupName) initGroupSpinner(Some(item.url_group))
+        notifyItemInserted(pos)
+      })
     }
 
     def move(from: Int, to: Int) {
@@ -346,6 +348,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   private final val REQUEST_CREATE_DOCUMENT = 40
   private final val REQUEST_IMPORT_PROFILES = 41
   private final val REQUEST_IMPORT_QRCODE_IMAGE = 42
+  private final val REQUEST_CONFIG_RESULT = 43
   private final val TAG = "ProfileManagerActivity"
   private var currentGroupName: String = _
 
@@ -580,7 +583,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 //        Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show
       case R.id.fab_ssr_sub =>
         menu.toggle(true)
-        ssrsubDialog()
+//        ssrsubDialog()
+        val intent = new Intent(this, classOf[ConfigActivity])
+        intent.putExtra(Key.FRAGMENT_NAME, Key.FRAGMENT_SUBSCRIPTION)
+        startActivityForResult(intent, REQUEST_CONFIG_RESULT)
     }
   }
 
@@ -876,6 +882,12 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           val profiles = profiles_ssr ::: profiles_v2ray
           profiles.foreach(app.profileManager.createProfile)
         })
+      }
+      case REQUEST_CONFIG_RESULT => {
+        val groupName = Option(data.getStringExtra(Key.SUBSCRIPTION_GROUP_NAME))
+        undoManager.flush
+        initGroupSpinner(groupName)
+        profilesAdapter.notifyDataSetChanged()
       }
       case REQUEST_IMPORT_QRCODE_IMAGE => {
         val uri = data.getData

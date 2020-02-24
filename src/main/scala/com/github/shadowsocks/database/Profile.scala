@@ -76,10 +76,10 @@ object Profile {
       profile.v_aid.toLong,
       profile.v_net,
       profile.v_id,
+      profile.v_type,
       "error"
     )
   }
-
 
   // TODO:
   def profileToBytes(profile: Profile) = ???
@@ -220,6 +220,7 @@ class Profile {
 
   def isMethodUnsafe = "table".equalsIgnoreCase(method) || "rc4".equalsIgnoreCase(method)
 
+  // to ADT
   def isVmess = this.proxy_protocol == "vmess"
 
   def isV2RayJSON = this.proxy_protocol == "v2ray_json"

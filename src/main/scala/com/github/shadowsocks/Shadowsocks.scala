@@ -331,7 +331,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
           if (success) connectionTestText.setText(result)
           else {
             connectionTestText.setText(R.string.connection_test_fail)
-            Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
+            Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_SHORT).show
           }))
       }
     }

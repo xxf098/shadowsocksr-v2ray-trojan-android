@@ -3,8 +3,10 @@ package com.github.shadowsocks
 import java.io.File
 import java.lang.Exception
 
-import android.app.TaskStackBuilder
+import android.app.{Activity, TaskStackBuilder}
+import android.content.Intent
 import android.os.Bundle
+import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
@@ -15,12 +17,13 @@ import com.github.shadowsocks.utils.Parser.TAG
 import com.github.shadowsocks.utils.{ConfigUtils, Key, Parser}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.fragments.V2RayConfigFragment
+import com.github.shadowsocks.fragments.{SubscriptionFragment, V2RayConfigFragment}
 import com.google.gson.{Gson, GsonBuilder, JsonParser}
 import go.Seq
 import org.json.JSONObject
 import tun2socks.Tun2socks
 
+import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -32,6 +35,7 @@ class ConfigActivity extends AppCompatActivity{
   private var etConfig: EditText = _
   private var profile: Profile = _
   var toolbar: Toolbar = _
+  private val nameValues = mutable.Map[String, String]()
 
   override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
@@ -43,64 +47,46 @@ class ConfigActivity extends AppCompatActivity{
     toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
     toolbar.setTitle(R.string.v2ray_config)
     toolbar.setNavigationIcon(R.drawable.ic_navigation_close)
-    toolbar.setNavigationOnClickListener(_ => {
-      val intent = getParentActivityIntent
-      if (shouldUpRecreateTask(intent) || isTaskRoot)
-        TaskStackBuilder.create(this).addNextIntentWithParentStack(intent).startActivities()
-      else finish()
-    })
+    toolbar.setNavigationOnClickListener(_ => onBackPressed())
     // start fragment
-    val v2rayConfigFragment = new V2RayConfigFragment()
-    val bundle = new Bundle()
-    bundle.putInt(Key.EXTRA_PROFILE_ID, getIntent.getIntExtra(Key.EXTRA_PROFILE_ID, -1))
-    v2rayConfigFragment.setArguments(bundle)
+    val fragmentName = Option(getIntent.getStringExtra(Key.FRAGMENT_NAME))
+    navigateToFragment(fragmentName)
+  }
+
+  override def onBackPressed(): Unit = {
+    val intent = new Intent(this, classOf[ProfileManagerActivity])
+    nameValues match {
+      case nv if nv.isEmpty => super.onBackPressed()
+      case nv => {
+        for ((name, value) <- nv) { intent.putExtra(name, value) }
+        setResult(Activity.RESULT_OK, intent)
+        finish()
+      }
+    }
+  }
+
+  def navigateToFragment (name: Option[String]): Unit = {
+    name match {
+      case Some(Key.FRAGMENT_V2RAY_CONFIG) | None => {
+        val v2rayConfigFragment = new V2RayConfigFragment()
+        val bundle = new Bundle()
+        bundle.putInt(Key.EXTRA_PROFILE_ID, getIntent.getIntExtra(Key.EXTRA_PROFILE_ID, -1))
+        v2rayConfigFragment.setArguments(bundle)
+        displayFragment(v2rayConfigFragment)
+      }
+      case Some(Key.FRAGMENT_SUBSCRIPTION) => displayFragment(new SubscriptionFragment())
+      case _ =>
+    }
+  }
+
+  def displayFragment(fragment: Fragment): Unit = {
     getSupportFragmentManager()
       .beginTransaction()
-      .replace(R.id.config_fragment_holder, v2rayConfigFragment)
+      .replace(R.id.config_fragment_holder, fragment)
       .commitAllowingStateLoss()
-
   }
 
-  def saveConfig(config: String): Unit = {
-    val future = checkConfig(config)
-    future onSuccess {
-      case prettyConfig if prettyConfig != null => {
-        runOnUiThread(() => {
-          val newProfile = Parser.getV2RayJSONProfile(prettyConfig)
-          if (profile == null) {
-            profile = app.profileManager.createProfile(newProfile)
-          } else {
-            newProfile.id = profile.id
-            newProfile.url_group = profile.url_group
-            newProfile.name = profile.name
-            app.profileManager.updateProfile(newProfile)
-          }
-          Toast.makeText(this, "Saved!", Toast.LENGTH_SHORT).show()
-        })
-      }
-      case _ => runOnUiThread(() => Toast.makeText(this, "Config is not valid!", Toast.LENGTH_SHORT))
-    }
-    future onFailure {
-      case e: Exception => {
-        e.printStackTrace()
-        runOnUiThread(() => Toast.makeText(this, "config is not valid!", Toast.LENGTH_SHORT).show())
-      }
-    }
-  }
-
-  def checkConfig(config: String): Future[String] = {
-      Future {
-        val jsonObject = new JsonParser().parse(config).getAsJsonObject
-//        val outbounds = jsonObject.getAsJsonArray("outbounds")
-//        val vmess = outbounds.get(0).getAsJsonObject
-//        val settings = vmess.getAsJsonObject("settings")
-//        val vnext = vmess.getAsJsonArray("vnext")
-//        Log.e(TAG, vmess.toString)
-//        Log.e(TAG, "protocol==")
-        val prettyConfig = new GsonBuilder().setPrettyPrinting().create().toJson(jsonObject)
-//        val assetPath = getApplicationInfo.dataDir + "/files/"
-//        Tun2socks.testConfig(prettyConfig, assetPath)
-        prettyConfig
-      }
+  def putStringExtra(name: String, value: String): Unit = {
+    nameValues += (name -> value)
   }
 }

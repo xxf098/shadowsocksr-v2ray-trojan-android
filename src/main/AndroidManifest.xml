@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools" package="com.github.shadowsocks"
           android:versionCode="326"
-          android:versionName="3.6.6">
+          android:versionName="3.7.0">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -125,7 +125,7 @@
             android:label="@string/config_activity"
             android:parentActivityName=".ProfileManagerActivity"
             android:excludeFromRecents="true"
-            android:windowSoftInputMode="stateHidden"/>
+            android:windowSoftInputMode="stateAlwaysHidden"/>
 
         <activity
                 android:name=".AppManager"

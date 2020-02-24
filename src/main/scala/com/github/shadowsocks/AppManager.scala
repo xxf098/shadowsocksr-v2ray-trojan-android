@@ -59,6 +59,7 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.language.implicitConversions
 
+// TODO: Apply setting to all config
 object AppManager {
   case class ProxiedApp(name: String, packageName: String, icon: Drawable)
   private case class ListEntry(switch: Switch, text: TextView, icon: ImageView)

@@ -116,6 +116,7 @@ class ProfileManager(dbHelper: DBHelper) {
     profile
   }
 
+  // TODO: notify adapter data batch change
   def createProfile_sub(p: Profile = null): Int = {
     val profile = if (p == null) new Profile else p
     profile.id = 0
@@ -140,6 +141,9 @@ class ProfileManager(dbHelper: DBHelper) {
       val last_exist = checkLastExistProfile(profile)
       if (last_exist == null) {
         dbHelper.profileDao.createOrUpdate(profile)
+        if (profileAddedListener != null)  {
+          profileAddedListener(profile)
+        }
         0
       } else {
         last_exist.id

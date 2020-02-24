@@ -86,6 +86,7 @@ object SSRSub {
   }
   }
 
+// TODO: TIME
 class SSRSub {
   @DatabaseField(generatedId = true)
   var id: Int = 0

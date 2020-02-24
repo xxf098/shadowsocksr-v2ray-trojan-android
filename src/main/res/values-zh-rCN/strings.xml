@@ -83,6 +83,7 @@
   <string name="share_message_nfc_disabled">扫描二维码\nAndroid Beam 被禁用</string>
   <string name="turn_on_nfc">打开 NFC &amp; Android Beam</string>
   <string name="add_profile">添加配置文件</string>
+  <string name="edit">"编辑"</string>
 
   <string name="nat">NAT 模式 (仅限调试)</string>
   <string name="nat_summary">从 VPN 模式切换为 NAT 模式，需要 ROOT 权限</string>
@@ -205,6 +206,9 @@
   <string name="ssrsub_remove_tip">您是想直接删除呢，还是想连带着删除群组和这个订阅名一样的节点呢？</string>
   <string name="ssrsub_remove_tip_direct">直接删除</string>
   <string name="ssrsub_remove_tip_delete">与节点一起删除</string>
+  <string name="subscriptions">"订阅"</string>
+  <string name="add_subscription">"添加订阅"</string>
+  <string name="update_subscription">"更新订阅"</string>
 
 
 

@@ -1056,11 +1056,12 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
                   isTesting = false
                   testAsyncJob.interrupt()
-
+                  runOnUiThread(() => getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON))
                   finish()
                   startActivity(new Intent(getIntent()))
               }
           })
+          getWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
           // TODO: refactor
           testAsyncJob = new Thread {
@@ -1173,6 +1174,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                 testProgressDialog = null;
               }
 
+              runOnUiThread(() => getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON))
               finish()
               startActivity(new Intent(getIntent()))
               Looper.loop()

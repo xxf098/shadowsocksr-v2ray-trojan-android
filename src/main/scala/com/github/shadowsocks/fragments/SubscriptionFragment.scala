@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit
 import android.app.ProgressDialog
 import android.content.{DialogInterface, Intent}
 import android.os.{Bundle, Handler}
+import android.preference.PreferenceManager
 import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView.ViewHolder
@@ -17,7 +18,7 @@ import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.util.Log
 import android.view.{KeyEvent, LayoutInflater, MenuItem, View, ViewGroup}
-import android.widget.{EditText, ImageView, TextView, Toast}
+import android.widget.{CompoundButton, EditText, ImageView, Switch, TextView, Toast}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.{Profile, SSRSub}
 import com.github.shadowsocks.utils.{Key, Parser, Utils}
@@ -49,6 +50,22 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     activity.toolbar.setOnMenuItemClickListener(this)
 
     app.ssrsubManager.setSSRSubAddedListener(ssrsubAdapter.add)
+
+    // auto update
+    val prefs = PreferenceManager.getDefaultSharedPreferences(configActivity)
+    val sw_ssr_sub_autoupdate_enable = view.findViewById(R.id.sw_ssr_sub_autoupdate_enable).asInstanceOf[Switch]
+    if (prefs.getInt(Key.ssrsub_autoupdate, 0) == 1) {
+      sw_ssr_sub_autoupdate_enable.setChecked(true)
+    }
+    sw_ssr_sub_autoupdate_enable.setOnCheckedChangeListener(((_, isChecked: Boolean) => {
+      val prefs_edit = prefs.edit()
+      if (isChecked) {
+        prefs_edit.putInt(Key.ssrsub_autoupdate, 1)
+      } else {
+        prefs_edit.putInt(Key.ssrsub_autoupdate, 0)
+      }
+      prefs_edit.apply()
+    }): CompoundButton.OnCheckedChangeListener)
 
     val ssusubsList = view.findViewById(R.id.ssrsubList).asInstanceOf[RecyclerView]
     val layoutManager = new LinearLayoutManager(activity)

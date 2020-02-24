@@ -650,6 +650,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       sw_ssr_sub_autoupdate_enable.setChecked(true)
     }
 
+    // auto update
     sw_ssr_sub_autoupdate_enable.setOnCheckedChangeListener(((_, isChecked: Boolean) => {
       val prefs_edit = prefs.edit()
       if (isChecked) {

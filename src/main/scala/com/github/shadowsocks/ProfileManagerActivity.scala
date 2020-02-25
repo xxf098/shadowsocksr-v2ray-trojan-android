@@ -131,6 +131,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val pingBtn = itemView.findViewById(R.id.ping_single).asInstanceOf[ImageView]
       pingBtn.setOnClickListener(_ => {
 
+        getWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
         item.testLatency().map(elapsed => {
           this.updateText(0, 0, elapsed)
@@ -141,6 +142,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             app.getString(R.string.connection_test_error, e.getMessage)
           }
         }.foreach(result => {
+          getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
           singleTestProgressDialog.dismiss()
           Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
         })
@@ -1086,10 +1088,12 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
                   if (!profile.isV2Ray) {
                     // Resolve the server address
+                    var result = ""
+                    try {
                     var host = profile.host
                     if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = true) match {
                       case Some(addr) => host = addr
-                      case None => throw new Exception("can't resolve")
+                      case None => throw new Exception(s"can't resolve host $host")
                     }
 
                     val conf = ConfigUtils
@@ -1122,11 +1126,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                       }
                     }
 
-                    var result = ""
+
                     val builder = new OkHttpClient.Builder()
-                      .connectTimeout(5, TimeUnit.SECONDS)
-                      .writeTimeout(5, TimeUnit.SECONDS)
-                      .readTimeout(5, TimeUnit.SECONDS)
+                      .connectTimeout(3, TimeUnit.SECONDS)
+                      .writeTimeout(3, TimeUnit.SECONDS)
+                      .readTimeout(3, TimeUnit.SECONDS)
 
                     val client = builder.build();
 
@@ -1134,7 +1138,6 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                       .url("http://127.0.0.1:" + (profile.localPort + 2) + "/generate_204").removeHeader("Host").addHeader("Host", "www.google.com")
                       .build();
 
-                    try {
                       val response = client.newCall(request).execute()
                       val code = response.code()
                       if (code == 204 || code == 200 && response.body().contentLength == 0) {

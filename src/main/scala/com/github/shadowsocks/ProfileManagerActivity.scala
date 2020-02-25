@@ -1155,7 +1155,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                       } else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
                       response.body().close()
                     } catch {
-                      case e: IOException =>
+                      case e: Exception =>
                         result = getString(R.string.connection_test_error, e.getMessage)
                     }
 

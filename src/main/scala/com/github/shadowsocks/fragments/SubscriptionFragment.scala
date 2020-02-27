@@ -98,17 +98,21 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
         if(!TextUtils.isEmpty(url)) {
           Utils.ThrowableFuture {
             handler.post(() => testProgressDialog = ProgressDialog.show(context, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true))
-            getSubscriptionResponse(url) match {
-              case Failure(e) => getString(R.string.ssrsub_error, e.getMessage)
+            val result = getSubscriptionResponse(url) match {
+              case Failure(e) => Some(getString(R.string.ssrsub_error, e.getMessage))
               case Success(responseString) => SSRSub.createSSRSub(responseString, url) match {
                 case Some(ssrsub) => {
                   handler.post(() => app.ssrsubManager.createSSRSub(ssrsub))
                   addProfilesFromSubscription(ssrsub, responseString)
+                  None
                 }
-                case None =>
+                case None => None
               }
             }
-            handler.post(() => testProgressDialog.dismiss)
+            handler.post(() => {
+              result.foreach(msg => Toast.makeText(configActivity, msg, Toast.LENGTH_SHORT).show())
+              testProgressDialog.dismiss
+            })
           }
         }
       }): DialogInterface.OnClickListener)

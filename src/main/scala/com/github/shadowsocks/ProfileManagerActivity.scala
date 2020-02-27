@@ -51,6 +51,7 @@ import tun2socks.Tun2socks
 
 import scala.language.implicitConversions
 import Profile._
+import com.github.shadowsocks.database.VmessAction.profile
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -1091,6 +1092,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                     var result = ""
                     try {
                     var host = profile.host
+                    if (List("www.google.com", "127.0.0.1").contains(host)) {
+                      throw new IOException(s"Bypass Host $host")
+                    }
                     if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = true) match {
                       case Some(addr) => host = addr
                       case None => throw new Exception(s"can't resolve host $host")

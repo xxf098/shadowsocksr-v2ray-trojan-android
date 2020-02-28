@@ -1160,6 +1160,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                       response.body().close()
                     } catch {
                       case e: Exception =>
+                        profile.elapsed = 0
+                        app.profileManager.updateProfile(profile)
                         result = getString(R.string.connection_test_error, e.getMessage)
                     }
 

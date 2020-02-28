@@ -247,7 +247,11 @@ class Profile {
       app.profileManager.updateProfile(this)
       app.getString(R.string.connection_test_available, elapsed: java.lang.Long)
     }).recover{
-      case e: Exception => app.getString(R.string.connection_test_error, e.getMessage)
+      case e: Exception => {
+        this.elapsed = 0
+        app.profileManager.updateProfile(this)
+        app.getString(R.string.connection_test_error, e.getMessage)
+      }
     }.get
   }
 

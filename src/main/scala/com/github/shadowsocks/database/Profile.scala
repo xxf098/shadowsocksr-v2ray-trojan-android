@@ -204,6 +204,9 @@ class Profile {
   @DatabaseField
   var v_json_config: String = ""
 
+  @DatabaseField
+  var v_security: String = ""
+
   override def toString(): String = {
     implicit val flags: Int = Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP
     this match {

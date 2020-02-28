@@ -67,6 +67,7 @@ object Profile {
     if (!profile.isVmess) {
       throw new Exception("Not a V2ray Profile")
     }
+    val v_security = if (TextUtils.isEmpty(profile.v_security)) "auto" else profile.v_security
     Tun2socks.newVmess(
       profile.v_host,
       profile.v_path,
@@ -77,7 +78,7 @@ object Profile {
       profile.v_net,
       profile.v_id,
       profile.v_type,
-      "auto",
+      v_security,
       "error"
     )
   }

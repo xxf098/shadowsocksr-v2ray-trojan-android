@@ -29,6 +29,7 @@ import com.github.shadowsocks.utils._
 import java.io.InputStreamReader
 import java.io.BufferedReader
 
+import android.text.TextUtils
 import android.util.Log
 import com.github.shadowsocks.Shadowsocks.TAG
 
@@ -37,7 +38,7 @@ object ShadowsocksSettings {
   private final val TAG = "ShadowsocksSettings"
   private val PROXY_PREFS = Array(Key.group_name, Key.name, Key.host, Key.remotePort, Key.localPort, Key.password, Key.method,
     Key.protocol, Key.obfs, Key.obfs_param, Key.dns, Key.china_dns, Key.protocol_param, Key.v_ps,
-    Key.v_id, Key.v_add, Key.v_host, Key.v_port, Key.v_path, Key.v_aid, Key.v_id_json, Key.v_add_json)
+    Key.v_id, Key.v_add, Key.v_host, Key.v_port, Key.v_path, Key.v_aid, Key.v_id_json, Key.v_add_json, Key.v_security)
   private val FEATURE_PREFS = Array(Key.route, Key.proxyApps, Key.udpdns, Key.ipv6, Key.tfo)
 
   // Helper functions
@@ -65,6 +66,7 @@ object ShadowsocksSettings {
 
   def updatePreference(pref: Preference, name: String, profile: Profile) {
     if (profile.isVmess) {
+      val v_security = if (TextUtils.isEmpty(profile.v_security)) "auto" else profile.v_security
       name match {
         case Key.group_name => updateSummaryEditTextPreference(pref, profile.url_group)
         case Key.v_ps => updateSummaryEditTextPreference(pref, profile.v_ps)
@@ -72,6 +74,7 @@ object ShadowsocksSettings {
         case Key.v_aid => updateNumberPickerPreference(pref, Option(profile.v_aid).getOrElse("0").toInt)
         case Key.v_path => updateSummaryEditTextPreference(pref, profile.v_path)
         case Key.v_host => updateSummaryEditTextPreference(pref, profile.v_host)
+        case Key.v_security => updateDropDownPreference(pref, v_security)
         case Key.route => updateDropDownPreference(pref, profile.route)
         case Key.proxyApps => updateSwitchPreference(pref, profile.proxyApps)
         case Key.udpdns => updateSwitchPreference(pref, profile.udpdns)
@@ -230,6 +233,11 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
 
     findPreference(Key.v_path).setOnPreferenceChangeListener((_, value) => {
       profile.v_path = value.asInstanceOf[String]
+      app.profileManager.updateProfile(profile)
+    })
+
+    findPreference(Key.v_security).setOnPreferenceChangeListener((_, value) => {
+      profile.v_security = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
     })
 

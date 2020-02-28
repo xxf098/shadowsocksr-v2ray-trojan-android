@@ -1200,7 +1200,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       true
     case R.id.batch_delete =>
       val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
-        .setTitle("Batch Delete")
+        .setTitle(getString(R.string.batch_delete))
         .setPositiveButton(android.R.string.yes, ((_, _) =>{
           ProfileManagerActivity.getProfilesByGroup(currentGroupName, is_sort)
             .filter(_.id != app.profileId)

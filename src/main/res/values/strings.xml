@@ -215,8 +215,8 @@
   <string name="ssrsub_remove_tip_direct">Delete the URL only</string>
   <string name="ssrsub_remove_tip_delete">Delete the nodes too</string>
   <string name="subscriptions">Subscriptions</string>
-    <string name="add_subscription">Add a subscription</string>
-    <string name="update_subscription">Refresh servers from subscription</string>
+  <string name="add_subscription">Add a subscription</string>
+  <string name="update_subscription">Refresh servers from subscription</string>
 
 
   <string name="scan_qrcode_install_title">Scanner installation</string>

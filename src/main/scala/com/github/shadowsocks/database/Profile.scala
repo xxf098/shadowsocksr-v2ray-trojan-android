@@ -77,6 +77,7 @@ object Profile {
       profile.v_net,
       profile.v_id,
       profile.v_type,
+      "auto",
       "error"
     )
   }

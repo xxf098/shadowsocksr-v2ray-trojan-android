@@ -143,7 +143,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             app.getString(R.string.connection_test_error, e.getMessage)
           }
         }.foreach(result => {
-          getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+          runOnUiThread(() => getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON))
           singleTestProgressDialog.dismiss()
           Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
         })

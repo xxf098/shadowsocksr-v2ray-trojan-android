@@ -238,7 +238,13 @@ class Profile {
       this.elapsed = elapsed
       app.profileManager.updateProfile(this)
       elapsed
-    })
+    }).recover{
+      case e: Exception => {
+        this.elapsed = 0
+        app.profileManager.updateProfile(this)
+        throw e
+      }
+    }
   }
 
   def testLatencyThread () : String = {

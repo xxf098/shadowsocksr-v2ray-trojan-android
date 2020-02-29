@@ -139,7 +139,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           getString(R.string.connection_test_available, elapsed: java.lang.Long)
         }).recover {
           case e: Exception => {
-            e.printStackTrace()
+//            e.printStackTrace()
+            this.updateText(0, 0, 0)
             app.getString(R.string.connection_test_error, e.getMessage)
           }
         }.foreach(result => {

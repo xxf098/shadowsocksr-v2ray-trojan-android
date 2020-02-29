@@ -85,6 +85,42 @@ object Profile {
 
   // TODO:
   def profileToBytes(profile: Profile) = ???
+
+  implicit class LatencyTest(profile: Profile) {
+
+    // either left right
+    def testLatency (): Future[Long] = {
+      Future(profile.getElapsed())
+        .map(elapsed => {
+          profile.elapsed = elapsed
+          app.profileManager.updateProfile(profile)
+          elapsed
+        }).recover{
+        case e: Exception => {
+          profile.elapsed = 0
+          app.profileManager.updateProfile(profile)
+          throw e
+        }
+      }
+    }
+
+    def testLatencyThread () : String = {
+      Try(profile.getElapsed()).map(elapsed => {
+        profile.elapsed = elapsed
+        app.profileManager.updateProfile(profile)
+        app.getString(R.string.connection_test_available, elapsed: java.lang.Long)
+      }).recover{
+        case e: Exception => {
+          profile.elapsed = 0
+          app.profileManager.updateProfile(profile)
+          app.getString(R.string.connection_test_error, e.getMessage)
+        }
+      }.get
+    }
+
+    Option
+
+  }
 }
 
 class Profile {
@@ -225,40 +261,10 @@ class Profile {
 
   def isMethodUnsafe = "table".equalsIgnoreCase(method) || "rc4".equalsIgnoreCase(method)
 
-  // to ADT
   def isVmess = this.proxy_protocol == "vmess"
 
   def isV2RayJSON = this.proxy_protocol == "v2ray_json"
 
   def isV2Ray = isVmess || isV2RayJSON
-
-  def testLatency (): Future[Long] = {
-    Future(this.getElapsed())
-    .map(elapsed => {
-      this.elapsed = elapsed
-      app.profileManager.updateProfile(this)
-      elapsed
-    }).recover{
-      case e: Exception => {
-        this.elapsed = 0
-        app.profileManager.updateProfile(this)
-        throw e
-      }
-    }
-  }
-
-  def testLatencyThread () : String = {
-    Try(this.getElapsed()).map(elapsed => {
-      this.elapsed = elapsed
-      app.profileManager.updateProfile(this)
-      app.getString(R.string.connection_test_available, elapsed: java.lang.Long)
-    }).recover{
-      case e: Exception => {
-        this.elapsed = 0
-        app.profileManager.updateProfile(this)
-        app.getString(R.string.connection_test_error, e.getMessage)
-      }
-    }.get
-  }
 
 }

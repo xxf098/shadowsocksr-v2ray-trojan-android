@@ -66,7 +66,7 @@ object SSRAction extends ProfileAction {
 
 object VmessAction extends ProfileAction {
   override def getElapsed(): Long = {
-    if (List("www.google.com", "127.0.0.1").contains(profile.v_add)) {
+    if (List("www.google.com", "127.0.0.1", "8.8.8.8", "1.2.3.4").contains(profile.v_add)) {
         throw new IOException(s"Bypass Host ${profile.v_add}")
     }
     if (!Utils.isNumeric(profile.v_add)) Utils.resolve(profile.v_add, enableIPv6 = true) match {

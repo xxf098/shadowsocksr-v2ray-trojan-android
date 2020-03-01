@@ -241,6 +241,8 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       app.profileManager.updateProfile(profile)
     })
 
+    // v_ps
+
     findPreference(Key.v_id).setOnPreferenceClickListener((preference: Preference) => {
       val HostEditText = new EditText(activity)
       HostEditText.setText(profile.v_id)

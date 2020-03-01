@@ -134,20 +134,15 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
         getWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
-        item.testLatency().map(elapsed => {
-          this.updateText(0, 0, elapsed)
-          getString(R.string.connection_test_available, elapsed: java.lang.Long)
-        }).recover {
-          case e: Exception => {
-//            e.printStackTrace()
-            this.updateText(0, 0, 0)
-            app.getString(R.string.connection_test_error, e.getMessage)
-          }
-        }.foreach(result => {
-          runOnUiThread(() => getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON))
-          singleTestProgressDialog.dismiss()
-          Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
-        })
+        item.testLatency()
+          .foreach(result => {
+            item.elapsed = result.elapsed
+            app.profileManager.updateProfile(item)
+            this.updateText(0, 0, result.elapsed)
+            runOnUiThread(() => getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON))
+            singleTestProgressDialog.dismiss()
+            Snackbar.make(findViewById(android.R.id.content), result.msg, Snackbar.LENGTH_LONG).show
+          })
         // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
       })
       pingBtn.setOnLongClickListener(_ => {

@@ -1057,7 +1057,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                   testAsyncJob.interrupt()
                   runOnUiThread(() => getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON))
                   finish()
-                  startActivity(new Intent(getIntent()))
+                  startActivity(new Intent(Action.SORT))
               }
           })
           getWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)

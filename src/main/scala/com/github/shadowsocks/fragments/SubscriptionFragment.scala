@@ -25,7 +25,7 @@ import com.github.shadowsocks.utils.{Key, Parser, Utils}
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.github.shadowsocks.{ConfigActivity, ProfileManagerActivity, R}
 import okhttp3.{OkHttpClient, Request}
-
+import android.view.View
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
@@ -88,19 +88,23 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     case _ => false
   }
 
+  // move to ssrsub
   private[this] def addSubscription(url: Option[String]): Unit = {
     val context = getActivity
-    val UrlAddEdit = new EditText(context)
+    val view = View.inflate(context, R.layout.layout_ssr_sub_add, null)
+    val etAddUrl = view.findViewById(R.id.et_subscription_url).asInstanceOf[EditText]
+    val etGroupName = view.findViewById(R.id.et_group_name).asInstanceOf[EditText]
     new AlertDialog.Builder(context)
       .setTitle(getString(R.string.ssrsub_add))
       .setPositiveButton(android.R.string.ok, ((_, _) => {
-        val url = UrlAddEdit.getText().toString()
+        val url = etAddUrl.getText.toString
+        val groupName = etGroupName.getText.toString
         if(!TextUtils.isEmpty(url)) {
           Utils.ThrowableFuture {
             handler.post(() => testProgressDialog = ProgressDialog.show(context, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true))
             val result = getSubscriptionResponse(url) match {
               case Failure(e) => Some(getString(R.string.ssrsub_error, e.getMessage))
-              case Success(responseString) => SSRSub.createSSRSub(responseString, url) match {
+              case Success(responseString) => SSRSub.createSSRSub(responseString, url, groupName) match {
                 case Some(ssrsub) => {
                   handler.post(() => app.ssrsubManager.createSSRSub(ssrsub))
                   addProfilesFromSubscription(ssrsub, responseString)
@@ -117,7 +121,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
         }
       }): DialogInterface.OnClickListener)
       .setNegativeButton(android.R.string.no, null)
-      .setView(UrlAddEdit)
+      .setView(view)
       .create()
       .show()
   }
@@ -195,14 +199,11 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       profiles_ssr = scala.util.Random.shuffle(profiles_ssr)
     }
     val profiles_vmess = Parser.findAllVmess(response_string)
-      .map(profile => {
-        profile.url_group = ssrsub.url_group
-        profile
-      })
     val profiles = profiles_ssr ++ profiles_vmess
     profiles.foreach((profile: Profile) => {
       if (encounter_num < limit_num && limit_num != -1 || limit_num == -1) {
         profile.ssrsub_id = ssrsub.id
+        profile.url_group = ssrsub.url_group
         configActivity.putStringExtra(Key.SUBSCRIPTION_GROUP_NAME, profile.url_group)
         val result = app.profileManager.createProfile_sub(profile)
         if (result != 0) {

@@ -33,7 +33,8 @@
         android:id="@+id/et_subscription_url"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textUri">
+        android:inputType="textUri|textMultiLine"
+        android:maxLines="3">
         <requestFocus/>
     </EditText>
 </LinearLayout>

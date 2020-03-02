@@ -1200,7 +1200,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
         .setTitle(getString(R.string.batch_delete))
         .setPositiveButton(android.R.string.yes, ((_, _) =>{
-          ProfileManagerActivity.getProfilesByGroup(currentGroupName, is_sort)
+          ProfileManagerActivity.getProfilesByGroup(currentGroupName, false)
             .filter(_.id != app.profileId)
             .foreach(profile => app.profileManager.delProfile(profile.id))
           finish()

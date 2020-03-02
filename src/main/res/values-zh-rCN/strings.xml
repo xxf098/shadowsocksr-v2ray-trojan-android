@@ -192,6 +192,7 @@
   <string name="add_profile_methods_ssr_sub">管理 SSR|V2Ray 订阅</string>
   <string name="ssrsub_autoupdate_enable">自动更新</string>
   <string name="ssrsub_add">添加订阅地址</string>
+  <string name="ssrsub_edit">编辑订阅地址</string>
   <string name="ssrsub_ok">确定并升级</string>
   <string name="ssrsub_list">订阅列表</string>
   <string name="ssrsub_error">地址不正确或网络不可用。</string>

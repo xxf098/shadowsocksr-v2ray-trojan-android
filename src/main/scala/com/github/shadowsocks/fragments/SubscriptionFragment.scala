@@ -143,6 +143,13 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       .show()
   }
 
+  private def notifyGroupNameChange (groupName: Option[String]): Unit = {
+    groupName match {
+      case Some(name) => configActivity.putStringExtra(Key.SUBSCRIPTION_GROUP_NAME, name)
+      case None => configActivity.putStringExtra(Key.SUBSCRIPTION_GROUP_NAME, getString(R.string.allgroups))
+    }
+  }
+
   // TODO: Future.sequence
   private[this] def updateAllSubscriptions (): Unit = {
     Utils.ThrowableFuture {
@@ -200,7 +207,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     }
   }
 
-  private[this] def addProfilesFromSubscription (ssrsub: SSRSub, response_string: String): Unit = {
+  private[this] def addProfilesFromSubscription (ssrsub: SSRSub, responseString: String): Unit = {
     var delete_profiles = app.profileManager.getAllProfilesByGroup(ssrsub.url_group) match {
       case Some(subProfiles) =>
         subProfiles.filter(profile=> profile.ssrsub_id <= 0 || profile.ssrsub_id == ssrsub.id)
@@ -208,20 +215,20 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     }
     var limit_num = -1
     var encounter_num = 0
-    if (response_string.indexOf("MAX=") == 0) {
-      limit_num = response_string.split("\\n")(0).split("MAX=")(1).replaceAll("\\D+","").toInt
+    if (responseString.indexOf("MAX=") == 0) {
+      limit_num = responseString.split("\\n")(0).split("MAX=")(1).replaceAll("\\D+","").toInt
     }
-    var profiles_ssr = Parser.findAll_ssr(response_string)
-    if (response_string.indexOf("MAX=") == 0) {
+    var profiles_ssr = Parser.findAll_ssr(responseString)
+    if (responseString.indexOf("MAX=") == 0) {
       profiles_ssr = scala.util.Random.shuffle(profiles_ssr)
     }
-    val profiles_vmess = Parser.findAllVmess(response_string)
+    val profiles_vmess = Parser.findAllVmess(responseString)
     val profiles = profiles_ssr ++ profiles_vmess
     profiles.foreach((profile: Profile) => {
       if (encounter_num < limit_num && limit_num != -1 || limit_num == -1) {
         profile.ssrsub_id = ssrsub.id
         profile.url_group = ssrsub.url_group
-        configActivity.putStringExtra(Key.SUBSCRIPTION_GROUP_NAME, profile.url_group)
+        notifyGroupNameChange(Some(profile.url_group))
         val result = app.profileManager.createProfile_sub(profile)
         if (result != 0) {
           delete_profiles = delete_profiles.filter(_.id != result)
@@ -269,7 +276,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
             val item = viewHolder.asInstanceOf[SSRSubViewHolder].item
             ssrsubAdapter.remove(index)
             app.ssrsubManager.delSSRSub(item.id)
-            configActivity.putStringExtra(Key.SUBSCRIPTION_GROUP_NAME, getString(R.string.allgroups))
+            notifyGroupNameChange(None)
           }): DialogInterface.OnClickListener)
           .setMessage(getString(R.string.ssrsub_remove_tip))
           .setCancelable(false)
@@ -306,7 +313,25 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     })
     ivEditSubscription.setOnClickListener(_ => {
       showSubscriptionDialog(Some(item)) { (responseString, url, groupName) => {
-          None
+        (url, groupName) match {
+          case t if t._1 == item.url && t._2 != item.url_group => {
+            Utils.ThrowableFuture{
+              item.url_group = groupName
+              app.ssrsubManager.updateSSRSub(item)
+              app.profileManager.updateGroupName(groupName, item.id)
+              updateText(false)
+              notifyGroupNameChange(Some(groupName))
+            }
+          }
+          case t if t._1 != item.url => {
+            item.url = url
+            item.url_group = groupName
+            app.ssrsubManager.updateSSRSub(item)
+            addProfilesFromSubscription(item, responseString)
+            updateText(false)
+          }
+          case _ =>
+        }
         }
       }
     })

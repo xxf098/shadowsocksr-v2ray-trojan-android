@@ -225,6 +225,19 @@ class ProfileManager(dbHelper: DBHelper) {
     }
   }
 
+  def updateGroupName(groupName:String, ssrsub_id:Int): Boolean = {
+    try {
+      dbHelper.profileDao.executeRawNoArgs(s"UPDATE `profile` SET url_group = '$groupName' WHERE ssrsub_id = $ssrsub_id")
+      true
+    } catch {
+      case ex: Exception =>
+        Log.e(TAG, "updateProfile", ex)
+        app.track(ex)
+        false
+    }
+  }
+
+
   def getProfile(id: Int): Option[Profile] = {
     try {
       dbHelper.profileDao.queryForId(id) match {

@@ -200,6 +200,7 @@
   <string name="add_profile_methods_ssr_sub">Manage Subscriptions</string>
   <string name="ssrsub_autoupdate_enable">Auto Update</string>
   <string name="ssrsub_add">Add URL</string>
+  <string name="ssrsub_edit">Edit URL</string>
   <string name="ssrsub_ok">Save and Update</string>
   <string name="ssrsub_list">Item List</string>
   <string name="ssrsub_error">Error: URL invaild or internet unavailable.</string>

@@ -78,7 +78,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
 
   def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
     case R.id.action_add_subscription => {
-      addSubscription(None)
+      addSubscription()
       true
     }
     case R.id.action_update_subscription => {
@@ -88,35 +88,52 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     case _ => false
   }
 
-  // move to ssrsub
-  private[this] def addSubscription(url: Option[String]): Unit = {
+  private[this] def addSubscription(): Unit = {
+    showSubscriptionDialog(None) { (responseString, url, groupName) => {
+      SSRSub.createSSRSub(responseString, url, groupName) match {
+        case Some(ssrsub) => {
+          handler.post(() => app.ssrsubManager.createSSRSub(ssrsub))
+          addProfilesFromSubscription(ssrsub, responseString)
+        }
+        case None =>
+      }
+    }
+    }
+  }
+
+  private  def showSubscriptionDialog (ssrSub: Option[SSRSub])(responseHandler: (String, String, String) => Unit): Unit = {
     val context = getActivity
     val view = View.inflate(context, R.layout.layout_ssr_sub_add, null)
     val etAddUrl = view.findViewById(R.id.et_subscription_url).asInstanceOf[EditText]
     val etGroupName = view.findViewById(R.id.et_group_name).asInstanceOf[EditText]
+    var title = getString(R.string.ssrsub_add)
+    ssrSub.foreach(sub => {
+      etAddUrl.setText(sub.url)
+      etGroupName.setText(sub.url_group)
+      title = getString(R.string.ssrsub_edit)
+    })
     new AlertDialog.Builder(context)
       .setTitle(getString(R.string.ssrsub_add))
       .setPositiveButton(android.R.string.ok, ((_, _) => {
         val url = etAddUrl.getText.toString
         val groupName = etGroupName.getText.toString
         if(!TextUtils.isEmpty(url)) {
-          Utils.ThrowableFuture {
-            handler.post(() => testProgressDialog = ProgressDialog.show(context, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true))
-            val result = getSubscriptionResponse(url) match {
-              case Failure(e) => Some(getString(R.string.ssrsub_error, e.getMessage))
-              case Success(responseString) => SSRSub.createSSRSub(responseString, url, groupName) match {
-                case Some(ssrsub) => {
-                  handler.post(() => app.ssrsubManager.createSSRSub(ssrsub))
-                  addProfilesFromSubscription(ssrsub, responseString)
+          ssrSub match {
+            case Some(x) if x.url == url => responseHandler(null, url, groupName)
+            case _ => Utils.ThrowableFuture {
+              handler.post(() => testProgressDialog = ProgressDialog.show(context, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true))
+              val result = getSubscriptionResponse(url) match {
+                case Failure(e) => Some(getString(R.string.ssrsub_error, e.getMessage))
+                case Success(responseString) => {
+                  responseHandler(responseString, url, groupName)
                   None
                 }
-                case None => None
               }
+              handler.post(() => {
+                result.foreach(msg => Toast.makeText(configActivity, msg, Toast.LENGTH_SHORT).show())
+                testProgressDialog.dismiss
+              })
             }
-            handler.post(() => {
-              result.foreach(msg => Toast.makeText(configActivity, msg, Toast.LENGTH_SHORT).show())
-              testProgressDialog.dismiss
-            })
           }
         }
       }): DialogInterface.OnClickListener)
@@ -274,6 +291,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     private val text1 = itemView.findViewById(android.R.id.text1).asInstanceOf[TextView]
     private val text2 = itemView.findViewById(android.R.id.text2).asInstanceOf[TextView]
     private val ivUpdateSubscription = itemView.findViewById(R.id.update_subscription).asInstanceOf[ImageView]
+    private val ivEditSubscription = itemView.findViewById(R.id.edit_subscription).asInstanceOf[ImageView]
     text1.setOnClickListener(this)
     ivUpdateSubscription.setOnClickListener(_ => {
       Utils.ThrowableFuture {
@@ -284,6 +302,12 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
         handler.post(() => {
           testProgressDialog.dismiss
         })
+      }
+    })
+    ivEditSubscription.setOnClickListener(_ => {
+      showSubscriptionDialog(Some(item)) { (responseString, url, groupName) => {
+          None
+        }
       }
     })
 

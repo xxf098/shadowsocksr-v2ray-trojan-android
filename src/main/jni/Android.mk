@@ -609,8 +609,8 @@ LOCAL_CFLAGS :=  	-fPIC -pthread -ldl -Wl,--no-as-needed -Wl,-soname=libproxycha
 									-I$(LOCAL_PATH)/include/proxychains \
 									-I$(LOCAL_PATH)/proxychains/src \
 				   				-I$(LOCAL_PATH)/libancillary \
-									-DLIB_DIR=\"/data/user/0/in.zhaoj.shadowsocksrr/lib\" -DINSTALL_PREFIX=\"/data/user/0/in.zhaoj.shadowsocksrr/\" \
-									-DDLL_NAME=\"libproxychains4.so\" -DSYSCONFDIR=\"/data/user/0/in.zhaoj.shadowsocksrr/\"
+									-DLIB_DIR=\"/data/user/0/com.xxf098.ssrray/lib\" -DINSTALL_PREFIX=\"/data/user/0/com.xxf098.ssrray/\" \
+									-DDLL_NAME=\"libproxychains4.so\" -DSYSCONFDIR=\"/data/user/0/com.xxf098.ssrray/\"
 
 LOCAL_STATIC_LIBRARIES := libancillary
 

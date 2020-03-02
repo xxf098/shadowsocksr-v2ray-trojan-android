@@ -6,7 +6,7 @@ android.useSupportVectors
 
 name := "shadowsocksr-v2ray"
 
-applicationId := "in.zhaoj.shadowsocksrr"
+applicationId := "com.xxf098.ssrray"
 
 val supportLibVersion = "27.1.1"
 platformTarget := "android-29"

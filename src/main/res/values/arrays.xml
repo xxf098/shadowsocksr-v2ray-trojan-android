@@ -110,6 +110,20 @@
         <item>self</item>
     </string-array>
 
+    <string-array name="v2ray_security_entry">
+        <item>aes-128-gcm</item>
+        <item>chacha20-poly1305</item>
+        <item>auto</item>
+        <item>none</item>
+    </string-array>
+
+    <string-array name="v2ray_security_value">
+        <item>aes-128-gcm</item>
+        <item>chacha20-poly1305</item>
+        <item>auto</item>
+        <item>none</item>
+    </string-array>
+
     <string-array name="bypass_private_route">
         <item>1.0.0.0/8</item>
         <item>2.0.0.0/7</item>

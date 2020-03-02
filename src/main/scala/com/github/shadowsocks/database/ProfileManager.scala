@@ -180,7 +180,7 @@ class ProfileManager(dbHelper: DBHelper) {
         .and().eq("v_host", profile.v_host)
         .and().eq("v_path", Option(profile.v_path).getOrElse(""))
         .and().eq("url_group", profile.url_group)
-        .and().eq("name", profile.name)
+        .and().eq("v_ps", profile.v_ps)
         .and().eq("v_tls", profile.v_tls).queryForFirst()
     }
   }

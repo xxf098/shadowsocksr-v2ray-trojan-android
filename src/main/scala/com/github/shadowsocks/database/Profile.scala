@@ -67,6 +67,7 @@ object Profile {
     if (!profile.isVmess) {
       throw new Exception("Not a V2ray Profile")
     }
+    val v_security = if (TextUtils.isEmpty(profile.v_security)) "auto" else profile.v_security
     Tun2socks.newVmess(
       profile.v_host,
       profile.v_path,
@@ -77,12 +78,38 @@ object Profile {
       profile.v_net,
       profile.v_id,
       profile.v_type,
+      v_security,
       "error"
     )
   }
 
   // TODO:
   def profileToBytes(profile: Profile) = ???
+
+  case class LatencyResult(elapsed: Long, msg: String)
+
+  implicit class LatencyTest(profile: Profile) {
+
+    def testLatency(): Future[LatencyResult] = {
+      Future(profile.getElapsed())
+        .map(elapsed => LatencyResult(elapsed, app.getString(R.string.connection_test_available, elapsed: java.lang.Long)))
+        .recover {
+          case e: Exception => LatencyResult(0, app.getString(R.string.connection_test_error, e.getMessage))
+        }
+    }
+
+    def testLatencyThread(): String = {
+      Try(profile.getElapsed())
+        .map(elapsed => LatencyResult(elapsed, app.getString(R.string.connection_test_available, elapsed: java.lang.Long)))
+        .recover {
+          case e: Exception => LatencyResult(0, app.getString(R.string.connection_test_error, e.getMessage))
+        }.map(result => {
+        profile.elapsed = result.elapsed
+        app.profileManager.updateProfile(profile)
+        result.msg
+      }).get
+    }
+  }
 }
 
 class Profile {
@@ -203,6 +230,9 @@ class Profile {
   @DatabaseField
   var v_json_config: String = ""
 
+  @DatabaseField
+  var v_security: String = ""
+
   override def toString(): String = {
     implicit val flags: Int = Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP
     this match {
@@ -220,30 +250,10 @@ class Profile {
 
   def isMethodUnsafe = "table".equalsIgnoreCase(method) || "rc4".equalsIgnoreCase(method)
 
-  // to ADT
   def isVmess = this.proxy_protocol == "vmess"
 
   def isV2RayJSON = this.proxy_protocol == "v2ray_json"
 
   def isV2Ray = isVmess || isV2RayJSON
-
-  def testLatency (): Future[Long] = {
-    Future(this.getElapsed())
-    .map(elapsed => {
-      this.elapsed = elapsed
-      app.profileManager.updateProfile(this)
-      elapsed
-    })
-  }
-
-  def testLatencyThread () : String = {
-    Try(this.getElapsed()).map(elapsed => {
-      this.elapsed = elapsed
-      app.profileManager.updateProfile(this)
-      app.getString(R.string.connection_test_available, elapsed: java.lang.Long)
-    }).recover{
-      case e: Exception => app.getString(R.string.connection_test_error, e.getMessage)
-    }.get
-  }
 
 }

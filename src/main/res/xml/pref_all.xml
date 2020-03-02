@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-                  xmlns:app="http://schemas.android.com/apk/res/in.zhaoj.shadowsocksrr"
+                  xmlns:app="http://schemas.android.com/apk/res/com.xxf098.ssrray"
     android:key="@string/preferenceScreen">
 
     <PreferenceCategory
@@ -108,6 +108,13 @@
             android:title="AlterId"
             app:max="65535"
             app:min="1" />
+        <com.github.shadowsocks.preferences.DropDownPreference
+            android:entries="@array/v2ray_security_entry"
+            android:entryValues="@array/v2ray_security_value"
+            android:key="v_security"
+            android:persistent="false"
+            android:summary="%s"
+            android:title="Security" />
         <com.github.shadowsocks.preferences.SummaryEditTextPreference
             android:key="v_path"
             android:summary="Path"

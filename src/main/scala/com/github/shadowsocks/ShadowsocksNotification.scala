@@ -4,10 +4,11 @@ import java.util.Locale
 
 import android.app.{KeyguardManager, NotificationManager, PendingIntent}
 import android.content.{BroadcastReceiver, Context, Intent, IntentFilter}
-import android.os.PowerManager
+import android.os.{Build, PowerManager}
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationCompat.BigTextStyle
 import android.support.v4.content.ContextCompat
+import android.util.Log
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback.Stub
 import com.github.shadowsocks.utils.{Action, State, TrafficMonitor, Utils}
 import com.github.shadowsocks.ShadowsocksApplication.app

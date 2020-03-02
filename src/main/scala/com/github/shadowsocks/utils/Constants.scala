@@ -311,6 +311,7 @@ object Key {
   val v_class = "v_class"
   val v_add_json = "v_add_json"
   val v_id_json = "v_id_json"
+  val v_security = "v_security"
 
   val profileTip = "profileTip"
 
@@ -346,11 +347,11 @@ object State {
 }
 
 object Action {
-  val SERVICE = "in.zhaoj.shadowsocksrr.SERVICE"
-  val CLOSE = "in.zhaoj.shadowsocksrr.CLOSE"
-  val QUICK_SWITCH = "in.zhaoj.shadowsocksrr.QUICK_SWITCH"
-  val SCAN = "in.zhaoj.shadowsocksrr.intent.action.SCAN"
-  val SORT = "in.zhaoj.shadowsocksrr.intent.action.SORT"
+  val SERVICE = "com.xxf098.ssrray.SERVICE"
+  val CLOSE = "com.xxf098.ssrray.CLOSE"
+  val QUICK_SWITCH = "com.xxf098.ssrray.QUICK_SWITCH"
+  val SCAN = "com.xxf098.ssrray.intent.action.SCAN"
+  val SORT = "com.xxf098.ssrray.intent.action.SORT"
 }
 
 object Route {

@@ -51,6 +51,7 @@ import tun2socks.Tun2socks
 
 import scala.language.implicitConversions
 import Profile._
+import com.github.shadowsocks.database.VmessAction.profile
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -131,19 +132,17 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val pingBtn = itemView.findViewById(R.id.ping_single).asInstanceOf[ImageView]
       pingBtn.setOnClickListener(_ => {
 
+        getWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
-        item.testLatency().map(elapsed => {
-          this.updateText(0, 0, elapsed)
-          getString(R.string.connection_test_available, elapsed: java.lang.Long)
-        }).recover {
-          case e: Exception => {
-            e.printStackTrace()
-            app.getString(R.string.connection_test_error, e.getMessage)
-          }
-        }.foreach(result => {
-          singleTestProgressDialog.dismiss()
-          Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
-        })
+        item.testLatency()
+          .foreach(result => {
+            item.elapsed = result.elapsed
+            app.profileManager.updateProfile(item)
+            this.updateText(0, 0, result.elapsed)
+            runOnUiThread(() => getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON))
+            singleTestProgressDialog.dismiss()
+            Snackbar.make(findViewById(android.R.id.content), result.msg, Snackbar.LENGTH_LONG).show
+          })
         // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
       })
       pingBtn.setOnLongClickListener(_ => {
@@ -650,6 +649,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       sw_ssr_sub_autoupdate_enable.setChecked(true)
     }
 
+    // auto update
     sw_ssr_sub_autoupdate_enable.setOnCheckedChangeListener(((_, isChecked: Boolean) => {
       val prefs_edit = prefs.edit()
       if (isChecked) {
@@ -1055,11 +1055,12 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
                   isTesting = false
                   testAsyncJob.interrupt()
-
+                  runOnUiThread(() => getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON))
                   finish()
-                  startActivity(new Intent(getIntent()))
+                  startActivity(new Intent(Action.SORT))
               }
           })
+          getWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
           // TODO: refactor
           testAsyncJob = new Thread {
@@ -1084,10 +1085,15 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
                   if (!profile.isV2Ray) {
                     // Resolve the server address
+                    var result = ""
+                    try {
                     var host = profile.host
+                    if (List("www.google.com", "127.0.0.1").contains(host)) {
+                      throw new IOException(s"Bypass Host $host")
+                    }
                     if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = true) match {
                       case Some(addr) => host = addr
-                      case None => throw new Exception("can't resolve")
+                      case None => throw new Exception(s"can't resolve host $host")
                     }
 
                     val conf = ConfigUtils
@@ -1120,11 +1126,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                       }
                     }
 
-                    var result = ""
+
                     val builder = new OkHttpClient.Builder()
-                      .connectTimeout(5, TimeUnit.SECONDS)
-                      .writeTimeout(5, TimeUnit.SECONDS)
-                      .readTimeout(5, TimeUnit.SECONDS)
+                      .connectTimeout(3, TimeUnit.SECONDS)
+                      .writeTimeout(3, TimeUnit.SECONDS)
+                      .readTimeout(3, TimeUnit.SECONDS)
 
                     val client = builder.build();
 
@@ -1132,7 +1138,6 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                       .url("http://127.0.0.1:" + (profile.localPort + 2) + "/generate_204").removeHeader("Host").addHeader("Host", "www.google.com")
                       .build();
 
-                    try {
                       val response = client.newCall(request).execute()
                       val code = response.code()
                       if (code == 204 || code == 200 && response.body().contentLength == 0) {
@@ -1150,7 +1155,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                       } else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
                       response.body().close()
                     } catch {
-                      case e: IOException =>
+                      case e: Exception =>
+                        profile.elapsed = 0
+                        app.profileManager.updateProfile(profile)
                         result = getString(R.string.connection_test_error, e.getMessage)
                     }
 
@@ -1172,6 +1179,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                 testProgressDialog = null;
               }
 
+              runOnUiThread(() => getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON))
               finish()
               startActivity(new Intent(getIntent()))
               Looper.loop()
@@ -1190,7 +1198,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       true
     case R.id.batch_delete =>
       val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
-        .setTitle("Batch Delete")
+        .setTitle(getString(R.string.batch_delete))
         .setPositiveButton(android.R.string.yes, ((_, _) =>{
           ProfileManagerActivity.getProfilesByGroup(currentGroupName, is_sort)
             .filter(_.id != app.profileId)

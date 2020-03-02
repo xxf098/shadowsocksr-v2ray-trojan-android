@@ -154,6 +154,7 @@ object Parser {
     profile.v_host = vmessBean.requestHost
     profile.v_path = vmessBean.path
     profile.v_tls = vmessBean.streamSecurity
+    profile.v_security = vmessBean.security
     // common
     profile.name = profile.v_ps
     profile.url_group = vmessBean.url_group

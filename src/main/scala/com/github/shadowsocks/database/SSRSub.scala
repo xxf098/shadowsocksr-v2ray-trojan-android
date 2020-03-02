@@ -42,6 +42,7 @@ package com.github.shadowsocks.database
 import java.net.{URL, URLEncoder}
 import java.util.Locale
 
+import android.text.TextUtils
 import android.util.Base64
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.CloseUtils.autoClose
@@ -64,12 +65,12 @@ object SSRSub {
     subscribes
   }
 
-  def createSSRSub(responseString: String, requestURL: String): Option[SSRSub] = {
+  def createSSRSub(responseString: String, requestURL: String, groupName: String = ""): Option[SSRSub] = {
     val profiles_ssr = Parser.findAll_ssr(responseString).toList
     if(profiles_ssr.nonEmpty && profiles_ssr.head.url_group != "") {
       val ssrsub = new SSRSub {
         url = requestURL
-        url_group = profiles_ssr(0).url_group
+        url_group = if (TextUtils.isEmpty(groupName)) profiles_ssr.head.url_group else groupName
       }
       return Some(ssrsub)
     } else {
@@ -77,7 +78,7 @@ object SSRSub {
       if (profiles_vmess.nonEmpty) {
         val ssrsub = new SSRSub {
           url = requestURL
-          url_group = new URL(requestURL).getHost
+          url_group = if (TextUtils.isEmpty(groupName)) new URL(requestURL).getHost else groupName
         }
         return Some(ssrsub)
       }

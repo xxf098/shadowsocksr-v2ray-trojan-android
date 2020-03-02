@@ -65,7 +65,7 @@ object DBHelper {
 }
 
 class DBHelper(val context: Context)
-  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 28) {
+  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 29) {
   import DBHelper._
 
   lazy val profileDao: Dao[Profile, Int] = getDao(classOf[Profile])
@@ -175,6 +175,10 @@ class DBHelper(val context: Context)
         }
         if (oldVersion < 28) {
           profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN ssrsub_id INTEGER DEFAULT '';")
+        }
+
+        if (oldVersion < 29) {
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN v_security VARCHAR DEFAULT '';")
         }
       } catch {
         case ex: Exception =>

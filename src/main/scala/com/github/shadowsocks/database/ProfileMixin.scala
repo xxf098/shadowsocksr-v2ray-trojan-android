@@ -31,7 +31,7 @@ object SSRAction extends ProfileAction {
       var host = profile.host
       if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = true) match {
         case Some(addr) => host = addr
-        case None => throw new Exception("can't resolve")
+        case None => throw new IOException("Host Not Resolved")
       }
       val conf = ConfigUtils
         .SHADOWSOCKS.formatLocal(Locale.ENGLISH, host, profile.remotePort, profile.localPort + 2,
@@ -66,9 +66,12 @@ object SSRAction extends ProfileAction {
 
 object VmessAction extends ProfileAction {
   override def getElapsed(): Long = {
-    if (!Utils.isNumeric(profile.v_add)) Utils.resolve(profile.v_add, enableIPv6 = true, hostname = "1.1.1.1") match {
+    if (List("www.google.com", "127.0.0.1", "8.8.8.8", "1.2.3.4").contains(profile.v_add)) {
+        throw new IOException(s"Bypass Host ${profile.v_add}")
+    }
+    if (!Utils.isNumeric(profile.v_add)) Utils.resolve(profile.v_add, enableIPv6 = true) match {
       case Some(addr) => profile.v_add = addr
-      case None => throw new IOException("Name Not Resolved")
+      case None => throw new IOException("Host Not Resolved")
     }
     Tun2socks.testVmessLatency(profile, app.getV2rayAssetsPath())
   }

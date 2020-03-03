@@ -59,7 +59,7 @@ import com.github.shadowsocks.utils.Utils
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
-import ProfileMixin._
+import ProfileConverter._
 // automatic from Android without pc
 
 object Profile {

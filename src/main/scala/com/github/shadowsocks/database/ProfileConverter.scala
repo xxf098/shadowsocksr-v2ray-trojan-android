@@ -97,8 +97,10 @@ object V2JSONAction extends ProfileAction {
   override def isOK(): Boolean = !TextUtils.isEmpty(profile.v_json_config)
 }
 
-object ProfileMixin {
-  implicit class ProfileExt(profile: Profile) extends ProfileAction {
+// implicit convert  profile to prileaction
+object ProfileConverter {
+
+  implicit def convertProfileToAction (profile: Profile): ProfileAction = {
     val profileAction: ProfileAction = profile match {
       case p if p.isVmess => VmessAction
       case p if p.isV2RayJSON => V2JSONAction
@@ -106,8 +108,6 @@ object ProfileMixin {
       case _ => throw new Exception("Not Supported!")
     }
     profileAction.profile = profile
-    override def getElapsed(): Long = profileAction.getElapsed()
-
-    override def isOK(): Boolean = profileAction.isOK()
+    profileAction
   }
 }

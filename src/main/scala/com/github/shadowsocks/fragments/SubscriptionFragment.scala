@@ -208,7 +208,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
   }
 
   private[this] def addProfilesFromSubscription (ssrsub: SSRSub, responseString: String): Unit = {
-    var delete_profiles = app.profileManager.getAllProfilesBySSRSub(ssrsub) match {
+    val delete_profiles = app.profileManager.getAllProfilesBySSRSub(ssrsub) match {
       case Some(subProfiles) =>
         subProfiles.filter(profile=> profile.ssrsub_id <= 0 || profile.ssrsub_id == ssrsub.id)
       case _ => null
@@ -229,10 +229,10 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
         profile.ssrsub_id = ssrsub.id
         profile.url_group = ssrsub.url_group
         notifyGroupNameChange(Some(profile.url_group))
-        val result = app.profileManager.createProfile_sub(profile)
-        if (result != 0) {
-          delete_profiles = delete_profiles.filter(_.id != result)
-        }
+        app.profileManager.createProfile_sub(profile)
+//        if (result != 0) {
+//          delete_profiles = delete_profiles.filter(_.id != result)
+//        }
       }
       encounter_num += 1
     })

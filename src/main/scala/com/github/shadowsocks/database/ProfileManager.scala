@@ -138,16 +138,20 @@ class ProfileManager(dbHelper: DBHelper) {
         .prepareStatementString).getFirstResult
       if (last != null && last.length == 1 && last(0) != null) profile.userOrder = last(0).toInt + 1
 
-      val last_exist = checkLastExistProfile(profile)
-      if (last_exist == null) {
-        dbHelper.profileDao.createOrUpdate(profile)
-        if (profileAddedListener != null)  {
-          profileAddedListener(profile)
-        }
-        0
-      } else {
-        last_exist.id
-      }
+//      val last_exist = checkLastExistProfile(profile)
+//      if (last_exist == null) {
+//        dbHelper.profileDao.createOrUpdate(profile)
+//        if (profileAddedListener != null)  {
+//          profileAddedListener(profile)
+//        }
+//        0
+//      } else {
+//        last_exist.id
+//      }
+      // https://github.com/xxf098/shadowsocksr-v2ray-android/issues/49
+      dbHelper.profileDao.createOrUpdate(profile)
+      if (profileAddedListener != null) { profileAddedListener(profile) }
+      0
     } catch {
       case ex: Exception =>
         Log.e(TAG, "addProfile", ex)

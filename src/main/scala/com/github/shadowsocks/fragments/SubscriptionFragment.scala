@@ -4,7 +4,7 @@ import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 import android.app.ProgressDialog
-import android.content.{DialogInterface, Intent}
+import android.content.{ClipData, ClipboardManager, Context, DialogInterface, Intent}
 import android.os.{Bundle, Handler}
 import android.preference.PreferenceManager
 import android.support.v4.app.Fragment
@@ -18,7 +18,7 @@ import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.util.Log
 import android.view.{KeyEvent, LayoutInflater, MenuItem, View, ViewGroup}
-import android.widget.{CompoundButton, EditText, ImageView, Switch, TextView, Toast}
+import android.widget.{CompoundButton, EditText, ImageView, PopupMenu, Switch, TextView, Toast}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.{Profile, SSRSub}
 import com.github.shadowsocks.utils.{Key, Parser, Utils}
@@ -26,6 +26,7 @@ import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.github.shadowsocks.{ConfigActivity, ProfileManagerActivity, R}
 import okhttp3.{OkHttpClient, Request}
 import android.view.View
+
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
@@ -37,6 +38,8 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
   private lazy val ssrsubAdapter = new SSRSubAdapter
   private var testProgressDialog: ProgressDialog = _
   private lazy val configActivity = getActivity.asInstanceOf[ConfigActivity]
+  private lazy val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
+
 
   override def onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle): View = {
     inflater.inflate(R.layout.layout_subscriptions, container, false)
@@ -154,12 +157,12 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
   private[this] def updateAllSubscriptions (): Unit = {
     Utils.ThrowableFuture {
       handler.post(() => {
-        testProgressDialog = ProgressDialog.show(getActivity, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true)
+        testProgressDialog = ProgressDialog.show(requireContext(), getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true)
       })
       app.ssrsubManager.getAllSSRSubs match {
         case Some(ssrsubs) => ssrsubs.foreach(updateSingleSubscription)
         case _ => configActivity.runOnUiThread(() => {
-          Toast.makeText(getActivity, R.string.action_export_err, Toast.LENGTH_SHORT).show
+          Toast.makeText(requireContext(), R.string.action_export_err, Toast.LENGTH_SHORT).show
         })
       }
       handler.post(() => {
@@ -289,10 +292,8 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     }).attachToRecyclerView(ssusubsList)
   }
 
-
-
   private final class SSRSubViewHolder(val view: View) extends RecyclerView.ViewHolder(view)
-    with View.OnClickListener with View.OnKeyListener {
+    with View.OnClickListener with View.OnKeyListener with PopupMenu.OnMenuItemClickListener {
 
     var item: SSRSub = _
     private val text1 = itemView.findViewById(android.R.id.text1).asInstanceOf[TextView]
@@ -312,29 +313,13 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       }
     })
     ivEditSubscription.setOnClickListener(_ => {
-      showSubscriptionDialog(Some(item)) { (responseString, url, groupName) => {
-        (url, groupName) match {
-          case t if t._1 == item.url && t._2 != item.url_group => {
-            Utils.ThrowableFuture{
-              item.url_group = groupName
-              app.ssrsubManager.updateSSRSub(item)
-              app.profileManager.updateGroupName(groupName, item.id)
-              updateText(false)
-              notifyGroupNameChange(Some(groupName))
-            }
-          }
-          case t if t._1 != item.url => {
-            item.url = url
-            item.url_group = groupName
-            app.ssrsubManager.updateSSRSub(item)
-            addProfilesFromSubscription(item, responseString)
-            updateText(false)
-          }
-          case _ =>
-        }
-        }
-      }
+      val popup = new PopupMenu(requireContext(), ivEditSubscription)
+      popup.getMenuInflater.inflate(R.menu.subscription_edit_popup, popup.getMenu)
+      popup.setOnMenuItemClickListener(this)
+      popup.show()
+
     })
+
 
     def updateText(isShowUrl: Boolean = false) {
       val builder = new SpannableStringBuilder
@@ -363,6 +348,43 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
 
     def onClick(v: View) = {
       updateText(true)
+    }
+
+    override def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
+      case R.id.action_edit_subscription => {
+        edit_subscription()
+        true
+      }
+      case R.id.action_copy_subscription => {
+        clipboard.setPrimaryClip(ClipData.newPlainText(null, this.item.url))
+        true
+      }
+      case _ => false
+    }
+
+    def edit_subscription(): Unit = {
+      showSubscriptionDialog(Some(item)) { (responseString, url, groupName) => {
+        (url, groupName) match {
+          case t if t._1 == item.url && t._2 != item.url_group => {
+            Utils.ThrowableFuture {
+              this.item.url_group = groupName
+              app.ssrsubManager.updateSSRSub(item)
+              app.profileManager.updateGroupName(groupName, item.id)
+              updateText(false)
+              notifyGroupNameChange(Some(groupName))
+            }
+          }
+          case t if t._1 != item.url => {
+            item.url = url
+            item.url_group = groupName
+            app.ssrsubManager.updateSSRSub(item)
+            addProfilesFromSubscription(item, responseString)
+            updateText(false)
+          }
+          case _ =>
+        }
+      }
+      }
     }
 
     def onKey(v: View, keyCode: Int, event: KeyEvent) = {

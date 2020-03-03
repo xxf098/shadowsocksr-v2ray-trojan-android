@@ -83,7 +83,7 @@
   <string name="share_message_nfc_disabled">扫描二维码\nAndroid Beam 被禁用</string>
   <string name="turn_on_nfc">打开 NFC &amp; Android Beam</string>
   <string name="add_profile">添加配置文件</string>
-  <string name="edit">"编辑"</string>
+  <string name="edit">编辑</string>
 
   <string name="nat">NAT 模式 (仅限调试)</string>
   <string name="nat_summary">从 VPN 模式切换为 NAT 模式，需要 ROOT 权限</string>

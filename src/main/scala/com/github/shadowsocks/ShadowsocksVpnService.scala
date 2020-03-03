@@ -471,7 +471,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
           try {
             if (!profile.bypass) {
               builder.addAllowedApplication(pkg)
-            } else if (pkg != getPackageName) {
+            }
+            if (profile.bypass && pkg != getPackageName) {
               builder.addDisallowedApplication(pkg)
             }
           } catch {

@@ -107,7 +107,7 @@
             android:summary="%d"
             android:title="AlterId"
             app:max="65535"
-            app:min="1" />
+            app:min="0" />
         <com.github.shadowsocks.preferences.DropDownPreference
             android:entries="@array/v2ray_security_entry"
             android:entryValues="@array/v2ray_security_value"

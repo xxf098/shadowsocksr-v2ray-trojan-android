@@ -11,7 +11,7 @@ import com.github.shadowsocks.{GuardedProcess, R}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.{ConfigUtils, ExeNative, NetUtils, TcpFastOpen, Utils}
 import okhttp3.{OkHttpClient, Request}
-import tun2socks.Tun2socks
+import tun2socks.{Tun2socks, Vmess}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -69,11 +69,12 @@ object VmessAction extends ProfileAction {
     if (List("www.google.com", "127.0.0.1", "8.8.8.8", "1.2.3.4").contains(profile.v_add)) {
         throw new IOException(s"Bypass Host ${profile.v_add}")
     }
-    if (!Utils.isNumeric(profile.v_add)) Utils.resolve(profile.v_add, enableIPv6 = true) match {
-      case Some(addr) => profile.v_add = addr
+    val vmess: Vmess = profile
+    if (!Utils.isNumeric(vmess.getAdd)) Utils.resolve(profile.v_add, enableIPv6 = true) match {
+      case Some(addr) => vmess.setAdd(addr)
       case None => throw new IOException("Host Not Resolved")
     }
-    Tun2socks.testVmessLatency(profile, app.getV2rayAssetsPath())
+    Tun2socks.testVmessLatency(vmess, app.getV2rayAssetsPath())
   }
 
   override def isOK(): Boolean = !(TextUtils.isEmpty(profile.v_add) ||

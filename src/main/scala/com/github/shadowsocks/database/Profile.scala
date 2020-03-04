@@ -83,26 +83,39 @@ object Profile {
     )
   }
 
-  // TODO:
+
   def profileToBytes(profile: Profile) = ???
 
-  case class LatencyResult(elapsed: Long, msg: String)
+  abstract class LatencyResult {
+    val elapsed: Long
+    val msg: String
+  }
+
+  case class SuccessResult(el: Long) extends LatencyResult {
+    val elapsed: Long = el
+    val msg: String = app.getString(R.string.connection_test_available, elapsed: java.lang.Long)
+  }
+
+  case class FailureResult(e: Exception) extends LatencyResult {
+    val elapsed: Long = 0L
+    val msg: String = app.getString(R.string.connection_test_error, e.getMessage)
+  }
 
   implicit class LatencyTest(profile: Profile) {
 
     def testLatency(): Future[LatencyResult] = {
       Future(profile.getElapsed())
-        .map(elapsed => LatencyResult(elapsed, app.getString(R.string.connection_test_available, elapsed: java.lang.Long)))
+        .map(elapsed => SuccessResult(elapsed))
         .recover {
-          case e: Exception => LatencyResult(0, app.getString(R.string.connection_test_error, e.getMessage))
+          case e: Exception => FailureResult(e)
         }
     }
 
     def testLatencyThread(): String = {
       Try(profile.getElapsed())
-        .map(elapsed => LatencyResult(elapsed, app.getString(R.string.connection_test_available, elapsed: java.lang.Long)))
+        .map(elapsed => SuccessResult(elapsed))
         .recover {
-          case e: Exception => LatencyResult(0, app.getString(R.string.connection_test_error, e.getMessage))
+          case e: Exception => FailureResult(e)
         }.map(result => {
         profile.elapsed = result.elapsed
         app.profileManager.updateProfile(profile)

@@ -66,6 +66,7 @@ import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils._
 import com.github.shadowsocks.job.SSRSubUpdateJob
 import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.types.{FailureConnect, Result, SuccessConnect}
 import okhttp3._
 
 import scala.concurrent.Future
@@ -308,31 +309,24 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     }
     Utils.ThrowableFuture {
       if (testCount == id) {
-        var result: String = null
-        var success = false
-        for (i <- 1 to retry if !success) {
-          handler.post(() => connectionTestText.setText(R.string.connection_test_testing))
+        var result = Result[Long](0L)
+        for (i <- 1 to retry if result.isFailure) {
+          handler.post(() => {connectionTestText.setText(R.string.connection_test_testing)})
           result = Try(NetUtils.testConnection("https://www.google.com/generate_204"))
-            .map(elapsed => {
-              success = true
-              getString(R.string.connection_test_available, elapsed: java.lang.Long)
-            })
+            .map(SuccessConnect)
             .recover {
               case e: Exception => {
                 if (i < retry - 1) {
                   handler.post(() => connectionTestText.setText("retry..."))
                   Thread.sleep(500 * (Math.pow(0.5, retry).toLong + 1))
                 }
-                getString(R.string.connection_test_error, e.getMessage)
+                FailureConnect(getString(R.string.connection_test_error, e.getMessage))
               }
             }.get
         }
         synchronized(if (testCount == id && app.isVpnEnabled && serviceStarted) handler.post(() =>
-          if (success) connectionTestText.setText(result)
-          else {
-            connectionTestText.setText(R.string.connection_test_fail)
-//            Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_SHORT).show
-          }))
+          connectionTestText.setText(result.msg)
+         ))
       }
     }
   }

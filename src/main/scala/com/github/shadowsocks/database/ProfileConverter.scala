@@ -16,13 +16,13 @@ import tun2socks.{Tun2socks, Vmess}
 import scala.collection.mutable.ArrayBuffer
 
 
-trait ProfileAction {
+trait ProfileFunctions {
   var profile: Profile = _
   def getElapsed() : Long
   def isOK(): Boolean
 }
 
-object SSRAction extends ProfileAction {
+object SSRAction extends ProfileFunctions {
   // TODO: refactor
   var ssTestProcess: GuardedProcess = _
   override def getElapsed(): Long = {
@@ -64,7 +64,7 @@ object SSRAction extends ProfileAction {
   override def isOK(): Boolean = !(TextUtils.isEmpty(profile.host) || TextUtils.isEmpty(profile.password))
 }
 
-object VmessAction extends ProfileAction {
+object VmessAction extends ProfileFunctions {
   override def getElapsed(): Long = {
     if (List("www.google.com", "127.0.0.1", "8.8.8.8", "1.2.3.4").contains(profile.v_add)) {
         throw new IOException(s"Bypass Host ${profile.v_add}")
@@ -84,7 +84,7 @@ object VmessAction extends ProfileAction {
     TextUtils.isEmpty(profile.v_net))
 }
 
-object V2JSONAction extends ProfileAction {
+object V2JSONAction extends ProfileFunctions {
   override def getElapsed(): Long = {
     if (TextUtils.isEmpty(profile.v_add)) throw new IOException("Server Address Not Found!")
     if (!Utils.isNumeric(profile.v_add)) Utils.resolve(profile.v_add, enableIPv6 = true, hostname = "1.1.1.1") match {
@@ -98,11 +98,11 @@ object V2JSONAction extends ProfileAction {
   override def isOK(): Boolean = !TextUtils.isEmpty(profile.v_json_config)
 }
 
-// implicit convert  profile to prileaction
+
 object ProfileConverter {
 
-  implicit def convertProfileToAction (profile: Profile): ProfileAction = {
-    val profileAction: ProfileAction = profile match {
+  implicit def convertProfileToAction (profile: Profile): ProfileFunctions = {
+    val profileAction: ProfileFunctions = profile match {
       case p if p.isVmess => VmessAction
       case p if p.isV2RayJSON => V2JSONAction
       case p if !p.isV2Ray => SSRAction

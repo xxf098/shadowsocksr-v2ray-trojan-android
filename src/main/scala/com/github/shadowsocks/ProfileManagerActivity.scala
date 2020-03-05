@@ -136,9 +136,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
         item.testLatency()
           .foreach(result => {
-            item.elapsed = result.elapsed
+            item.elapsed = result.data
             app.profileManager.updateProfile(item)
-            this.updateText(0, 0, result.elapsed)
+            this.updateText(0, 0, result.data)
             runOnUiThread(() => getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON))
             singleTestProgressDialog.dismiss()
             Snackbar.make(findViewById(android.R.id.content), result.msg, Snackbar.LENGTH_LONG).show

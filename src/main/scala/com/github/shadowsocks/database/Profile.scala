@@ -60,6 +60,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
 import ProfileConverter._
+import com.github.shadowsocks.types.{FailureConnect, Result, SuccessConnect}
 // automatic from Android without pc
 
 object Profile {
@@ -83,41 +84,25 @@ object Profile {
     )
   }
 
-
   def profileToBytes(profile: Profile) = ???
-
-  abstract class LatencyResult {
-    val elapsed: Long
-    val msg: String
-  }
-
-  case class SuccessResult(el: Long) extends LatencyResult {
-    val elapsed: Long = el
-    val msg: String = app.getString(R.string.connection_test_available, elapsed: java.lang.Long)
-  }
-
-  case class FailureResult(e: Exception) extends LatencyResult {
-    val elapsed: Long = 0L
-    val msg: String = app.getString(R.string.connection_test_error, e.getMessage)
-  }
 
   implicit class LatencyTest(profile: Profile) {
 
-    def testLatency(): Future[LatencyResult] = {
+    def testLatency(): Future[Result[Long]] = {
       Future(profile.getElapsed())
-        .map(elapsed => SuccessResult(elapsed))
+        .map(SuccessConnect)
         .recover {
-          case e: Exception => FailureResult(e)
+          case e: Exception => FailureConnect(e.getMessage)
         }
     }
 
     def testLatencyThread(): String = {
       Try(profile.getElapsed())
-        .map(elapsed => SuccessResult(elapsed))
+        .map(SuccessConnect)
         .recover {
-          case e: Exception => FailureResult(e)
+          case e: Exception => FailureConnect(e.getMessage)
         }.map(result => {
-        profile.elapsed = result.elapsed
+        profile.elapsed = result.data
         app.profileManager.updateProfile(profile)
         result.msg
       }).get

@@ -127,16 +127,16 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
             case Some(x) if x.url == url => responseHandler(null, url, groupName)
             case _ => Utils.ThrowableFuture {
               handler.post(() => testProgressDialog = ProgressDialog.show(context, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true))
-              val result = SSRSub.getSubscriptionResponse(url) match {
-                case Failure(e) => Some(getString(R.string.ssrsub_error, e.getMessage))
-                case Success(responseString) => {
-                  responseHandler(responseString, url, groupName)
-                  None
-                }
-              }
-              handler.post(() => {
-                result.foreach(msg => Toast.makeText(configActivity, msg, Toast.LENGTH_SHORT).show())
-                testProgressDialog.dismiss
+              SSRSub.getSubscriptionResponse(url).flatMap(responseString => Try{
+                responseHandler(responseString, url, groupName)
+                None
+              }).recover{
+                case e: Exception => Some(getString(R.string.ssrsub_error, e.getMessage))
+              }.foreach(result => {
+                handler.post(() => {
+                  result.foreach(msg => Toast.makeText(configActivity, msg, Toast.LENGTH_SHORT).show())
+                  testProgressDialog.dismiss
+                })
               })
             }
           }
@@ -169,69 +169,24 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       }
       handler.post(() => {
         testProgressDialog.dismiss
+        testProgressDialog = null
       })
 //      finish()
 //      startActivity(new Intent(getIntent()))
     }
   }
 
-  private def updateSingleSubscription (ssrsub: SSRSub): Option[String] = {
-    SSRSub.getSubscriptionResponse(ssrsub.url) match {
-      case Failure(e) => {
-        val message = getString(R.string.ssrsub_error, e.getMessage)
-        configActivity.runOnUiThread(() => {
-          Toast.makeText(getActivity, message, Toast.LENGTH_SHORT).show
-        })
-        Some(message)
-      }
-      case Success(response) => {
-//        addProfilesFromSubscription(ssrsub, response)
+  private def updateSingleSubscription (ssrsub: SSRSub): Unit = {
+    SSRSub.getSubscriptionResponse(ssrsub.url)
+      .flatMap(response => Try {
         ssrsub.addProfiles(response)
         notifyGroupNameChange(Some(ssrsub.url_group))
         None
-      }
-    }
-  }
-
-  private[this] def addProfilesFromSubscription (ssrsub: SSRSub, responseString: String): Unit = {
-    val delete_profiles = app.profileManager.getAllProfilesBySSRSub(ssrsub) match {
-      case Some(subProfiles) =>
-        subProfiles.filter(profile=> profile.ssrsub_id <= 0 || profile.ssrsub_id == ssrsub.id)
-      case _ => null
-    }
-    var limit_num = -1
-    var encounter_num = 0
-    if (responseString.indexOf("MAX=") == 0) {
-      limit_num = responseString.split("\\n")(0).split("MAX=")(1).replaceAll("\\D+","").toInt
-    }
-    var profiles_ssr = Parser.findAll_ssr(responseString)
-    if (responseString.indexOf("MAX=") == 0) {
-      profiles_ssr = scala.util.Random.shuffle(profiles_ssr)
-    }
-    val profiles_vmess = Parser.findAllVmess(responseString)
-    val profiles = profiles_ssr ++ profiles_vmess
-    var isProfileAdded = false
-    profiles.foreach((profile: Profile) => {
-      if (encounter_num < limit_num && limit_num != -1 || limit_num == -1) {
-        profile.ssrsub_id = ssrsub.id
-        profile.url_group = ssrsub.url_group
-        notifyGroupNameChange(Some(profile.url_group))
-        app.profileManager.createProfile_sub(profile)
-        isProfileAdded = true
-//        if (result != 0) {
-//          delete_profiles = delete_profiles.filter(_.id != result)
-//        }
-      }
-      encounter_num += 1
-    })
-
-    delete_profiles.foreach((profile: Profile) => {
-      if (profile.id != app.profileId ||
-        (profile.id == app.profileId && isProfileAdded)) {
-        app.profileManager.delProfile(profile.id)
-      }
-    })
-//    app.profileManager.getFirstProfileBySSRSub(ssrsub).foreach(p => app.profileId(p.id))
+      }).recover{
+      case e: Exception => Some(getString(R.string.ssrsub_error, e.getMessage))
+    }.foreach(result => result.foreach(msg =>
+      configActivity.runOnUiThread(() => Toast.makeText(getActivity, msg, Toast.LENGTH_SHORT).show)
+    ))
   }
 
   private[this] def setupRemoveSubscription (ssusubsList: RecyclerView): Unit = {
@@ -296,6 +251,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
         updateSingleSubscription(item)
         handler.post(() => {
           testProgressDialog.dismiss
+          testProgressDialog = null
         })
       }
     })

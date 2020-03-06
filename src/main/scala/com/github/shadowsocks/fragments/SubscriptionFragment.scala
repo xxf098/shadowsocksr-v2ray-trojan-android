@@ -227,12 +227,14 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     }
     val profiles_vmess = Parser.findAllVmess(responseString)
     val profiles = profiles_ssr ++ profiles_vmess
+    var isProfileAdded = false
     profiles.foreach((profile: Profile) => {
       if (encounter_num < limit_num && limit_num != -1 || limit_num == -1) {
         profile.ssrsub_id = ssrsub.id
         profile.url_group = ssrsub.url_group
         notifyGroupNameChange(Some(profile.url_group))
         app.profileManager.createProfile_sub(profile)
+        isProfileAdded = true
 //        if (result != 0) {
 //          delete_profiles = delete_profiles.filter(_.id != result)
 //        }
@@ -241,10 +243,12 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     })
 
     delete_profiles.foreach((profile: Profile) => {
-      if (profile.id != app.profileId) {
+      if (profile.id != app.profileId ||
+        (profile.id == app.profileId && isProfileAdded)) {
         app.profileManager.delProfile(profile.id)
       }
     })
+//    app.profileManager.getFirstProfileBySSRSub(ssrsub).foreach(p => app.profileId(p.id))
   }
 
   private[this] def setupRemoveSubscription (ssusubsList: RecyclerView): Unit = {

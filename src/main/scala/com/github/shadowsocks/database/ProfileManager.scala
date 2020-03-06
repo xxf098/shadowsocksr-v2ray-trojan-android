@@ -138,7 +138,12 @@ class ProfileManager(dbHelper: DBHelper) {
         .prepareStatementString).getFirstResult
       if (last != null && last.length == 1 && last(0) != null) profile.userOrder = last(0).toInt + 1
 
-//      val last_exist = checkLastExistProfile(profile)
+      val last_exist = checkLastExistProfile(profile)
+      if (last_exist != null) {
+        profile.tx = last_exist.tx
+        profile.rx = last_exist.rx
+        profile.elapsed = last_exist.elapsed
+      }
 //      if (last_exist == null) {
 //        dbHelper.profileDao.createOrUpdate(profile)
 //        if (profileAddedListener != null)  {
@@ -312,6 +317,19 @@ class ProfileManager(dbHelper: DBHelper) {
       } else {
         getAllProfilesByGroup(ssrsub.url_group)
       }
+    } catch {
+      case ex: Exception =>
+        Log.e(TAG, "getAllProfiles", ex)
+        app.track(ex)
+        None
+    }
+  }
+
+  def getFirstProfileBySSRSub(ssrsub: SSRSub): Option[Profile] = {
+    try {
+      import scala.collection.JavaConversions._
+      val result = dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.limit(1L).where().eq("ssrsub_id", ssrsub.id).prepare).toList
+      if (result.size == 1) Option(result.head) else None
     } catch {
       case ex: Exception =>
         Log.e(TAG, "getAllProfiles", ex)

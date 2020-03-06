@@ -123,7 +123,13 @@
             android:key="v_host"
             android:summary="Host"
             android:title="Host" />
-
+        <com.github.shadowsocks.preferences.DropDownPreference
+            android:entries="@array/streamsecuritys_entry"
+            android:entryValues="@array/streamsecuritys_value"
+            android:key="v_tls"
+            android:persistent="false"
+            android:summary="%s"
+            android:title="TLS" />
     </PreferenceCategory>
 
     <PreferenceCategory

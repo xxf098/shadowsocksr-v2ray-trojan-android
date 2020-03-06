@@ -96,7 +96,9 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       SSRSub.createSSRSub(responseString, url, groupName) match {
         case Some(ssrsub) => {
           handler.post(() => app.ssrsubManager.createSSRSub(ssrsub))
-          addProfilesFromSubscription(ssrsub, responseString)
+//          addProfilesFromSubscription(ssrsub, responseString)
+          ssrsub.addProfiles(responseString)
+          notifyGroupNameChange(Some(ssrsub.url_group))
         }
         case None =>
       }
@@ -125,7 +127,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
             case Some(x) if x.url == url => responseHandler(null, url, groupName)
             case _ => Utils.ThrowableFuture {
               handler.post(() => testProgressDialog = ProgressDialog.show(context, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true))
-              val result = getSubscriptionResponse(url) match {
+              val result = SSRSub.getSubscriptionResponse(url) match {
                 case Failure(e) => Some(getString(R.string.ssrsub_error, e.getMessage))
                 case Success(responseString) => {
                   responseHandler(responseString, url, groupName)
@@ -174,7 +176,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
   }
 
   private def updateSingleSubscription (ssrsub: SSRSub): Option[String] = {
-    getSubscriptionResponse(ssrsub.url) match {
+    SSRSub.getSubscriptionResponse(ssrsub.url) match {
       case Failure(e) => {
         val message = getString(R.string.ssrsub_error, e.getMessage)
         configActivity.runOnUiThread(() => {
@@ -183,30 +185,11 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
         Some(message)
       }
       case Success(response) => {
-        addProfilesFromSubscription(ssrsub, response)
+//        addProfilesFromSubscription(ssrsub, response)
+        ssrsub.addProfiles(response)
+        notifyGroupNameChange(Some(ssrsub.url_group))
         None
       }
-    }
-  }
-
-  private[this] def getSubscriptionResponse (url: String): Try[String] = Try{
-    val builder = new OkHttpClient.Builder()
-      .connectTimeout(3, TimeUnit.SECONDS)
-      .writeTimeout(3, TimeUnit.SECONDS)
-      .readTimeout(3, TimeUnit.SECONDS)
-    val client = builder.build()
-    val request = new Request.Builder()
-      .url(url)
-      .build()
-    val response = client.newCall(request).execute()
-    val code = response.code()
-    if (code == 200) {
-      val result = SSRSub.getResponseString(response)
-      response.body().close()
-      result
-    } else {
-      response.body().close()
-      throw new Exception(getString(R.string.ssrsub_error, code: Integer))
     }
   }
 
@@ -382,8 +365,10 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
             item.url = url
             item.url_group = groupName
             app.ssrsubManager.updateSSRSub(item)
-            addProfilesFromSubscription(item, responseString)
+            item.addProfiles(responseString)
+//            addProfilesFromSubscription(item, responseString)
             updateText(false)
+            notifyGroupNameChange(Some(groupName))
           }
           case _ =>
         }

@@ -3,4 +3,5 @@
     <!-- TODO: Remove when this issue is fixed: https://github.com/JorgeCastilloPrz/FABProgressCircle/issues/19 -->
     <dimen name="fab_margin_bottom">-44dp</dimen>
     <dimen name="profile_padding">8dp</dimen>
+    <dimen name="default_dropdown_width">160dp</dimen>
 </resources>

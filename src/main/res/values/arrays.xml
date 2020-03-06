@@ -124,6 +124,16 @@
         <item>none</item>
     </string-array>
 
+    <string-array name="streamsecuritys_entry">
+        <item></item>
+        <item>tls    </item>
+    </string-array>
+
+    <string-array name="streamsecuritys_value">
+        <item></item>
+        <item>tls</item>
+    </string-array>
+
     <string-array name="bypass_private_route">
         <item>1.0.0.0/8</item>
         <item>2.0.0.0/7</item>

@@ -21,6 +21,7 @@
   <string name="connection_test_pending">Check Connectivity</string>
   <string name="connection_test_testing">Testing…</string>
   <string name="connection_test_available">Success: %dms latency</string>
+  <string name="connection_test_unavailable">Failed to Connect to Internet</string>
   <string name="connection_test_error">Fail to detect internet connection: %s</string>
   <string name="connection_test_fail">Internet Unavailable</string>
   <string name="connection_test_error_status_code">Error code: #%d</string>
@@ -255,7 +256,7 @@
   <string name="v_pref_id">ID</string>
   <string name="v_pref_alterid">AlterId</string>
   <string name="v_pref_security">Security</string>
-  <string name="v_pref_path">Path/QUIC key</string>
-  <string name="v_pref_host">Host/QUIC security</string>
+  <string name="v_pref_path">Path</string>
+  <string name="v_pref_host">Host</string>
 
 </resources>

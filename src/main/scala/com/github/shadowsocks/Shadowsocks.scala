@@ -143,7 +143,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
               connectionTestText.setVisibility(View.VISIBLE)
               connectionTestText.setText(getString(R.string.connection_test_pending))
             }
-//            checkConnection(1, 3)
+            checkConnection(1, 3)
           case State.STOPPED =>
             fab.setBackgroundTintList(greyTint)
             fabProgressCircle.postDelayed(hideCircle, 1000)
@@ -319,7 +319,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
                   handler.post(() => connectionTestText.setText("retry..."))
                   Thread.sleep(500 * (Math.pow(0.5, retry).toLong + 1))
                 }
-                FailureConnect(getString(R.string.connection_test_error, e.getMessage))
+                FailureConnect(getString(R.string.connection_test_unavailable))
               }
             }.get
         }

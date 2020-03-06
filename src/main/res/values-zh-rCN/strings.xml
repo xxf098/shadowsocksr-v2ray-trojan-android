@@ -109,6 +109,7 @@
   <string name="connection_test_pending">检查网络连接</string>
   <string name="connection_test_testing">测试中……</string>
   <string name="connection_test_available">连接有效: 延时 %d 毫秒</string>
+  <string name="connection_test_unavailable">连接失败</string>
   <string name="connection_test_fail">无互联网连接</string>
   <string name="connection_test_error">失败：%s</string>
   <string name="connection_test_error_status_code">状态码无效（#%d）</string>
@@ -221,7 +222,7 @@
   <string name="v_pref_id">用户ID</string>
   <string name="v_pref_alterid">额外ID</string>
   <string name="v_pref_security">加密方式</string>
-  <string name="v_pref_path">路径/QUIC 加密密钥</string>
-  <string name="v_pref_host">伪装域名/QUIC 加密方式</string>
+  <string name="v_pref_path">路径</string>
+  <string name="v_pref_host">伪装域名</string>
 
 </resources>

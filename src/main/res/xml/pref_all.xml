@@ -100,12 +100,12 @@
             android:key="v_id"
             android:persistent="false"
             android:summary="Click to see user id"
-            android:title="UserID" />
+            android:title="@string/v_pref_id" />
         <com.github.shadowsocks.preferences.NumberPickerPreference
             android:key="v_aid"
             android:persistent="false"
             android:summary="%d"
-            android:title="AlterId"
+            android:title="@string/v_pref_alterid"
             app:max="65535"
             app:min="0" />
         <com.github.shadowsocks.preferences.DropDownPreference
@@ -114,15 +114,15 @@
             android:key="v_security"
             android:persistent="false"
             android:summary="%s"
-            android:title="Security" />
-        <com.github.shadowsocks.preferences.SummaryEditTextPreference
-            android:key="v_path"
-            android:summary="Path"
-            android:title="Path" />
+            android:title="@string/v_pref_security" />
         <com.github.shadowsocks.preferences.SummaryEditTextPreference
             android:key="v_host"
             android:summary="Host"
-            android:title="Host" />
+            android:title="@string/v_pref_host" />
+        <com.github.shadowsocks.preferences.SummaryEditTextPreference
+            android:key="v_path"
+            android:summary="Path"
+            android:title="@string/v_pref_path" />
         <com.github.shadowsocks.preferences.DropDownPreference
             android:entries="@array/streamsecuritys_entry"
             android:entryValues="@array/streamsecuritys_value"

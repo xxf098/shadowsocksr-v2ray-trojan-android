@@ -213,12 +213,15 @@
   <string name="subscription_url">订阅地址</string>
   <string name="use_default_group_name">使用默认群组名</string>
 
-
-
-
-
   <!-- status -->
   <string name="sent">发送:</string>
   <string name="received">接收:</string>
+
+  <!--  V2Ray -->
+  <string name="v_pref_id">用户ID</string>
+  <string name="v_pref_alterid">额外ID</string>
+  <string name="v_pref_security">加密方式</string>
+  <string name="v_pref_path">路径/QUIC 加密密钥</string>
+  <string name="v_pref_host">伪装域名/QUIC 加密方式</string>
 
 </resources>

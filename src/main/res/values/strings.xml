@@ -251,4 +251,11 @@
   <string name="traffic" translatable="false">%1$s↑\t%2$s↓</string>
   <string name="default_group" translatable="false">Default Group</string>
 
+  <!--  V2Ray -->
+  <string name="v_pref_id">ID</string>
+  <string name="v_pref_alterid">AlterId</string>
+  <string name="v_pref_security">Security</string>
+  <string name="v_pref_path">Path/QUIC key</string>
+  <string name="v_pref_host">Host/QUIC security</string>
+
 </resources>

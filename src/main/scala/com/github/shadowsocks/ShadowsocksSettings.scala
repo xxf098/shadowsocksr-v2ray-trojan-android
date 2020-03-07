@@ -282,6 +282,11 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
 
     findPreference(Key.route).setOnPreferenceChangeListener((_, value) => {
       if(value == "self") {
+        val url = getPreferenceManager.getSharedPreferences.getString(Key.aclurl, "");
+        if (!TextUtils.isEmpty(url)) {
+          app.profileManager.updateAllProfile_String(Key.route, value.asInstanceOf[String])
+          return true
+        }
         val AclUrlEditText = new EditText(activity);
         AclUrlEditText.setText(getPreferenceManager.getSharedPreferences.getString(Key.aclurl, ""));
         new AlertDialog.Builder(activity)
@@ -308,7 +313,6 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       else {
         app.profileManager.updateAllProfile_String(Key.route, value.asInstanceOf[String])
       }
-
       true
     })
 

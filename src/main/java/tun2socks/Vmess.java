@@ -1,203 +1,206 @@
 package tun2socks;
 
-import go.Seq;
-import go.Seq.Proxy;
 import java.util.Arrays;
+import go.Seq;
 
-public final class Vmess implements Proxy {
+public final class Vmess implements Seq.Proxy
+{
     private final int refnum;
 
+    @Override
     public final int incRefnum() {
         Seq.incGoRef(this.refnum, this);
         return this.refnum;
     }
 
-    public Vmess(String var1, String var2, String var3, String var4, long var5, long var7, String var9, String var10, String var11, String var12, String var13) {
-        this.refnum = __NewVmess(var1, var2, var3, var4, var5, var7, var9, var10, var11, var12, var13);
-        Seq.trackGoRef(this.refnum, this);
+    public Vmess(final String s, final String s2, final String s3, final String s4, final long n, final long n2, final String s5, final String s6, final String s7, final String s8, final long n3, final String s9) {
+        Seq.trackGoRef(this.refnum = __NewVmess(s, s2, s3, s4, n, n2, s5, s6, s7, s8, n3, s9), this);
     }
 
-    private static native int __NewVmess(String var0, String var1, String var2, String var3, long var4, long var6, String var8, String var9, String var10, String var11, String var12);
+    private static native int __NewVmess(final String p0, final String p1, final String p2, final String p3, final long p4, final long p5, final String p6, final String p7, final String p8, final String p9, final long p10, final String p11);
 
-    Vmess(int var1) {
-        this.refnum = var1;
-        Seq.trackGoRef(var1, this);
+    Vmess(final int refnum) {
+        Seq.trackGoRef(this.refnum = refnum, this);
     }
 
     public final native String getHost();
 
-    public final native void setHost(String var1);
+    public final native void setHost(final String p0);
 
     public final native String getPath();
 
-    public final native void setPath(String var1);
+    public final native void setPath(final String p0);
 
     public final native String getTLS();
 
-    public final native void setTLS(String var1);
+    public final native void setTLS(final String p0);
 
     public final native String getAdd();
 
-    public final native void setAdd(String var1);
+    public final native void setAdd(final String p0);
 
     public final native long getPort();
 
-    public final native void setPort(long var1);
+    public final native void setPort(final long p0);
 
     public final native long getAid();
 
-    public final native void setAid(long var1);
+    public final native void setAid(final long p0);
 
     public final native String getNet();
 
-    public final native void setNet(String var1);
+    public final native void setNet(final String p0);
 
     public final native String getID();
 
-    public final native void setID(String var1);
+    public final native void setID(final String p0);
 
     public final native String getType();
 
-    public final native void setType(String var1);
+    public final native void setType(final String p0);
 
     public final native String getSecurity();
 
-    public final native void setSecurity(String var1);
+    public final native void setSecurity(final String p0);
+
+    public final native long getRouteMode();
+
+    public final native void setRouteMode(final long p0);
 
     public final native String getLoglevel();
 
-    public final native void setLoglevel(String var1);
+    public final native void setLoglevel(final String p0);
 
-    public boolean equals(Object var1) {
-        if (var1 != null && var1 instanceof Vmess) {
-            Vmess var2 = (Vmess)var1;
-            String var3 = this.getHost();
-            String var4 = var2.getHost();
-            if (var3 == null) {
-                if (var4 != null) {
-                    return false;
-                }
-            } else if (!var3.equals(var4)) {
-                return false;
-            }
-
-            String var5 = this.getPath();
-            String var6 = var2.getPath();
-            if (var5 == null) {
-                if (var6 != null) {
-                    return false;
-                }
-            } else if (!var5.equals(var6)) {
-                return false;
-            }
-
-            String var7 = this.getTLS();
-            String var8 = var2.getTLS();
-            if (var7 == null) {
-                if (var8 != null) {
-                    return false;
-                }
-            } else if (!var7.equals(var8)) {
-                return false;
-            }
-
-            String var9 = this.getAdd();
-            String var10 = var2.getAdd();
-            if (var9 == null) {
-                if (var10 != null) {
-                    return false;
-                }
-            } else if (!var9.equals(var10)) {
-                return false;
-            }
-
-            long var11 = this.getPort();
-            long var13 = var2.getPort();
-            if (var11 != var13) {
-                return false;
-            } else {
-                long var15 = this.getAid();
-                long var17 = var2.getAid();
-                if (var15 != var17) {
-                    return false;
-                } else {
-                    String var19 = this.getNet();
-                    String var20 = var2.getNet();
-                    if (var19 == null) {
-                        if (var20 != null) {
-                            return false;
-                        }
-                    } else if (!var19.equals(var20)) {
-                        return false;
-                    }
-
-                    String var21 = this.getID();
-                    String var22 = var2.getID();
-                    if (var21 == null) {
-                        if (var22 != null) {
-                            return false;
-                        }
-                    } else if (!var21.equals(var22)) {
-                        return false;
-                    }
-
-                    String var23 = this.getType();
-                    String var24 = var2.getType();
-                    if (var23 == null) {
-                        if (var24 != null) {
-                            return false;
-                        }
-                    } else if (!var23.equals(var24)) {
-                        return false;
-                    }
-
-                    String var25 = this.getSecurity();
-                    String var26 = var2.getSecurity();
-                    if (var25 == null) {
-                        if (var26 != null) {
-                            return false;
-                        }
-                    } else if (!var25.equals(var26)) {
-                        return false;
-                    }
-
-                    String var27 = this.getLoglevel();
-                    String var28 = var2.getLoglevel();
-                    if (var27 == null) {
-                        if (var28 != null) {
-                            return false;
-                        }
-                    } else if (!var27.equals(var28)) {
-                        return false;
-                    }
-
-                    return true;
-                }
-            }
-        } else {
+    @Override
+    public boolean equals(final Object o) {
+        if (o == null || !(o instanceof Vmess)) {
             return false;
         }
+        final Vmess vmess = (Vmess)o;
+        final String host = this.getHost();
+        final String host2 = vmess.getHost();
+        if (host == null) {
+            if (host2 != null) {
+                return false;
+            }
+        }
+        else if (!host.equals(host2)) {
+            return false;
+        }
+        final String path = this.getPath();
+        final String path2 = vmess.getPath();
+        if (path == null) {
+            if (path2 != null) {
+                return false;
+            }
+        }
+        else if (!path.equals(path2)) {
+            return false;
+        }
+        final String tls = this.getTLS();
+        final String tls2 = vmess.getTLS();
+        if (tls == null) {
+            if (tls2 != null) {
+                return false;
+            }
+        }
+        else if (!tls.equals(tls2)) {
+            return false;
+        }
+        final String add = this.getAdd();
+        final String add2 = vmess.getAdd();
+        if (add == null) {
+            if (add2 != null) {
+                return false;
+            }
+        }
+        else if (!add.equals(add2)) {
+            return false;
+        }
+        if (this.getPort() != vmess.getPort()) {
+            return false;
+        }
+        if (this.getAid() != vmess.getAid()) {
+            return false;
+        }
+        final String net = this.getNet();
+        final String net2 = vmess.getNet();
+        if (net == null) {
+            if (net2 != null) {
+                return false;
+            }
+        }
+        else if (!net.equals(net2)) {
+            return false;
+        }
+        final String id = this.getID();
+        final String id2 = vmess.getID();
+        if (id == null) {
+            if (id2 != null) {
+                return false;
+            }
+        }
+        else if (!id.equals(id2)) {
+            return false;
+        }
+        final String type = this.getType();
+        final String type2 = vmess.getType();
+        if (type == null) {
+            if (type2 != null) {
+                return false;
+            }
+        }
+        else if (!type.equals(type2)) {
+            return false;
+        }
+        final String security = this.getSecurity();
+        final String security2 = vmess.getSecurity();
+        if (security == null) {
+            if (security2 != null) {
+                return false;
+            }
+        }
+        else if (!security.equals(security2)) {
+            return false;
+        }
+        if (this.getRouteMode() != vmess.getRouteMode()) {
+            return false;
+        }
+        final String loglevel = this.getLoglevel();
+        final String loglevel2 = vmess.getLoglevel();
+        if (loglevel == null) {
+            if (loglevel2 != null) {
+                return false;
+            }
+        }
+        else if (!loglevel.equals(loglevel2)) {
+            return false;
+        }
+        return true;
     }
 
+    @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[]{this.getHost(), this.getPath(), this.getTLS(), this.getAdd(), this.getPort(), this.getAid(), this.getNet(), this.getID(), this.getType(), this.getSecurity(), this.getLoglevel()});
+        return Arrays.hashCode(new Object[] { this.getHost(), this.getPath(), this.getTLS(), this.getAdd(), this.getPort(), this.getAid(), this.getNet(), this.getID(), this.getType(), this.getSecurity(), this.getRouteMode(), this.getLoglevel() });
     }
 
+    @Override
     public String toString() {
-        StringBuilder var1 = new StringBuilder();
-        var1.append("Vmess").append("{");
-        var1.append("Host:").append(this.getHost()).append(",");
-        var1.append("Path:").append(this.getPath()).append(",");
-        var1.append("TLS:").append(this.getTLS()).append(",");
-        var1.append("Add:").append(this.getAdd()).append(",");
-        var1.append("Port:").append(this.getPort()).append(",");
-        var1.append("Aid:").append(this.getAid()).append(",");
-        var1.append("Net:").append(this.getNet()).append(",");
-        var1.append("ID:").append(this.getID()).append(",");
-        var1.append("Type:").append(this.getType()).append(",");
-        var1.append("Security:").append(this.getSecurity()).append(",");
-        var1.append("Loglevel:").append(this.getLoglevel()).append(",");
-        return var1.append("}").toString();
+        final StringBuilder sb = new StringBuilder();
+        sb.append("Vmess").append("{");
+        sb.append("Host:").append(this.getHost()).append(",");
+        sb.append("Path:").append(this.getPath()).append(",");
+        sb.append("TLS:").append(this.getTLS()).append(",");
+        sb.append("Add:").append(this.getAdd()).append(",");
+        sb.append("Port:").append(this.getPort()).append(",");
+        sb.append("Aid:").append(this.getAid()).append(",");
+        sb.append("Net:").append(this.getNet()).append(",");
+        sb.append("ID:").append(this.getID()).append(",");
+        sb.append("Type:").append(this.getType()).append(",");
+        sb.append("Security:").append(this.getSecurity()).append(",");
+        sb.append("RouteMode:").append(this.getRouteMode()).append(",");
+        sb.append("Loglevel:").append(this.getLoglevel()).append(",");
+        return sb.append("}").toString();
     }
 
     static {

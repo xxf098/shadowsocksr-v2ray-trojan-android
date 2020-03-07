@@ -143,7 +143,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
               connectionTestText.setVisibility(View.VISIBLE)
               connectionTestText.setText(getString(R.string.connection_test_pending))
             }
-            checkConnection(1, 3)
+            checkConnection(1, 4)
           case State.STOPPED =>
             fab.setBackgroundTintList(greyTint)
             fabProgressCircle.postDelayed(hideCircle, 1000)

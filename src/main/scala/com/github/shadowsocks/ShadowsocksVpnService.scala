@@ -390,7 +390,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     }
 
     val black_list = profile.route match {
-      case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST=> {
+      case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST |
+           Route.ACL4SSR_BANDAD | Route.ACL4SSR_GFWLIST_BANAD | Route.ACL4SSR_ONLYBANAD |
+           Route.ACL4SSR_FULLGFWLIST | Route.ACL4SSR_BACKCN_BANAD | Route.ACL4SSR_NOBANAD => {
         getBlackList
       }
       case Route.ACL => {
@@ -411,7 +413,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     }
 
     val conf = profile.route match {
-      case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST => {
+      case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST |
+           Route.ACL4SSR_BANDAD | Route.ACL4SSR_GFWLIST_BANAD | Route.ACL4SSR_ONLYBANAD |
+           Route.ACL4SSR_FULLGFWLIST | Route.ACL4SSR_BACKCN_BANAD | Route.ACL4SSR_NOBANAD => {
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, protect, getApplicationInfo.dataDir,
           "0.0.0.0", profile.localPort + 53, china_dns_settings, profile.localPort + 63, reject)
       }

@@ -173,7 +173,9 @@ class ShadowsocksNatService extends BaseService {
     }
 
     val black_list = profile.route match {
-      case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST => {
+      case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST |
+           Route.ACL4SSR_BANDAD | Route.ACL4SSR_GFWLIST_BANAD | Route.ACL4SSR_ONLYBANAD |
+           Route.ACL4SSR_FULLGFWLIST | Route.ACL4SSR_BACKCN_BANAD | Route.ACL4SSR_NOBANAD => {
         getBlackList
       }
       case Route.ACL => {
@@ -194,7 +196,9 @@ class ShadowsocksNatService extends BaseService {
     }
 
     val conf = profile.route match {
-      case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST => {
+      case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST |
+           Route.ACL4SSR_BANDAD | Route.ACL4SSR_GFWLIST_BANAD | Route.ACL4SSR_ONLYBANAD |
+           Route.ACL4SSR_FULLGFWLIST | Route.ACL4SSR_BACKCN_BANAD | Route.ACL4SSR_NOBANAD => {
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "", getApplicationInfo.dataDir,
           "127.0.0.1", profile.localPort + 53, china_dns_settings, profile.localPort + 63, reject)
       }

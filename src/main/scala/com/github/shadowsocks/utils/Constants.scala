@@ -361,6 +361,12 @@ object Route {
   val BYPASS_LAN_CHN = "bypass-lan-china"
   val GFWLIST = "gfwlist"
   val CHINALIST = "china-list"
+  val ACL4SSR_BANDAD = "banAD"
+  val ACL4SSR_GFWLIST_BANAD = "gfwlist-banAD"
+  val ACL4SSR_ONLYBANAD = "onlybanAD"
+  val ACL4SSR_FULLGFWLIST = "fullgfwlist"
+  val ACL4SSR_BACKCN_BANAD = "backcn-banAD"
+  val ACL4SSR_NOBANAD = "nobanAD"
   val ACL = "self"
   val BLOCK_DOMAIN = List(
 //    "baidu.com",

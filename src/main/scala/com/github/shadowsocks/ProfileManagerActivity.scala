@@ -527,7 +527,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               .setMessage(R.string.scan_qrcode_install_text)
               .create()
             dialog.show()*/
-            menu.toggle(false)
+            if (menu != null) {
+              menu.toggle(false)
+            }
             startActivity(new Intent(this, classOf[ScannerActivity]))
     }
   }

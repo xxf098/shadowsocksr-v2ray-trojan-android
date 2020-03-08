@@ -1,6 +1,7 @@
 package com.github.shadowsocks.fragments
 
 import java.io.IOException
+import java.net.URL
 import java.util.concurrent.TimeUnit
 
 import android.app.ProgressDialog
@@ -26,6 +27,7 @@ import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.github.shadowsocks.{ConfigActivity, ProfileManagerActivity, R}
 import okhttp3.{OkHttpClient, Request}
 import android.view.View
+import android.webkit.URLUtil
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
@@ -112,11 +114,19 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     val etAddUrl = view.findViewById(R.id.et_subscription_url).asInstanceOf[EditText]
     val etGroupName = view.findViewById(R.id.et_group_name).asInstanceOf[EditText]
     var title = getString(R.string.ssrsub_add)
-    ssrSub.foreach(sub => {
-      etAddUrl.setText(sub.url)
-      etGroupName.setText(sub.url_group)
-      title = getString(R.string.ssrsub_edit)
-    })
+    ssrSub match {
+      case Some(sub) => {
+        etAddUrl.setText(sub.url)
+        etGroupName.setText(sub.url_group)
+        title = getString(R.string.ssrsub_edit)
+      }
+      case None => {
+        val link = clipboard.getPrimaryClip.getItemAt(0).getText.toString
+        if (URLUtil.isValidUrl(link.toString)) {
+          etAddUrl.setText(link)
+        }
+      }
+    }
     new AlertDialog.Builder(context)
       .setTitle(getString(R.string.ssrsub_add))
       .setPositiveButton(android.R.string.ok, ((_, _) => {

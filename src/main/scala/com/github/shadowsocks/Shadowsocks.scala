@@ -372,12 +372,12 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     })
     updateTraffic(0, 0, 0, 0)
 
-    app.ssrsubManager.getFirstSSRSub match {
-      case Some(first) => {
-
-      }
-      case None => app.ssrsubManager.createDefault()
-    }
+//    app.ssrsubManager.getFirstSSRSub match {
+//      case Some(first) => {
+//
+//      }
+//      case None => app.ssrsubManager.createDefault()
+//    }
 
 //    SSRSubUpdateJob.schedule()
 

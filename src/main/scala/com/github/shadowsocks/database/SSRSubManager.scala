@@ -134,7 +134,7 @@ class SSRSubManager(dbHelper: DBHelper) {
   def createDefault(): SSRSub = {
     val ssrsub = new SSRSub {
       url = "https://raw.githubusercontent.com/breakwa11/breakwa11.github.io/master/free/freenodeplain.txt"
-      url_group = "github.com/xxf098"
+      url_group = "Default Group"
     }
     createSSRSub(ssrsub)
   }

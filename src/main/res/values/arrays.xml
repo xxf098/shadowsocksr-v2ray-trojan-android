@@ -107,6 +107,12 @@
         <item>bypass-lan-china</item>
         <item>gfwlist</item>
         <item>china-list</item>
+        <item>banAD</item>
+        <item>gfwlist-banAD</item>
+        <item>onlybanAD</item>
+        <item>fullgfwlist</item>
+        <item>backcn-banAD</item>
+        <item>nobanAD</item>
         <item>self</item>
     </string-array>
 

@@ -158,6 +158,7 @@ object Parser {
     // common
     profile.name = profile.v_ps
     profile.url_group = vmessBean.url_group
+    profile.route = Route.ALL
     profile
   }
 

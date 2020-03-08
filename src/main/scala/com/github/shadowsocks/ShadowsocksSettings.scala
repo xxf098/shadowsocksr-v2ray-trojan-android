@@ -395,7 +395,9 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       }
       else
       {
-        downloadAcl(url)
+        val routeMode = Option(getPreferenceManager.getSharedPreferences.getString(Key.route, null))
+          .filter(mode => Route.ACL4SSR_ROUTES.contains(mode))
+        downloadAcl(url, routeMode)
       }
       true
     })
@@ -538,14 +540,20 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     })
   }
 
-  def downloadAcl(url: String) {
+  def downloadAcl(url: String, routeMode: Option[String] = None) {
     val progressDialog = ProgressDialog.show(activity, getString(R.string.aclupdate), getString(R.string.aclupdate_downloading), false, false)
     new Thread {
       override def run() {
-        Looper.prepare();
+        Looper.prepare()
         try {
           IOUtils.writeString(app.getApplicationInfo.dataDir + '/' + "self.acl", autoClose(
             new URL(url).openConnection().getInputStream())(IOUtils.readString))
+          routeMode.foreach(mode => {
+            val filename = s"$mode.acl"
+            val aclURL = s"https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/$filename"
+            IOUtils.writeString(app.getApplicationInfo.dataDir + '/' + filename, autoClose(
+              new URL(aclURL).openConnection().getInputStream())(IOUtils.readString))
+          })
           progressDialog.dismiss()
           new AlertDialog.Builder(activity, R.style.Theme_Material_Dialog_Alert)
             .setTitle(getString(R.string.aclupdate))

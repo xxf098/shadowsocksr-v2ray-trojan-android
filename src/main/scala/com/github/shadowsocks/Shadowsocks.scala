@@ -66,6 +66,7 @@ import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils._
 import com.github.shadowsocks.job.SSRSubUpdateJob
 import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.types.{FailureConnect, Result, SuccessConnect}
 import okhttp3._
 
 import scala.concurrent.Future
@@ -142,8 +143,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
               connectionTestText.setVisibility(View.VISIBLE)
               connectionTestText.setText(getString(R.string.connection_test_pending))
             }
-            // check connection
-            checkConnection(1, 3)
+            checkConnection(1, 4)
           case State.STOPPED =>
             fab.setBackgroundTintList(greyTint)
             fabProgressCircle.postDelayed(hideCircle, 1000)
@@ -308,39 +308,32 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     }
     Utils.ThrowableFuture {
       if (testCount == id) {
-        var result: String = null
-        var success = false
-        for (i <- 1 to retry if !success) {
-          handler.post(() => connectionTestText.setText(R.string.connection_test_testing))
+        var result = Result[Long](0L)
+        for (i <- 1 to retry if result.isFailure) {
+          handler.post(() => {connectionTestText.setText(R.string.connection_test_testing)})
           result = Try(NetUtils.testConnection("https://www.google.com/generate_204"))
-            .map(elapsed => {
-              success = true
-              getString(R.string.connection_test_available, elapsed: java.lang.Long)
-            })
+            .map(SuccessConnect)
             .recover {
               case e: Exception => {
                 if (i < retry - 1) {
                   handler.post(() => connectionTestText.setText("retry..."))
                   Thread.sleep(500 * (Math.pow(0.5, retry).toLong + 1))
                 }
-                getString(R.string.connection_test_error, e.getMessage)
+                FailureConnect(getString(R.string.connection_test_unavailable))
               }
             }.get
         }
         synchronized(if (testCount == id && app.isVpnEnabled && serviceStarted) handler.post(() =>
-          if (success) connectionTestText.setText(result)
-          else {
-            connectionTestText.setText(R.string.connection_test_fail)
-            Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_SHORT).show
-          }))
+          connectionTestText.setText(result.msg)
+         ))
       }
     }
   }
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
-    getWindow.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
-    getWindow.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+//    getWindow.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
+//    getWindow.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
     setContentView(R.layout.layout_main)
     // Initialize Toolbar
     val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
@@ -379,12 +372,12 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     })
     updateTraffic(0, 0, 0, 0)
 
-    app.ssrsubManager.getFirstSSRSub match {
-      case Some(first) => {
-
-      }
-      case None => app.ssrsubManager.createDefault()
-    }
+//    app.ssrsubManager.getFirstSSRSub match {
+//      case Some(first) => {
+//
+//      }
+//      case None => app.ssrsubManager.createDefault()
+//    }
 
 //    SSRSubUpdateJob.schedule()
 

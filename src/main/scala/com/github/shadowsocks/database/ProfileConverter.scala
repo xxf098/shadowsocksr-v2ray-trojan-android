@@ -11,18 +11,18 @@ import com.github.shadowsocks.{GuardedProcess, R}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.{ConfigUtils, ExeNative, NetUtils, TcpFastOpen, Utils}
 import okhttp3.{OkHttpClient, Request}
-import tun2socks.Tun2socks
+import tun2socks.{Tun2socks, Vmess}
 
 import scala.collection.mutable.ArrayBuffer
 
 
-trait ProfileAction {
+trait ProfileFunctions {
   var profile: Profile = _
   def getElapsed() : Long
   def isOK(): Boolean
 }
 
-object SSRAction extends ProfileAction {
+object SSRAction extends ProfileFunctions {
   // TODO: refactor
   var ssTestProcess: GuardedProcess = _
   override def getElapsed(): Long = {
@@ -64,16 +64,17 @@ object SSRAction extends ProfileAction {
   override def isOK(): Boolean = !(TextUtils.isEmpty(profile.host) || TextUtils.isEmpty(profile.password))
 }
 
-object VmessAction extends ProfileAction {
+object VmessAction extends ProfileFunctions {
   override def getElapsed(): Long = {
     if (List("www.google.com", "127.0.0.1", "8.8.8.8", "1.2.3.4").contains(profile.v_add)) {
         throw new IOException(s"Bypass Host ${profile.v_add}")
     }
-    if (!Utils.isNumeric(profile.v_add)) Utils.resolve(profile.v_add, enableIPv6 = true) match {
-      case Some(addr) => profile.v_add = addr
+    val vmess: Vmess = profile
+    if (!Utils.isNumeric(vmess.getAdd)) Utils.resolve(profile.v_add, enableIPv6 = true) match {
+      case Some(addr) => vmess.setAdd(addr)
       case None => throw new IOException("Host Not Resolved")
     }
-    Tun2socks.testVmessLatency(profile, app.getV2rayAssetsPath())
+    Tun2socks.testVmessLatency(vmess, app.getV2rayAssetsPath())
   }
 
   override def isOK(): Boolean = !(TextUtils.isEmpty(profile.v_add) ||
@@ -83,7 +84,7 @@ object VmessAction extends ProfileAction {
     TextUtils.isEmpty(profile.v_net))
 }
 
-object V2JSONAction extends ProfileAction {
+object V2JSONAction extends ProfileFunctions {
   override def getElapsed(): Long = {
     if (TextUtils.isEmpty(profile.v_add)) throw new IOException("Server Address Not Found!")
     if (!Utils.isNumeric(profile.v_add)) Utils.resolve(profile.v_add, enableIPv6 = true, hostname = "1.1.1.1") match {
@@ -97,17 +98,17 @@ object V2JSONAction extends ProfileAction {
   override def isOK(): Boolean = !TextUtils.isEmpty(profile.v_json_config)
 }
 
-object ProfileMixin {
-  implicit class ProfileExt(profile: Profile) extends ProfileAction {
-    val profileAction: ProfileAction = profile match {
+
+object ProfileConverter {
+
+  implicit def convertProfileToAction (profile: Profile): ProfileFunctions = {
+    val profileAction: ProfileFunctions = profile match {
       case p if p.isVmess => VmessAction
       case p if p.isV2RayJSON => V2JSONAction
       case p if !p.isV2Ray => SSRAction
       case _ => throw new Exception("Not Supported!")
     }
     profileAction.profile = profile
-    override def getElapsed(): Long = profileAction.getElapsed()
-
-    override def isOK(): Boolean = profileAction.isOK()
+    profileAction
   }
 }

@@ -8,7 +8,7 @@ import com.evernote.android.job.Job.{Params, Result}
 import com.evernote.android.job.{Job, JobRequest}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.CloseUtils._
-import com.github.shadowsocks.utils.IOUtils
+import com.github.shadowsocks.utils.{IOUtils, Route}
 
 /**
   * @author Mygod
@@ -29,13 +29,22 @@ class AclSyncJob(route: String) extends Job {
   override def onRunJob(params: Params): Result = {
     val filename = route + ".acl"
     try {
-      if(route != "self")
-      {
-        //noinspection JavaAccessorMethodCalledAsEmptyParen
-        IOUtils.writeString(app.getApplicationInfo.dataDir + '/' + filename, autoClose(
-          new URL("https://raw.githubusercontent.com/shadowsocksrr/shadowsocksr-android/Akkariiin/master/src/main/assets/acl/" +
-            filename).openConnection().getInputStream())(IOUtils.readString))
+      val aclUrl = route match {
+        case x if Route.DEFAULT_ROUTES.contains(x) => Some(s"https://raw.githubusercontent.com/xxf098/shadowsocksr-v2ray-android/xxf098/master/src/main/assets/acl/$filename")
+        case x if Route.ACL4SSR_ROUTES.contains(x) => Some(s"https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/$filename")
+        case _ => None
       }
+      aclUrl.foreach(url => {
+        IOUtils.writeString(app.getApplicationInfo.dataDir + '/' + filename, autoClose(
+          new URL(url).openConnection().getInputStream())(IOUtils.readString))
+      })
+//      if(Route.DEFAULT_ROUTES.contains(route))
+//      {
+//        //noinspection JavaAccessorMethodCalledAsEmptyParen
+//        IOUtils.writeString(app.getApplicationInfo.dataDir + '/' + filename, autoClose(
+//          new URL("https://raw.githubusercontent.com/shadowsocks/shadowsocks-android/master/core/src/main/assets/acl/" +
+//            filename).openConnection().getInputStream())(IOUtils.readString))
+//      }
       Result.SUCCESS
     } catch {
       case e: IOException =>

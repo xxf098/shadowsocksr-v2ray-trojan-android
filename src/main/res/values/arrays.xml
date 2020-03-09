@@ -107,6 +107,12 @@
         <item>bypass-lan-china</item>
         <item>gfwlist</item>
         <item>china-list</item>
+        <item>banAD</item>
+        <item>gfwlist-banAD</item>
+        <item>onlybanAD</item>
+        <item>fullgfwlist</item>
+        <item>backcn-banAD</item>
+        <item>nobanAD</item>
         <item>self</item>
     </string-array>
 
@@ -122,6 +128,16 @@
         <item>chacha20-poly1305</item>
         <item>auto</item>
         <item>none</item>
+    </string-array>
+
+    <string-array name="streamsecuritys_entry">
+        <item></item>
+        <item>tls    </item>
+    </string-array>
+
+    <string-array name="streamsecuritys_value">
+        <item></item>
+        <item>tls</item>
     </string-array>
 
     <string-array name="bypass_private_route">

@@ -40,8 +40,8 @@ class ConfigActivity extends AppCompatActivity{
   override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
     Seq.setContext(getApplicationContext)
-    getWindow.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
-    getWindow.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+//    getWindow.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
+//    getWindow.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
     setContentView(R.layout.layout_config)
 
     toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]

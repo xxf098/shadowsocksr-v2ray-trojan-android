@@ -21,6 +21,7 @@
   <string name="connection_test_pending">Check Connectivity</string>
   <string name="connection_test_testing">Testing…</string>
   <string name="connection_test_available">Success: %dms latency</string>
+  <string name="connection_test_unavailable">Failed to Connect to Internet</string>
   <string name="connection_test_error">Fail to detect internet connection: %s</string>
   <string name="connection_test_fail">Internet Unavailable</string>
   <string name="connection_test_error_status_code">Error code: #%d</string>
@@ -68,6 +69,12 @@
     <item>Bypass LAN &amp; China</item>
     <item>GFW List</item>
     <item>China List</item>
+    <item>ACL4SSR BanAD</item>
+    <item>ACL4SSR GFWList BanAD</item>
+    <item>ACL4SSR OnlyBanAD</item>
+    <item>ACL4SSR FullGFWList</item>
+    <item>ACL4SSR BackCN BanAD</item>
+    <item>ACL4SSR NoBanAD</item>
     <item>Customize ACL File</item>
   </string-array>
   <string name="acl_file">ACL File URL</string>
@@ -200,6 +207,7 @@
   <string name="add_profile_methods_ssr_sub">Manage Subscriptions</string>
   <string name="ssrsub_autoupdate_enable">Auto Update</string>
   <string name="ssrsub_add">Add URL</string>
+  <string name="ssrsub_edit">Edit URL</string>
   <string name="ssrsub_ok">Save and Update</string>
   <string name="ssrsub_list">Item List</string>
   <string name="ssrsub_error">Error: URL invaild or internet unavailable.</string>
@@ -249,5 +257,12 @@
 
   <string name="traffic" translatable="false">%1$s↑\t%2$s↓</string>
   <string name="default_group" translatable="false">Default Group</string>
+
+  <!--  V2Ray -->
+  <string name="v_pref_id">ID</string>
+  <string name="v_pref_alterid">AlterId</string>
+  <string name="v_pref_security">Security</string>
+  <string name="v_pref_path">Path</string>
+  <string name="v_pref_host">Host</string>
 
 </resources>

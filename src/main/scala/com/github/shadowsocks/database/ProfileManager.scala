@@ -139,15 +139,24 @@ class ProfileManager(dbHelper: DBHelper) {
       if (last != null && last.length == 1 && last(0) != null) profile.userOrder = last(0).toInt + 1
 
       val last_exist = checkLastExistProfile(profile)
-      if (last_exist == null) {
-        dbHelper.profileDao.createOrUpdate(profile)
-        if (profileAddedListener != null)  {
-          profileAddedListener(profile)
-        }
-        0
-      } else {
-        last_exist.id
+      if (last_exist != null) {
+        profile.tx = last_exist.tx
+        profile.rx = last_exist.rx
+        profile.elapsed = last_exist.elapsed
       }
+//      if (last_exist == null) {
+//        dbHelper.profileDao.createOrUpdate(profile)
+//        if (profileAddedListener != null)  {
+//          profileAddedListener(profile)
+//        }
+//        0
+//      } else {
+//        last_exist.id
+//      }
+      // https://github.com/xxf098/shadowsocksr-v2ray-android/issues/49
+      dbHelper.profileDao.createOrUpdate(profile)
+      if (profileAddedListener != null) { profileAddedListener(profile) }
+      0
     } catch {
       case ex: Exception =>
         Log.e(TAG, "addProfile", ex)
@@ -225,6 +234,19 @@ class ProfileManager(dbHelper: DBHelper) {
     }
   }
 
+  def updateGroupName(groupName:String, ssrsub_id:Int): Boolean = {
+    try {
+      dbHelper.profileDao.executeRawNoArgs(s"UPDATE `profile` SET url_group = '$groupName' WHERE ssrsub_id = $ssrsub_id")
+      true
+    } catch {
+      case ex: Exception =>
+        Log.e(TAG, "updateProfile", ex)
+        app.track(ex)
+        false
+    }
+  }
+
+
   def getProfile(id: Int): Option[Profile] = {
     try {
       dbHelper.profileDao.queryForId(id) match {
@@ -287,24 +309,34 @@ class ProfileManager(dbHelper: DBHelper) {
     }
   }
 
-//  def getAllProfilesByGroup(group:String, ssrsub_id: Int): Option[List[Profile]] = {
-//    try {
-//      import scala.collection.JavaConversions._
-//      ssrsub_id match {
-//        case id if id > 0 => {
-//          val profiles = Option(dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.where().eq("ssrsub_id", ssrsub_id).prepare).toList)
-//            .getOrElse(dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.where().eq("url_group", group).prepare).toList)
-//          Option(profiles)
-//        }
-//        case _ => Option(dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.where().eq("url_group", group).prepare).toList)
-//      }
-//    } catch {
-//      case ex: Exception =>
-//        Log.e(TAG, "getAllProfiles", ex)
-//        app.track(ex)
-//        None
-//    }
-//  }
+  def getAllProfilesBySSRSub(ssrsub: SSRSub): Option[List[Profile]] = {
+    try {
+      import scala.collection.JavaConversions._
+      if (ssrsub.id > 0) {
+        Option(dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.where().eq("ssrsub_id", ssrsub.id).prepare).toList)
+      } else {
+        getAllProfilesByGroup(ssrsub.url_group)
+      }
+    } catch {
+      case ex: Exception =>
+        Log.e(TAG, "getAllProfiles", ex)
+        app.track(ex)
+        None
+    }
+  }
+
+  def getFirstProfileBySSRSub(ssrsub: SSRSub): Option[Profile] = {
+    try {
+      import scala.collection.JavaConversions._
+      val result = dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.limit(1L).where().eq("ssrsub_id", ssrsub.id).prepare).toList
+      if (result.size == 1) Option(result.head) else None
+    } catch {
+      case ex: Exception =>
+        Log.e(TAG, "getAllProfiles", ex)
+        app.track(ex)
+        None
+    }
+  }
 
   def getAllProfilesByElapsed: Option[List[Profile]] = {
     try {
@@ -350,14 +382,14 @@ class ProfileManager(dbHelper: DBHelper) {
 
   def createDefault(): Profile = {
     val profile = new Profile {
-      name = "Android SSR Default"
+      name = "项目地址: https://github.com/xxf098/shadowsocksr-v2ray-android"
       host = "137.74.141.42"
       remotePort = 80
       password = "androidssr"
       protocol = "auth_chain_a"
       obfs = "http_simple"
       method = "none"
-      url_group = "FreeSSR-public"
+      url_group = "Default Group"
     }
     createProfile(profile)
   }

@@ -136,9 +136,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
         item.testLatency()
           .foreach(result => {
-            item.elapsed = result.elapsed
+            item.elapsed = result.data
             app.profileManager.updateProfile(item)
-            this.updateText(0, 0, result.elapsed)
+            this.updateText(0, 0, result.data)
             runOnUiThread(() => getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON))
             singleTestProgressDialog.dismiss()
             Snackbar.make(findViewById(android.R.id.content), result.msg, Snackbar.LENGTH_LONG).show
@@ -378,8 +378,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
        is_sort = true
     }
 
-    getWindow.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
-    getWindow.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+//    getWindow.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
+//    getWindow.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
     setContentView(R.layout.layout_profiles)
 
     val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
@@ -527,7 +527,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               .setMessage(R.string.scan_qrcode_install_text)
               .create()
             dialog.show()*/
-            menu.toggle(false)
+            if (menu != null) {
+              menu.toggle(false)
+            }
             startActivity(new Intent(this, classOf[ScannerActivity]))
     }
   }
@@ -1057,7 +1059,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                   testAsyncJob.interrupt()
                   runOnUiThread(() => getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON))
                   finish()
-                  startActivity(new Intent(Action.SORT))
+                  startActivity(new Intent(getIntent))
               }
           })
           getWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -1181,7 +1183,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
               runOnUiThread(() => getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON))
               finish()
-              startActivity(new Intent(getIntent()))
+              startActivity(new Intent(Action.SORT))
               Looper.loop()
             }
           }
@@ -1200,7 +1202,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
         .setTitle(getString(R.string.batch_delete))
         .setPositiveButton(android.R.string.yes, ((_, _) =>{
-          ProfileManagerActivity.getProfilesByGroup(currentGroupName, is_sort)
+          ProfileManagerActivity.getProfilesByGroup(currentGroupName, false)
             .filter(_.id != app.profileId)
             .foreach(profile => app.profileManager.delProfile(profile.id))
           finish()

@@ -1,10 +1,11 @@
 package com.github.shadowsocks.fragments
 
 import java.io.IOException
+import java.net.URL
 import java.util.concurrent.TimeUnit
 
 import android.app.ProgressDialog
-import android.content.{DialogInterface, Intent}
+import android.content.{ClipData, ClipboardManager, Context, DialogInterface, Intent}
 import android.os.{Bundle, Handler}
 import android.preference.PreferenceManager
 import android.support.v4.app.Fragment
@@ -18,7 +19,7 @@ import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.util.Log
 import android.view.{KeyEvent, LayoutInflater, MenuItem, View, ViewGroup}
-import android.widget.{CompoundButton, EditText, ImageView, Switch, TextView, Toast}
+import android.widget.{CompoundButton, EditText, ImageView, PopupMenu, Switch, TextView, Toast}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.{Profile, SSRSub}
 import com.github.shadowsocks.utils.{Key, Parser, Utils}
@@ -26,6 +27,8 @@ import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.github.shadowsocks.{ConfigActivity, ProfileManagerActivity, R}
 import okhttp3.{OkHttpClient, Request}
 import android.view.View
+import android.webkit.URLUtil
+
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
@@ -37,6 +40,8 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
   private lazy val ssrsubAdapter = new SSRSubAdapter
   private var testProgressDialog: ProgressDialog = _
   private lazy val configActivity = getActivity.asInstanceOf[ConfigActivity]
+  private lazy val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
+
 
   override def onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle): View = {
     inflater.inflate(R.layout.layout_subscriptions, container, false)
@@ -78,7 +83,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
 
   def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
     case R.id.action_add_subscription => {
-      addSubscription(None)
+      addSubscription()
       true
     }
     case R.id.action_update_subscription => {
@@ -88,35 +93,57 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     case _ => false
   }
 
-  // move to ssrsub
-  private[this] def addSubscription(url: Option[String]): Unit = {
+  private[this] def addSubscription(): Unit = {
+    showSubscriptionDialog(None) { (responseString, url, groupName) => {
+      SSRSub.createSSRSub(responseString, url, groupName) match {
+        case Some(ssrsub) => {
+          handler.post(() => app.ssrsubManager.createSSRSub(ssrsub))
+//          addProfilesFromSubscription(ssrsub, responseString)
+          ssrsub.addProfiles(responseString)
+          notifyGroupNameChange(Some(ssrsub.url_group))
+        }
+        case None =>
+      }
+    }
+    }
+  }
+
+  private  def showSubscriptionDialog (ssrSub: Option[SSRSub])(responseHandler: (String, String, String) => Unit): Unit = {
     val context = getActivity
     val view = View.inflate(context, R.layout.layout_ssr_sub_add, null)
     val etAddUrl = view.findViewById(R.id.et_subscription_url).asInstanceOf[EditText]
     val etGroupName = view.findViewById(R.id.et_group_name).asInstanceOf[EditText]
+    var title = getString(R.string.ssrsub_add)
+    ssrSub match {
+      case Some(sub) => {
+        etAddUrl.setText(sub.url)
+        etGroupName.setText(sub.url_group)
+        title = getString(R.string.ssrsub_edit)
+      }
+      case None =>
+    }
     new AlertDialog.Builder(context)
       .setTitle(getString(R.string.ssrsub_add))
       .setPositiveButton(android.R.string.ok, ((_, _) => {
         val url = etAddUrl.getText.toString
         val groupName = etGroupName.getText.toString
         if(!TextUtils.isEmpty(url)) {
-          Utils.ThrowableFuture {
-            handler.post(() => testProgressDialog = ProgressDialog.show(context, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true))
-            val result = getSubscriptionResponse(url) match {
-              case Failure(e) => Some(getString(R.string.ssrsub_error, e.getMessage))
-              case Success(responseString) => SSRSub.createSSRSub(responseString, url, groupName) match {
-                case Some(ssrsub) => {
-                  handler.post(() => app.ssrsubManager.createSSRSub(ssrsub))
-                  addProfilesFromSubscription(ssrsub, responseString)
-                  None
-                }
-                case None => None
-              }
+          ssrSub match {
+            case Some(x) if x.url == url => responseHandler(null, url, groupName)
+            case _ => Utils.ThrowableFuture {
+              handler.post(() => testProgressDialog = ProgressDialog.show(context, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true))
+              SSRSub.getSubscriptionResponse(url).flatMap(responseString => Try{
+                responseHandler(responseString, url, groupName)
+                None
+              }).recover{
+                case e: Exception => Some(getString(R.string.ssrsub_error, e.getMessage))
+              }.foreach(result => {
+                handler.post(() => {
+                  result.foreach(msg => Toast.makeText(configActivity, msg, Toast.LENGTH_SHORT).show())
+                  testProgressDialog.dismiss
+                })
+              })
             }
-            handler.post(() => {
-              result.foreach(msg => Toast.makeText(configActivity, msg, Toast.LENGTH_SHORT).show())
-              testProgressDialog.dismiss
-            })
           }
         }
       }): DialogInterface.OnClickListener)
@@ -126,98 +153,45 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       .show()
   }
 
+  private def notifyGroupNameChange (groupName: Option[String]): Unit = {
+    groupName match {
+      case Some(name) => configActivity.putStringExtra(Key.SUBSCRIPTION_GROUP_NAME, name)
+      case None => configActivity.putStringExtra(Key.SUBSCRIPTION_GROUP_NAME, getString(R.string.allgroups))
+    }
+  }
+
   // TODO: Future.sequence
   private[this] def updateAllSubscriptions (): Unit = {
     Utils.ThrowableFuture {
       handler.post(() => {
-        testProgressDialog = ProgressDialog.show(getActivity, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true)
+        testProgressDialog = ProgressDialog.show(requireContext(), getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true)
       })
       app.ssrsubManager.getAllSSRSubs match {
         case Some(ssrsubs) => ssrsubs.foreach(updateSingleSubscription)
         case _ => configActivity.runOnUiThread(() => {
-          Toast.makeText(getActivity, R.string.action_export_err, Toast.LENGTH_SHORT).show
+          Toast.makeText(requireContext(), R.string.action_export_err, Toast.LENGTH_SHORT).show
         })
       }
       handler.post(() => {
         testProgressDialog.dismiss
+        testProgressDialog = null
       })
 //      finish()
 //      startActivity(new Intent(getIntent()))
     }
   }
 
-  private def updateSingleSubscription (ssrsub: SSRSub): Option[String] = {
-    getSubscriptionResponse(ssrsub.url) match {
-      case Failure(e) => {
-        val message = getString(R.string.ssrsub_error, e.getMessage)
-        configActivity.runOnUiThread(() => {
-          Toast.makeText(getActivity, message, Toast.LENGTH_SHORT).show
-        })
-        Some(message)
-      }
-      case Success(response) => {
-        addProfilesFromSubscription(ssrsub, response)
+  private def updateSingleSubscription (ssrsub: SSRSub): Unit = {
+    SSRSub.getSubscriptionResponse(ssrsub.url)
+      .flatMap(response => Try {
+        ssrsub.addProfiles(response)
+        notifyGroupNameChange(Some(ssrsub.url_group))
         None
-      }
-    }
-  }
-
-  private[this] def getSubscriptionResponse (url: String): Try[String] = Try{
-    val builder = new OkHttpClient.Builder()
-      .connectTimeout(3, TimeUnit.SECONDS)
-      .writeTimeout(3, TimeUnit.SECONDS)
-      .readTimeout(3, TimeUnit.SECONDS)
-    val client = builder.build()
-    val request = new Request.Builder()
-      .url(url)
-      .build()
-    val response = client.newCall(request).execute()
-    val code = response.code()
-    if (code == 200) {
-      val result = SSRSub.getResponseString(response)
-      response.body().close()
-      result
-    } else {
-      response.body().close()
-      throw new Exception(getString(R.string.ssrsub_error, code: Integer))
-    }
-  }
-
-  private[this] def addProfilesFromSubscription (ssrsub: SSRSub, response_string: String): Unit = {
-    var delete_profiles = app.profileManager.getAllProfilesByGroup(ssrsub.url_group) match {
-      case Some(subProfiles) =>
-        subProfiles.filter(profile=> profile.ssrsub_id <= 0 || profile.ssrsub_id == ssrsub.id)
-      case _ => null
-    }
-    var limit_num = -1
-    var encounter_num = 0
-    if (response_string.indexOf("MAX=") == 0) {
-      limit_num = response_string.split("\\n")(0).split("MAX=")(1).replaceAll("\\D+","").toInt
-    }
-    var profiles_ssr = Parser.findAll_ssr(response_string)
-    if (response_string.indexOf("MAX=") == 0) {
-      profiles_ssr = scala.util.Random.shuffle(profiles_ssr)
-    }
-    val profiles_vmess = Parser.findAllVmess(response_string)
-    val profiles = profiles_ssr ++ profiles_vmess
-    profiles.foreach((profile: Profile) => {
-      if (encounter_num < limit_num && limit_num != -1 || limit_num == -1) {
-        profile.ssrsub_id = ssrsub.id
-        profile.url_group = ssrsub.url_group
-        configActivity.putStringExtra(Key.SUBSCRIPTION_GROUP_NAME, profile.url_group)
-        val result = app.profileManager.createProfile_sub(profile)
-        if (result != 0) {
-          delete_profiles = delete_profiles.filter(_.id != result)
-        }
-      }
-      encounter_num += 1
-    })
-
-    delete_profiles.foreach((profile: Profile) => {
-      if (profile.id != app.profileId) {
-        app.profileManager.delProfile(profile.id)
-      }
-    })
+      }).recover{
+      case e: Exception => Some(getString(R.string.ssrsub_error, e.getMessage))
+    }.foreach(result => result.foreach(msg =>
+      configActivity.runOnUiThread(() => Toast.makeText(getActivity, msg, Toast.LENGTH_SHORT).show)
+    ))
   }
 
   private[this] def setupRemoveSubscription (ssusubsList: RecyclerView): Unit = {
@@ -236,7 +210,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
           }): DialogInterface.OnClickListener)
           .setNeutralButton(R.string.ssrsub_remove_tip_delete,  ((_, _) => {
             val ssrsubItem = viewHolder.asInstanceOf[SSRSubViewHolder].item
-            val delete_profiles = app.profileManager.getAllProfilesByGroup(ssrsubItem.url_group) match {
+            val delete_profiles = app.profileManager.getAllProfilesBySSRSub(ssrsubItem) match {
               case Some(profiles) =>
                 profiles.filter(profile=> profile.ssrsub_id <= 0 || profile.ssrsub_id == ssrsubItem.id)
               case _ => List()
@@ -252,7 +226,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
             val item = viewHolder.asInstanceOf[SSRSubViewHolder].item
             ssrsubAdapter.remove(index)
             app.ssrsubManager.delSSRSub(item.id)
-            configActivity.putStringExtra(Key.SUBSCRIPTION_GROUP_NAME, getString(R.string.allgroups))
+            notifyGroupNameChange(None)
           }): DialogInterface.OnClickListener)
           .setMessage(getString(R.string.ssrsub_remove_tip))
           .setCancelable(false)
@@ -265,15 +239,14 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     }).attachToRecyclerView(ssusubsList)
   }
 
-
-
   private final class SSRSubViewHolder(val view: View) extends RecyclerView.ViewHolder(view)
-    with View.OnClickListener with View.OnKeyListener {
+    with View.OnClickListener with View.OnKeyListener with PopupMenu.OnMenuItemClickListener {
 
     var item: SSRSub = _
     private val text1 = itemView.findViewById(android.R.id.text1).asInstanceOf[TextView]
     private val text2 = itemView.findViewById(android.R.id.text2).asInstanceOf[TextView]
     private val ivUpdateSubscription = itemView.findViewById(R.id.update_subscription).asInstanceOf[ImageView]
+    private val ivEditSubscription = itemView.findViewById(R.id.edit_subscription).asInstanceOf[ImageView]
     text1.setOnClickListener(this)
     ivUpdateSubscription.setOnClickListener(_ => {
       Utils.ThrowableFuture {
@@ -283,9 +256,18 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
         updateSingleSubscription(item)
         handler.post(() => {
           testProgressDialog.dismiss
+          testProgressDialog = null
         })
       }
     })
+    ivEditSubscription.setOnClickListener(_ => {
+      val popup = new PopupMenu(requireContext(), ivEditSubscription)
+      popup.getMenuInflater.inflate(R.menu.subscription_edit_popup, popup.getMenu)
+      popup.setOnMenuItemClickListener(this)
+      popup.show()
+
+    })
+
 
     def updateText(isShowUrl: Boolean = false) {
       val builder = new SpannableStringBuilder
@@ -314,6 +296,45 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
 
     def onClick(v: View) = {
       updateText(true)
+    }
+
+    override def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
+      case R.id.action_edit_subscription => {
+        edit_subscription()
+        true
+      }
+      case R.id.action_copy_subscription => {
+        clipboard.setPrimaryClip(ClipData.newPlainText(null, this.item.url))
+        true
+      }
+      case _ => false
+    }
+
+    def edit_subscription(): Unit = {
+      showSubscriptionDialog(Some(item)) { (responseString, url, groupName) => {
+        (url, groupName) match {
+          case t if t._1 == item.url && t._2 != item.url_group => {
+            Utils.ThrowableFuture {
+              this.item.url_group = groupName
+              app.ssrsubManager.updateSSRSub(item)
+              app.profileManager.updateGroupName(groupName, item.id)
+              updateText(false)
+              notifyGroupNameChange(Some(groupName))
+            }
+          }
+          case t if t._1 != item.url => {
+            item.url = url
+            item.url_group = groupName
+            app.ssrsubManager.updateSSRSub(item)
+            item.addProfiles(responseString)
+//            addProfilesFromSubscription(item, responseString)
+            updateText(false)
+            notifyGroupNameChange(Some(groupName))
+          }
+          case _ =>
+        }
+      }
+      }
     }
 
     def onKey(v: View, keyCode: Int, event: KeyEvent) = {

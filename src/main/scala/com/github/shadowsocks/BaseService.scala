@@ -60,7 +60,7 @@ import okhttp3.{Dns, FormBody, OkHttpClient, Request}
 import go.Seq
 
 import scala.language.implicitConversions
-import com.github.shadowsocks.database.ProfileMixin._
+import com.github.shadowsocks.database.ProfileConverter._
 
 import scala.util.Random
 

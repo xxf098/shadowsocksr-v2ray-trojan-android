@@ -260,8 +260,8 @@ object Utils {
   }
 
   def startSsService(context: Context) {
-    val intent = new Intent(context, classOf[ShadowsocksRunnerService])
-    context.startService(intent)
+    if (Build.VERSION.SDK_INT >= 26) context.startForegroundService(new Intent(context, classOf[ShadowsocksRunnerService]))
+    else context.startService(new Intent(context, classOf[ShadowsocksRunnerService]))
   }
 
   def stopSsService(context: Context) {

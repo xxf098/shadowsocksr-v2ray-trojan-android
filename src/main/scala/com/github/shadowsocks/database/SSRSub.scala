@@ -41,6 +41,7 @@ package com.github.shadowsocks.database
 
 import java.net.{URL, URLEncoder}
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 import android.text.TextUtils
 import android.util.Base64
@@ -48,8 +49,33 @@ import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.CloseUtils.autoClose
 import com.github.shadowsocks.utils.Parser
 import com.j256.ormlite.field.{DataType, DatabaseField}
+import okhttp3.{OkHttpClient, Request}
+import com.github.shadowsocks.R
+
+import scala.util.Try
 
 object SSRSub {
+
+   def getSubscriptionResponse (url: String): Try[String] = Try{
+    val builder = new OkHttpClient.Builder()
+      .connectTimeout(3, TimeUnit.SECONDS)
+      .writeTimeout(3, TimeUnit.SECONDS)
+      .readTimeout(3, TimeUnit.SECONDS)
+    val client = builder.build()
+    val request = new Request.Builder()
+      .url(url)
+      .build()
+    val response = client.newCall(request).execute()
+    val code = response.code()
+    if (code == 200) {
+      val result = getResponseString(response)
+      response.body().close()
+      result
+    } else {
+      response.body().close()
+      throw new Exception(app.getString(R.string.ssrsub_error, code: Integer))
+    }
+  }
 
   def getResponseString (response: okhttp3.Response): String = {
     var subscribes = ""
@@ -85,6 +111,51 @@ object SSRSub {
     }
     None
   }
+
+  implicit class SSRSubFunctions(ssrsub: SSRSub) {
+
+    def addProfiles(responseString: String): Unit = {
+      val delete_profiles = app.profileManager.getAllProfilesBySSRSub(ssrsub) match {
+        case Some(subProfiles) =>
+          subProfiles.filter(profile=> profile.ssrsub_id <= 0 || profile.ssrsub_id == ssrsub.id)
+        case _ => null
+      }
+      var limit_num = -1
+      var encounter_num = 0
+      if (responseString.indexOf("MAX=") == 0) {
+        limit_num = responseString.split("\\n")(0).split("MAX=")(1).replaceAll("\\D+","").toInt
+      }
+      var profiles_ssr = Parser.findAll_ssr(responseString)
+      if (responseString.indexOf("MAX=") == 0) {
+        profiles_ssr = scala.util.Random.shuffle(profiles_ssr)
+      }
+      val profiles_vmess = Parser.findAllVmess(responseString)
+      val profiles = profiles_ssr ++ profiles_vmess
+      var isProfileAdded = false
+      profiles.foreach((profile: Profile) => {
+        if (encounter_num < limit_num && limit_num != -1 || limit_num == -1) {
+          profile.ssrsub_id = ssrsub.id
+          profile.url_group = ssrsub.url_group
+//          notifyGroupNameChange(Some(profile.url_group))
+          app.profileManager.createProfile_sub(profile)
+          isProfileAdded = true
+          //        if (result != 0) {
+          //          delete_profiles = delete_profiles.filter(_.id != result)
+          //        }
+        }
+        encounter_num += 1
+      })
+
+      delete_profiles.foreach((profile: Profile) => {
+        if (profile.id != app.profileId ||
+          (profile.id == app.profileId && isProfileAdded)) {
+          app.profileManager.delProfile(profile.id)
+        }
+      })
+      //    app.profileManager.getFirstProfileBySSRSub(ssrsub).foreach(p => app.profileId(p.id))
+    }
+  }
+
   }
 
 // TODO: TIME

@@ -83,7 +83,7 @@
   <string name="share_message_nfc_disabled">扫描二维码\nAndroid Beam 被禁用</string>
   <string name="turn_on_nfc">打开 NFC &amp; Android Beam</string>
   <string name="add_profile">添加配置文件</string>
-  <string name="edit">"编辑"</string>
+  <string name="edit">编辑</string>
 
   <string name="nat">NAT 模式 (仅限调试)</string>
   <string name="nat_summary">从 VPN 模式切换为 NAT 模式，需要 ROOT 权限</string>
@@ -109,6 +109,7 @@
   <string name="connection_test_pending">检查网络连接</string>
   <string name="connection_test_testing">测试中……</string>
   <string name="connection_test_available">连接有效: 延时 %d 毫秒</string>
+  <string name="connection_test_unavailable">连接失败</string>
   <string name="connection_test_fail">无互联网连接</string>
   <string name="connection_test_error">失败：%s</string>
   <string name="connection_test_error_status_code">状态码无效（#%d）</string>
@@ -137,6 +138,12 @@
     <item>绕过局域网及中国大陆地址</item>
     <item>仅代理中国大陆无法访问的地址</item>
     <item>仅代理中国大陆地址</item>
+    <item>ACL4SSR BanAD</item>
+    <item>ACL4SSR GFWList BanAD</item>
+    <item>ACL4SSR OnlyBanAD</item>
+    <item>ACL4SSR FullGFWList</item>
+    <item>ACL4SSR BackCN BanAD</item>
+    <item>ACL4SSR NoBanAD</item>
     <item>自定义 ACL 文件</item>
   </string-array>
 
@@ -192,6 +199,7 @@
   <string name="add_profile_methods_ssr_sub">管理 SSR|V2Ray 订阅</string>
   <string name="ssrsub_autoupdate_enable">自动更新</string>
   <string name="ssrsub_add">添加订阅地址</string>
+  <string name="ssrsub_edit">编辑订阅地址</string>
   <string name="ssrsub_ok">确定并升级</string>
   <string name="ssrsub_list">订阅列表</string>
   <string name="ssrsub_error">地址不正确或网络不可用。</string>
@@ -212,12 +220,15 @@
   <string name="subscription_url">订阅地址</string>
   <string name="use_default_group_name">使用默认群组名</string>
 
-
-
-
-
   <!-- status -->
   <string name="sent">发送:</string>
   <string name="received">接收:</string>
+
+  <!--  V2Ray -->
+  <string name="v_pref_id">用户ID</string>
+  <string name="v_pref_alterid">额外ID</string>
+  <string name="v_pref_security">加密方式</string>
+  <string name="v_pref_path">路径</string>
+  <string name="v_pref_host">伪装域名</string>
 
 </resources>

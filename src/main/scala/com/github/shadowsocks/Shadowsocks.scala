@@ -143,7 +143,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
               connectionTestText.setVisibility(View.VISIBLE)
               connectionTestText.setText(getString(R.string.connection_test_pending))
             }
-            checkConnection(1, 4)
+            checkConnection(2, 3)
           case State.STOPPED =>
             fab.setBackgroundTintList(greyTint)
             fabProgressCircle.postDelayed(hideCircle, 1000)
@@ -299,7 +299,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       })
   }
 
-  def checkConnection(timeout: Int = 2, retry: Int = 1): Unit = {
+  def checkConnection(timeout: Int, attempts: Int = 1): Unit = {
     connectionTestText = findViewById(R.id.connection_test).asInstanceOf[TextView]
     val id = synchronized {
       testCount += 1
@@ -308,21 +308,14 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     }
     Utils.ThrowableFuture {
       if (testCount == id) {
-        var result = Result[Long](0L)
-        for (i <- 1 to retry if result.isFailure) {
-          handler.post(() => {connectionTestText.setText(R.string.connection_test_testing)})
-          result = Try(NetUtils.testConnection("https://www.google.com/generate_204"))
-            .map(SuccessConnect)
-            .recover {
-              case e: Exception => {
-                if (i < retry - 1) {
-                  handler.post(() => connectionTestText.setText("retry..."))
-                  Thread.sleep(500 * (Math.pow(0.5, retry).toLong + 1))
-                }
+        handler.post(() => {connectionTestText.setText(R.string.connection_test_testing)})
+        val result = Retryer.exponentialBackoff[Long](attempts, 320)
+            .on(() => NetUtils.testConnection("https://www.google.com/generate_204", timeout),
+              SuccessConnect,
+              e => {
+                handler.post(() => connectionTestText.setText("retry..."))
                 FailureConnect(getString(R.string.connection_test_unavailable))
-              }
-            }.get
-        }
+              })
         synchronized(if (testCount == id && app.isVpnEnabled && serviceStarted) handler.post(() =>
           connectionTestText.setText(result.msg)
          ))

@@ -4,7 +4,7 @@ import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.R
 
 object Result {
-  def apply[A](x: A): Result[A] = new Result[A] {
+  def apply[A](x: A = null.asInstanceOf[A]): Result[A] = new Result[A] {
     val data: A = x
     val msg: String = ""
     override def isFailure: Boolean = true

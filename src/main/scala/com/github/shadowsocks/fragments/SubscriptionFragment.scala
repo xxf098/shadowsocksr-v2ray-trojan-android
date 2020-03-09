@@ -120,12 +120,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
         etGroupName.setText(sub.url_group)
         title = getString(R.string.ssrsub_edit)
       }
-      case None => {
-        val link = clipboard.getPrimaryClip.getItemAt(0).getText.toString
-        if (URLUtil.isValidUrl(link.toString)) {
-          etAddUrl.setText(link)
-        }
-      }
+      case None =>
     }
     new AlertDialog.Builder(context)
       .setTitle(getString(R.string.ssrsub_add))
@@ -215,7 +210,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
           }): DialogInterface.OnClickListener)
           .setNeutralButton(R.string.ssrsub_remove_tip_delete,  ((_, _) => {
             val ssrsubItem = viewHolder.asInstanceOf[SSRSubViewHolder].item
-            val delete_profiles = app.profileManager.getAllProfilesByGroup(ssrsubItem.url_group) match {
+            val delete_profiles = app.profileManager.getAllProfilesBySSRSub(ssrsubItem) match {
               case Some(profiles) =>
                 profiles.filter(profile=> profile.ssrsub_id <= 0 || profile.ssrsub_id == ssrsubItem.id)
               case _ => List()

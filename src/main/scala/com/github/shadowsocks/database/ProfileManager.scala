@@ -382,7 +382,7 @@ class ProfileManager(dbHelper: DBHelper) {
 
   def createDefault(): Profile = {
     val profile = new Profile {
-      name = "Official Site: https://github.com/xxf098/shadowsocksr-v2ray-android"
+      name = "项目地址: https://github.com/xxf098/shadowsocksr-v2ray-android"
       host = "137.74.141.42"
       remotePort = 80
       password = "androidssr"

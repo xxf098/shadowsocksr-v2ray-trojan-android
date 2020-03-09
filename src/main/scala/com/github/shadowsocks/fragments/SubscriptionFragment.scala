@@ -127,7 +127,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       .setPositiveButton(android.R.string.ok, ((_, _) => {
         val url = etAddUrl.getText.toString
         val groupName = etGroupName.getText.toString
-        if(!TextUtils.isEmpty(url)) {
+        if(URLUtil.isHttpsUrl(url) || URLUtil.isHttpUrl(url)) {
           ssrSub match {
             case Some(x) if x.url == url => responseHandler(null, url, groupName)
             case _ => Utils.ThrowableFuture {

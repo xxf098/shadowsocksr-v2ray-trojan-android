@@ -33,6 +33,7 @@ import android.text.TextUtils
 import android.util.Log
 import com.github.shadowsocks.Shadowsocks.TAG
 
+import scala.collection.mutable
 import scala.io.Source
 
 object ShadowsocksSettings {
@@ -449,7 +450,13 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       val et_logcat = new EditText(activity)
 
       try {
-        val logcat = Runtime.getRuntime().exec("logcat -d")
+        val lst = new mutable.LinkedHashSet[String]()
+        lst.add("logcat")
+        lst.add("-d")
+        lst.add("-v")
+        lst.add("time")
+        lst.add("com.xxf098.ssrray")
+        val logcat = Runtime.getRuntime.exec(lst.toArray)
         val br = new BufferedReader(new InputStreamReader(logcat.getInputStream()))
         var line = ""
         line = br.readLine()

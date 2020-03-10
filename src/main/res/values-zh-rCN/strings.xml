@@ -223,8 +223,10 @@
   <!-- status -->
   <string name="sent">发送:</string>
   <string name="received">接收:</string>
+  <string name="allgroups" translatable="false">全部群组</string>
 
-  <!--  V2Ray -->
+
+    <!--  V2Ray -->
   <string name="v_pref_id">用户ID</string>
   <string name="v_pref_alterid">额外ID</string>
   <string name="v_pref_security">加密方式</string>

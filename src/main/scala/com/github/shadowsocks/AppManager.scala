@@ -49,7 +49,7 @@ import android.graphics.drawable.Drawable
 import android.os.{Bundle, Handler}
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
-import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, RecyclerView, Toolbar}
+import android.support.v7.widget.{DefaultItemAnimator, DividerItemDecoration, LinearLayoutManager, RecyclerView, Toolbar}
 import android.view._
 import android.widget._
 import com.github.shadowsocks.ShadowsocksApplication.app
@@ -96,8 +96,10 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
   import AppManager._
 
   private final class AppViewHolder(val view: View) extends RecyclerView.ViewHolder(view) with View.OnClickListener {
-    private val icon = itemView.findViewById(R.id.itemicon).asInstanceOf[ImageView]
-    private val check = itemView.findViewById(R.id.itemcheck).asInstanceOf[Switch]
+    private val icon = itemView.findViewById(R.id.icon).asInstanceOf[ImageView]
+    private val tvName = itemView.findViewById(R.id.name).asInstanceOf[TextView]
+    private val tvPackageName = itemView.findViewById(R.id.packagename).asInstanceOf[TextView]
+    private val checkbox = itemView.findViewById(R.id.checkbox).asInstanceOf[CheckBox]
     private var item: ProxiedApp = _
     itemView.setOnClickListener(this)
 
@@ -106,17 +108,18 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
     def bind(app: ProxiedApp) {
       this.item = app
       icon.setImageDrawable(app.icon)
-      check.setText(app.name)
-      check.setChecked(proxied)
+      tvName.setText(app.name)
+      tvPackageName.setText(app.packageName)
+      checkbox.setChecked(proxied)
     }
 
     def onClick(v: View) {
       if (proxied) {
         proxiedApps.remove(item.packageName)
-        check.setChecked(false)
+        checkbox.setChecked(false)
       } else {
         proxiedApps.add(item.packageName)
-        check.setChecked(true)
+        checkbox.setChecked(true)
       }
       if (!appsLoading.get) {
         profile.individual = proxiedApps.mkString("\n")
@@ -252,7 +255,9 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
     initProxiedApps()
     loadingView = findViewById(R.id.loading)
     appListView = findViewById(R.id.applistview).asInstanceOf[RecyclerView]
-    appListView.setLayoutManager(new LinearLayoutManager(this))
+    val layoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false)
+    appListView.setLayoutManager(layoutManager)
+    appListView.addItemDecoration(new DividerItemDecoration(this, layoutManager.getOrientation))
     appListView.setItemAnimator(new DefaultItemAnimator)
 
     instance = this

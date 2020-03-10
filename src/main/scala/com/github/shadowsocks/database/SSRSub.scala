@@ -147,11 +147,19 @@ object SSRSub {
       })
 
       delete_profiles.foreach((profile: Profile) => {
-        if (profile.id != app.profileId ||
-          (profile.id == app.profileId && isProfileAdded)) {
+        if (profile.id != app.profileId) {
           app.profileManager.delProfile(profile.id)
         }
+        // keep current selected profile
+        if (profile.id == app.profileId && isProfileAdded) {
+          val currentProfile = app.currentProfile
+          app.profileManager.delProfile(profile.id)
+          currentProfile
+            .flatMap(profile => Option(app.profileManager.checkLastExistProfile(profile)))
+            .foreach(profile => app.profileId(profile.id))
+        }
       })
+      // set current profile
       //    app.profileManager.getFirstProfileBySSRSub(ssrsub).foreach(p => app.profileId(p.id))
     }
   }

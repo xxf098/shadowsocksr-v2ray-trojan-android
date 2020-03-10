@@ -851,15 +851,16 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   }
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
-      if (requestCode == 0) {
-          if (resultCode == Activity.RESULT_OK) {
-            val contents = data.getStringExtra("SCAN_RESULT")
-            createProfilesFromText(contents)
-          }
-          if(resultCode == Activity.RESULT_CANCELED){
-            Toast.makeText(this, "Fail to Scan QRCode", Toast.LENGTH_SHORT)
-          }
+    if (requestCode == 0) {
+      if (resultCode == Activity.RESULT_OK) {
+        val contents = data.getStringExtra("SCAN_RESULT")
+        createProfilesFromText(contents)
       }
+      if (resultCode == Activity.RESULT_CANCELED) {
+        Toast.makeText(this, "Fail to Scan QRCode", Toast.LENGTH_SHORT)
+      }
+      return
+    }
     if (resultCode != Activity.RESULT_OK) return
     requestCode match {
       case REQUEST_CREATE_DOCUMENT => {
@@ -916,6 +917,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           }
         }
       }
+      case _ =>
     }
   }
 

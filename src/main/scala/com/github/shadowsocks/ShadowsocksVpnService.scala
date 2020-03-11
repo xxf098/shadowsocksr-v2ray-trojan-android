@@ -469,14 +469,18 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (Utils.isLollipopOrAbove) {
 
-      if (profile.proxyApps) {
-        if (!profile.bypass) builder.addAllowedApplication(getPackageName)
-        for (pkg <- profile.individual.split('\n')) {
+      // TODO: AIDL
+      val isPerAppProxyEnabled = app.settings.getBoolean(Key.isPerAppProxyEnabled, false)
+      if (isPerAppProxyEnabled) {
+        val bypassMode = app.settings.getBoolean(Key.isPerAppProxyBypassMode, false)
+        val packageNames = app.settings.getString(Key.perAppProxy, "")
+        if (!bypassMode) builder.addAllowedApplication(getPackageName)
+        for (pkg <- packageNames.split('\n')) {
           try {
-            if (!profile.bypass) {
+            if (!bypassMode) {
               builder.addAllowedApplication(pkg)
             }
-            if (profile.bypass && pkg != getPackageName) {
+            if (bypassMode && pkg != getPackageName) {
               builder.addDisallowedApplication(pkg)
             }
           } catch {

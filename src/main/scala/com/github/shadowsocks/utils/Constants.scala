@@ -280,6 +280,9 @@ object Key {
   val isNAT = "isNAT"
   val route = "route"
   val aclurl = "aclurl"
+  val isPerAppProxyEnabled = "isPerAppProxyEnabled"
+  val isPerAppProxyBypassMode = "isPerAppProxyBypassMode"
+  val perAppProxy = "perAppProxy"
 
   val isAutoConnect = "isAutoConnect"
 

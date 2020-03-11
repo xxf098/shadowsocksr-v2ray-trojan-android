@@ -17,7 +17,7 @@ object AclSyncJob {
   final val TAG = "AclSyncJob"
 
   def schedule(route: String) = new JobRequest.Builder(AclSyncJob.TAG + ':' + route)
-    .setExecutionWindow(1, TimeUnit.DAYS.toMillis(28))
+    .setExecutionWindow(1, TimeUnit.DAYS.toMillis(5))
     .setRequirementsEnforced(true)
     .setRequiredNetworkType(JobRequest.NetworkType.UNMETERED)
     .setRequiresCharging(true)

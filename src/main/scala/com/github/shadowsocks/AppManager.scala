@@ -50,6 +50,7 @@ import android.os.{Bundle, Handler}
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
 import android.support.v7.widget.{DefaultItemAnimator, DividerItemDecoration, LinearLayoutManager, RecyclerView, Toolbar}
+import android.util.Log
 import android.view._
 import android.widget._
 import com.github.shadowsocks.ShadowsocksApplication.app
@@ -138,6 +139,8 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
     def onBindViewHolder(vh: AppViewHolder, i: Int) = vh.bind(apps(i))
     def onCreateViewHolder(vg: ViewGroup, i: Int) =
       new AppViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_apps_item, vg, false))
+
+    def getAllPackageNames () =  apps.map(_.packageName)
   }
 
   private var proxiedApps: mutable.HashSet[String] = _
@@ -209,7 +212,19 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
           }
         }
         Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show()
-        return false
+        return true
+      case R.id.select_all => {
+        val appsAdapter = appListView.getAdapter.asInstanceOf[AppsAdapter]
+        if (proxiedApps.size >= appsAdapter.getItemCount) {
+          proxiedApps.clear()
+        } else {
+          appsAdapter.getAllPackageNames().foreach(item => proxiedApps.add(item))
+        }
+        // TODO: save to db
+        appsAdapter.notifyDataSetChanged()
+        return true
+      }
+      case _ => return false
     }
     false
   }

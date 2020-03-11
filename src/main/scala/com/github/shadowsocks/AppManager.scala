@@ -131,7 +131,7 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
   }
 
   private final class AppsAdapter extends RecyclerView.Adapter[AppViewHolder] {
-    private val apps = getApps(getPackageManager).sortWith((a, b) => {
+    private lazy val apps = getApps(getPackageManager).sortWith((a, b) => {
       val aProxied = proxiedApps.contains(a.packageName)
       if (aProxied ^ proxiedApps.contains(b.packageName)) aProxied else a.name.compareToIgnoreCase(b.name) < 0
     })
@@ -236,7 +236,7 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
               if (bypassSwitch.isChecked) index < 0 else index >= 0
             })
             .foreach(proxiedApps.add(_))
-          appsAdapter.notifyDataSetChanged()
+          reloadApps()
         }))
         return true
       }

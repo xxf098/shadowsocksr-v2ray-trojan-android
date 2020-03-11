@@ -4,6 +4,7 @@
           android:title="@string/action_apply_all"
           android:alphabeticShortcut="a"
           android:numericShortcut="1"
+          android:visible="false"
           app:showAsAction="never"/>
     <item android:id="@+id/action_export"
           android:title="@string/action_export"

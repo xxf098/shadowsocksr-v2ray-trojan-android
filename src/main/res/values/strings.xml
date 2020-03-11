@@ -167,6 +167,8 @@
   <string name="action_add_v2ray_config">Import from V2Ray Config</string>
   <string name="action_save_v2ray_config">Save</string>
   <string name="action_clear_v2ray_config">Clear</string>
+  <string name="action_select_all">Select all</string>
+  <string name="action_select_proxy_app">Auto select proxy app</string>
   <string name="edit">Edit</string>
 
 

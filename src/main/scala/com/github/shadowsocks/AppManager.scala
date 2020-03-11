@@ -54,6 +54,7 @@ import android.util.Log
 import android.view._
 import android.widget._
 import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.utils.CloseUtils.autoClose
 import com.github.shadowsocks.utils.{Key, Utils}
 
 import scala.collection.JavaConversions._
@@ -135,12 +136,12 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
       if (aProxied ^ proxiedApps.contains(b.packageName)) aProxied else a.name.compareToIgnoreCase(b.name) < 0
     })
 
+    lazy val packageNames = apps.map(_.packageName)
+
     def getItemCount = apps.length
     def onBindViewHolder(vh: AppViewHolder, i: Int) = vh.bind(apps(i))
     def onCreateViewHolder(vg: ViewGroup, i: Int) =
       new AppViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_apps_item, vg, false))
-
-    def getAllPackageNames () =  apps.map(_.packageName)
   }
 
   private var proxiedApps: mutable.HashSet[String] = _
@@ -218,10 +219,25 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
         if (proxiedApps.size >= appsAdapter.getItemCount) {
           proxiedApps.clear()
         } else {
-          appsAdapter.getAllPackageNames().foreach(item => proxiedApps.add(item))
+          appsAdapter.packageNames.foreach(item => proxiedApps.add(item))
         }
-        // TODO: save to db
+        // TODO: save to db sort
         appsAdapter.notifyDataSetChanged()
+        return true
+      }
+      case R.id.select_proxy_app => {
+        Utils.ThrowableFuture(autoClose(getAssets.open("proxy_apps.txt"))(in => {
+          val defaultProxyApps = scala.io.Source.fromInputStream(in).getLines().toList
+          proxiedApps.clear()
+          val appsAdapter = appListView.getAdapter.asInstanceOf[AppsAdapter]
+          appsAdapter.packageNames
+            .filter(item => {
+              val index = defaultProxyApps.indexOf(item)
+              if (bypassSwitch.isChecked) index < 0 else index >= 0
+            })
+            .foreach(proxiedApps.add(_))
+          appsAdapter.notifyDataSetChanged()
+        }))
         return true
       }
       case _ => return false

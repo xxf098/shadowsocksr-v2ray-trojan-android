@@ -8,13 +8,21 @@
     <item android:id="@+id/action_export"
           android:title="@string/action_export"
           android:icon="@drawable/ic_content_copy"
-          app:showAsAction="ifRoom"
+          app:showAsAction="never"
           android:alphabeticShortcut="e"
           android:numericShortcut="2"/>
     <item android:id="@+id/action_import"
           android:title="@string/action_import"
           android:icon="@drawable/ic_content_paste"
-          app:showAsAction="ifRoom"
+          app:showAsAction="never"
           android:alphabeticShortcut="i"
           android:numericShortcut="3"/>
+    <item
+        android:id="@+id/select_all"
+        android:title="@string/action_select_all"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/select_proxy_app"
+        android:title="@string/action_select_proxy_app"
+        app:showAsAction="never" />
 </menu>

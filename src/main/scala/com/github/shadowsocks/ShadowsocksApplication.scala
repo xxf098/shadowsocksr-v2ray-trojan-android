@@ -114,9 +114,17 @@ class ShadowsocksApplication extends Application {
     .setFatal(false)
     .build())
 
-  def profileId = settings.getInt(Key.id, -1)
+  def profileId = {
+//    settings.getInt(Key.id, -1)
+    val id = appStateManager.getProfileID()
+    // TODO: delete this line
+    if (id == -1) settings.getInt(Key.id, -1) else id
+  }
 
-  def profileId(i: Int) = editor.putInt(Key.id, i).apply
+  def profileId(i: Int) = {
+//    editor.putInt(Key.id, i).apply
+    appStateManager.saveProfileIdAsync(i)
+  }
 
   def currentProfile = profileManager.getProfile(profileId)
 

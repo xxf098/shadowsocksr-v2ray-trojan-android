@@ -226,8 +226,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     // change state
     changeState(State.CONNECTED)
 
-    if (profile.route != Route.ALL)
-      AclSyncJob.schedule(profile.route)
+//    if (profile.route != Route.ALL)
+//      AclSyncJob.schedule(profile.route)
 
     notification = new ShadowsocksNotification(this, profile.name, "service-ssr")
   }
@@ -469,11 +469,12 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (Utils.isLollipopOrAbove) {
 
-      // TODO: AIDL
-      val isPerAppProxyEnabled = app.settings.getBoolean(Key.isPerAppProxyEnabled, false)
+      // TODO: Content Provider
+      val appState = app.appStateManager.getAppState()
+      val isPerAppProxyEnabled = appState.map(_.per_app_proxy_enable).getOrElse(false)
       if (isPerAppProxyEnabled) {
-        val bypassMode = app.settings.getBoolean(Key.isPerAppProxyBypassMode, false)
-        val packageNames = app.settings.getString(Key.perAppProxy, "")
+        val bypassMode = appState.map(_.bypass_mode).getOrElse(false)
+        val packageNames = appState.map(_.package_names).getOrElse("")
         if (!bypassMode) builder.addAllowedApplication(getPackageName)
         for (pkg <- packageNames.split('\n')) {
           try {

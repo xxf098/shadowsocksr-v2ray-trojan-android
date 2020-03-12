@@ -123,10 +123,6 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
         proxiedApps.add(item.packageName)
         checkbox.setChecked(true)
       }
-//      if (!appsLoading.get) {
-//        profile.individual = proxiedApps.mkString("\n")
-//        app.profileManager.updateProfile(profile)
-//      }
     }
   }
 
@@ -198,8 +194,6 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
                 val (enabled, apps) = if (i < 0) (proxiedAppString, "")
                   else (proxiedAppString.substring(0, i), proxiedAppString.substring(i + 1))
                 bypassSwitch.setChecked(enabled.toBoolean)
-//                profile.individual = apps
-//                app.profileManager.updateProfile(profile)
                 Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
                 appListView.setVisibility(View.GONE)
                 loadingView.setVisibility(View.VISIBLE)

@@ -158,7 +158,6 @@ object SSRSub {
             .flatMap(profile => Option(app.profileManager.checkLastExistProfile(profile)))
             .foreach(profile => {
               app.profileId(profile.id)
-              // TODO: content provider
               currentProfile = app.currentProfile
             })
         }

@@ -3,6 +3,7 @@ package com.github.shadowsocks.database
 import android.util.Log
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.SSRSubManager.TAG
+import com.github.shadowsocks.utils.Utils
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -31,6 +32,33 @@ class AppStateManager(dbHelper: DBHelper) {
       case ex: Exception =>
         app.track(ex)
         false
+    }
+  }
+
+  def getProfileID (): Int = {
+    try {
+      val query = dbHelper.appStateDao.queryBuilder().selectColumns("profile_id").where().eq("id", 1)
+      val result = dbHelper.appStateDao.query(query.prepare())
+      if (result.size() == 1) result.get(0).profile_id else -1
+    } catch {
+      case ex: Exception =>
+        app.track(ex)
+        -1
+    }
+  }
+
+  def saveProfileId (profileId: Int): Unit = {
+      try {
+        dbHelper.appStateDao.executeRawNoArgs(s"UPDATE `appstate` SET profile_id = '$profileId' WHERE id = 1")
+      } catch {
+        case e: Exception =>
+          e.printStackTrace()
+      }
+  }
+
+  def saveProfileIdAsync (profileId: Int): Unit = {
+    Utils.ThrowableFuture {
+      saveProfileId(profileId)
     }
   }
 
@@ -82,10 +110,6 @@ class AppStateManager(dbHelper: DBHelper) {
 
   def savePackageNames(packageNames: String): Unit = {
     saveAppStateAsync(None, None, None, Some(packageNames))
-  }
-
-  def saveProfileId(profileId: Int): Unit = {
-    saveAppState(Some(profileId), None, None, None)
   }
 
 }

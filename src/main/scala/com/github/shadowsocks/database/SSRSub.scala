@@ -44,7 +44,7 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 import android.text.TextUtils
-import android.util.Base64
+import android.util.{Base64, Log}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.CloseUtils.autoClose
 import com.github.shadowsocks.utils.Parser
@@ -115,6 +115,7 @@ object SSRSub {
   implicit class SSRSubFunctions(ssrsub: SSRSub) {
 
     def addProfiles(responseString: String): Unit = {
+      var currentProfile = app.currentProfile
       val delete_profiles = app.profileManager.getAllProfilesBySSRSub(ssrsub) match {
         case Some(subProfiles) =>
           subProfiles.filter(profile=> profile.ssrsub_id <= 0 || profile.ssrsub_id == ssrsub.id)
@@ -152,11 +153,14 @@ object SSRSub {
         }
         // keep current selected profile
         if (profile.id == app.profileId && isProfileAdded) {
-          val currentProfile = app.currentProfile
           app.profileManager.delProfile(profile.id)
           currentProfile
             .flatMap(profile => Option(app.profileManager.checkLastExistProfile(profile)))
-            .foreach(profile => app.profileId(profile.id))
+            .foreach(profile => {
+              app.profileId(profile.id)
+              // TODO: content provider
+              currentProfile = app.currentProfile
+            })
         }
       })
       // set current profile

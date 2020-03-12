@@ -47,7 +47,6 @@ import android.content._
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.{Bundle, Handler}
-import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
 import android.support.v7.widget.{DefaultItemAnimator, DividerItemDecoration, LinearLayoutManager, RecyclerView, Toolbar}
@@ -153,7 +152,7 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
   private val appsLoading = new AtomicBoolean
   private var handler: Handler = _
   private val profile = app.currentProfile.orNull
-  private lazy val sharePref = app.settings
+  private lazy val appState = app.appStateManager.getAppState()
 
   private def initProxiedApps(str: String = "") = proxiedApps = str.split('\n').to[mutable.HashSet]
 
@@ -182,8 +181,8 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
 //        }
         return true
       case R.id.action_export =>
-        val bypass = sharePref.getBoolean(Key.isPerAppProxyBypassMode, false)
-        val proxiedAppString = sharePref.getString(Key.perAppProxy, "")
+        val bypass = bypassSwitch.isChecked
+        val proxiedAppString = proxiedApps.mkString("\n")
         val clip = ClipData.newPlainText(Key.perAppProxy, bypass + "\n" + proxiedAppString)
         clipboard.setPrimaryClip(clip)
         Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show()
@@ -269,21 +268,16 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
 
     findViewById(R.id.onSwitch).asInstanceOf[Switch]
       .setOnCheckedChangeListener((_, checked) => {
-//        profile.proxyApps = checked
-//        app.profileManager.updateProfile(profile)
-        sharePref.edit().putBoolean(Key.isPerAppProxyEnabled, checked).commit()
+        app.appStateManager.savePerAppProxyEnabled(checked)
         finish()
       })
 
     bypassSwitch = findViewById(R.id.bypassSwitch).asInstanceOf[Switch]
-    bypassSwitch.setChecked(sharePref.getBoolean(Key.isPerAppProxyBypassMode, false))
+    bypassSwitch.setChecked(appState.map(_.bypass_mode).getOrElse(false))
     bypassSwitch.setOnCheckedChangeListener((_, checked) => {
-      sharePref.edit().putBoolean(Key.isPerAppProxyBypassMode, checked).commit()
-      //      profile.bypass = checked
-//      app.profileManager.updateProfile(profile)
+      app.appStateManager.saveIsBypassMode(checked)
     })
 
-    initProxiedApps(sharePref.getString(Key.perAppProxy, ""))
     loadingView = findViewById(R.id.loading)
     appListView = findViewById(R.id.applistview).asInstanceOf[RecyclerView]
     val layoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false)
@@ -293,13 +287,12 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
 
     instance = this
     loadAppsAsync()
-    sharePref.edit().putBoolean(Key.isPerAppProxyEnabled, true).commit()
   }
 
 
   override def onPause(): Unit = {
     super.onPause()
-    sharePref.edit().putString(Key.perAppProxy, proxiedApps.mkString("\n")).commit()
+    app.appStateManager.savePackageNames(proxiedApps.mkString("\n"))
   }
 
   def reloadApps() = if (!appsLoading.compareAndSet(true, false)) loadAppsAsync()
@@ -307,6 +300,8 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
     if (!appsLoading.compareAndSet(false, true)) return
     Utils.ThrowableFuture {
       var adapter: AppsAdapter = null
+      initProxiedApps(appState.map(_.package_names).getOrElse(""))
+      app.appStateManager.savePerAppProxyEnabled(true)
       do {
         appsLoading.set(true)
         adapter = new AppsAdapter

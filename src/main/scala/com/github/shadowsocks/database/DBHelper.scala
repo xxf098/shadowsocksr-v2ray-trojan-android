@@ -65,11 +65,12 @@ object DBHelper {
 }
 
 class DBHelper(val context: Context)
-  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 29) {
+  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 30) {
   import DBHelper._
 
   lazy val profileDao: Dao[Profile, Int] = getDao(classOf[Profile])
   lazy val ssrsubDao: Dao[SSRSub, Int] = getDao(classOf[SSRSub])
+  lazy val appStateDao: Dao[AppState, Int] = getDao(classOf[AppState])
 
   def onCreate(database: SQLiteDatabase, connectionSource: ConnectionSource) {
     TableUtils.createTable(connectionSource, classOf[Profile])
@@ -179,6 +180,9 @@ class DBHelper(val context: Context)
 
         if (oldVersion < 29) {
           profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN v_security VARCHAR DEFAULT '';")
+        }
+        if (oldVersion < 30) {
+          TableUtils.createTable(connectionSource, classOf[AppState])
         }
       } catch {
         case ex: Exception =>

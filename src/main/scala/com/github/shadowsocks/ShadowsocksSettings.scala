@@ -68,7 +68,7 @@ object ShadowsocksSettings {
   }
 
   def updatePreference(pref: Preference, name: String, profile: Profile) {
-    val isPerAppProxyEnabled = app.settings.getBoolean(Key.isPerAppProxyEnabled, false)
+//    val isPerAppProxyEnabled = app.appStateManager.getAppState().map(_.per_app_proxy_enable).getOrElse(false)
     if (profile.isVmess) {
       val v_security = if (TextUtils.isEmpty(profile.v_security)) "auto" else profile.v_security
       name match {
@@ -81,7 +81,7 @@ object ShadowsocksSettings {
         case Key.v_security => updateDropDownPreference(pref, v_security)
         case Key.v_tls => updateDropDownPreference(pref, profile.v_tls)
         case Key.route => updateDropDownPreference(pref, profile.route)
-        case Key.proxyApps => updateSwitchPreference(pref, isPerAppProxyEnabled)
+//        case Key.proxyApps => updateSwitchPreference(pref, isPerAppProxyEnabled)
         case Key.udpdns => updateSwitchPreference(pref, profile.udpdns)
         case Key.dns => updateSummaryEditTextPreference(pref, profile.dns)
         case Key.china_dns => updateSummaryEditTextPreference(pref, profile.china_dns)
@@ -110,7 +110,7 @@ object ShadowsocksSettings {
       case Key.obfs => updateDropDownPreference(pref, profile.obfs)
       case Key.obfs_param => updateSummaryEditTextPreference(pref, profile.obfs_param)
       case Key.route => updateDropDownPreference(pref, profile.route)
-      case Key.proxyApps => updateSwitchPreference(pref, isPerAppProxyEnabled)
+//      case Key.proxyApps => updateSwitchPreference(pref, isPerAppProxyEnabled)
       case Key.udpdns => updateSwitchPreference(pref, profile.udpdns)
       case Key.dns => updateSummaryEditTextPreference(pref, profile.dns)
       case Key.china_dns => updateSummaryEditTextPreference(pref, profile.china_dns)
@@ -326,15 +326,17 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     })
 
     isProxyApps = findPreference(Key.proxyApps).asInstanceOf[SwitchPreference]
+    isProxyApps.setChecked(app.appStateManager.getPerAppProxyEnable())
     isProxyApps.setOnPreferenceClickListener(_ => {
       startActivity(new Intent(activity, classOf[AppManager]))
       isProxyApps.setChecked(true)
       true
     })
-    isProxyApps.setOnPreferenceChangeListener((_, value) => {
-      app.settings.edit.putBoolean(Key.isPerAppProxyEnabled, true).commit()
-//      app.profileManager.updateAllProfile_Boolean("proxyApps", value.asInstanceOf[Boolean])
-    })
+//    isProxyApps.setOnPreferenceChangeListener((_, value) => {
+//      app.appStateManager.savePerAppProxyEnabled(true)
+//      true
+//            app.profileManager.updateAllProfile_Boolean("proxyApps", value.asInstanceOf[Boolean])
+//    })
 
     findPreference(Key.udpdns).setOnPreferenceChangeListener((_, value) => {
       app.profileManager.updateAllProfile_Boolean("udpdns", value.asInstanceOf[Boolean])
@@ -646,8 +648,10 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
             default
         }
     }
-    val isPerAppProxyEnabled = app.settings.getBoolean(Key.isPerAppProxyEnabled, false)
-    isProxyApps.setChecked(isPerAppProxyEnabled)
+    val isPerAppProxyEnabled = app.appStateManager.getPerAppProxyEnable()
+    if (isProxyApps.isChecked != isPerAppProxyEnabled) {
+      isProxyApps.setChecked(isPerAppProxyEnabled)
+    }
   }
 
   override def onDestroy {

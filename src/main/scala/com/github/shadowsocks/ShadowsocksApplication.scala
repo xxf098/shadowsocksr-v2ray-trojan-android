@@ -53,7 +53,7 @@ import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatDelegate
 import android.util.Log
 import com.evernote.android.job.JobManager
-import com.github.shadowsocks.database.{DBHelper, ProfileManager, SSRSubManager}
+import com.github.shadowsocks.database.{AppStateManager, DBHelper, ProfileManager, SSRSubManager}
 import com.github.shadowsocks.job.DonaldTrump
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils._
@@ -62,8 +62,8 @@ import com.google.android.gms.common.api.ResultCallback
 import com.google.android.gms.tagmanager.{ContainerHolder, TagManager}
 import com.j256.ormlite.logger.LocalLog
 import eu.chainfire.libsuperuser.Shell
-import scala.collection.JavaConverters._
 
+import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 
 object ShadowsocksApplication {
@@ -93,6 +93,7 @@ class ShadowsocksApplication extends Application {
   lazy val editor = settings.edit
   lazy val profileManager = new ProfileManager(new DBHelper(this))
   lazy val ssrsubManager = new SSRSubManager(new DBHelper(this))
+  lazy val appStateManager = new AppStateManager(new DBHelper(this))
   lazy val resources = getResources()
 
   var BLOCK_DOMAIN = List[String]()

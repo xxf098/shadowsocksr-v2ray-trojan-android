@@ -186,7 +186,7 @@ class DBHelper(val context: Context)
           TableUtils.createTableIfNotExists(connectionSource, classOf[AppState])
         }
         if (oldVersion < 31) {
-          appStateDao.queryBuilder().queryForFirst() match {
+          appStateDao.queryBuilder().selectColumns("id").queryForFirst() match {
             case _: AppState =>
             case _ => {
               val appState = new AppState {

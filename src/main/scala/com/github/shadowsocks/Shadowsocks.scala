@@ -372,7 +372,9 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
 //      case None => app.ssrsubManager.createDefault()
 //    }
 
-    SSRSubUpdateJob.schedule()
+    if (app.settings.getInt(Key.ssrsub_autoupdate, 0) == 1) {
+      SSRSubUpdateJob.schedule()
+    }
 
     handler.post(() => attachService)
   }
@@ -435,7 +437,11 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
         case None => // removed
           app.switchProfile((app.profileManager.getFirstProfile match {
             case Some(first) => first
-            case None => app.profileManager.createDefault()
+            case None => {
+              val defaultProfile = app.profileManager.createDefault()
+              app.appStateManager.createDefault(defaultProfile.id)
+              defaultProfile
+            }
           }).id)
       })
 

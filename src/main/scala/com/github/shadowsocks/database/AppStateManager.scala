@@ -12,7 +12,7 @@ class AppStateManager(dbHelper: DBHelper) {
 
   def getAppState (): Option[AppState] = {
     try {
-      dbHelper.appStateDao.queryForId(1) match {
+        dbHelper.appStateDao.queryBuilder().queryForFirst() match {
         case appState: AppState => Option(appState)
         case _ => None
       }
@@ -25,9 +25,8 @@ class AppStateManager(dbHelper: DBHelper) {
 
   def getPerAppProxyEnable (): Boolean = {
     try {
-      val query = dbHelper.appStateDao.queryBuilder().selectColumns("per_app_proxy_enable").where().eq("id", 1)
-      val result = dbHelper.appStateDao.query(query.prepare())
-      if (result.size() == 1) result.get(0).per_app_proxy_enable else false
+      val result = dbHelper.appStateDao.queryBuilder().selectColumns("per_app_proxy_enable").queryForFirst()
+      if (result != null) result.per_app_proxy_enable else false
     } catch {
       case ex: Exception =>
         app.track(ex)
@@ -37,9 +36,8 @@ class AppStateManager(dbHelper: DBHelper) {
 
   def getProfileID (): Int = {
     try {
-      val query = dbHelper.appStateDao.queryBuilder().selectColumns("profile_id").where().eq("id", 1)
-      val result = dbHelper.appStateDao.query(query.prepare())
-      if (result.size() == 1) result.get(0).profile_id else -1
+      val result = dbHelper.appStateDao.queryBuilder().selectColumns("profile_id").queryForFirst()
+      if (result != null) result.profile_id else -1
     } catch {
       case ex: Exception =>
         app.track(ex)
@@ -49,9 +47,10 @@ class AppStateManager(dbHelper: DBHelper) {
 
   def saveProfileId (profileId: Int): Unit = {
       try {
-        dbHelper.appStateDao.executeRawNoArgs(s"UPDATE `appstate` SET profile_id = '$profileId' WHERE id = 1")
+        dbHelper.appStateDao.executeRawNoArgs(s"UPDATE appstate SET profile_id = '$profileId'")
       } catch {
         case e: Exception =>
+          Log.e("====", e.getMessage)
           e.printStackTrace()
       }
   }
@@ -66,16 +65,17 @@ class AppStateManager(dbHelper: DBHelper) {
 //
 //  }
 
-  def saveAppState(profileId: Option[Int], perAppProxyEnabled: Option[Boolean], isBypassMode: Option[Boolean], packageNames: Option[String]): Unit = {
+  def saveAppState(profileId: Option[Int], perAppProxyEnabled: Option[Boolean], isBypassMode: Option[Boolean], packageNames: Option[String]): Option[AppState] = {
     try {
-      dbHelper.appStateDao.queryForId(1) match {
+      dbHelper.appStateDao.queryBuilder().queryForFirst() match {
         case appState: AppState => {
-          appState.id = 1
+          appState.id = appState.id
           profileId.foreach(profile_id => appState.profile_id = profile_id)
           perAppProxyEnabled.foreach(per_app_proxy_enable => appState.per_app_proxy_enable = per_app_proxy_enable)
           isBypassMode.foreach(bypass_mode => appState.bypass_mode = bypass_mode)
           packageNames.foreach(package_names => appState.package_names = package_names)
           dbHelper.appStateDao.update(appState)
+          Some(appState)
         }
         case _ => {
           val appState = new AppState {
@@ -85,6 +85,7 @@ class AppStateManager(dbHelper: DBHelper) {
             package_names = packageNames.getOrElse("")
           }
           dbHelper.appStateDao.create(appState)
+          Some(appState)
         }
       }
     } catch {
@@ -110,6 +111,10 @@ class AppStateManager(dbHelper: DBHelper) {
 
   def savePackageNames(packageNames: String): Unit = {
     saveAppStateAsync(None, None, None, Some(packageNames))
+  }
+
+  def createDefault(profileId: Int): AppState = {
+    saveAppState(Some(profileId), None, None, None).getOrElse(new AppState())
   }
 
 }

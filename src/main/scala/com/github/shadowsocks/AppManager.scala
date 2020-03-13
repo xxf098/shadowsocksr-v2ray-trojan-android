@@ -222,6 +222,7 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
       case R.id.select_proxy_app => {
         Utils.ThrowableFuture(autoClose(getAssets.open("proxy_apps.txt"))(in => {
           val defaultProxyApps = scala.io.Source.fromInputStream(in).getLines().toList
+          Log.e("===", s"defaultProxyApps${defaultProxyApps.size}")
           proxiedApps.clear()
           val appsAdapter = appListView.getAdapter.asInstanceOf[AppsAdapter]
           appsAdapter.packageNames
@@ -230,7 +231,8 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
               if (bypassSwitch.isChecked) index < 0 else index >= 0
             })
             .foreach(proxiedApps.add(_))
-          reloadApps()
+          Log.e("===", s"proxiedApps${proxiedApps.size}")
+          if (!appsLoading.compareAndSet(true, false)) loadAppsAsync(false)
         }))
         return true
       }
@@ -290,12 +292,13 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
   }
 
   def reloadApps() = if (!appsLoading.compareAndSet(true, false)) loadAppsAsync()
-  def loadAppsAsync() {
+  def loadAppsAsync(needInitProxiedApps: Boolean = true) {
     if (!appsLoading.compareAndSet(false, true)) return
     Utils.ThrowableFuture {
       var adapter: AppsAdapter = null
-      initProxiedApps(appState.map(_.package_names).getOrElse(""))
+      if (needInitProxiedApps) initProxiedApps(appState.map(_.package_names).getOrElse(""))
       app.appStateManager.savePerAppProxyEnabled(true)
+      Log.e("====", s"proxiedApps.size: ${Option(proxiedApps).map(_.size).getOrElse("")}")
       do {
         appsLoading.set(true)
         adapter = new AppsAdapter

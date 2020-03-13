@@ -644,6 +644,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
             p
           case None =>
             val default = app.profileManager.createDefault()
+            app.appStateManager.createDefault(default.id)
             app.profileId(default.id)
             default
         }

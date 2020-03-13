@@ -69,7 +69,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       } else {
         prefs_edit.putInt(Key.ssrsub_autoupdate, 0)
       }
-      prefs_edit.apply()
+      prefs_edit.commit()
     }): CompoundButton.OnCheckedChangeListener)
 
     val ssusubsList = view.findViewById(R.id.ssrsubList).asInstanceOf[RecyclerView]

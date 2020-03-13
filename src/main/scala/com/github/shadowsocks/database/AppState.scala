@@ -1,7 +1,9 @@
 package com.github.shadowsocks.database
 
 import com.j256.ormlite.field.DatabaseField
+import com.j256.ormlite.table.DatabaseTable
 
+@DatabaseTable(tableName = "appstate")
 class AppState {
   @DatabaseField(generatedId = true)
   var id: Int = 0

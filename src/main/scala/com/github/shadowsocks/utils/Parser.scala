@@ -186,7 +186,7 @@ object Parser {
     vmess.network = "tcp"
     vmess.headerType = "none"
 
-    vmess.configVersion = vmessQRCode.v.toInt
+    vmess.configVersion = Option(vmessQRCode.v).getOrElse("2").toInt
     vmess.remarks = vmessQRCode.ps
     vmess.address = vmessQRCode.add
     vmess.port = vmessQRCode.port.toInt

@@ -13,7 +13,7 @@
             android:layout_gravity="center"
             android:orientation="vertical">
 
-            <Spinner
+            <android.support.v7.widget.AppCompatSpinner
                 android:id="@+id/group_choose_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"

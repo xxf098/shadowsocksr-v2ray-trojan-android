@@ -214,8 +214,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
     def onBindViewHolder(vh: ProfileViewHolder, i: Int) = vh.bind(profiles(i))
 
-    def onCreateViewHolder(vg: ViewGroup, i: Int) =
-      new ProfileViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_profiles_item1, vg, false))
+    def onCreateViewHolder(vg: ViewGroup, i: Int) ={
+      val layoutId = if (Build.VERSION.SDK_INT >= 21) R.layout.layout_profiles_item1 else R.layout.layout_profiles_item
+      new ProfileViewHolder(LayoutInflater.from(vg.getContext).inflate(layoutId, vg, false))
+    }
 
     def add(item: Profile) {
       undoManager.flush

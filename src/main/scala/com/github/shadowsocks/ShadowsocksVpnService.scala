@@ -565,30 +565,29 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     lazy val connectivityManager = getSystemService(classOf[ConnectivityManager])
     var underlyingNetwork : Network = _
 
+    private[this] def getUnderlyingNetworks(network: Network): Array[Network] = {
+      if (Build.VERSION.SDK_INT == 28 && connectivityManager.isActiveNetworkMetered) null
+      else Array(network)
+    }
     override def onAvailable(network: Network): Unit = {
       val networkInfo = connectivityManager.getNetworkInfo(network)
-//      underlyingNetwork = network
-      Log.e(TAG,  "onAvailable " + connectivityManager.isActiveNetworkMetered)
-//      if (networkInfo == null || networkInfo.getState != NetworkInfo.State.CONNECTED) {
-//        return
-//      }
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) setUnderlyingNetworks(Array(underlyingNetwork))
+      if (networkInfo == null || networkInfo.getState() != NetworkInfo.State.CONNECTED) {
+        return
+      }
+      val networks = getUnderlyingNetworks(network)
+      if (Build.VERSION.SDK_INT >= 22) setUnderlyingNetworks(networks)
     }
 
-
     override def onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities): Unit = {
-      val networkInfo = connectivityManager.getNetworkInfo(network)
-//      underlyingNetwork = network
-      Log.e(TAG,  "onCapabilitiesChanged " + connectivityManager.isActiveNetworkMetered)
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) setUnderlyingNetworks(Array(underlyingNetwork))
+      val networks = getUnderlyingNetworks(network)
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) setUnderlyingNetworks(networks)
     }
 
     override def onLost(network: Network): Unit = {
-//      underlyingNetwork = network
-//      val activeNetworkInfo = connectivityManager.getActiveNetworkInfo
-//      if (activeNetworkInfo != null && activeNetworkInfo.getState == NetworkInfo.State.CONNECTED) {
-//          return
-//      }
+      val activeNetworkInfo = connectivityManager.getActiveNetworkInfo
+      if (activeNetworkInfo != null && activeNetworkInfo.getState == NetworkInfo.State.CONNECTED) {
+          return
+      }
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) setUnderlyingNetworks(null)
     }
   }

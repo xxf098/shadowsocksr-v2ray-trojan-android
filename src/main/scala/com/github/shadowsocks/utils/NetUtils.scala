@@ -27,7 +27,7 @@ object NetUtils {
     result
   }
 
-  def testConnection(url: String, timeout: Int = 3): Long = {
+  def testConnection(url: String, timeout: Int = 2): Long = {
     var elapsed = 0L
     val builder = new OkHttpClient.Builder()
       .connectTimeout(timeout, TimeUnit.SECONDS)

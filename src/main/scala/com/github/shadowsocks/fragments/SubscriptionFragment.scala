@@ -136,7 +136,10 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
                 responseHandler(responseString, url, groupName)
                 None
               }).recover{
-                case e: Exception => Some(getString(R.string.ssrsub_error, e.getMessage))
+                case e: Exception => {
+                  e.printStackTrace()
+                  Some(getString(R.string.ssrsub_error, e.getMessage))
+                }
               }.foreach(result => {
                 handler.post(() => {
                   result.foreach(msg => Toast.makeText(configActivity, msg, Toast.LENGTH_SHORT).show())

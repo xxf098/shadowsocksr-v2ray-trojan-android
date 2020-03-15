@@ -77,6 +77,14 @@
     <item>ACL4SSR NoBanAD</item>
     <item>Customize ACL File</item>
   </string-array>
+  <string-array name="route_entry_v2ray">
+    <item>All</item>
+    <item>Bypass LAN</item>
+    <item>Bypass China</item>
+    <item>Bypass LAN &amp; China</item>
+    <item>GFW List</item>
+    <item>China List</item>
+  </string-array>
   <string name="acl_file">ACL File URL</string>
   <string name="aclupdate">ACL Update</string>
   <string name="aclupdate_summary">Update Your ACL file</string>

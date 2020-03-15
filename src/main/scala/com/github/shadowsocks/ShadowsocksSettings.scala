@@ -701,5 +701,11 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     }
     screen.addPreference(featureCategory)
     screen.addPreference(miscCategory)
+    val routePref = findPreference(Key.route).asInstanceOf[DropDownPreference]
+    val routeEntries = profile match {
+      case x if x.isV2Ray => getResources.getTextArray(R.array.route_entry_v2ray)
+      case _ => getResources.getTextArray(R.array.route_entry)
+    }
+    routePref.setEntries(routeEntries)
   }
 }

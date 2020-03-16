@@ -706,6 +706,10 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       case x if x.isV2Ray => getResources.getTextArray(R.array.route_entry_v2ray)
       case _ => getResources.getTextArray(R.array.route_entry)
     }
+    val routeValues = getResources.getTextArray(R.array.route_value)
+    if (profile.isV2Ray && routeValues.indexOf(profile.route) > 5) {
+      profile.route = "bypass-lan-china"
+    }
     routePref.setEntries(routeEntries)
   }
 }

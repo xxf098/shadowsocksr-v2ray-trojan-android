@@ -49,6 +49,7 @@ import android.content.{Context, Intent}
 import android.graphics._
 import android.os.Build
 import android.provider.Settings
+import android.support.v4.content.ContextCompat
 import android.util.{Base64, DisplayMetrics, Log}
 import android.view.View.MeasureSpec
 import android.view.{Gravity, View, Window}
@@ -260,7 +261,7 @@ object Utils {
   }
 
   def startSsService(context: Context) {
-    if (Build.VERSION.SDK_INT >= 26) context.startForegroundService(new Intent(context, classOf[ShadowsocksRunnerService]))
+    if (Build.VERSION.SDK_INT >= 26) ContextCompat.startForegroundService(context, new Intent(context, classOf[ShadowsocksRunnerService]))
     else context.startService(new Intent(context, classOf[ShadowsocksRunnerService]))
   }
 

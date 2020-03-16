@@ -226,8 +226,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     // change state
     changeState(State.CONNECTED)
 
-    if (profile.route != Route.ALL)
-      AclSyncJob.schedule(profile.route)
+//    if (profile.route != Route.ALL)
+//      AclSyncJob.schedule(profile.route)
 
     notification = new ShadowsocksNotification(this, profile.name, "service-ssr")
   }
@@ -469,14 +469,19 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (Utils.isLollipopOrAbove) {
 
-      if (profile.proxyApps) {
-        if (!profile.bypass) builder.addAllowedApplication(getPackageName)
-        for (pkg <- profile.individual.split('\n')) {
+      // TODO: Content Provider
+      val appState = app.appStateManager.getAppState()
+      val isPerAppProxyEnabled = appState.map(_.per_app_proxy_enable).getOrElse(false)
+      if (isPerAppProxyEnabled) {
+        val bypassMode = appState.map(_.bypass_mode).getOrElse(false)
+        val packageNames = appState.map(_.package_names).getOrElse("")
+        if (!bypassMode) builder.addAllowedApplication(getPackageName)
+        for (pkg <- packageNames.split('\n')) {
           try {
-            if (!profile.bypass) {
+            if (!bypassMode) {
               builder.addAllowedApplication(pkg)
             }
-            if (profile.bypass && pkg != getPackageName) {
+            if (bypassMode && pkg != getPackageName) {
               builder.addDisallowedApplication(pkg)
             }
           } catch {
@@ -560,30 +565,29 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     lazy val connectivityManager = getSystemService(classOf[ConnectivityManager])
     var underlyingNetwork : Network = _
 
+    private[this] def getUnderlyingNetworks(network: Network): Array[Network] = {
+      if (Build.VERSION.SDK_INT == 28 && connectivityManager.isActiveNetworkMetered) null
+      else Array(network)
+    }
     override def onAvailable(network: Network): Unit = {
       val networkInfo = connectivityManager.getNetworkInfo(network)
-//      underlyingNetwork = network
-      Log.e(TAG,  "onAvailable " + connectivityManager.isActiveNetworkMetered)
-//      if (networkInfo == null || networkInfo.getState != NetworkInfo.State.CONNECTED) {
-//        return
-//      }
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) setUnderlyingNetworks(Array(underlyingNetwork))
+      if (networkInfo == null || networkInfo.getState() != NetworkInfo.State.CONNECTED) {
+        return
+      }
+      val networks = getUnderlyingNetworks(network)
+      if (Build.VERSION.SDK_INT >= 22) setUnderlyingNetworks(networks)
     }
 
-
     override def onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities): Unit = {
-      val networkInfo = connectivityManager.getNetworkInfo(network)
-//      underlyingNetwork = network
-      Log.e(TAG,  "onCapabilitiesChanged " + connectivityManager.isActiveNetworkMetered)
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) setUnderlyingNetworks(Array(underlyingNetwork))
+      val networks = getUnderlyingNetworks(network)
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) setUnderlyingNetworks(networks)
     }
 
     override def onLost(network: Network): Unit = {
-//      underlyingNetwork = network
-//      val activeNetworkInfo = connectivityManager.getActiveNetworkInfo
-//      if (activeNetworkInfo != null && activeNetworkInfo.getState == NetworkInfo.State.CONNECTED) {
-//          return
-//      }
+      val activeNetworkInfo = connectivityManager.getActiveNetworkInfo
+      if (activeNetworkInfo != null && activeNetworkInfo.getState == NetworkInfo.State.CONNECTED) {
+          return
+      }
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) setUnderlyingNetworks(null)
     }
   }

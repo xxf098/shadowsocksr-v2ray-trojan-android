@@ -62,9 +62,9 @@ class ProfileManager(dbHelper: DBHelper) {
           // Copy Feature Settings from old profile
           profile.route = oldProfile.route
           profile.ipv6 = oldProfile.ipv6
-          profile.proxyApps = oldProfile.proxyApps
-          profile.bypass = oldProfile.bypass
-          profile.individual = oldProfile.individual
+//          profile.proxyApps = oldProfile.proxyApps
+//          profile.bypass = oldProfile.bypass
+//          profile.individual = oldProfile.individual
           profile.udpdns = oldProfile.udpdns
         case _ =>
       }
@@ -90,9 +90,9 @@ class ProfileManager(dbHelper: DBHelper) {
           // Copy Feature Settings from old profile
           profile.route = oldProfile.route
           profile.ipv6 = oldProfile.ipv6
-          profile.proxyApps = oldProfile.proxyApps
-          profile.bypass = oldProfile.bypass
-          profile.individual = oldProfile.individual
+//          profile.proxyApps = oldProfile.proxyApps
+//          profile.bypass = oldProfile.bypass
+//          profile.individual = oldProfile.individual
           profile.udpdns = oldProfile.udpdns
           profile.dns = oldProfile.dns
           profile.china_dns = oldProfile.china_dns
@@ -126,9 +126,9 @@ class ProfileManager(dbHelper: DBHelper) {
           // Copy Feature Settings from old profile
           profile.route = oldProfile.route
           profile.ipv6 = oldProfile.ipv6
-          profile.proxyApps = oldProfile.proxyApps
-          profile.bypass = oldProfile.bypass
-          profile.individual = oldProfile.individual
+//          profile.proxyApps = oldProfile.proxyApps
+//          profile.bypass = oldProfile.bypass
+//          profile.individual = oldProfile.individual
           profile.udpdns = oldProfile.udpdns
           profile.dns = oldProfile.dns
           profile.china_dns = oldProfile.china_dns

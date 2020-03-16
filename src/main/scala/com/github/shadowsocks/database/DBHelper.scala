@@ -65,15 +65,17 @@ object DBHelper {
 }
 
 class DBHelper(val context: Context)
-  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 29) {
+  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 31) {
   import DBHelper._
 
   lazy val profileDao: Dao[Profile, Int] = getDao(classOf[Profile])
   lazy val ssrsubDao: Dao[SSRSub, Int] = getDao(classOf[SSRSub])
+  lazy val appStateDao: Dao[AppState, Int] = getDao(classOf[AppState])
 
   def onCreate(database: SQLiteDatabase, connectionSource: ConnectionSource) {
     TableUtils.createTable(connectionSource, classOf[Profile])
     TableUtils.createTable(connectionSource, classOf[SSRSub])
+    TableUtils.createTable(connectionSource, classOf[AppState])
   }
 
   def onUpgrade(database: SQLiteDatabase, connectionSource: ConnectionSource, oldVersion: Int,
@@ -179,6 +181,23 @@ class DBHelper(val context: Context)
 
         if (oldVersion < 29) {
           profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN v_security VARCHAR DEFAULT '';")
+        }
+        if (oldVersion < 30) {
+          TableUtils.createTableIfNotExists(connectionSource, classOf[AppState])
+        }
+        if (oldVersion < 31) {
+          appStateDao.queryBuilder().selectColumns("id").queryForFirst() match {
+            case _: AppState =>
+            case _ => {
+              val appState = new AppState {
+                profile_id = -1
+                per_app_proxy_enable = false
+                bypass_mode = false
+                package_names = ""
+              }
+              appStateDao.create(appState)
+            }
+          }
         }
       } catch {
         case ex: Exception =>

@@ -173,11 +173,7 @@
                 android:persistent="false"
                 android:summary="@string/ipv6_summary"
                 android:title="@string/ipv6"/>
-        <SwitchPreference
-                android:key="isProxyApps"
-                android:persistent="false"
-                android:summary="@string/proxied_apps_summary"
-                android:title="@string/proxied_apps"/>
+
         <SwitchPreference
                 android:key="isUdpDns"
                 android:persistent="false"
@@ -203,6 +199,12 @@
                 android:persistent="false"
                 android:summary="@string/auto_connect_summary"
                 android:title="@string/auto_connect"/>
+
+        <SwitchPreference
+            android:key="isProxyApps"
+            android:persistent="false"
+            android:summary="@string/proxied_apps_summary"
+            android:title="@string/proxied_apps"/>
 
         <SwitchPreference
                 android:key="tcp_fastopen"

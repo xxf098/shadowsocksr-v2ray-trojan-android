@@ -48,6 +48,7 @@ import java.util.{Timer, TimerTask}
 import android.app.Service
 import android.content.{BroadcastReceiver, Context, Intent, IntentFilter}
 import android.os.{Build, Handler, RemoteCallbackList}
+import android.support.v4.content.ContextCompat
 import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
@@ -184,7 +185,7 @@ trait BaseService extends Service {
   def startRunner(profile: Profile) {
     this.profile = profile
 
-    if (Build.VERSION.SDK_INT >= 26) startForegroundService(new Intent(this, getClass))
+    if (Build.VERSION.SDK_INT >= 26) ContextCompat.startForegroundService(this, new Intent(this, getClass))
     else startService(new Intent(this, getClass))
     TrafficMonitor.reset()
     trafficMonitorThread = new TrafficMonitorThread(getApplicationContext)

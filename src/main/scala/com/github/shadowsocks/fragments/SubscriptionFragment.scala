@@ -69,7 +69,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       } else {
         prefs_edit.putInt(Key.ssrsub_autoupdate, 0)
       }
-      prefs_edit.apply()
+      prefs_edit.commit()
     }): CompoundButton.OnCheckedChangeListener)
 
     val ssusubsList = view.findViewById(R.id.ssrsubList).asInstanceOf[RecyclerView]
@@ -127,7 +127,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       .setPositiveButton(android.R.string.ok, ((_, _) => {
         val url = etAddUrl.getText.toString
         val groupName = etGroupName.getText.toString
-        if(!TextUtils.isEmpty(url)) {
+        if(URLUtil.isHttpsUrl(url) || URLUtil.isHttpUrl(url)) {
           ssrSub match {
             case Some(x) if x.url == url => responseHandler(null, url, groupName)
             case _ => Utils.ThrowableFuture {
@@ -136,7 +136,10 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
                 responseHandler(responseString, url, groupName)
                 None
               }).recover{
-                case e: Exception => Some(getString(R.string.ssrsub_error, e.getMessage))
+                case e: Exception => {
+                  e.printStackTrace()
+                  Some(getString(R.string.ssrsub_error, e.getMessage))
+                }
               }.foreach(result => {
                 handler.post(() => {
                   result.foreach(msg => Toast.makeText(configActivity, msg, Toast.LENGTH_SHORT).show())

@@ -15,7 +15,7 @@ import android.support.v7.app.AlertDialog
 import android.app.ProgressDialog
 import android.content._
 import android.view.View
-import android.webkit.{WebView, WebViewClient}
+import android.webkit.{URLUtil, WebView, WebViewClient}
 import android.widget._
 import android.os.Looper
 import com.github.shadowsocks.ShadowsocksApplication.app
@@ -32,6 +32,9 @@ import java.io.BufferedReader
 import android.text.TextUtils
 import android.util.Log
 import com.github.shadowsocks.Shadowsocks.TAG
+
+import scala.collection.mutable
+import scala.io.Source
 
 object ShadowsocksSettings {
   // Constants
@@ -65,6 +68,7 @@ object ShadowsocksSettings {
   }
 
   def updatePreference(pref: Preference, name: String, profile: Profile) {
+//    val isPerAppProxyEnabled = app.appStateManager.getAppState().map(_.per_app_proxy_enable).getOrElse(false)
     if (profile.isVmess) {
       val v_security = if (TextUtils.isEmpty(profile.v_security)) "auto" else profile.v_security
       name match {
@@ -77,7 +81,7 @@ object ShadowsocksSettings {
         case Key.v_security => updateDropDownPreference(pref, v_security)
         case Key.v_tls => updateDropDownPreference(pref, profile.v_tls)
         case Key.route => updateDropDownPreference(pref, profile.route)
-        case Key.proxyApps => updateSwitchPreference(pref, profile.proxyApps)
+//        case Key.proxyApps => updateSwitchPreference(pref, isPerAppProxyEnabled)
         case Key.udpdns => updateSwitchPreference(pref, profile.udpdns)
         case Key.dns => updateSummaryEditTextPreference(pref, profile.dns)
         case Key.china_dns => updateSummaryEditTextPreference(pref, profile.china_dns)
@@ -106,7 +110,7 @@ object ShadowsocksSettings {
       case Key.obfs => updateDropDownPreference(pref, profile.obfs)
       case Key.obfs_param => updateSummaryEditTextPreference(pref, profile.obfs_param)
       case Key.route => updateDropDownPreference(pref, profile.route)
-      case Key.proxyApps => updateSwitchPreference(pref, profile.proxyApps)
+//      case Key.proxyApps => updateSwitchPreference(pref, isPerAppProxyEnabled)
       case Key.udpdns => updateSwitchPreference(pref, profile.udpdns)
       case Key.dns => updateSummaryEditTextPreference(pref, profile.dns)
       case Key.china_dns => updateSummaryEditTextPreference(pref, profile.china_dns)
@@ -287,28 +291,33 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
           app.profileManager.updateAllProfile_String(Key.route, value.asInstanceOf[String])
           return true
         }
-        val AclUrlEditText = new EditText(activity);
-        AclUrlEditText.setText(getPreferenceManager.getSharedPreferences.getString(Key.aclurl, ""));
-        new AlertDialog.Builder(activity)
-          .setTitle(getString(R.string.acl_file))
-          .setPositiveButton(android.R.string.ok, ((_, _) => {
-            if(AclUrlEditText.getText().toString() == "")
-            {
-              setProfile(profile)
-            }
-            else
-            {
-              getPreferenceManager.getSharedPreferences.edit.putString(Key.aclurl, AclUrlEditText.getText().toString()).commit()
-              downloadAcl(AclUrlEditText.getText().toString())
-              app.profileManager.updateAllProfile_String(Key.route, value.asInstanceOf[String])
-            }
-          }): DialogInterface.OnClickListener)
-          .setNegativeButton(android.R.string.no,  ((_, _) => {
-            setProfile(profile)
-          }): DialogInterface.OnClickListener)
-          .setView(AclUrlEditText)
-          .create()
-          .show()
+        showACLDialog( url =>{
+          getPreferenceManager.getSharedPreferences.edit.putString(Key.aclurl, url).commit()
+          downloadAcl(url)
+          app.profileManager.updateAllProfile_String(Key.route, value.asInstanceOf[String])
+        })
+//        val AclUrlEditText = new EditText(activity);
+//        AclUrlEditText.setText(getPreferenceManager.getSharedPreferences.getString(Key.aclurl, ""));
+//        new AlertDialog.Builder(activity)
+//          .setTitle(getString(R.string.acl_file))
+//          .setPositiveButton(android.R.string.ok, ((_, _) => {
+//            if(AclUrlEditText.getText().toString() == "")
+//            {
+//              setProfile(profile)
+//            }
+//            else
+//            {
+//              getPreferenceManager.getSharedPreferences.edit.putString(Key.aclurl, AclUrlEditText.getText().toString()).commit()
+//              downloadAcl(AclUrlEditText.getText().toString())
+//              app.profileManager.updateAllProfile_String(Key.route, value.asInstanceOf[String])
+//            }
+//          }): DialogInterface.OnClickListener)
+//          .setNegativeButton(android.R.string.no,  ((_, _) => {
+//            setProfile(profile)
+//          }): DialogInterface.OnClickListener)
+//          .setView(AclUrlEditText)
+//          .create()
+//          .show()
       }
       else {
         app.profileManager.updateAllProfile_String(Key.route, value.asInstanceOf[String])
@@ -317,14 +326,17 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     })
 
     isProxyApps = findPreference(Key.proxyApps).asInstanceOf[SwitchPreference]
+    isProxyApps.setChecked(app.appStateManager.getPerAppProxyEnable())
     isProxyApps.setOnPreferenceClickListener(_ => {
       startActivity(new Intent(activity, classOf[AppManager]))
       isProxyApps.setChecked(true)
-      false
+      true
     })
-    isProxyApps.setOnPreferenceChangeListener((_, value) => {
-      app.profileManager.updateAllProfile_Boolean("proxyApps", value.asInstanceOf[Boolean])
-    })
+//    isProxyApps.setOnPreferenceChangeListener((_, value) => {
+//      app.appStateManager.savePerAppProxyEnabled(true)
+//      true
+//            app.profileManager.updateAllProfile_Boolean("proxyApps", value.asInstanceOf[Boolean])
+//    })
 
     findPreference(Key.udpdns).setOnPreferenceChangeListener((_, value) => {
       app.profileManager.updateAllProfile_Boolean("udpdns", value.asInstanceOf[Boolean])
@@ -383,22 +395,27 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
 
     findPreference("aclupdate").setOnPreferenceClickListener((preference: Preference) => {
       app.track(TAG, "aclupdate")
-      val url = getPreferenceManager.getSharedPreferences.getString(Key.aclurl, "");
-      if(url == "")
-      {
-        new AlertDialog.Builder(activity)
-          .setTitle(getString(R.string.aclupdate).formatLocal(Locale.ENGLISH, BuildConfig.VERSION_NAME))
-          .setNegativeButton(getString(android.R.string.ok), null)
-          .setMessage(R.string.aclupdate_url_notset)
-          .create()
-          .show()
-      }
-      else
-      {
-        val routeMode = Option(getPreferenceManager.getSharedPreferences.getString(Key.route, null))
+      showACLDialog(url => {
+        val routeMode = app.currentProfile.map(profile => profile.route)
           .filter(mode => Route.ACL4SSR_ROUTES.contains(mode))
         downloadAcl(url, routeMode)
-      }
+      })
+//      val url = getPreferenceManager.getSharedPreferences.getString(Key.aclurl, "");
+//      if(url == "")
+//      {
+//        new AlertDialog.Builder(activity)
+//          .setTitle(getString(R.string.aclupdate).formatLocal(Locale.ENGLISH, BuildConfig.VERSION_NAME))
+//          .setNegativeButton(getString(android.R.string.ok), null)
+//          .setMessage(R.string.aclupdate_url_notset)
+//          .create()
+//          .show()
+//      }
+//      else
+//      {
+//        val routeMode = Option(getPreferenceManager.getSharedPreferences.getString(Key.route, null))
+//          .filter(mode => Route.ACL4SSR_ROUTES.contains(mode))
+//        downloadAcl(url, routeMode)
+//      }
       true
     })
 
@@ -437,7 +454,13 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       val et_logcat = new EditText(activity)
 
       try {
-        val logcat = Runtime.getRuntime().exec("logcat -d")
+        val lst = new mutable.LinkedHashSet[String]()
+        lst.add("logcat")
+        lst.add("-d")
+        lst.add("-v")
+        lst.add("time")
+        lst.add("com.xxf098.ssrray")
+        val logcat = Runtime.getRuntime.exec(lst.toArray)
         val br = new BufferedReader(new InputStreamReader(logcat.getInputStream()))
         var line = ""
         line = br.readLine()
@@ -540,6 +563,23 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     })
   }
 
+  def showACLDialog (onOk: String => Unit): Unit = {
+    val AclUrlEditText = new EditText(activity)
+    AclUrlEditText.setText(getPreferenceManager.getSharedPreferences.getString(Key.aclurl, ""));
+    new AlertDialog.Builder(activity)
+      .setTitle(getString(R.string.acl_file))
+      .setPositiveButton(android.R.string.ok, ((_, _) => {
+        val url = AclUrlEditText.getText.toString
+        if(URLUtil.isHttpsUrl(url) || URLUtil.isHttpUrl(url)) { onOk(url) } else { setProfile(profile) }
+      }): DialogInterface.OnClickListener)
+      .setNegativeButton(android.R.string.no,  ((_, _) => {
+        setProfile(profile)
+      }): DialogInterface.OnClickListener)
+      .setView(AclUrlEditText)
+      .create()
+      .show()
+  }
+
   def downloadAcl(url: String, routeMode: Option[String] = None) {
     val progressDialog = ProgressDialog.show(activity, getString(R.string.aclupdate), getString(R.string.aclupdate_downloading), false, false)
     new Thread {
@@ -548,9 +588,10 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
         try {
           IOUtils.writeString(app.getApplicationInfo.dataDir + '/' + "self.acl", autoClose(
             new URL(url).openConnection().getInputStream())(IOUtils.readString))
+          Log.e(TAG, routeMode.getOrElse("no mode"))
           routeMode.foreach(mode => {
             val filename = s"$mode.acl"
-            val aclURL = s"https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/$filename"
+            val aclURL = s"https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/$filename"
             IOUtils.writeString(app.getApplicationInfo.dataDir + '/' + filename, autoClose(
               new URL(aclURL).openConnection().getInputStream())(IOUtils.readString))
           })
@@ -603,12 +644,15 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
             p
           case None =>
             val default = app.profileManager.createDefault()
+            app.appStateManager.createDefault(default.id)
             app.profileId(default.id)
             default
         }
     }
-
-    isProxyApps.setChecked(profile.proxyApps)
+    val isPerAppProxyEnabled = app.appStateManager.getPerAppProxyEnable()
+    if (isProxyApps.isChecked != isPerAppProxyEnabled) {
+      isProxyApps.setChecked(isPerAppProxyEnabled)
+    }
   }
 
   override def onDestroy {
@@ -657,5 +701,11 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     }
     screen.addPreference(featureCategory)
     screen.addPreference(miscCategory)
+    val routePref = findPreference(Key.route).asInstanceOf[DropDownPreference]
+    val routeEntries = profile match {
+      case x if x.isV2Ray => getResources.getTextArray(R.array.route_entry_v2ray)
+      case _ => getResources.getTextArray(R.array.route_entry)
+    }
+    routePref.setEntries(routeEntries)
   }
 }

@@ -47,4 +47,36 @@
                android:contentDescription="@string/share"
                android:focusable="true"
                android:nextFocusLeft="@+id/ping_single"/>
+<!--    only for run on Android <= 4.4 -->
+    <TextView
+        android:visibility="gone"
+        android:id="@android:id/text2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="@dimen/profile_padding"
+        android:layout_marginEnd="12dp"
+        android:layout_toStartOf="@+id/traffic"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="?android:attr/textColorSecondary"
+        android:layout_alignParentLeft="true"
+        android:layout_marginRight="12dp"
+        android:layout_toLeftOf="@+id/traffic" />
+
+    <TextView
+        android:visibility="gone"
+        android:id="@+id/traffic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="@dimen/profile_padding"
+        android:layout_marginEnd="12dp"
+        android:ellipsize="end"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="?android:attr/textColorSecondary"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="12dp" />
 </LinearLayout>

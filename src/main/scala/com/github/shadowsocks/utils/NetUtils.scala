@@ -27,12 +27,12 @@ object NetUtils {
     result
   }
 
-  def testConnection(url: String): Long = {
+  def testConnection(url: String, timeout: Int = 2): Long = {
     var elapsed = 0L
     val builder = new OkHttpClient.Builder()
-      .connectTimeout(3, TimeUnit.SECONDS)
-      .writeTimeout(3, TimeUnit.SECONDS)
-      .readTimeout(3, TimeUnit.SECONDS)
+      .connectTimeout(timeout, TimeUnit.SECONDS)
+      .writeTimeout(timeout, TimeUnit.SECONDS)
+      .readTimeout(timeout, TimeUnit.SECONDS)
     val client = builder.build()
     val request = new Request.Builder()
       .url(url).removeHeader("Host").addHeader("Host", "www.google.com")

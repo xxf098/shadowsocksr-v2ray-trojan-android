@@ -214,8 +214,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
     def onBindViewHolder(vh: ProfileViewHolder, i: Int) = vh.bind(profiles(i))
 
-    def onCreateViewHolder(vg: ViewGroup, i: Int) =
-      new ProfileViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_profiles_item1, vg, false))
+    def onCreateViewHolder(vg: ViewGroup, i: Int) ={
+      val layoutId = if (Build.VERSION.SDK_INT >= 21) R.layout.layout_profiles_item1 else R.layout.layout_profiles_item
+      new ProfileViewHolder(LayoutInflater.from(vg.getContext).inflate(layoutId, vg, false))
+    }
 
     def add(item: Profile) {
       undoManager.flush
@@ -851,15 +853,16 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   }
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
-      if (requestCode == 0) {
-          if (resultCode == Activity.RESULT_OK) {
-            val contents = data.getStringExtra("SCAN_RESULT")
-            createProfilesFromText(contents)
-          }
-          if(resultCode == Activity.RESULT_CANCELED){
-            Toast.makeText(this, "Fail to Scan QRCode", Toast.LENGTH_SHORT)
-          }
+    if (requestCode == 0) {
+      if (resultCode == Activity.RESULT_OK) {
+        val contents = data.getStringExtra("SCAN_RESULT")
+        createProfilesFromText(contents)
       }
+      if (resultCode == Activity.RESULT_CANCELED) {
+        Toast.makeText(this, "Fail to Scan QRCode", Toast.LENGTH_SHORT)
+      }
+      return
+    }
     if (resultCode != Activity.RESULT_OK) return
     requestCode match {
       case REQUEST_CREATE_DOCUMENT => {
@@ -916,6 +919,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           }
         }
       }
+      case _ =>
     }
   }
 

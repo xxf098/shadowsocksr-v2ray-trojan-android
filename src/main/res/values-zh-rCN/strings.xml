@@ -36,6 +36,7 @@
   <string name="proxied_apps">分应用代理</string>
   <string name="proxied_apps_summary">为应用程序分别设置代理，在 4.x 下需要启用 NAT 模式</string>
   <string name="on">开</string>
+  <string name="per_app_proxy">分应用代理</string>
   <string name="bypass_apps">绕行模式</string>
   <string name="bypass_apps_summary">启用该选项，以使所选应用程序的流量不经过代理</string>
   <string name="auto_connect">自动连接</string>
@@ -83,6 +84,8 @@
   <string name="share_message_nfc_disabled">扫描二维码\nAndroid Beam 被禁用</string>
   <string name="turn_on_nfc">打开 NFC &amp; Android Beam</string>
   <string name="add_profile">添加配置文件</string>
+  <string name="action_select_all">全选</string>
+  <string name="action_select_proxy_app">自动选中需代理应用</string>
   <string name="edit">编辑</string>
 
   <string name="nat">NAT 模式 (仅限调试)</string>
@@ -145,6 +148,15 @@
     <item>ACL4SSR BackCN BanAD</item>
     <item>ACL4SSR NoBanAD</item>
     <item>自定义 ACL 文件</item>
+  </string-array>
+
+  <string-array name="route_entry_v2ray">
+    <item>全局</item>
+    <item>绕过局域网地址</item>
+    <item>绕过中国大陆地址</item>
+    <item>绕过局域网及中国大陆地址</item>
+    <item>仅代理中国大陆无法访问的地址</item>
+    <item>仅代理中国大陆地址</item>
   </string-array>
 
   <string name="acl_file">ACL 文件 URL</string>
@@ -223,8 +235,10 @@
   <!-- status -->
   <string name="sent">发送:</string>
   <string name="received">接收:</string>
+  <string name="allgroups" translatable="false">全部群组</string>
 
-  <!--  V2Ray -->
+
+    <!--  V2Ray -->
   <string name="v_pref_id">用户ID</string>
   <string name="v_pref_alterid">额外ID</string>
   <string name="v_pref_security">加密方式</string>

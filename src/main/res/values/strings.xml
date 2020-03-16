@@ -77,6 +77,14 @@
     <item>ACL4SSR NoBanAD</item>
     <item>Customize ACL File</item>
   </string-array>
+  <string-array name="route_entry_v2ray">
+    <item>All</item>
+    <item>Bypass LAN</item>
+    <item>Bypass China</item>
+    <item>Bypass LAN &amp; China</item>
+    <item>GFW List</item>
+    <item>China List</item>
+  </string-array>
   <string name="acl_file">ACL File URL</string>
   <string name="aclupdate">ACL Update</string>
   <string name="aclupdate_summary">Update Your ACL file</string>
@@ -87,6 +95,7 @@
   <string name="proxied_apps">Per-App Proxy</string>
   <string name="proxied_apps_summary">Set proxy for selected apps, requires NAT mode under Android 4.x</string>
   <string name="on">On</string>
+  <string name="per_app_proxy">Per-App Proxy</string>
   <string name="bypass_apps">Bypass Mode</string>
   <string name="bypass_apps_summary">Enable this option to bypass selected apps</string>
   <string name="auto_connect">Auto Connect</string>
@@ -166,6 +175,8 @@
   <string name="action_add_v2ray_config">Import from V2Ray Config</string>
   <string name="action_save_v2ray_config">Save</string>
   <string name="action_clear_v2ray_config">Clear</string>
+  <string name="action_select_all">Select all</string>
+  <string name="action_select_proxy_app">Auto select proxy app</string>
   <string name="edit">Edit</string>
 
 

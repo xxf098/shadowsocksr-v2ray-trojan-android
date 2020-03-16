@@ -17,7 +17,7 @@ object AclSyncJob {
   final val TAG = "AclSyncJob"
 
   def schedule(route: String) = new JobRequest.Builder(AclSyncJob.TAG + ':' + route)
-    .setExecutionWindow(1, TimeUnit.DAYS.toMillis(28))
+    .setExecutionWindow(1, TimeUnit.DAYS.toMillis(5))
     .setRequirementsEnforced(true)
     .setRequiredNetworkType(JobRequest.NetworkType.UNMETERED)
     .setRequiresCharging(true)
@@ -31,7 +31,7 @@ class AclSyncJob(route: String) extends Job {
     try {
       val aclUrl = route match {
         case x if Route.DEFAULT_ROUTES.contains(x) => Some(s"https://raw.githubusercontent.com/xxf098/shadowsocksr-v2ray-android/xxf098/master/src/main/assets/acl/$filename")
-        case x if Route.ACL4SSR_ROUTES.contains(x) => Some(s"https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/$filename")
+        case x if Route.ACL4SSR_ROUTES.contains(x) => Some(s"https://cdn.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/$filename")
         case _ => None
       }
       aclUrl.foreach(url => {

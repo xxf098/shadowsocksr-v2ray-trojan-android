@@ -74,7 +74,10 @@
             android:maxLines="1"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:attr/textColorSecondary"
-            tools:text="Address"/>
+            tools:text="Address"
+            android:layout_alignParentLeft="true"
+            android:layout_marginRight="12dp"
+            android:layout_toLeftOf="@+id/traffic" />
 
         <TextView
             android:id="@+id/traffic"
@@ -87,7 +90,9 @@
             android:ellipsize="end"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:attr/textColorSecondary"
-            tools:text="@string/traffic"/>
+            tools:text="@string/traffic"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="12dp" />
     </RelativeLayout>
 
 </LinearLayout>

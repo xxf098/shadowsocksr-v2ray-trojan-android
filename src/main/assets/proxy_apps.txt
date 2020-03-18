@@ -83,6 +83,7 @@ com.google.android.gsf
 com.google.android.gsf.login
 com.google.android.ims
 com.google.android.inputmethod.latin
+com.google.android.inputmethod.pinyin
 com.google.android.instantapps.supervisor
 com.google.android.keep
 com.google.android.music

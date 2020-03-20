@@ -38,7 +38,7 @@ public abstract class Tun2socks
 
     public static native long testConfigLatency(final byte[] p0, final String p1) throws Exception;
 
-    public static native long testVmessLatency(final Vmess p0, final String p1) throws Exception;
+    public static native long testVmessLatency(final Vmess p0, final String p1, final long p2) throws Exception;
 
     static {
         Seq.touch();

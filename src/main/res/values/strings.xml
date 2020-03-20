@@ -221,7 +221,7 @@
   <string name="ssrsub_edit">Edit URL</string>
   <string name="ssrsub_ok">Save and Update</string>
   <string name="ssrsub_list">Item List</string>
-  <string name="ssrsub_error">Error: URL invaild or internet unavailable.</string>
+  <string name="ssrsub_error">Subscription Error: %s</string>
   <string name="ssrsub_progres">Processing...</string>
   <string name="ssrsub_progres_text">Please wait...</string>
   <string name="ssrsub_toast_start">Updating subscriptions...</string>

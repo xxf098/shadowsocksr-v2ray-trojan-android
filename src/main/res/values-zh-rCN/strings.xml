@@ -214,7 +214,7 @@
   <string name="ssrsub_edit">编辑订阅地址</string>
   <string name="ssrsub_ok">确定并升级</string>
   <string name="ssrsub_list">订阅列表</string>
-  <string name="ssrsub_error">地址不正确或网络不可用。</string>
+  <string name="ssrsub_error">订阅失败: %s</string>
   <string name="ssrsub_progres">处理中</string>
   <string name="ssrsub_progres_text">请稍候</string>
   <string name="ssrsub_toast_start">开始更新订阅。</string>

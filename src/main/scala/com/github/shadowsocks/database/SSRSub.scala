@@ -60,7 +60,7 @@ object SSRSub {
      val builder = new OkHttpClient.Builder()
        .connectTimeout(5, TimeUnit.SECONDS)
        .writeTimeout(5, TimeUnit.SECONDS)
-       .readTimeout(15, TimeUnit.SECONDS)
+       .readTimeout(12, TimeUnit.SECONDS)
     val client = builder.build()
     val request = new Request.Builder()
       .url(url)

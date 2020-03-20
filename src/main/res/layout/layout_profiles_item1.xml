@@ -39,7 +39,7 @@
             android:layout_gravity="top"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:focusable="true"
-            android:padding="12dp"
+            android:padding="6dp"
             android:contentDescription="@string/ping"
             app:srcCompat="@drawable/ic_click"/>
 
@@ -52,7 +52,7 @@
             android:contentDescription="@string/share"
             android:focusable="true"
             android:nextFocusLeft="@+id/container"
-            android:padding="12dp"
+            android:padding="6dp"
             app:srcCompat="@drawable/ic_social_share"/>
     </LinearLayout>
 
@@ -67,7 +67,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
-            android:layout_marginBottom="@dimen/profile_padding"
+            android:layout_marginBottom="4dp"
             android:layout_marginEnd="12dp"
             android:layout_toStartOf="@+id/traffic"
             android:ellipsize="end"
@@ -85,7 +85,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_gravity="bottom"
-            android:layout_marginBottom="@dimen/profile_padding"
+            android:layout_marginBottom="4dp"
             android:layout_marginEnd="12dp"
             android:ellipsize="end"
             android:textAppearance="?android:attr/textAppearanceSmall"

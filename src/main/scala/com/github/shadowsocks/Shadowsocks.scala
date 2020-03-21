@@ -433,6 +433,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   private def updateCurrentProfile(): Boolean = {
     // when subscription updated and the VPN has already connected then do nothing
     if (preferences.profile != null &&
+      app.profileId != preferences.profile.id &&
       serviceStarted &&
       app.profileManager.checkLastExistProfile(preferences.profile) != null) {
       return false

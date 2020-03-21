@@ -1074,20 +1074,20 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             override def run() {
               // Do some background work
               Looper.prepare()
-              val size = 5
+              val size = 4
               val v2rayProfiles = profiles.filter(p => p.isV2Ray).grouped(size).toList
-              v2rayProfiles.zipWithIndex.foreach{case (profiles: List[Profile], index: Int) => {
-                val futures = profiles.zipWithIndex.map{case (p: Profile, i: Int) => {
-                  Future(p.testLatencyThread(8900L + i%size))
+              v2rayProfiles.foreach((profiles: List[Profile]) => {
+                val futures = profiles.map(p =>
+                  Future(p.testLatencyThread(8900L + p.id % size))
                     .map(testResult => {
                       val msg = Message.obtain()
                       msg.obj = s"${profile.name} $testResult"
                       msg.setTarget(showProgresshandler)
                       msg.sendToTarget()
                     })
-                }}
-                Await.ready(Future.sequence(futures), Duration(12, SECONDS))
-              }}
+                )
+                Await.ready(Future.sequence(futures), Duration(16, SECONDS))
+              })
               profiles.zipWithIndex.foreach{case (profile: Profile, index: Int) => {
                 if (isTesting) {
 

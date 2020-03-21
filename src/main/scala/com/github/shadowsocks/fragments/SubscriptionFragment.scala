@@ -138,11 +138,12 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
               }).recover{
                 case e: Exception => {
                   e.printStackTrace()
+                  // select all for route mode and turn on vpn
                   Some(getString(R.string.ssrsub_error, e.getMessage))
                 }
               }.foreach(result => {
                 handler.post(() => {
-                  result.foreach(msg => Toast.makeText(configActivity, msg, Toast.LENGTH_SHORT).show())
+                  result.foreach(msg => Toast.makeText(configActivity, msg, Toast.LENGTH_LONG).show())
                   testProgressDialog.dismiss
                 })
               })

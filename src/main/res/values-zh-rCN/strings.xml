@@ -87,6 +87,8 @@
   <string name="action_select_all">全选</string>
   <string name="action_select_proxy_app">自动选中需代理应用</string>
   <string name="edit">编辑</string>
+  <string name="NEW">新建</string>
+
 
   <string name="nat">NAT 模式 (仅限调试)</string>
   <string name="nat_summary">从 VPN 模式切换为 NAT 模式，需要 ROOT 权限</string>
@@ -178,6 +180,7 @@
   <string name="action_export_file">导出至文件</string>
   <string name="action_import_file">从文件导入</string>
   <string name="action_import_qrcode_image">从二维码图片导入</string>
+  <string name="action_import_manually_vmess">手动输入Vmess</string>
   <string name="action_add_v2ray_config">从V2Ray JSON导入</string>
 
   <plurals name="removed">
@@ -214,7 +217,7 @@
   <string name="ssrsub_edit">编辑订阅地址</string>
   <string name="ssrsub_ok">确定并升级</string>
   <string name="ssrsub_list">订阅列表</string>
-  <string name="ssrsub_error">地址不正确或网络不可用。</string>
+  <string name="ssrsub_error">订阅失败: %s</string>
   <string name="ssrsub_progres">处理中</string>
   <string name="ssrsub_progres_text">请稍候</string>
   <string name="ssrsub_toast_start">开始更新订阅。</string>

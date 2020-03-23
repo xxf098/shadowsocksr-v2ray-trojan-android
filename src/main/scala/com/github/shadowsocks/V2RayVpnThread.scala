@@ -27,15 +27,16 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
   var outputStream: FileOutputStream = _
   var buffer = ByteBuffer.allocate(1501)
 
-  var txTotal: Long = 0
-  var rxTotal: Long = 0
+  var txTotal: Long = 0 // download
+  var rxTotal: Long = 0 // upload
   val profile: Profile = vpnService.getProfile()
 
   class Flow(stream: FileOutputStream) extends PacketFlow {
     private val flowOutputStream = stream
     override def writePacket(pkt: Array[Byte]): Unit = {
       flowOutputStream.write(pkt)
-      rxTotal += pkt.length
+//      rxTotal += pkt.length
+      rxTotal += Tun2socks.queryStats("up")
       TrafficMonitor.update(txTotal, rxTotal)
     }
   }
@@ -115,7 +116,8 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
           buffer.limit(n)
           Tun2socks.inputPacket(buffer.array())
           buffer.clear()
-          txTotal += n
+//          txTotal += n
+          txTotal += Tun2socks.queryStats("down")
           TrafficMonitor.update(txTotal, rxTotal)
         }
       } catch {

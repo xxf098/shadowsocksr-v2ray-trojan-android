@@ -166,18 +166,21 @@
   <string name="action_export_file">Export to File</string>
   <string name="action_import_file">Import from File</string>
   <string name="action_import_qrcode_image">Import from QRCode Image</string>
+  <string name="action_import_manually_vmess">Type Manually Vmess</string>
   <string name="action_export_msg">Successfully exported profiles.</string>
   <string name="action_export_err">Failed to export profiles!</string>
   <string name="action_import_msg">Successfully imported profiles.</string>
   <string name="action_import_err">Failed to import profiles!</string>
   <string name="v2ray_config">V2Ray Config</string>
   <string name="config_activity">Config Activity</string>
+  <string name="new_profile_activity">New Profile Activity</string>
   <string name="action_add_v2ray_config">Import from V2Ray Config</string>
   <string name="action_save_v2ray_config">Save</string>
   <string name="action_clear_v2ray_config">Clear</string>
   <string name="action_select_all">Select all</string>
   <string name="action_select_proxy_app">Auto select proxy app</string>
   <string name="edit">Edit</string>
+  <string name="NEW">New</string>
 
 
   <!-- profile -->
@@ -221,7 +224,7 @@
   <string name="ssrsub_edit">Edit URL</string>
   <string name="ssrsub_ok">Save and Update</string>
   <string name="ssrsub_list">Item List</string>
-  <string name="ssrsub_error">Error: URL invaild or internet unavailable.</string>
+  <string name="ssrsub_error">Subscription Error: %s</string>
   <string name="ssrsub_progres">Processing...</string>
   <string name="ssrsub_progres_text">Please wait...</string>
   <string name="ssrsub_toast_start">Updating subscriptions...</string>

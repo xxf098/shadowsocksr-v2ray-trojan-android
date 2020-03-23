@@ -22,6 +22,8 @@ public abstract class Tun2socks
 
     public static native Vmess newVmess(final String p0, final String p1, final String p2, final String p3, final long p4, final long p5, final String p6, final String p7, final String p8, final String p9, final long p10, final String p11);
 
+    public static native long queryStats(final String p0);
+
     public static native void setLocalDNS(final String p0);
 
     public static native boolean setNonblock(final long p0, final boolean p1);
@@ -36,7 +38,7 @@ public abstract class Tun2socks
 
     public static native long testConfigLatency(final byte[] p0, final String p1) throws Exception;
 
-    public static native long testVmessLatency(final Vmess p0, final String p1) throws Exception;
+    public static native long testVmessLatency(final Vmess p0, final String p1, final long p2) throws Exception;
 
     static {
         Seq.touch();

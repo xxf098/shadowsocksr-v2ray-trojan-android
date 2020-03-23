@@ -18,14 +18,14 @@ import scala.collection.mutable.ArrayBuffer
 
 trait ProfileFunctions {
   var profile: Profile = _
-  def getElapsed() : Long
+  def getElapsed(port: Long = 8900) : Long
   def isOK(): Boolean
 }
 
 object SSRAction extends ProfileFunctions {
   // TODO: refactor
   var ssTestProcess: GuardedProcess = _
-  override def getElapsed(): Long = {
+  override def getElapsed(port: Long = 8900): Long = {
     var elapsed = 0L
     try {
       var host = profile.host
@@ -65,7 +65,7 @@ object SSRAction extends ProfileFunctions {
 }
 
 object VmessAction extends ProfileFunctions {
-  override def getElapsed(): Long = {
+  override def getElapsed(port: Long = 8900): Long = {
     if (List("www.google.com", "127.0.0.1", "8.8.8.8", "1.2.3.4").contains(profile.v_add)) {
         throw new IOException(s"Bypass Host ${profile.v_add}")
     }
@@ -74,7 +74,7 @@ object VmessAction extends ProfileFunctions {
       case Some(addr) => vmess.setAdd(addr)
       case None => throw new IOException("Host Not Resolved")
     }
-    Tun2socks.testVmessLatency(vmess, app.getV2rayAssetsPath())
+    Tun2socks.testVmessLatency(vmess, app.getV2rayAssetsPath(), port)
   }
 
   override def isOK(): Boolean = !(TextUtils.isEmpty(profile.v_add) ||
@@ -85,7 +85,7 @@ object VmessAction extends ProfileFunctions {
 }
 
 object V2JSONAction extends ProfileFunctions {
-  override def getElapsed(): Long = {
+  override def getElapsed(port: Long = 8900): Long = {
     if (TextUtils.isEmpty(profile.v_add)) throw new IOException("Server Address Not Found!")
     if (!Utils.isNumeric(profile.v_add)) Utils.resolve(profile.v_add, enableIPv6 = true, hostname = "1.1.1.1") match {
       case Some(addr) => profile.v_add = addr

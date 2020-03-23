@@ -46,6 +46,7 @@ import android.app.TaskStackBuilder
 import android.content._
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
+import android.nfc.Tag
 import android.os.{Bundle, Handler}
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
@@ -198,7 +199,7 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
                 appListView.setVisibility(View.GONE)
                 loadingView.setVisibility(View.VISIBLE)
                 initProxiedApps(apps)
-                reloadApps()
+                reloadAppsWithoutInit()
                 return true
               } catch {
                 case _: IllegalArgumentException =>
@@ -222,7 +223,7 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
       case R.id.select_proxy_app => {
         Utils.ThrowableFuture(autoClose(getAssets.open("proxy_apps.txt"))(in => {
           val defaultProxyApps = scala.io.Source.fromInputStream(in).getLines().toList
-          Log.e("===", s"defaultProxyApps${defaultProxyApps.size}")
+//          Log.e("===", s"defaultProxyApps${defaultProxyApps.size}")
           proxiedApps.clear()
           val appsAdapter = appListView.getAdapter.asInstanceOf[AppsAdapter]
           appsAdapter.packageNames
@@ -231,8 +232,8 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
               if (bypassSwitch.isChecked) index < 0 else index >= 0
             })
             .foreach(proxiedApps.add(_))
-          Log.e("===", s"proxiedApps${proxiedApps.size}")
-          if (!appsLoading.compareAndSet(true, false)) loadAppsAsync(false)
+//          Log.e("===", s"proxiedApps${proxiedApps.size}")
+          reloadAppsWithoutInit()
         }))
         return true
       }
@@ -292,13 +293,14 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
   }
 
   def reloadApps() = if (!appsLoading.compareAndSet(true, false)) loadAppsAsync()
+  def reloadAppsWithoutInit() = if (!appsLoading.compareAndSet(true, false)) loadAppsAsync(false)
   def loadAppsAsync(needInitProxiedApps: Boolean = true) {
     if (!appsLoading.compareAndSet(false, true)) return
     Utils.ThrowableFuture {
       var adapter: AppsAdapter = null
       if (needInitProxiedApps) initProxiedApps(appState.map(_.package_names).getOrElse(""))
       app.appStateManager.savePerAppProxyEnabled(true)
-      Log.e("====", s"proxiedApps.size: ${Option(proxiedApps).map(_.size).getOrElse("")}")
+//      Log.e("====", s"proxiedApps.size: ${Option(proxiedApps).map(_.size).getOrElse("")}")
       do {
         appsLoading.set(true)
         adapter = new AppsAdapter

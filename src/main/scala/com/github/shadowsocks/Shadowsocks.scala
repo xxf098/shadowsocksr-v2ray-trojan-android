@@ -143,7 +143,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
               connectionTestText.setVisibility(View.VISIBLE)
               connectionTestText.setText(getString(R.string.connection_test_pending))
             }
-            checkConnection(2, 3)
+            checkConnection(3, 3)
           case State.STOPPED =>
             fab.setBackgroundTintList(greyTint)
             fabProgressCircle.postDelayed(hideCircle, 1000)
@@ -430,7 +430,14 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     }
   }
 
-  private def updateCurrentProfile() = {
+  private def updateCurrentProfile(): Boolean = {
+    // when subscription updated and the VPN has already connected then do nothing
+    if (preferences.profile != null &&
+      app.profileId != preferences.profile.id &&
+      serviceStarted &&
+      app.profileManager.checkLastExistProfile(preferences.profile) != null) {
+      return false
+    }
     // Check if current profile changed
     if (preferences.profile == null || app.profileId != preferences.profile.id) {
       updatePreferenceScreen(app.currentProfile match {

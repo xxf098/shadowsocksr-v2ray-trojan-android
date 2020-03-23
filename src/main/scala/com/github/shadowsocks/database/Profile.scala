@@ -98,11 +98,14 @@ object Profile {
         }
     }
 
-    def testLatencyThread(): String = {
-      Try(profile.getElapsed())
+    def testLatencyThread(port: Long): String = {
+      Try(profile.getElapsed(port))
         .map(SuccessConnect)
         .recover {
-          case e: Exception => FailureConnect(e.getMessage)
+          case e: Exception => {
+//            e.printStackTrace()
+            FailureConnect(e.getMessage)
+          }
         }.map(result => {
         profile.elapsed = result.data
         app.profileManager.updateProfile(profile)

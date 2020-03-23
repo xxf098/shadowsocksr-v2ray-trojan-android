@@ -54,7 +54,8 @@ import Profile._
 import com.github.shadowsocks.database.VmessAction.profile
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.duration.{Duration, SECONDS}
+import scala.concurrent.{Await, Future}
 
 object ProfileManagerActivity {
   def getProfilesByGroup (groupName: String, is_sort: Boolean): List[Profile] = {
@@ -1039,6 +1040,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       intent.addCategory(Intent.CATEGORY_OPENABLE)
       startActivityForResult(Intent.createChooser(intent, "SSR"), REQUEST_IMPORT_QRCODE_IMAGE)
       true
+//    case R.id.action_import_manually_vmess => {
+//      startActivity(new Intent(this, classOf[NewProfileActivity]))
+//      true
+//    }
     case R.id.action_add_v2ray_config =>
       startActivity(new Intent(this, classOf[ConfigActivity]))
       true
@@ -1073,6 +1078,20 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             override def run() {
               // Do some background work
               Looper.prepare()
+              val size = 4
+              val v2rayProfiles = profiles.filter(p => p.isV2Ray).grouped(size).toList
+              v2rayProfiles.foreach((profiles: List[Profile]) => {
+                val futures = profiles.map(p =>
+                  Future(p.testLatencyThread(8900L + p.id % size))
+                    .map(testResult => {
+                      val msg = Message.obtain()
+                      msg.obj = s"${profile.name} $testResult"
+                      msg.setTarget(showProgresshandler)
+                      msg.sendToTarget()
+                    })
+                )
+                Await.ready(Future.sequence(futures), Duration(16, SECONDS))
+              })
               profiles.zipWithIndex.foreach{case (profile: Profile, index: Int) => {
                 if (isTesting) {
 
@@ -1080,14 +1099,14 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                     isTesting = false
                   }
 
-                 // v2ray
-                  if (profile.isV2Ray) {
-                    val testResult = profile.testLatencyThread()
-                    val msg = Message.obtain()
-                    msg.obj = s"${index+1} ${profile.name} $testResult"
-                    msg.setTarget(showProgresshandler)
-                    msg.sendToTarget()
-                  }
+//                  v2ray
+//                  if (profile.isV2Ray) {
+//                    val testResult = profile.testLatencyThread(8900L)
+//                    val msg = Message.obtain()
+//                    msg.obj = s"${index+1} ${profile.name} $testResult"
+//                    msg.setTarget(showProgresshandler)
+//                    msg.sendToTarget()
+//                  }
 
                   if (!profile.isV2Ray) {
                     // Resolve the server address

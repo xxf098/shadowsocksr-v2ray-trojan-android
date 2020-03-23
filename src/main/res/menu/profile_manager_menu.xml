@@ -29,14 +29,18 @@
                 android:title="@string/action_import_file"
                 android:alphabeticShortcut="i"
                 android:numericShortcut="6"/>
+<!--            <item-->
+<!--                android:id="@+id/action_import_manually_vmess"-->
+<!--                android:title="@string/action_import_manually_vmess"-->
+<!--                android:numericShortcut="7"/>-->
             <item
                 android:id="@+id/action_import_qrcode_image"
                 android:title="@string/action_import_qrcode_image"
-                android:numericShortcut="7"/>
+                android:numericShortcut="8"/>
             <item
                 android:id="@+id/action_add_v2ray_config"
                 android:title="@string/action_add_v2ray_config"
-                android:numericShortcut="7"/>
+                android:numericShortcut="9"/>
         </menu>
     </item>
     <item

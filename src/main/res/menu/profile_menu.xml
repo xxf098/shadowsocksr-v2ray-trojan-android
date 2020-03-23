@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/action_save_v2ray_config"
+    <item android:id="@+id/action_save_profile"
         android:title="@string/action_save_v2ray_config"
         android:alphabeticShortcut="s"
         android:numericShortcut="1"

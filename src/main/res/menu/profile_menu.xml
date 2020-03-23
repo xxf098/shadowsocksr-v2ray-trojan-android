@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/action_save_profile"
+        android:title="@string/action_save_v2ray_config"
+        android:alphabeticShortcut="s"
+        android:numericShortcut="1"
+        android:icon="@drawable/ic_action_done"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/action_clear_v2ray_config"
+        android:title="@string/action_clear_v2ray_config"
+        android:alphabeticShortcut="s"
+        android:numericShortcut="1"
+        app:showAsAction="never"/>
 
 </menu>

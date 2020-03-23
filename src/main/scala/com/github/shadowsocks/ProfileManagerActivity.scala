@@ -1040,6 +1040,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       intent.addCategory(Intent.CATEGORY_OPENABLE)
       startActivityForResult(Intent.createChooser(intent, "SSR"), REQUEST_IMPORT_QRCODE_IMAGE)
       true
+//    case R.id.action_import_manually_vmess => {
+//      startActivity(new Intent(this, classOf[NewProfileActivity]))
+//      true
+//    }
     case R.id.action_add_v2ray_config =>
       startActivity(new Intent(this, classOf[ConfigActivity]))
       true
@@ -1095,9 +1099,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                     isTesting = false
                   }
 
-                 // v2ray
+//                  v2ray
 //                  if (profile.isV2Ray) {
-//                    val testResult = profile.testLatencyThread()
+//                    val testResult = profile.testLatencyThread(8900L)
 //                    val msg = Message.obtain()
 //                    msg.obj = s"${index+1} ${profile.name} $testResult"
 //                    msg.setTarget(showProgresshandler)

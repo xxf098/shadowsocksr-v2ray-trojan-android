@@ -1073,28 +1073,47 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           })
           getWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
+          val testV2rayProfiles = (v2rayProfiles: List[List[Profile]], size: Int) => {
+            v2rayProfiles.foreach((profiles: List[Profile]) => {
+              val futures = profiles.map(p =>{
+                Future(p.testLatencyThread(8900L + p.id % size))
+                  .map(testResult => {
+                    val msg = Message.obtain()
+                    msg.obj = s"${profile.name} $testResult"
+                    msg.setTarget(showProgresshandler)
+                    msg.sendToTarget()
+                  })
+              }
+              )
+              Await.ready(Future.sequence(futures), Duration(15, SECONDS))
+            })
+          }
+
+          val testV2rayJob = (profiles: List[Profile]) => {
+            val size = 4
+            val v2rayProfiles = profiles.filter(p => p.isV2Ray).grouped(size).toList
+            if (v2rayProfiles.isEmpty) return false
+            testV2rayProfiles(v2rayProfiles, size)
+            // retest 0
+//            val zeroProfiles = if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles
+//            else app.profileManager.getAllProfilesByGroup(currentGroupName)
+//            zeroProfiles match {
+//              case Some(x) => {
+//                val zeroV2RayProfiles = x.filter(p => p.elapsed == 0 && p.isV2Ray)
+//                if (zeroV2RayProfiles.nonEmpty && zeroV2RayProfiles.length * 2 < v2rayProfiles.length * size) {
+//                  testV2rayProfiles(zeroV2RayProfiles.grouped(size).toList, size)
+//                }
+//              }
+//              case None =>
+//            }
+          }
+
           // TODO: refactor
           testAsyncJob = new Thread {
             override def run() {
               // Do some background work
               Looper.prepare()
-              val size = 4
-              val v2rayProfiles = profiles.filter(p => p.isV2Ray).grouped(size).toList
-              var index = size
-              v2rayProfiles.foreach((profiles: List[Profile]) => {
-                val futures = profiles.map(p =>{
-                  index = if (index > size * 10) size else index + 1
-                  Future(p.testLatencyThread(8900L + p.id % size + index * size))
-                    .map(testResult => {
-                      val msg = Message.obtain()
-                      msg.obj = s"${profile.name} $testResult"
-                      msg.setTarget(showProgresshandler)
-                      msg.sendToTarget()
-                    })
-                }
-                )
-                Await.ready(Future.sequence(futures), Duration(16, SECONDS))
-              })
+              testV2rayJob(profiles)
               profiles.zipWithIndex.foreach{case (profile: Profile, index: Int) => {
                 if (isTesting) {
 

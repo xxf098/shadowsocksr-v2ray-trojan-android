@@ -1,6 +1,8 @@
 
 package com.github.shadowsocks
 
+import java.util
+
 import android.app.{Activity, TaskStackBuilder}
 import android.content.{ClipData, ClipboardManager, Context, Intent}
 import android.content.pm.{PackageManager, ShortcutManager}
@@ -12,7 +14,7 @@ import android.support.v7.widget.Toolbar
 import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
-import com.google.zxing.Result
+import com.google.zxing.{BarcodeFormat, Result}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.Parser
 import me.dm7.barcodescanner.zxing.ZXingScannerView
@@ -60,6 +62,10 @@ class ScannerActivity extends AppCompatActivity with ZXingScannerView.ResultHand
     toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_material)
     toolbar.setNavigationOnClickListener(_ => navigateUp())
     scannerView = findViewById(R.id.scanner).asInstanceOf[ZXingScannerView]
+    scannerView.setAutoFocus(true)
+    val formats = new util.ArrayList[BarcodeFormat]()
+    formats.add(BarcodeFormat.QR_CODE)
+    scannerView.setFormats(formats)
     if (Build.VERSION.SDK_INT >= 25) getSystemService(classOf[ShortcutManager]).reportShortcutUsed("scan")
   }
 

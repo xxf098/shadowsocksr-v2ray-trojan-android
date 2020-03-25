@@ -506,34 +506,17 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   def qrcodeScan() {
     try {
-        val intent = new Intent("com.google.zxing.client.android.SCAN")
-        intent.putExtra("SCAN_MODE", "QR_CODE_MODE")
-
-        startActivityForResult(intent, 0)
+//        val intent = new Intent("com.google.zxing.client.android.SCAN")
+//        intent.putExtra("SCAN_MODE", "QR_CODE_MODE")
+//
+//        startActivityForResult(intent, 0)
+      startActivity(new Intent(this, classOf[ScannerActivity]))
     } catch {
         case _ : Throwable =>
-            /*val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
-              .setTitle(R.string.scan_qrcode_install_title)
-              .setPositiveButton(android.R.string.yes, ((_, _) => {
-                  val marketUri = Uri.parse("market://details?id=com.google.zxing.client.android")
-                  val marketIntent = new Intent(Intent.ACTION_VIEW, marketUri)
-                  startActivity(marketIntent)
-                }
-              ): DialogInterface.OnClickListener)
-              .setNeutralButton(R.string.scan_qrcode_direct_download_text, ((_, _) => {
-                  val marketUri = Uri.parse("https://breakwa11.github.io/download/BarcodeScanner.apk")
-                  val marketIntent = new Intent(Intent.ACTION_VIEW, marketUri)
-                  startActivity(marketIntent)
-                }
-              ): DialogInterface.OnClickListener)
-              .setNegativeButton(android.R.string.no, ((_, _) => finish()): DialogInterface.OnClickListener)
-              .setMessage(R.string.scan_qrcode_install_text)
-              .create()
-            dialog.show()*/
             if (menu != null) {
               menu.toggle(false)
             }
-            startActivity(new Intent(this, classOf[ScannerActivity]))
+//            startActivity(new Intent(this, classOf[ScannerActivity]))
     }
   }
 
@@ -1090,22 +1073,23 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           }
 
           val testV2rayJob = (profiles: List[Profile]) => {
-            val size = 4
-            val v2rayProfiles = profiles.filter(p => p.isV2Ray).grouped(size).toList
-            if (v2rayProfiles.isEmpty) return false
-            testV2rayProfiles(v2rayProfiles, size)
-            // retest 0
-//            val zeroProfiles = if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles
-//            else app.profileManager.getAllProfilesByGroup(currentGroupName)
-//            zeroProfiles match {
-//              case Some(x) => {
-//                val zeroV2RayProfiles = x.filter(p => p.elapsed == 0 && p.isV2Ray)
-//                if (zeroV2RayProfiles.nonEmpty && zeroV2RayProfiles.length * 2 < v2rayProfiles.length * size) {
-//                  testV2rayProfiles(zeroV2RayProfiles.grouped(size).toList, size)
-//                }
-//              }
-//              case None =>
-//            }
+            val v2rayProfiles = profiles.filter(p => p.isV2Ray)
+            if (v2rayProfiles.nonEmpty) {
+              val size = 4
+              testV2rayProfiles(v2rayProfiles.grouped(size).toList, size)
+              // retest 0
+              //            val zeroProfiles = if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles
+              //            else app.profileManager.getAllProfilesByGroup(currentGroupName)
+              //            zeroProfiles match {
+              //              case Some(x) => {
+              //                val zeroV2RayProfiles = x.filter(p => p.elapsed == 0 && p.isV2Ray)
+              //                if (zeroV2RayProfiles.nonEmpty && zeroV2RayProfiles.length * 2 < v2rayProfiles.length * size) {
+              //                  testV2rayProfiles(zeroV2RayProfiles.grouped(size).toList, size)
+              //                }
+              //              }
+              //              case None =>
+              //            }
+            }
           }
 
           // TODO: refactor

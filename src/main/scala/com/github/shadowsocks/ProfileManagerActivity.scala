@@ -1227,7 +1227,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val intent = new Intent(Action.SORT)
       startActivity(intent)
       true
-    case R.id.batch_delete =>
+    case R.id.action_batch_delete =>
       val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
         .setTitle(getString(R.string.batch_delete))
         .setPositiveButton(android.R.string.yes, ((_, _) =>{
@@ -1242,6 +1242,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         .create()
       dialog.show()
       true
+    case R.id.action_settings => {
+      startActivity(new Intent(this, classOf[SettingActivity]))
+      true
+    }
     case _ => false
   }
 }

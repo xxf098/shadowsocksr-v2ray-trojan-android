@@ -61,8 +61,11 @@
                 android:numericShortcut="5"/>
         </menu>
     </item>
-    <item android:id="@+id/batch_delete"
+    <item android:id="@+id/action_batch_delete"
         android:title="@string/batch_delete"
         android:alphabeticShortcut="g"
+        app:showAsAction="never"/>
+    <item android:id="@+id/action_settings"
+        android:title="@string/settings"
         app:showAsAction="never"/>
 </menu>

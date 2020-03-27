@@ -33,6 +33,7 @@ class SettingActivity extends AppCompatActivity{
 
   private final val TAG = "SettingActivity"
   var toolbar: Toolbar = _
+  var isPreferenceChanged = false
 
   override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
@@ -49,7 +50,8 @@ class SettingActivity extends AppCompatActivity{
 
   override def onBackPressed(): Unit = {
     val intent = new Intent(this, classOf[ProfileManagerActivity])
-    setResult(Activity.RESULT_OK, intent)
+    val resultCode = if (isPreferenceChanged) Activity.RESULT_OK else Activity.RESULT_CANCELED
+    setResult(resultCode, intent)
     finish()
   }
 }

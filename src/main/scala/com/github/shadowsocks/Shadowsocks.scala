@@ -339,7 +339,13 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     title.setFocusable(true)
     title.setGravity(0x10)
     title.getLayoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
-    title.setOnClickListener(_ => startActivity(new Intent(this, classOf[ProfileManagerActivity])))
+    title.setOnClickListener(_ => {
+      val intent = new Intent(this, classOf[ProfileManagerActivity])
+      if (app.settings.getString(Key.SORT_METHOD, "default") == "elapsed") {
+        intent.setAction(Action.SORT)
+      }
+      startActivity(intent)
+    })
     val typedArray = obtainStyledAttributes(Array(R.attr.selectableItemBackgroundBorderless))
     title.setBackgroundResource(typedArray.getResourceId(0, 0))
     typedArray.recycle

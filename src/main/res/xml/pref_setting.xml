@@ -21,6 +21,10 @@
             android:summary="@string/summary_pref_hide_server"
             android:title="@string/title_pref_hide_server" />
 
+        <CheckBoxPreference
+            android:key="pref_auto_update_subscription"
+            android:summary="Auto Update Subscription"
+            android:title="@string/ssrsub_autoupdate_enable" />
     </PreferenceCategory>
 
 

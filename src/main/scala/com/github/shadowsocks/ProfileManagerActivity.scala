@@ -226,6 +226,13 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       new ProfileViewHolder(LayoutInflater.from(vg.getContext).inflate(layoutId, vg, false))
     }
 
+    def resetProfiles (): Unit = {
+      profilesAdapter.hideServer = app.settings.getBoolean(Key.HIDE_SERVER, false)
+      is_sort = app.settings.getString(Key.SORT_METHOD, "default") == "elapsed"
+      profiles.clear()
+      profiles ++= getProfilesByGroup(currentGroupName)
+    }
+
     def add(item: Profile) {
       undoManager.flush
       val pos = getItemCount
@@ -886,7 +893,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         profilesAdapter.notifyDataSetChanged()
       }
       case REQUEST_SETTINGS => {
-        profilesAdapter.hideServer = app.settings.getBoolean(Key.HIDE_SERVER, false)
+        profilesAdapter.resetProfiles()
         profilesAdapter.notifyDataSetChanged()
       }
       case REQUEST_IMPORT_QRCODE_IMAGE => {

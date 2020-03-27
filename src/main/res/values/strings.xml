@@ -279,4 +279,19 @@
   <string name="v_pref_path">Path</string>
   <string name="v_pref_host">Host</string>
 
+<!--  settings -->
+  <string name="title_pref_sort_method">Sort Method</string>
+  <string-array name="sort_method_entry">
+    <item>By Default</item>
+    <item>By Elapsed</item>
+  </string-array>
+
+  <string-array name="sort_method_value">
+    <item>default</item>
+    <item>elapsed</item>
+  </string-array>
+
+  <string name="title_pref_hide_server">Hide Server</string>
+  <string name="summary_pref_hide_server">Hide Server Address for Privacy</string>
+
 </resources>

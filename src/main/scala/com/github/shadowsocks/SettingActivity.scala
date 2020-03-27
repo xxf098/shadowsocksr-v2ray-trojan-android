@@ -45,6 +45,11 @@ class SettingActivity extends AppCompatActivity{
     toolbar.setTitle(R.string.settings)
     toolbar.setNavigationIcon(R.drawable.ic_navigation_close)
     toolbar.setNavigationOnClickListener(_ => onBackPressed())
+  }
 
+  override def onBackPressed(): Unit = {
+    val intent = new Intent(this, classOf[ProfileManagerActivity])
+    setResult(Activity.RESULT_OK, intent)
+    finish()
   }
 }

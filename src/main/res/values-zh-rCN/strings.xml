@@ -248,4 +248,13 @@
   <string name="v_pref_path">路径</string>
   <string name="v_pref_host">伪装域名</string>
 
+  <string name="title_pref_sort_method">排序方式</string>
+  <string-array name="sort_method_entry">
+    <item>默认</item>
+    <item>延迟</item>
+  </string-array>
+
+  <string name="title_pref_hide_server">隐藏地址</string>
+  <string name="summary_pref_hide_server">隐藏配置列表的服务器地址</string>
+
 </resources>

@@ -78,6 +78,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     with View.OnClickListener with View.OnKeyListener {
 
     var item: Profile = _
+    var hideServer = false
 //    private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
     // profile name
     private val text1 = itemView.findViewById(android.R.id.text1).asInstanceOf[TextView]
@@ -164,7 +165,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       handler.post(() => {
         text1.setText(item.name)
         val serverAddress = if(item.isV2Ray) item.v_add else item.host
-        text2.setText(serverAddress)
+        text2.setText(if (hideServer) "" else serverAddress )
         tvTraffic.setText(trafficStatus)
       })
     }
@@ -201,6 +202,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   // TODO: update adapter
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
     var profiles = new ArrayBuffer[Profile]
+    var hideServer = false
     profiles ++= getProfilesByGroup(currentGroupName)
 
     def onGroupChange(groupName: String): Unit = {
@@ -213,10 +215,14 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
     def getItemCount = profiles.length
 
-    def onBindViewHolder(vh: ProfileViewHolder, i: Int) = vh.bind(profiles(i))
+    def onBindViewHolder(vh: ProfileViewHolder, i: Int) = {
+      vh.hideServer = hideServer
+      vh.bind(profiles(i))
+    }
 
     def onCreateViewHolder(vg: ViewGroup, i: Int) ={
       val layoutId = if (Build.VERSION.SDK_INT >= 21) R.layout.layout_profiles_item1 else R.layout.layout_profiles_item
+      hideServer = app.settings.getBoolean(Key.HIDE_SERVER, false)
       new ProfileViewHolder(LayoutInflater.from(vg.getContext).inflate(layoutId, vg, false))
     }
 
@@ -351,6 +357,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   private final val REQUEST_IMPORT_PROFILES = 41
   private final val REQUEST_IMPORT_QRCODE_IMAGE = 42
   private final val REQUEST_CONFIG_RESULT = 43
+  private final val REQUEST_SETTINGS = 44
   private final val TAG = "ProfileManagerActivity"
   private var currentGroupName: String = _
 
@@ -878,6 +885,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         initGroupSpinner(groupName)
         profilesAdapter.notifyDataSetChanged()
       }
+      case REQUEST_SETTINGS => {
+        profilesAdapter.hideServer = app.settings.getBoolean(Key.HIDE_SERVER, false)
+        profilesAdapter.notifyDataSetChanged()
+      }
       case REQUEST_IMPORT_QRCODE_IMAGE => {
         val uri = data.getData
         val bitmap = MediaStore.Images.Media.getBitmap(getContentResolver, uri)
@@ -1243,7 +1254,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       dialog.show()
       true
     case R.id.action_settings => {
-      startActivity(new Intent(this, classOf[SettingActivity]))
+      startActivityForResult(new Intent(this, classOf[SettingActivity]), REQUEST_SETTINGS)
       true
     }
     case _ => false

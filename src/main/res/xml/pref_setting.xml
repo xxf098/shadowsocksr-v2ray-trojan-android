@@ -23,7 +23,7 @@
 
         <CheckBoxPreference
             android:key="pref_auto_update_subscription"
-            android:summary="Auto Update Subscription"
+            android:summary="@string/summary_ssrsub_autoupdate_enable"
             android:title="@string/ssrsub_autoupdate_enable" />
     </PreferenceCategory>
 

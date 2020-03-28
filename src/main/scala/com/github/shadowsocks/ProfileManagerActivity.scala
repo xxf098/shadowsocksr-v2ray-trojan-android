@@ -1093,20 +1093,19 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           val testV2rayJob = (profiles: List[Profile]) => {
             val v2rayProfiles = profiles.filter(p => p.isV2Ray)
             if (v2rayProfiles.nonEmpty) {
-              val size = 4
-              testV2rayProfiles(v2rayProfiles.grouped(size).toList, size)
+              testV2rayProfiles(v2rayProfiles.grouped(4).toList, 4)
               // retest 0
-              //            val zeroProfiles = if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles
-              //            else app.profileManager.getAllProfilesByGroup(currentGroupName)
-              //            zeroProfiles match {
-              //              case Some(x) => {
-              //                val zeroV2RayProfiles = x.filter(p => p.elapsed == 0 && p.isV2Ray)
-              //                if (zeroV2RayProfiles.nonEmpty && zeroV2RayProfiles.length * 2 < v2rayProfiles.length * size) {
-              //                  testV2rayProfiles(zeroV2RayProfiles.grouped(size).toList, size)
-              //                }
-              //              }
-              //              case None =>
-              //            }
+              val zeroProfiles = if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles
+              else app.profileManager.getAllProfilesByGroup(currentGroupName)
+              zeroProfiles match {
+                case Some(x) => {
+                  val zeroV2RayProfiles = x.filter(p => p.elapsed == 0 && p.isV2Ray)
+                  if (zeroV2RayProfiles.nonEmpty && zeroV2RayProfiles.length * 2 < v2rayProfiles.length * 4) {
+                    testV2rayProfiles(zeroV2RayProfiles.grouped(1).toList, 1)
+                  }
+                }
+                case None =>
+              }
             }
           }
 

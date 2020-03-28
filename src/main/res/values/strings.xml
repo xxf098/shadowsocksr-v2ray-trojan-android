@@ -294,4 +294,7 @@
   <string name="title_pref_hide_server">Hide Server</string>
   <string name="summary_pref_hide_server">Hide Server Address for Privacy</string>
 
+  <string name="summary_ssrsub_autoupdate_enable">Auto Update Subscriptions</string>
+
+
 </resources>

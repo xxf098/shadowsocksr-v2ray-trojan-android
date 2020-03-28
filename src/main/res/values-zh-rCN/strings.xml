@@ -257,4 +257,7 @@
   <string name="title_pref_hide_server">隐藏地址</string>
   <string name="summary_pref_hide_server">隐藏配置列表的服务器地址</string>
 
+  <string name="summary_ssrsub_autoupdate_enable">自动更新订阅</string>
+
+
 </resources>

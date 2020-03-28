@@ -428,21 +428,22 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       case (profile, i) if profile.id == app.profileId => i
     }.getOrElse(-1))
     undoManager = new UndoSnackbarManager[Profile](profilesList, profilesAdapter.undo, profilesAdapter.commit)
-    if (is_sort == false) {
-      new ItemTouchHelper(new SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
-        ItemTouchHelper.START) {
+//    if (is_sort == false) {
+    new ItemTouchHelper(new SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
+      ItemTouchHelper.START) {
 
-        def onSwiped(viewHolder: ViewHolder, direction: Int) = {
-          val index = viewHolder.getAdapterPosition
-          profilesAdapter.remove(index)
-          undoManager.remove(index, viewHolder.asInstanceOf[ProfileViewHolder].item)
-        }
-        def onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder) = {
-          profilesAdapter.move(viewHolder.getAdapterPosition, target.getAdapterPosition)
-          true
-        }
-      }).attachToRecyclerView(profilesList)
-    }
+      def onSwiped(viewHolder: ViewHolder, direction: Int) = {
+        val index = viewHolder.getAdapterPosition
+        profilesAdapter.remove(index)
+        undoManager.remove(index, viewHolder.asInstanceOf[ProfileViewHolder].item)
+      }
+
+      def onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder) = {
+        profilesAdapter.move(viewHolder.getAdapterPosition, target.getAdapterPosition)
+        true
+      }
+    }).attachToRecyclerView(profilesList)
+//    }
 
     attachService(new IShadowsocksServiceCallback.Stub {
       def stateChanged(state: Int, profileName: String, msg: String) = () // ignore

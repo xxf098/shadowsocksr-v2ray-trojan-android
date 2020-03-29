@@ -425,66 +425,6 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       downloadAcl(getPreferenceManager.getSharedPreferences.getString(Key.aclurl, ""))
     }
 
-    findPreference("about").setOnPreferenceClickListener((preference: Preference) => {
-      app.track(TAG, "about")
-      val web = new WebView(activity)
-      web.loadUrl("file:///android_asset/pages/about.html")
-      web.setWebViewClient(new WebViewClient() {
-        override def shouldOverrideUrlLoading(view: WebView, url: String): Boolean = {
-          try {
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-          } catch {
-            case _: android.content.ActivityNotFoundException => // Ignore
-          }
-          true
-        }
-      })
-
-      new AlertDialog.Builder(activity)
-        .setTitle(getString(R.string.about_title).formatLocal(Locale.ENGLISH, BuildConfig.VERSION_NAME))
-        .setNegativeButton(getString(android.R.string.ok), null)
-        .setView(web)
-        .create()
-        .show()
-      true
-    })
-
-    findPreference("logcat").setOnPreferenceClickListener((preference: Preference) => {
-      app.track(TAG, "logcat")
-
-      val et_logcat = new EditText(activity)
-
-      try {
-        val lst = new mutable.LinkedHashSet[String]()
-        lst.add("logcat")
-        lst.add("-d")
-        lst.add("-v")
-        lst.add("time")
-        lst.add("com.xxf098.ssrray")
-        val logcat = Runtime.getRuntime.exec(lst.toArray)
-        val br = new BufferedReader(new InputStreamReader(logcat.getInputStream()))
-        var line = ""
-        line = br.readLine()
-        while (line != null) {
-            et_logcat.append(line)
-            et_logcat.append("\n")
-            line = br.readLine()
-        }
-        br.close()
-      } catch {
-        case e: Exception =>  // unknown failures, probably shouldn't retry
-          e.printStackTrace()
-      }
-
-      new AlertDialog.Builder(activity)
-        .setTitle("Logcat")
-        .setNegativeButton(getString(android.R.string.ok), null)
-        .setView(et_logcat)
-        .create()
-        .show()
-      true
-    })
-
     findPreference(Key.frontproxy).setOnPreferenceClickListener((preference: Preference) => {
       val prefs = getPreferenceManager.getSharedPreferences()
 

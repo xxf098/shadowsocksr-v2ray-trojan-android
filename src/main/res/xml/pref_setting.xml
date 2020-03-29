@@ -27,5 +27,12 @@
             android:title="@string/ssrsub_autoupdate_enable" />
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/misc_cat"
+        android:key="@string/miscPreferenceGroup">
+        <Preference android:key="logcat" android:title="Logcat"/>
+
+        <Preference android:key="about" android:title="@string/about"/>
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

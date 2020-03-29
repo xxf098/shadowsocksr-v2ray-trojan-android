@@ -51,6 +51,11 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
       true
     })
 
+    findPreference("ignore_battery_optimization").setOnPreferenceClickListener((preference: Preference) => {
+      activity.ignoreBatteryOptimization()
+      true
+    })
+
     aboutPref.setSummary(s"v${BuildConfig.VERSION_NAME}")
     aboutPref.setOnPreferenceClickListener(_ => {
       val web = new WebView(activity)

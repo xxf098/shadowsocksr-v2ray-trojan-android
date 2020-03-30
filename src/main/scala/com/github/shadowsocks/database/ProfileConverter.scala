@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit
 import android.text.TextUtils
 import com.github.shadowsocks.{GuardedProcess, R}
 import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.database.VmessAction.profile
 import com.github.shadowsocks.utils.{ConfigUtils, ExeNative, NetUtils, TcpFastOpen, Utils}
 import okhttp3.{OkHttpClient, Request}
 import tun2socks.{Tun2socks, Vmess}
@@ -20,6 +21,11 @@ trait ProfileFunctions {
   var profile: Profile = _
   def getElapsed(port: Long = 8900) : Long
   def isOK(): Boolean
+  def checkBypassAddr(): Unit = {
+    if (List("www.google.com", "127.0.0.1", "8.8.8.8", "1.2.3.4", "1.1.1.1").contains(profile.v_add)) {
+      throw new IOException(s"Bypass Host ${profile.v_add}")
+    }
+  }
 }
 
 object SSRAction extends ProfileFunctions {
@@ -28,6 +34,7 @@ object SSRAction extends ProfileFunctions {
   override def getElapsed(port: Long = 8900): Long = {
     var elapsed = 0L
     try {
+      checkBypassAddr()
       var host = profile.host
       if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = true) match {
         case Some(addr) => host = addr
@@ -66,9 +73,7 @@ object SSRAction extends ProfileFunctions {
 
 object VmessAction extends ProfileFunctions {
   override def getElapsed(port: Long = 8900): Long = {
-    if (List("www.google.com", "127.0.0.1", "8.8.8.8", "1.2.3.4").contains(profile.v_add)) {
-        throw new IOException(s"Bypass Host ${profile.v_add}")
-    }
+    checkBypassAddr()
     val vmess: Vmess = profile
     if (!Utils.isNumeric(vmess.getAdd)) Utils.resolve(profile.v_add, enableIPv6 = true) match {
       case Some(addr) => vmess.setAdd(addr)

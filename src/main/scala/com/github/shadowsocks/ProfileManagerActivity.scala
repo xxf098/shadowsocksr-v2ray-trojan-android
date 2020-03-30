@@ -78,6 +78,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     with View.OnClickListener with View.OnKeyListener {
 
     var item: Profile = _
+    var hideServer = false
 //    private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
     // profile name
     private val text1 = itemView.findViewById(android.R.id.text1).asInstanceOf[TextView]
@@ -164,7 +165,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       handler.post(() => {
         text1.setText(item.name)
         val serverAddress = if(item.isV2Ray) item.v_add else item.host
-        text2.setText(serverAddress)
+        text2.setText(if (hideServer) "" else serverAddress )
         tvTraffic.setText(trafficStatus)
       })
     }
@@ -201,6 +202,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   // TODO: update adapter
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
     var profiles = new ArrayBuffer[Profile]
+    var hideServer = false
     profiles ++= getProfilesByGroup(currentGroupName)
 
     def onGroupChange(groupName: String): Unit = {
@@ -213,11 +215,22 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
     def getItemCount = profiles.length
 
-    def onBindViewHolder(vh: ProfileViewHolder, i: Int) = vh.bind(profiles(i))
+    def onBindViewHolder(vh: ProfileViewHolder, i: Int) = {
+      vh.hideServer = hideServer
+      vh.bind(profiles(i))
+    }
 
     def onCreateViewHolder(vg: ViewGroup, i: Int) ={
       val layoutId = if (Build.VERSION.SDK_INT >= 21) R.layout.layout_profiles_item1 else R.layout.layout_profiles_item
+      hideServer = app.settings.getBoolean(Key.HIDE_SERVER, false)
       new ProfileViewHolder(LayoutInflater.from(vg.getContext).inflate(layoutId, vg, false))
+    }
+
+    def resetProfiles (): Unit = {
+      profilesAdapter.hideServer = app.settings.getBoolean(Key.HIDE_SERVER, false)
+      is_sort = app.settings.getString(Key.SORT_METHOD, "default") == "elapsed"
+      profiles.clear()
+      profiles ++= getProfilesByGroup(currentGroupName)
     }
 
     def add(item: Profile) {
@@ -351,6 +364,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   private final val REQUEST_IMPORT_PROFILES = 41
   private final val REQUEST_IMPORT_QRCODE_IMAGE = 42
   private final val REQUEST_CONFIG_RESULT = 43
+  private final val REQUEST_SETTINGS = 44
   private final val TAG = "ProfileManagerActivity"
   private var currentGroupName: String = _
 
@@ -414,21 +428,22 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       case (profile, i) if profile.id == app.profileId => i
     }.getOrElse(-1))
     undoManager = new UndoSnackbarManager[Profile](profilesList, profilesAdapter.undo, profilesAdapter.commit)
-    if (is_sort == false) {
-      new ItemTouchHelper(new SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
-        ItemTouchHelper.START) {
+//    if (is_sort == false) {
+    new ItemTouchHelper(new SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
+      ItemTouchHelper.START) {
 
-        def onSwiped(viewHolder: ViewHolder, direction: Int) = {
-          val index = viewHolder.getAdapterPosition
-          profilesAdapter.remove(index)
-          undoManager.remove(index, viewHolder.asInstanceOf[ProfileViewHolder].item)
-        }
-        def onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder) = {
-          profilesAdapter.move(viewHolder.getAdapterPosition, target.getAdapterPosition)
-          true
-        }
-      }).attachToRecyclerView(profilesList)
-    }
+      def onSwiped(viewHolder: ViewHolder, direction: Int) = {
+        val index = viewHolder.getAdapterPosition
+        profilesAdapter.remove(index)
+        undoManager.remove(index, viewHolder.asInstanceOf[ProfileViewHolder].item)
+      }
+
+      def onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder) = {
+        profilesAdapter.move(viewHolder.getAdapterPosition, target.getAdapterPosition)
+        true
+      }
+    }).attachToRecyclerView(profilesList)
+//    }
 
     attachService(new IShadowsocksServiceCallback.Stub {
       def stateChanged(state: Int, profileName: String, msg: String) = () // ignore
@@ -506,34 +521,17 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   def qrcodeScan() {
     try {
-        val intent = new Intent("com.google.zxing.client.android.SCAN")
-        intent.putExtra("SCAN_MODE", "QR_CODE_MODE")
-
-        startActivityForResult(intent, 0)
+//        val intent = new Intent("com.google.zxing.client.android.SCAN")
+//        intent.putExtra("SCAN_MODE", "QR_CODE_MODE")
+//
+//        startActivityForResult(intent, 0)
+      startActivity(new Intent(this, classOf[ScannerActivity]))
     } catch {
         case _ : Throwable =>
-            /*val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
-              .setTitle(R.string.scan_qrcode_install_title)
-              .setPositiveButton(android.R.string.yes, ((_, _) => {
-                  val marketUri = Uri.parse("market://details?id=com.google.zxing.client.android")
-                  val marketIntent = new Intent(Intent.ACTION_VIEW, marketUri)
-                  startActivity(marketIntent)
-                }
-              ): DialogInterface.OnClickListener)
-              .setNeutralButton(R.string.scan_qrcode_direct_download_text, ((_, _) => {
-                  val marketUri = Uri.parse("https://breakwa11.github.io/download/BarcodeScanner.apk")
-                  val marketIntent = new Intent(Intent.ACTION_VIEW, marketUri)
-                  startActivity(marketIntent)
-                }
-              ): DialogInterface.OnClickListener)
-              .setNegativeButton(android.R.string.no, ((_, _) => finish()): DialogInterface.OnClickListener)
-              .setMessage(R.string.scan_qrcode_install_text)
-              .create()
-            dialog.show()*/
             if (menu != null) {
               menu.toggle(false)
             }
-            startActivity(new Intent(this, classOf[ScannerActivity]))
+//            startActivity(new Intent(this, classOf[ScannerActivity]))
     }
   }
 
@@ -895,6 +893,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         initGroupSpinner(groupName)
         profilesAdapter.notifyDataSetChanged()
       }
+      case REQUEST_SETTINGS => {
+        profilesAdapter.resetProfiles()
+        profilesAdapter.notifyDataSetChanged()
+      }
       case REQUEST_IMPORT_QRCODE_IMAGE => {
         val uri = data.getData
         val bitmap = MediaStore.Images.Media.getBitmap(getContentResolver, uri)
@@ -1073,25 +1075,47 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           })
           getWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
+          val testV2rayProfiles = (v2rayProfiles: List[List[Profile]], size: Int) => {
+            v2rayProfiles.foreach((profiles: List[Profile]) => {
+              val futures = profiles.map(p =>{
+                Future(p.testLatencyThread(8900L + p.id % size))
+                  .map(testResult => {
+                    val msg = Message.obtain()
+                    msg.obj = s"${profile.name} $testResult"
+                    msg.setTarget(showProgresshandler)
+                    msg.sendToTarget()
+                  })
+              }
+              )
+              Await.ready(Future.sequence(futures), Duration(15, SECONDS))
+            })
+          }
+
+          val testV2rayJob = (profiles: List[Profile]) => {
+            val v2rayProfiles = profiles.filter(p => p.isV2Ray)
+            if (v2rayProfiles.nonEmpty) {
+              testV2rayProfiles(v2rayProfiles.grouped(4).toList, 4)
+              // retest 0
+              val zeroProfiles = if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles
+              else app.profileManager.getAllProfilesByGroup(currentGroupName)
+              zeroProfiles match {
+                case Some(x) => {
+                  val zeroV2RayProfiles = x.filter(p => p.elapsed == 0 && p.isV2Ray)
+                  if (zeroV2RayProfiles.nonEmpty && zeroV2RayProfiles.length * 2 < v2rayProfiles.length * 4) {
+                    testV2rayProfiles(zeroV2RayProfiles.grouped(1).toList, 1)
+                  }
+                }
+                case None =>
+              }
+            }
+          }
+
           // TODO: refactor
           testAsyncJob = new Thread {
             override def run() {
               // Do some background work
               Looper.prepare()
-              val size = 4
-              val v2rayProfiles = profiles.filter(p => p.isV2Ray).grouped(size).toList
-              v2rayProfiles.foreach((profiles: List[Profile]) => {
-                val futures = profiles.map(p =>
-                  Future(p.testLatencyThread(8900L + p.id % size))
-                    .map(testResult => {
-                      val msg = Message.obtain()
-                      msg.obj = s"${profile.name} $testResult"
-                      msg.setTarget(showProgresshandler)
-                      msg.sendToTarget()
-                    })
-                )
-                Await.ready(Future.sequence(futures), Duration(16, SECONDS))
-              })
+              testV2rayJob(profiles)
               profiles.zipWithIndex.foreach{case (profile: Profile, index: Int) => {
                 if (isTesting) {
 
@@ -1221,7 +1245,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val intent = new Intent(Action.SORT)
       startActivity(intent)
       true
-    case R.id.batch_delete =>
+    case R.id.action_batch_delete =>
       val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
         .setTitle(getString(R.string.batch_delete))
         .setPositiveButton(android.R.string.yes, ((_, _) =>{
@@ -1236,6 +1260,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         .create()
       dialog.show()
       true
+    case R.id.action_settings => {
+      startActivityForResult(new Intent(this, classOf[SettingActivity]), REQUEST_SETTINGS)
+      true
+    }
     case _ => false
   }
 }

@@ -4,7 +4,7 @@ import java.util.Locale
 
 import android.app.{KeyguardManager, NotificationManager, PendingIntent}
 import android.content.{BroadcastReceiver, Context, Intent, IntentFilter}
-import android.os.{Build, PowerManager}
+import android.os.{Build, PowerManager, SystemClock}
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationCompat.BigTextStyle
 import android.support.v4.content.ContextCompat
@@ -34,7 +34,8 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
   private var callbackRegistered: Boolean = _
 
   private val builder = new NotificationCompat.Builder(service, channel)
-    .setWhen(0)
+    .setWhen(java.lang.System.currentTimeMillis())
+    .setShowWhen(true)
     .setColor(ContextCompat.getColor(service, R.color.material_accent_500))
     .setTicker(service.getString(R.string.forward_success))
     .setContentTitle(profileName)

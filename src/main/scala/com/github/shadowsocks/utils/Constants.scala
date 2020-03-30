@@ -340,6 +340,11 @@ object Key {
   val FRAGMENT_SUBSCRIPTION = "FRAGMENT_SUBSCRIPTION"
   val FRAGMENT_NEW_PROFILE = "FRAGMENT_NEW_PROFILE"
   val SUBSCRIPTION_GROUP_NAME = "SUBSCRIPTION_GROUP_NAME"
+
+  // settings
+  val SORT_METHOD = "pref_sort_method"
+  val HIDE_SERVER = "pref_hide_server"
+  val AUTO_UPDATE_SUBSCRIPTION = "pref_auto_update_subscription"
 }
 
 object State {

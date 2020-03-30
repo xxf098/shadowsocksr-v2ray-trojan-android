@@ -339,7 +339,13 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     title.setFocusable(true)
     title.setGravity(0x10)
     title.getLayoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
-    title.setOnClickListener(_ => startActivity(new Intent(this, classOf[ProfileManagerActivity])))
+    title.setOnClickListener(_ => {
+      val intent = new Intent(this, classOf[ProfileManagerActivity])
+      if (app.settings.getString(Key.SORT_METHOD, "default") == "elapsed") {
+        intent.setAction(Action.SORT)
+      }
+      startActivity(intent)
+    })
     val typedArray = obtainStyledAttributes(Array(R.attr.selectableItemBackgroundBorderless))
     title.setBackgroundResource(typedArray.getResourceId(0, 0))
     typedArray.recycle
@@ -434,9 +440,11 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     // when subscription updated and the VPN has already connected then do nothing
     if (preferences.profile != null &&
       app.profileId != preferences.profile.id &&
-      serviceStarted &&
-      app.profileManager.checkLastExistProfile(preferences.profile) != null) {
-      return false
+      serviceStarted) {
+      val existedProfile = app.profileManager.checkLastExistProfile(preferences.profile)
+      if (existedProfile != null && existedProfile.id == app.profileId) {
+        return false
+      }
     }
     // Check if current profile changed
     if (preferences.profile == null || app.profileId != preferences.profile.id) {

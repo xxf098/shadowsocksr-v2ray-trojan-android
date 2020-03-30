@@ -48,7 +48,7 @@ object SSRAction extends ProfileFunctions {
       })
       val cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.SS_LOCAL)
         , "-t", "600"
-        , "-L", "www.google.com:80"
+        , "-L", "www.gstatic.com:80"
         , "-c", app.getApplicationInfo.dataDir + "/ss-local-test.conf")
 
       if (TcpFastOpen.sendEnabled) cmd += "--fast-open"

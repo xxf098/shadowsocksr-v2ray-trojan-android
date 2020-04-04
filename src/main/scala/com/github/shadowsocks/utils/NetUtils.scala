@@ -34,7 +34,7 @@ object NetUtils {
     val dns = new Dns {
       override def lookup(s: String): util.List[InetAddress] = {
         val address = if (!Utils.isNumeric(s)) {
-          Utils.resolve(s, enableIPv6 = true, hostname="223.5.5.5") match {
+          Utils.resolve(s, enableIPv6 = false, hostname="223.5.5.5") match {
             case Some(addr) => InetAddress.getByName(addr)
             case None => throw new IOException("Name Not Resolved")
           }
@@ -51,7 +51,7 @@ object NetUtils {
       .dns(dns)
     val client = builder.build()
     val request = new Request.Builder()
-      .url(url).removeHeader("Host").addHeader("Host", "www.google.com")
+      .url(url).removeHeader("Host").addHeader("Host", "www.gstatic.com")
       .build()
     val response = client.newCall(request).execute()
     val code = response.code()

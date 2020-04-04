@@ -1,13 +1,15 @@
 package com.github.shadowsocks.utils
 
+import java.io.IOException
 import java.lang.System.currentTimeMillis
-import java.net.Socket
+import java.net.{Inet4Address, InetAddress, Socket}
+import java.util
 import java.util.concurrent.TimeUnit
 
 import com.github.shadowsocks.R
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.SSRAction.profile
-import okhttp3.{OkHttpClient, Request}
+import okhttp3.{Dns, OkHttpClient, Request}
 
 import scala.util.{Success, Try}
 
@@ -29,10 +31,24 @@ object NetUtils {
 
   def testConnection(url: String, timeout: Int = 2): Long = {
     var elapsed = 0L
+    val dns = new Dns {
+      override def lookup(s: String): util.List[InetAddress] = {
+        val address = if (!Utils.isNumeric(s)) {
+          Utils.resolve(s, enableIPv6 = true, hostname="223.5.5.5") match {
+            case Some(addr) => InetAddress.getByName(addr)
+            case None => throw new IOException("Name Not Resolved")
+          }
+        } else {
+          InetAddress.getByName(s)
+        }
+        util.Arrays.asList(address)
+      }
+    }
     val builder = new OkHttpClient.Builder()
       .connectTimeout(timeout, TimeUnit.SECONDS)
       .writeTimeout(timeout, TimeUnit.SECONDS)
       .readTimeout(timeout, TimeUnit.SECONDS)
+      .dns(dns)
     val client = builder.build()
     val request = new Request.Builder()
       .url(url).removeHeader("Host").addHeader("Host", "www.google.com")

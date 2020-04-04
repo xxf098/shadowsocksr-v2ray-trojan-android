@@ -291,7 +291,11 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       getString(R.string.connection_test_available, elapsed: java.lang.Long)
     }
       .recover{
-        case _ => getString(R.string.connection_test_fail)
+        case e => {
+//          e.printStackTrace()
+//          Log.e(TAG, e.getMessage)
+          getString(R.string.connection_test_fail)
+        }
       }
       .filter(testCount == id && app.isVpnEnabled && serviceStarted && !TextUtils.isEmpty(_))
       .foreach(result => {

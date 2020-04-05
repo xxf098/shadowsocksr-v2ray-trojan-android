@@ -345,6 +345,7 @@ object Key {
   val SORT_METHOD = "pref_sort_method"
   val HIDE_SERVER = "pref_hide_server"
   val AUTO_UPDATE_SUBSCRIPTION = "pref_auto_update_subscription"
+  val AUTO_TEST_CONNECTIVITY = "pref_auto_test_connectivity"
 }
 
 object State {

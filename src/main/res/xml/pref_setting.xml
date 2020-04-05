@@ -17,14 +17,19 @@
             android:title="@string/title_pref_sort_method" />
 
         <CheckBoxPreference
+            android:key="pref_auto_update_subscription"
+            android:summary="@string/summary_ssrsub_autoupdate_enable"
+            android:title="@string/ssrsub_autoupdate_enable" />
+        <CheckBoxPreference
+            android:key="pref_auto_test_connectivity"
+            android:summary="@string/summary_auto_test_connectivity"
+            android:title="@string/title_auto_test_connectivity" />
+
+        <CheckBoxPreference
             android:key="pref_hide_server"
             android:summary="@string/summary_pref_hide_server"
             android:title="@string/title_pref_hide_server" />
 
-        <CheckBoxPreference
-            android:key="pref_auto_update_subscription"
-            android:summary="@string/summary_ssrsub_autoupdate_enable"
-            android:title="@string/ssrsub_autoupdate_enable" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/misc_cat"

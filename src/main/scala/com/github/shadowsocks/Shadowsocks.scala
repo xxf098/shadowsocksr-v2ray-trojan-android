@@ -143,7 +143,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
               connectionTestText.setVisibility(View.VISIBLE)
               connectionTestText.setText(getString(R.string.connection_test_pending))
             }
-            checkConnection(3, 3)
+            if (app.settings.getBoolean(Key.AUTO_TEST_CONNECTIVITY, false)) checkConnection(3, 3)
           case State.STOPPED =>
             fab.setBackgroundTintList(greyTint)
             fabProgressCircle.postDelayed(hideCircle, 1000)
@@ -291,7 +291,11 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       getString(R.string.connection_test_available, elapsed: java.lang.Long)
     }
       .recover{
-        case _ => getString(R.string.connection_test_fail)
+        case e => {
+//          e.printStackTrace()
+//          Log.e(TAG, e.getMessage)
+          getString(R.string.connection_test_fail)
+        }
       }
       .filter(testCount == id && app.isVpnEnabled && serviceStarted && !TextUtils.isEmpty(_))
       .foreach(result => {
@@ -309,7 +313,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     Utils.ThrowableFuture {
       if (testCount == id) {
         handler.post(() => {connectionTestText.setText(R.string.connection_test_testing)})
-        val result = Retryer.exponentialBackoff[Long](attempts, 320)
+        val result = Retryer.exponentialBackoff[Long](attempts, 360)
             .on(() => NetUtils.testConnection("http://www.gstatic.com/generate_204", timeout),
               SuccessConnect,
               e => {

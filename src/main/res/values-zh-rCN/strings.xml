@@ -240,6 +240,7 @@
   <string name="received">接收:</string>
   <string name="allgroups" translatable="false">全部群组</string>
 
+  <string name="delete_zero_latency">仅删除0ms</string>
 
     <!--  V2Ray -->
   <string name="v_pref_id">用户ID</string>
@@ -258,6 +259,9 @@
   <string name="summary_pref_hide_server">隐藏配置列表的服务器地址</string>
 
   <string name="summary_ssrsub_autoupdate_enable">自动更新订阅</string>
+
+  <string name="title_auto_test_connection">自动测试</string>
+  <string name="summary_auto_test_connection">启动VPN后自动测试网络连接</string>
 
 
 </resources>

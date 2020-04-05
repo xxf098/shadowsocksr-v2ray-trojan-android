@@ -26,6 +26,7 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
   lazy val sortMethod = findPreference(Key.SORT_METHOD).asInstanceOf[DropDownPreference]
   lazy val hideServer = findPreference(Key.HIDE_SERVER).asInstanceOf[CheckBoxPreference]
   lazy val autoUpdate = findPreference(Key.AUTO_UPDATE_SUBSCRIPTION).asInstanceOf[CheckBoxPreference]
+  lazy val autoTestConnectivity = findPreference(Key.AUTO_TEST_CONNECTIVITY).asInstanceOf[CheckBoxPreference]
   lazy val aboutPref = findPreference("about")
   lazy val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
   private def activity = getActivity.asInstanceOf[SettingActivity]
@@ -48,6 +49,12 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
       val autoUpdateValue = value.asInstanceOf[Boolean]
       prefs.edit().putBoolean(Key.AUTO_UPDATE_SUBSCRIPTION, autoUpdateValue).apply()
       prefs.edit().putInt(Key.ssrsub_autoupdate, if (autoUpdateValue) 1 else 0).apply()
+      true
+    })
+
+    autoTestConnectivity.setOnPreferenceChangeListener((_, value) => {
+      val autoTestEnabled = value.asInstanceOf[Boolean]
+      prefs.edit().putBoolean(Key.AUTO_TEST_CONNECTIVITY, autoTestEnabled).apply()
       true
     })
 

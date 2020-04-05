@@ -21,7 +21,7 @@ import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
 import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.view._
-import android.widget.{Adapter, AdapterView, ArrayAdapter, CheckedTextView, CompoundButton, EditText, ImageView, LinearLayout, Switch, TextView, Toast}
+import android.widget.{Adapter, AdapterView, ArrayAdapter, CheckBox, CheckedTextView, CompoundButton, EditText, ImageView, LinearLayout, Switch, TextView, Toast}
 import android.net.Uri
 import android.support.design.widget.Snackbar
 import com.github.clans.fab.{FloatingActionButton, FloatingActionMenu}
@@ -1132,6 +1132,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 //                    msg.sendToTarget()
 //                  }
 
+                  // start multiple configs
                   if (!profile.isV2Ray) {
                     // Resolve the server address
                     var result = ""
@@ -1154,7 +1155,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
                     val cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.SS_LOCAL)
                       , "-t", "600"
-                      , "-L", "www.google.com:80"
+                      , "-L", "www.gstatic.com:80"
                       , "-c", getApplicationInfo.dataDir + "/ss-local-test.conf")
 
                     if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
@@ -1245,7 +1246,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val intent = new Intent(Action.SORT)
       startActivity(intent)
       true
-    case R.id.action_batch_delete =>
+    case R.id.action_batch_delete => {
       val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
         .setTitle(getString(R.string.batch_delete))
         .setPositiveButton(android.R.string.yes, ((_, _) =>{
@@ -1256,10 +1257,18 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           startActivity(new Intent(getIntent()))
         }): DialogInterface.OnClickListener)
         .setNegativeButton(android.R.string.no, null)
+        .setNeutralButton(R.string.delete_zero_latency,  ((_, _) => {
+          ProfileManagerActivity.getProfilesByGroup(currentGroupName, false)
+            .filter(p => p.elapsed < 1 && p.id != app.profileId )
+            .foreach(profile => app.profileManager.delProfile(profile.id))
+          finish()
+          startActivity(new Intent(getIntent()))
+        }): DialogInterface.OnClickListener)
         .setMessage(getString(R.string.batch_delete_msg, currentGroupName))
         .create()
       dialog.show()
       true
+    }
     case R.id.action_settings => {
       startActivityForResult(new Intent(this, classOf[SettingActivity]), REQUEST_SETTINGS)
       true

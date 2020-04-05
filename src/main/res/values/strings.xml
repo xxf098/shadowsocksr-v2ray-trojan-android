@@ -242,9 +242,6 @@
   <string name="subscription_url">Subscription URL</string>
   <string name="use_default_group_name">Use Default Group Name</string>
 
-
-
-
   <string name="scan_qrcode_install_title">Scanner installation</string>
   <string name="scan_qrcode_install_text">It seems that \'zxing scanner\' is not currently installed. You may click the \'ok\' button below to install it from Play Store, or \'Install Manually\' to manually download the apk and installed it.</string>
   <string name="scan_qrcode_direct_download_text">Install Manually</string>
@@ -272,6 +269,8 @@
   <string name="traffic" translatable="false">%1$s↑\t%2$s↓</string>
   <string name="default_group" translatable="false">Default Group</string>
 
+  <string name="delete_zero_latency">Delete 0ms</string>
+
   <!--  V2Ray -->
   <string name="v_pref_id">ID</string>
   <string name="v_pref_alterid">AlterId</string>
@@ -296,5 +295,7 @@
 
   <string name="summary_ssrsub_autoupdate_enable">Auto Update Subscriptions</string>
 
+  <string name="title_auto_test_connectivity">Auto Test</string>
+  <string name="summary_auto_test_connectivity">Auto Test Connectivity on Start VPN</string>
 
 </resources>

@@ -58,9 +58,9 @@ object SSRSub {
 
    def getSubscriptionResponse (url: String): Try[String] = Try{
      val builder = new OkHttpClient.Builder()
-       .connectTimeout(5, TimeUnit.SECONDS)
-       .writeTimeout(5, TimeUnit.SECONDS)
-       .readTimeout(12, TimeUnit.SECONDS)
+       .connectTimeout(10, TimeUnit.SECONDS)
+       .writeTimeout(10, TimeUnit.SECONDS)
+       .readTimeout(10, TimeUnit.SECONDS)
     val client = builder.build()
     val request = new Request.Builder()
       .url(url)

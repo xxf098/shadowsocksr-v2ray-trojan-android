@@ -41,7 +41,7 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     .setContentTitle(profileName)
     .setContentIntent(PendingIntent.getActivity(service, 0, new Intent(service, classOf[Shadowsocks])
       .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0))
-    .setSmallIcon(R.drawable.ic_stat_shadowsocks)
+    .setSmallIcon(if (channel == "service-v2ray") R.drawable.ic_v else R.drawable.ic_stat_shadowsocks)
     .setCategory(NotificationCompat.CATEGORY_SERVICE)
   val closeAction = new NotificationCompat.Action.Builder(
     R.drawable.ic_navigation_close,

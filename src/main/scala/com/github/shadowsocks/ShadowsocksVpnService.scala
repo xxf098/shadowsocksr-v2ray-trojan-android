@@ -199,8 +199,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         china_dns_port = 53
     }
 
+    // v2ray ipv6
     if (profile.isV2Ray) {
-      if (!Utils.isNumeric(profile.v_add)) Utils.resolve(profile.v_add, enableIPv6 = true, hostname=dns_address) match {
+      if (!Utils.isNumeric(profile.v_add)) Utils.resolve(profile.v_add, enableIPv6 = false, hostname=dns_address) match {
         case Some(addr) => profile.v_add = addr
         case None => throw NameNotResolvedException()
       }

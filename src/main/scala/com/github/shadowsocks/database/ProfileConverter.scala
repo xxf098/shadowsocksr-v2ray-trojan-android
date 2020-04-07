@@ -36,7 +36,7 @@ object SSRAction extends ProfileFunctions {
     try {
       checkBypassAddr()
       var host = profile.host
-      if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = true) match {
+      if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = false) match {
         case Some(addr) => host = addr
         case None => throw new IOException("Host Not Resolved")
       }
@@ -75,7 +75,7 @@ object VmessAction extends ProfileFunctions {
   override def getElapsed(port: Long = 8900): Long = {
     checkBypassAddr()
     val vmess: Vmess = profile
-    if (!Utils.isNumeric(vmess.getAdd)) Utils.resolve(profile.v_add, enableIPv6 = true) match {
+    if (!Utils.isNumeric(vmess.getAdd)) Utils.resolve(profile.v_add, enableIPv6 = false) match {
       case Some(addr) => vmess.setAdd(addr)
       case None => throw new IOException("Host Not Resolved")
     }
@@ -92,7 +92,7 @@ object VmessAction extends ProfileFunctions {
 object V2JSONAction extends ProfileFunctions {
   override def getElapsed(port: Long = 8900): Long = {
     if (TextUtils.isEmpty(profile.v_add)) throw new IOException("Server Address Not Found!")
-    if (!Utils.isNumeric(profile.v_add)) Utils.resolve(profile.v_add, enableIPv6 = true, hostname = "1.1.1.1") match {
+    if (!Utils.isNumeric(profile.v_add)) Utils.resolve(profile.v_add, enableIPv6 = false, hostname = "1.1.1.1") match {
       case Some(addr) => profile.v_add = addr
       case None => throw new IOException("Name Not Resolved")
     }

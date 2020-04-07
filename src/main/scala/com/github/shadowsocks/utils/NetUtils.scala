@@ -36,7 +36,7 @@ object NetUtils {
         val address = if (!Utils.isNumeric(s)) {
           Utils.resolve(s, enableIPv6 = false, hostname="1.1.1.1") match {
             case Some(addr) => InetAddress.getByName(addr)
-            case None => throw new IOException("Name Not Resolved")
+            case None => throw new IOException(s"Name Not Resolved: $s")
           }
         } else {
           InetAddress.getByName(s)

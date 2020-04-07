@@ -56,6 +56,7 @@ import scala.util.Try
 
 object SSRSub {
 
+  // custom dns
    def getSubscriptionResponse (url: String): Try[String] = Try{
      val builder = new OkHttpClient.Builder()
        .connectTimeout(60, TimeUnit.SECONDS)

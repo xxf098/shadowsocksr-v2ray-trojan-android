@@ -873,8 +873,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             case Some(profiles) =>
               val buffer = profiles.mkString("\n").getBytes(Charset.forName("UTF-8"))
               out.write(buffer)
-              Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show
-            case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
+              Toast.makeText(this, R.string.action_export_file_msg, Toast.LENGTH_SHORT).show
+            case _ => Toast.makeText(this, R.string.action_export_file_err, Toast.LENGTH_SHORT).show
           }
         })
       }
@@ -1141,7 +1141,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                     if (List("www.google.com", "127.0.0.1").contains(host)) {
                       throw new IOException(s"Bypass Host $host")
                     }
-                    if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = true) match {
+                    if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = false) match {
                       case Some(addr) => host = addr
                       case None => throw new Exception(s"can't resolve host $host")
                     }

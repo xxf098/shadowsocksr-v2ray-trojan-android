@@ -178,6 +178,8 @@
   <string name="action_import_msg">导入成功</string>
   <string name="action_import_err">导入失败</string>
   <string name="action_export_file">导出至文件</string>
+  <string name="action_export_file_msg">导出至文件成功</string>
+  <string name="action_export_file_err">导出至文件失败</string>
   <string name="action_import_file">从文件导入</string>
   <string name="action_import_qrcode_image">从二维码图片导入</string>
   <string name="action_import_manually_vmess">手动输入Vmess</string>
@@ -239,6 +241,8 @@
   <string name="sent">发送:</string>
   <string name="received">接收:</string>
   <string name="allgroups" translatable="false">全部群组</string>
+  <string name="retry_test">重试...</string>
+
 
   <string name="delete_zero_latency">仅删除0ms</string>
 

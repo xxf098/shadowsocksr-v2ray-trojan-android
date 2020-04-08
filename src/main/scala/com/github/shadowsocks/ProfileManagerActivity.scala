@@ -1138,7 +1138,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                     var result = ""
                     try {
                     var host = profile.host
-                    if (List("www.google.com", "127.0.0.1").contains(host)) {
+                    if (List("www.google.com", "127.0.0.1", "8.8.8.8", "1.2.3.4", "1.1.1.1").contains(host)) {
                       throw new IOException(s"Bypass Host $host")
                     }
                     if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = false) match {

@@ -192,7 +192,10 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
         notifyGroupNameChange(Some(ssrsub.url_group))
         None
       }).recover{
-      case e: Exception => Some(getString(R.string.ssrsub_error, e.getMessage))
+      case e: Exception => {
+        e.printStackTrace()
+        Some(getString(R.string.ssrsub_error, e.getMessage))
+      }
     }.foreach(result => result.foreach(msg =>
       configActivity.runOnUiThread(() => Toast.makeText(getActivity, msg, Toast.LENGTH_SHORT).show)
     ))

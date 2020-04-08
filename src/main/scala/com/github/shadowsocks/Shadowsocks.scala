@@ -314,7 +314,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       if (testCount == id) {
         handler.post(() => {connectionTestText.setText(R.string.connection_test_testing)})
         val result = Retryer.exponentialBackoff[Long](attempts, 360)
-            .on(() => NetUtils.testConnection("http://www.gstatic.com/generate_204", timeout),
+            .on(() => NetUtils.testConnection("http://www.google.com/generate_204", timeout),
               SuccessConnect,
               e => {
                 e.printStackTrace()

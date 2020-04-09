@@ -278,7 +278,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
         .retryOnConnectionFailure(false)
         .build()
       val request = new Request.Builder()
-        .url("http://www.gstatic.com/generate_204")
+        .url("http://www.google.com/generate_204")
         .build()
       if (testCount!=id) return
       client.newCall(request).execute().body().close()

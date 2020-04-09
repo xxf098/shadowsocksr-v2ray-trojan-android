@@ -49,7 +49,7 @@ import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.CloseUtils.autoClose
 import com.github.shadowsocks.utils.Parser
 import com.j256.ormlite.field.{DataType, DatabaseField}
-import okhttp3.{OkHttpClient, Request}
+import okhttp3.{ConnectionPool, OkHttpClient, Request}
 import com.github.shadowsocks.R
 
 import scala.util.Try
@@ -62,7 +62,8 @@ object SSRSub {
        .connectTimeout(60, TimeUnit.SECONDS)
        .writeTimeout(60, TimeUnit.SECONDS)
        .readTimeout(60, TimeUnit.SECONDS)
-    val client = builder.build()
+       .connectionPool(new ConnectionPool(16, 3, TimeUnit.MINUTES))
+     val client = builder.build()
     val request = new Request.Builder()
       .url(url)
       .build()

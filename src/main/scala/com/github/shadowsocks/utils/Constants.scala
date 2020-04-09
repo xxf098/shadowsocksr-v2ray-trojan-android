@@ -67,6 +67,8 @@ object ConfigUtils {
   }
 
   val SHADOWSOCKS = "{\"server\": \"%s\", \"server_port\": %d, \"local_port\": %d, \"password\": \"%s\", \"method\":\"%s\", \"timeout\": %d, \"protocol\": \"%s\", \"obfs\": \"%s\", \"obfs_param\": \"%s\", \"protocol_param\": \"%s\"}"
+  val SHADOWSOCKSR_TEST_SERVER = "{\"id\": \"%s\", \"server\": \"%s\", \"server_port\": %d, \"local_port\": %d, \"password\": \"%s\", \"method\":\"%s\", \"protocol\": \"%s\", \"protocol_param\": \"%s\", \"obfs\": \"%s\", \"obfs_param\": \"%s\", \"group\": \"test\", \"enable\": true}"
+  val SHADOWSOCKSR_TEST_CONF = "{\"servers\": [%s], \"timeout\": %d, \"user\": \"%s\", \"fast_open\": true, \"nameserver\":\"223.5.5.5\", \"tunnel_address\": \"%s\", \"mode\": \"tcp_only\", \"ipv6_first\": false, \"conf_ver\": 2}"
   val REDSOCKS = "base {\n" +
     " log_debug = off;\n" +
     " log_info = off;\n" +

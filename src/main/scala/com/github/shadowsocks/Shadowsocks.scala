@@ -278,7 +278,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
         .retryOnConnectionFailure(false)
         .build()
       val request = new Request.Builder()
-        .url("http://www.google.com/generate_204")
+        .url("http://clients3.google.com/generate_204")
         .build()
       if (testCount!=id) return
       client.newCall(request).execute().body().close()
@@ -313,8 +313,8 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     Utils.ThrowableFuture {
       if (testCount == id) {
         handler.post(() => {connectionTestText.setText(R.string.connection_test_testing)})
-        val result = Retryer.exponentialBackoff[Long](attempts, 360)
-            .on(() => NetUtils.testConnection("http://www.google.com/generate_204", timeout),
+        val result = Retryer.exponentialBackoff[Long](attempts, 350)
+            .on(() => NetUtils.testConnectionStartup("http://clients3.google.com/generate_204", timeout),
               SuccessConnect,
               e => {
                 e.printStackTrace()

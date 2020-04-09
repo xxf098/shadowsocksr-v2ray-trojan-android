@@ -6,10 +6,11 @@ import java.net.{Inet4Address, InetAddress, Socket}
 import java.util
 import java.util.concurrent.TimeUnit
 
+import android.os.SystemClock
 import com.github.shadowsocks.R
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.SSRAction.profile
-import okhttp3.{Dns, OkHttpClient, Request}
+import okhttp3.{ConnectionPool, Dns, OkHttpClient, Request}
 
 import scala.util.{Success, Try}
 
@@ -48,10 +49,12 @@ object NetUtils {
       .connectTimeout(timeout, TimeUnit.SECONDS)
       .writeTimeout(timeout, TimeUnit.SECONDS)
       .readTimeout(timeout, TimeUnit.SECONDS)
+      .connectionPool(new ConnectionPool(16, 3, TimeUnit.MINUTES))
       .dns(dns)
     val client = builder.build()
     val request = new Request.Builder()
-      .url(url).removeHeader("Host").addHeader("Host", "www.gstatic.com")
+      .url(url)
+      .removeHeader("Host").addHeader("Host", "www.gstatic.com")
       .build()
     val response = client.newCall(request).execute()
     val code = response.code()
@@ -65,6 +68,40 @@ object NetUtils {
       }
       else throw new Exception(app.getString(R.string.connection_test_error_status_code, code: Integer))
     } else throw new Exception(app.getString(R.string.connection_test_error_status_code, code: Integer))
+    response.body().close()
+    elapsed
+  }
+
+  def testConnectionStartup (url: String, timeout: Int = 2): Long = {
+    val dns = new Dns {
+      override def lookup(s: String): util.List[InetAddress] = {
+        val address = if (!Utils.isNumeric(s)) {
+          Utils.resolve(s, enableIPv6 = false, hostname="1.1.1.1") match {
+            case Some(addr) => InetAddress.getByName(addr)
+            case None => throw new IOException(s"Name Not Resolved: $s")
+          }
+        } else {
+          InetAddress.getByName(s)
+        }
+        util.Arrays.asList(address)
+      }
+    }
+    val client = new OkHttpClient.Builder()
+      .connectTimeout(timeout, TimeUnit.SECONDS)
+      .writeTimeout(timeout, TimeUnit.SECONDS)
+      .readTimeout(timeout, TimeUnit.SECONDS)
+      .retryOnConnectionFailure(false)
+      .connectionPool(new ConnectionPool(16, 3, TimeUnit.MINUTES))
+      .dns(dns)
+      .build()
+    val request = new Request.Builder().url(url).build()
+    client.newCall(request).execute().body().close()
+    val start = SystemClock.elapsedRealtime()
+    val response = client.newCall(request).execute()
+    val elapsed = SystemClock.elapsedRealtime() - start
+    if (response.code >= 300) {
+      throw new Exception(app.getString(R.string.connection_test_error_status_code, response.code: Integer))
+    }
     response.body().close()
     elapsed
   }

@@ -58,6 +58,7 @@ import scala.concurrent.duration.{Duration, SECONDS}
 import scala.concurrent.{Await, Future}
 
 object ProfileManagerActivity {
+  // profiles count
   def getProfilesByGroup (groupName: String, is_sort: Boolean): List[Profile] = {
     val allGroup = app.getString(R.string.allgroups)
     return {(groupName, is_sort) match {
@@ -1111,13 +1112,21 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           }
 
           // TODO: refactor
+          val builder = new OkHttpClient.Builder()
+            .connectTimeout(3, TimeUnit.SECONDS)
+            .writeTimeout(3, TimeUnit.SECONDS)
+            .readTimeout(3, TimeUnit.SECONDS)
+            .connectionPool(new ConnectionPool(16, 3, TimeUnit.MINUTES))
+
+          val OKClient = builder.build()
           testAsyncJob = new Thread {
             override def run() {
               // Do some background work
               Looper.prepare()
               testV2rayJob(profiles)
               profiles.zipWithIndex.foreach{case (profile: Profile, index: Int) => {
-                if (isTesting) {
+                val groupSize = 3  // why 3
+                if (isTesting && index % groupSize == 0) {
 
                   if (testAsyncJob.isInterrupted()) {
                     isTesting = false
@@ -1137,20 +1146,47 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                     // Resolve the server address
                     var result = ""
                     try {
-                    var host = profile.host
-                    if (List("www.google.com", "127.0.0.1", "8.8.8.8", "1.2.3.4", "1.1.1.1").contains(host)) {
-                      throw new IOException(s"Bypass Host $host")
-                    }
-                    if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = false) match {
-                      case Some(addr) => host = addr
-                      case None => throw new Exception(s"can't resolve host $host")
-                    }
+//                    var host = profile.host
+//                    if (List("www.google.com", "127.0.0.1", "8.8.8.8", "1.2.3.4", "1.1.1.1").contains(host)) {
+//                      throw new IOException(s"Bypass Host $host")
+//                    }
+//                    if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = false) match {
+//                      case Some(addr) => host = addr
+//                      case None => throw new Exception(s"can't resolve host $host")
+//                    }
 
-                    val conf = ConfigUtils
-                      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, host, profile.remotePort, profile.localPort + 2,
-                      ConfigUtils.EscapedJson(profile.password), profile.method, 600, profile.protocol, profile.obfs, ConfigUtils.EscapedJson(profile.obfs_param), ConfigUtils.EscapedJson(profile.protocol_param))
+                    // old format
+//                    val conf = ConfigUtils
+//                      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, host, profile.remotePort, profile.localPort + 2,
+//                      ConfigUtils.EscapedJson(profile.password), profile.method, 600, profile.protocol, profile.obfs, ConfigUtils.EscapedJson(profile.obfs_param), ConfigUtils.EscapedJson(profile.protocol_param))
+//                    Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-test.conf"))(p => {
+//                      p.println(conf)
+//                    })
+
+                    // new format
+                    val confServer = (index until math.min(index + groupSize, profiles.size)).toList
+                      .map(i => {
+                        val profile = profiles(i)
+                        var host = profile.host
+                        if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = false) match {
+                          case Some(addr) => host = addr
+                          case None => host = "127.0.0.1"
+                        }
+                        ConfigUtils.SHADOWSOCKSR_TEST_SERVER.formatLocal(Locale.ENGLISH,
+                          s"${host}${profile.remotePort}", host, profile.remotePort, profile.localPort + 2 + i + index, ConfigUtils.EscapedJson(profile.password), profile.method,
+                          profile.protocol, ConfigUtils.EscapedJson(profile.protocol_param), profile.obfs, ConfigUtils.EscapedJson(profile.obfs_param)
+                        )
+                      }).mkString(",")
+
+//                    val confServer = ConfigUtils.SHADOWSOCKSR_TEST_SERVER.formatLocal(Locale.ENGLISH,
+//                      s"${host}-${profile.remotePort}", host, profile.remotePort, profile.localPort + 2, ConfigUtils.EscapedJson(profile.password), profile.method,
+//                      profile.protocol, ConfigUtils.EscapedJson(profile.protocol_param), profile.obfs, ConfigUtils.EscapedJson(profile.obfs_param)
+//                    )
+                    val confTest = ConfigUtils.SHADOWSOCKSR_TEST_CONF.formatLocal(Locale.ENGLISH,
+                        confServer, 600, "www.gstatic.com:80")
+                    Log.e(TAG, s"index: $index, confTest: $confTest")
                     Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-test.conf"))(p => {
-                      p.println(conf)
+                      p.println(confTest)
                     })
 
                     val cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.SS_LOCAL)
@@ -1167,54 +1203,77 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
                     ssTestProcess = new GuardedProcess(cmd).start()
 
-                    val start = currentTimeMillis
-                    while (start - currentTimeMillis < 5 * 1000 && isPortAvailable(profile.localPort + 2)) {
+                    var start = 0
+                    while (start < 2 && isPortAvailable(profile.localPort + 2 + index)) {
                       try {
+                        start = start + 1
                         Thread.sleep(50)
                       } catch {
                         case e: InterruptedException => isTesting = false
                       }
                     }
 
+                    val futures = (index until math.min(index + groupSize, profiles.size)).toList
+                      .map(i => Future{
+                        val profile = profiles(i)
+                        val host = profile.host
+                        if (List("www.google.com", "127.0.0.1", "8.8.8.8", "1.2.3.4", "1.1.1.1").contains(host)) {
+                          throw new IOException(s"Bypass Host $host")
+                        }
+//                        val builder = new OkHttpClient.Builder()
+//                          .connectTimeout(3, TimeUnit.SECONDS)
+//                          .writeTimeout(3, TimeUnit.SECONDS)
+//                          .readTimeout(3, TimeUnit.SECONDS)
+//                        val OKClient = builder.build()
 
-                    val builder = new OkHttpClient.Builder()
-                      .connectTimeout(3, TimeUnit.SECONDS)
-                      .writeTimeout(3, TimeUnit.SECONDS)
-                      .readTimeout(3, TimeUnit.SECONDS)
+                        val request = new Request.Builder()
+                          .url("http://127.0.0.1:" + (profile.localPort + 2 + i + index) + "/generate_204").removeHeader("Host").addHeader("Host", "www.google.com")
+                          .build();
 
-                    val client = builder.build();
-
-                    val request = new Request.Builder()
-                      .url("http://127.0.0.1:" + (profile.localPort + 2) + "/generate_204").removeHeader("Host").addHeader("Host", "www.google.com")
-                      .build();
-
-                      val response = client.newCall(request).execute()
-                      val code = response.code()
-                      if (code == 204 || code == 200 && response.body().contentLength == 0) {
-                        val start = currentTimeMillis
-                        val response = client.newCall(request).execute()
-                        val elapsed = currentTimeMillis - start
+                        val response = OKClient.newCall(request).execute()
                         val code = response.code()
                         if (code == 204 || code == 200 && response.body().contentLength == 0) {
-                          result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
-                          profile.elapsed = elapsed
-                          app.profileManager.updateProfile(profile)
-                        }
-                        else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
+                          val start = currentTimeMillis
+                          val response = OKClient.newCall(request).execute()
+                          val elapsed = currentTimeMillis - start
+                          val code = response.code()
+                          if (code == 204 || code == 200 && response.body().contentLength == 0) {
+                            result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
+                            profile.elapsed = elapsed
+                            app.profileManager.updateProfile(profile)
+                          }
+                          else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
+                          response.body().close()
+                        } else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
                         response.body().close()
-                      } else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
-                      response.body().close()
+                        result
+                      }.recover{
+                        case e: Exception => {
+                          Log.e(TAG, e.getMessage)
+                          profile.elapsed = 0
+                          app.profileManager.updateProfile(profile)
+                          e.getMessage
+                        }
+                      }.map(testResult => {
+                        val msg = Message.obtain()
+                        msg.obj = s"${profile.name} $testResult"
+                        msg.setTarget(showProgresshandler)
+                        msg.sendToTarget()
+                      }))
+                    Await.ready(Future.sequence(futures), Duration(3 * groupSize + 3, SECONDS))
                     } catch {
                       case e: Exception =>
+                        e.printStackTrace()
+                        Log.e(TAG, e.getMessage)
                         profile.elapsed = 0
                         app.profileManager.updateProfile(profile)
                         result = getString(R.string.connection_test_error, e.getMessage)
                     }
 
-                    val msg = Message.obtain()
-                    msg.obj = s"${index+1} ${profile.name} $result"
-                    msg.setTarget(showProgresshandler)
-                    msg.sendToTarget()
+//                    val msg = Message.obtain()
+//                    msg.obj = s"${index+1} ${profile.name} $result"
+//                    msg.setTarget(showProgresshandler)
+//                    msg.sendToTarget()
 
                     if (ssTestProcess != null) {
                       ssTestProcess.destroy()

@@ -49,7 +49,7 @@ object NetUtils {
       .connectTimeout(timeout, TimeUnit.SECONDS)
       .writeTimeout(timeout, TimeUnit.SECONDS)
       .readTimeout(timeout, TimeUnit.SECONDS)
-      .connectionPool(new ConnectionPool(16, 3, TimeUnit.MINUTES))
+      .retryOnConnectionFailure(false)
       .dns(dns)
     val client = builder.build()
     val request = new Request.Builder()
@@ -86,6 +86,7 @@ object NetUtils {
         util.Arrays.asList(address)
       }
     }
+    // single client
     val client = new OkHttpClient.Builder()
       .connectTimeout(timeout, TimeUnit.SECONDS)
       .writeTimeout(timeout, TimeUnit.SECONDS)

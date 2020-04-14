@@ -1125,8 +1125,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               Looper.prepare()
               val (v2rayProfiles, ssrProfiles) = profiles.partition(_.isV2Ray)
               testV2rayJob(v2rayProfiles)
+              isTesting = ssrProfiles.nonEmpty
               ssrProfiles.zipWithIndex.foreach{case (profile: Profile, index: Int) => {
-                val groupSize = 3  // why 3
+                val groupSize = 3  // why 3 ?
                 if (isTesting && index % groupSize == 0) {
 
                   if (testAsyncJob.isInterrupted()) {
@@ -1165,9 +1166,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 //                    })
 
                     // new format
-                    val confServer = (index until math.min(index + groupSize, profiles.size)).toList
+                    val confServer = (index until math.min(index + groupSize, ssrProfiles.size)).toList
                       .map(i => {
-                        val profile = profiles(i)
+                        val profile = ssrProfiles(i)
                         var host = profile.host
                         if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = false) match {
                           case Some(addr) => host = addr
@@ -1214,9 +1215,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                       }
                     }
 
-                    val futures = (index until math.min(index + groupSize, profiles.size)).toList
+                    val futures = (index until math.min(index + groupSize, ssrProfiles.size)).toList
                       .map(i => Future{
-                        val profile = profiles(i)
+                        val profile = ssrProfiles(i)
                         val host = profile.host
                         if (List("www.google.com", "127.0.0.1", "8.8.8.8", "1.2.3.4", "1.1.1.1").contains(host)) {
                           throw new IOException(s"Bypass Host $host")

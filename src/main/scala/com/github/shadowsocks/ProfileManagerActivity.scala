@@ -1088,6 +1088,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                   })
               }
               )
+              // TODO: Duration
               Await.ready(Future.sequence(futures), Duration(15, SECONDS))
             })
           }
@@ -1127,43 +1128,18 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               testV2rayJob(v2rayProfiles)
               isTesting = ssrProfiles.nonEmpty
               ssrProfiles.zipWithIndex.foreach{case (profile: Profile, index: Int) => {
-                val groupSize = 3  // why 3 ?
+                val groupSize = 4
                 if (isTesting && index % groupSize == 0) {
 
                   if (testAsyncJob.isInterrupted()) {
                     isTesting = false
                   }
 
-//                  v2ray
-//                  if (profile.isV2Ray) {
-//                    val testResult = profile.testLatencyThread(8900L)
-//                    val msg = Message.obtain()
-//                    msg.obj = s"${index+1} ${profile.name} $testResult"
-//                    msg.setTarget(showProgresshandler)
-//                    msg.sendToTarget()
-//                  }
-
                   // start multiple configs
                   if (!profile.isV2Ray) {
                     // Resolve the server address
                     var result = ""
                     try {
-//                    var host = profile.host
-//                    if (List("www.google.com", "127.0.0.1", "8.8.8.8", "1.2.3.4", "1.1.1.1").contains(host)) {
-//                      throw new IOException(s"Bypass Host $host")
-//                    }
-//                    if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = false) match {
-//                      case Some(addr) => host = addr
-//                      case None => throw new Exception(s"can't resolve host $host")
-//                    }
-
-                    // old format
-//                    val conf = ConfigUtils
-//                      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, host, profile.remotePort, profile.localPort + 2,
-//                      ConfigUtils.EscapedJson(profile.password), profile.method, 600, profile.protocol, profile.obfs, ConfigUtils.EscapedJson(profile.obfs_param), ConfigUtils.EscapedJson(profile.protocol_param))
-//                    Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-test.conf"))(p => {
-//                      p.println(conf)
-//                    })
 
                     // new format
                     val confServer = (index until math.min(index + groupSize, ssrProfiles.size)).toList
@@ -1222,11 +1198,6 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                         if (List("www.google.com", "127.0.0.1", "8.8.8.8", "1.2.3.4", "1.1.1.1").contains(host)) {
                           throw new IOException(s"Bypass Host $host")
                         }
-//                        val builder = new OkHttpClient.Builder()
-//                          .connectTimeout(3, TimeUnit.SECONDS)
-//                          .writeTimeout(3, TimeUnit.SECONDS)
-//                          .readTimeout(3, TimeUnit.SECONDS)
-//                        val OKClient = builder.build()
 
                         val request = new Request.Builder()
                           .url("http://127.0.0.1:" + (profile.localPort + 2 + i + index) + "/generate_204").removeHeader("Host").addHeader("Host", "www.google.com")
@@ -1242,6 +1213,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                           if (code == 204 || code == 200 && response.body().contentLength == 0) {
                             result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
                             profile.elapsed = elapsed
+                            // Log.e(TAG, s"host:${profile.host}, elapsed: $elapsed")
                             app.profileManager.updateProfile(profile)
                           }
                           else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
@@ -1251,7 +1223,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                         result
                       }.recover{
                         case e: Exception => {
-                          Log.e(TAG, e.getMessage)
+                          val profile = ssrProfiles(i)
+                          // Log.e(TAG, s"==host: ${profile.host}, ${e.getMessage}")
                           profile.elapsed = 0
                           app.profileManager.updateProfile(profile)
                           e.getMessage
@@ -1262,11 +1235,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                         msg.setTarget(showProgresshandler)
                         msg.sendToTarget()
                       }))
-                    Await.ready(Future.sequence(futures), Duration(3 * groupSize + 3, SECONDS))
+                    Await.ready(Future.sequence(futures), Duration(4 * groupSize + 4, SECONDS))
                     } catch {
                       case e: Exception =>
-                        e.printStackTrace()
-                        Log.e(TAG, e.getMessage)
+                        // Log.e(TAG, s"====${e.getMessage}")
                         profile.elapsed = 0
                         app.profileManager.updateProfile(profile)
                         result = getString(R.string.connection_test_error, e.getMessage)

@@ -1128,7 +1128,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               testV2rayJob(v2rayProfiles)
               isTesting = ssrProfiles.nonEmpty
               ssrProfiles.zipWithIndex.foreach{case (profile: Profile, index: Int) => {
-                val groupSize = 5
+                val groupSize = 4
                 if (isTesting && index % groupSize == 0) {
 
                   if (testAsyncJob.isInterrupted()) {
@@ -1235,7 +1235,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                         msg.setTarget(showProgresshandler)
                         msg.sendToTarget()
                       }))
-                    Await.ready(Future.sequence(futures), Duration(7 * groupSize, SECONDS))
+                    Await.ready(Future.sequence(futures), Duration(6 * groupSize, SECONDS))
                     } catch {
                       case e: Exception =>
                         // Log.e(TAG, s"====${e.getMessage}")

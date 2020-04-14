@@ -1092,8 +1092,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             })
           }
 
-          val testV2rayJob = (profiles: List[Profile]) => {
-            val v2rayProfiles = profiles.filter(p => p.isV2Ray)
+          val testV2rayJob = (v2rayProfiles: List[Profile]) => {
+            // val v2rayProfiles = profiles.filter(p => p.isV2Ray)
             if (v2rayProfiles.nonEmpty) {
               testV2rayProfiles(v2rayProfiles.grouped(4).toList, 4)
               // retest 0
@@ -1123,8 +1123,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             override def run() {
               // Do some background work
               Looper.prepare()
-              testV2rayJob(profiles)
-              profiles.zipWithIndex.foreach{case (profile: Profile, index: Int) => {
+              val (v2rayProfiles, ssrProfiles) = profiles.partition(_.isV2Ray)
+              testV2rayJob(v2rayProfiles)
+              ssrProfiles.zipWithIndex.foreach{case (profile: Profile, index: Int) => {
                 val groupSize = 3  // why 3
                 if (isTesting && index % groupSize == 0) {
 

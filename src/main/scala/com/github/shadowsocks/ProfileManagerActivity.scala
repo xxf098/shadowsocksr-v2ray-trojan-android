@@ -1128,7 +1128,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               testV2rayJob(v2rayProfiles)
               isTesting = ssrProfiles.nonEmpty
               ssrProfiles.zipWithIndex.foreach{case (profile: Profile, index: Int) => {
-                val groupSize = 4
+                val groupSize = 5
                 if (isTesting && index % groupSize == 0) {
 
                   if (testAsyncJob.isInterrupted()) {
@@ -1162,7 +1162,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 //                    )
                     val confTest = ConfigUtils.SHADOWSOCKSR_TEST_CONF.formatLocal(Locale.ENGLISH,
                         confServer, 600, "www.gstatic.com:80")
-                    Log.e(TAG, s"index: $index, confTest: $confTest")
+                    // Log.e(TAG, s"index: $index, confTest: $confTest")
                     Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-test.conf"))(p => {
                       p.println(confTest)
                     })
@@ -1235,7 +1235,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                         msg.setTarget(showProgresshandler)
                         msg.sendToTarget()
                       }))
-                    Await.ready(Future.sequence(futures), Duration(4 * groupSize + 4, SECONDS))
+                    Await.ready(Future.sequence(futures), Duration(7 * groupSize, SECONDS))
                     } catch {
                       case e: Exception =>
                         // Log.e(TAG, s"====${e.getMessage}")

@@ -1098,6 +1098,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           val testV2rayJob = (v2rayProfiles: List[Profile]) => {
             testV2rayProfiles(v2rayProfiles.grouped(4).toList, 4)
             // retest 0
+            // TODO: get profiles from v2rayProfiles
             val zeroProfiles = if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles
             else app.profileManager.getAllProfilesByGroup(currentGroupName)
             zeroProfiles match {
@@ -1232,7 +1233,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               case Some(x) => {
                 val zeroSSRProfiles = x.filter(p => p.elapsed == 0 && !p.isV2Ray)
                 if (zeroSSRProfiles.nonEmpty && zeroSSRProfiles.length * 2 < ssrProfiles.length) {
-                  testSSRProfiles(zeroSSRProfiles.grouped(3).toList, 3)
+                  testSSRProfiles(zeroSSRProfiles.grouped(2).toList, 2)
                 }
               }
               case None =>

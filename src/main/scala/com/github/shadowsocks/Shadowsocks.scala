@@ -143,7 +143,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
               connectionTestText.setVisibility(View.VISIBLE)
               connectionTestText.setText(getString(R.string.connection_test_pending))
             }
-            if (app.settings.getBoolean(Key.AUTO_TEST_CONNECTIVITY, false)) checkConnection(3, 3)
+            if (app.settings.getBoolean(Key.AUTO_TEST_CONNECTIVITY, false)) checkConnection(2, 3)
           case State.STOPPED =>
             fab.setBackgroundTintList(greyTint)
             fabProgressCircle.postDelayed(hideCircle, 1000)
@@ -314,10 +314,10 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       if (testCount == id) {
         handler.post(() => {connectionTestText.setText(R.string.connection_test_testing)})
         val result = Retryer.exponentialBackoff[Long](attempts, 350)
-            .on(() => NetUtils.testConnectionStartup("http://clients3.google.com/generate_204", timeout),
+            .on(i => NetUtils.testConnectionStartup("http://clients3.google.com/generate_204", timeout + i),
               SuccessConnect,
               e => {
-                e.printStackTrace()
+                // e.printStackTrace()
                 handler.post(() => connectionTestText.setText(getString(R.string.retry_test)))
                 FailureConnect(getString(R.string.connection_test_unavailable))
               })

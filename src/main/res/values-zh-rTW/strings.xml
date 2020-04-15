@@ -138,7 +138,22 @@
     <item>略過區域網路及中國大陸</item>
     <item>GFW List</item>
     <item>China List</item>
+    <item>ACL4SSR BanAD</item>
+    <item>ACL4SSR GFWList BanAD</item>
+    <item>ACL4SSR OnlyBanAD</item>
+    <item>ACL4SSR FullGFWList</item>
+    <item>ACL4SSR BackCN BanAD</item>
+    <item>ACL4SSR NoBanAD</item>
     <item>自訂 ACL 檔案</item>
+  </string-array>
+
+  <string-array name="route_entry_v2ray">
+    <item>全部</item>
+    <item>略過區域網路</item>
+    <item>略過中國大陸</item>
+    <item>略過區域網路及中國大陸</item>
+    <item>GFW List</item>
+    <item>China List</item>
   </string-array>
 
   <string name="acl_file">ACL 檔案網址</string>

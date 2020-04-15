@@ -164,6 +164,8 @@
   <string name="action_import">Import from Clipboard</string>
   <string name="action_export_more">Export…</string>
   <string name="action_export_file">Export to File</string>
+  <string name="action_export_file_msg">Export to file succeeded</string>
+  <string name="action_export_file_err">Export to file failed</string>
   <string name="action_import_file">Import from File</string>
   <string name="action_import_qrcode_image">Import from QRCode Image</string>
   <string name="action_import_manually_vmess">Type Manually Vmess</string>
@@ -257,6 +259,7 @@
   <string name="sent">Sent:</string>
   <string name="received">Received:</string>
   <string name="allgroups" translatable="false">All Groups</string>
+  <string name="retry_test">Retry...</string>
 
 <!--  PreferenceScreen-->
   <string name="preferenceScreen" translatable="false">preferenceScreen</string>

@@ -143,7 +143,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
               connectionTestText.setVisibility(View.VISIBLE)
               connectionTestText.setText(getString(R.string.connection_test_pending))
             }
-            if (app.settings.getBoolean(Key.AUTO_TEST_CONNECTIVITY, false)) checkConnection(3, 3)
+            if (app.settings.getBoolean(Key.AUTO_TEST_CONNECTIVITY, false)) checkConnection(2, 3)
           case State.STOPPED =>
             fab.setBackgroundTintList(greyTint)
             fabProgressCircle.postDelayed(hideCircle, 1000)
@@ -278,7 +278,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
         .retryOnConnectionFailure(false)
         .build()
       val request = new Request.Builder()
-        .url("http://www.gstatic.com/generate_204")
+        .url("http://clients3.google.com/generate_204")
         .build()
       if (testCount!=id) return
       client.newCall(request).execute().body().close()
@@ -313,12 +313,12 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     Utils.ThrowableFuture {
       if (testCount == id) {
         handler.post(() => {connectionTestText.setText(R.string.connection_test_testing)})
-        val result = Retryer.exponentialBackoff[Long](attempts, 360)
-            .on(() => NetUtils.testConnection("http://www.gstatic.com/generate_204", timeout),
+        val result = Retryer.exponentialBackoff[Long](attempts, 350)
+            .on(i => NetUtils.testConnectionStartup("http://clients3.google.com/generate_204", timeout + i),
               SuccessConnect,
               e => {
-                e.printStackTrace()
-                handler.post(() => connectionTestText.setText("retry..."))
+                // e.printStackTrace()
+                handler.post(() => connectionTestText.setText(getString(R.string.retry_test)))
                 FailureConnect(getString(R.string.connection_test_unavailable))
               })
         synchronized(if (testCount == id && app.isVpnEnabled && serviceStarted) handler.post(() =>

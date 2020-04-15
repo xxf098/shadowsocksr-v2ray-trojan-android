@@ -63,7 +63,7 @@ libraryDependencies ++=
   "eu.chainfire" % "libsuperuser" % "1.0.0.201704021214" ::
   "me.dm7.barcodescanner" % "zxing" % "1.9.8" ::
   "net.glxn.qrgen" % "android" % "2.0" ::
-  "com.squareup.okhttp3" % "okhttp" % "4.2.2" ::
+  "com.squareup.okhttp3" % "okhttp" % "4.4.1" ::
   "com.google.code.findbugs" % "jsr305" % "1.3.+" ::
   "com.google.code.gson" % "gson" % "2.8.6" ::
 Nil

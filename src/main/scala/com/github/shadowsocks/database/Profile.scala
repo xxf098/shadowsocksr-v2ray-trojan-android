@@ -94,7 +94,10 @@ object Profile {
       Future(profile.getElapsed())
         .map(SuccessConnect)
         .recover {
-          case e: Exception => FailureConnect(e.getMessage)
+          case e: Exception => {
+            e.printStackTrace()
+            FailureConnect(e.getMessage)
+          }
         }
     }
 

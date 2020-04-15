@@ -1077,9 +1077,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           getWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
           val testV2rayProfiles = (v2rayProfiles: List[List[Profile]], size: Int) => {
-            v2rayProfiles.foreach((profiles: List[Profile]) => {
-              val futures = profiles.map(p =>{
-                Future(p.testLatencyThread(8900L + p.id % size))
+            v2rayProfiles.indices.foreach(index => {
+              val profiles = v2rayProfiles(index)
+              val futures = profiles.indices.map(i =>{
+                val p = profiles(i)
+                Future(p.testLatencyThread(8900L + index * size + i))
                   .map(testResult => {
                     val msg = Message.obtain()
                     msg.obj = s"${profile.name} $testResult"
@@ -1094,21 +1096,18 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           }
 
           val testV2rayJob = (v2rayProfiles: List[Profile]) => {
-            // val v2rayProfiles = profiles.filter(p => p.isV2Ray)
-            if (v2rayProfiles.nonEmpty) {
-              testV2rayProfiles(v2rayProfiles.grouped(4).toList, 4)
-              // retest 0
-              val zeroProfiles = if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles
-              else app.profileManager.getAllProfilesByGroup(currentGroupName)
-              zeroProfiles match {
-                case Some(x) => {
-                  val zeroV2RayProfiles = x.filter(p => p.elapsed == 0 && p.isV2Ray)
-                  if (zeroV2RayProfiles.nonEmpty && zeroV2RayProfiles.length * 2 < v2rayProfiles.length * 4) {
-                    testV2rayProfiles(zeroV2RayProfiles.grouped(1).toList, 1)
-                  }
+            testV2rayProfiles(v2rayProfiles.grouped(4).toList, 4)
+            // retest 0
+            val zeroProfiles = if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles
+            else app.profileManager.getAllProfilesByGroup(currentGroupName)
+            zeroProfiles match {
+              case Some(x) => {
+                val zeroV2RayProfiles = x.filter(p => p.elapsed == 0 && p.isV2Ray)
+                if (zeroV2RayProfiles.nonEmpty && zeroV2RayProfiles.length * 2 < v2rayProfiles.length) {
+                  testV2rayProfiles(zeroV2RayProfiles.grouped(2).toList, 2)
                 }
-                case None =>
               }
+              case None =>
             }
           }
 
@@ -1120,15 +1119,136 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             .connectionPool(new ConnectionPool(16, 3, TimeUnit.MINUTES))
 
           val OKClient = builder.build()
+
+          val testSSRProfiles = (ssrProfiles: List[List[Profile]], size: Int) => {
+            ssrProfiles.indices.foreach(index => {
+              val profiles: List[Profile] = ssrProfiles(index)
+              try {
+                // TODO: concurrency
+                val confServer = profiles.indices.map(i => {
+                  val profile = profiles(i)
+                  var host = profile.host
+                  if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = false) match {
+                    case Some(addr) => host = addr
+                    case None => host = "127.0.0.1"
+                  }
+                  ConfigUtils.SHADOWSOCKSR_TEST_SERVER.formatLocal(Locale.ENGLISH,
+                    s"${host}${profile.remotePort}", host, profile.remotePort, profile.localPort + index * size + i, ConfigUtils.EscapedJson(profile.password), profile.method,
+                    profile.protocol, ConfigUtils.EscapedJson(profile.protocol_param), profile.obfs, ConfigUtils.EscapedJson(profile.obfs_param)
+                  )
+                }).mkString(",")
+                val confTest = ConfigUtils.SHADOWSOCKSR_TEST_CONF.formatLocal(Locale.ENGLISH,
+                  confServer, 600, "www.gstatic.com:80")
+                Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-test.conf"))(p => {
+                  p.println(confTest)
+                })
+
+                val cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.SS_LOCAL)
+                  , "-t", "600"
+                  , "-L", "www.gstatic.com:80"
+                  , "-c", getApplicationInfo.dataDir + "/ss-local-test.conf")
+
+                if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
+
+                if (ssTestProcess != null) {
+                  ssTestProcess.destroy()
+                  ssTestProcess = null
+                }
+
+                ssTestProcess = new GuardedProcess(cmd).start()
+
+                var start = 0
+                while (start < 2 && isPortAvailable(profiles.head.localPort + index * size)) {
+                  try {
+                    start = start + 1
+                    Thread.sleep(50)
+                  } catch {
+                    case e: InterruptedException => isTesting = false
+                  }
+                }
+
+                val futures = profiles.indices.map(i => Future {
+                  var result = ""
+                  val profile = profiles(i)
+                  val host = profile.host
+                  if (List("www.google.com", "127.0.0.1", "8.8.8.8", "1.2.3.4", "1.1.1.1").contains(host)) {
+                    throw new IOException(s"Bypass Host $host")
+                  }
+
+                  val request = new Request.Builder()
+                    .url("http://127.0.0.1:" + (profile.localPort + index * size + i) + "/generate_204").removeHeader("Host").addHeader("Host", "www.google.com")
+                    .build()
+
+                  val response = OKClient.newCall(request).execute()
+                  val code = response.code()
+                  if (code == 204 || code == 200 && response.body().contentLength == 0) {
+                    val start = currentTimeMillis
+                    val response = OKClient.newCall(request).execute()
+                    val elapsed = currentTimeMillis - start
+                    val code = response.code()
+                    if (code == 204 || code == 200 && response.body().contentLength == 0) {
+                      result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
+                      profile.elapsed = elapsed
+                      // Log.e(TAG, s"host:${profile.host}, elapsed: $elapsed")
+                      app.profileManager.updateProfile(profile)
+                    }
+                    else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
+                    response.body().close()
+                  } else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
+                  response.body().close()
+                  result
+                }.recover {
+                  case e: Exception => {
+                    val profile = profiles(i)
+                    Log.e(TAG, s"host: ${profile.host}, msg: ${e.getMessage}")
+                    profile.elapsed = 0
+                    app.profileManager.updateProfile(profile)
+                    e.getMessage
+                  }
+                }.map(testResult => {
+                  val profile = profiles(i)
+                  val msg = Message.obtain()
+                  msg.obj = s"${profile.name} $testResult"
+                  msg.setTarget(showProgresshandler)
+                  msg.sendToTarget()
+                }))
+                Await.ready(Future.sequence(futures), Duration(6 * size, SECONDS))
+              } catch {
+                case e: Exception => e.printStackTrace()
+              }
+              if (ssTestProcess != null) {
+                ssTestProcess.destroy()
+                ssTestProcess = null
+              }
+            })
+          }
+
+          val testSSRJob = (ssrProfiles: List[Profile]) => {
+            testSSRProfiles(ssrProfiles.grouped(4).toList, 4)
+            // retest 0
+            val zeroProfiles = if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles
+            else app.profileManager.getAllProfilesByGroup(currentGroupName)
+            zeroProfiles match {
+              case Some(x) => {
+                val zeroSSRProfiles = x.filter(p => p.elapsed == 0 && !p.isV2Ray)
+                if (zeroSSRProfiles.nonEmpty && zeroSSRProfiles.length * 2 < ssrProfiles.length) {
+                  testSSRProfiles(zeroSSRProfiles.grouped(3).toList, 3)
+                }
+              }
+              case None =>
+            }
+          }
           testAsyncJob = new Thread {
             override def run() {
               // Do some background work
               Looper.prepare()
               val (v2rayProfiles, ssrProfiles) = profiles.partition(_.isV2Ray)
-              testV2rayJob(v2rayProfiles)
-              isTesting = ssrProfiles.nonEmpty
+              if (v2rayProfiles.nonEmpty) { testV2rayJob(v2rayProfiles) }
+              if (ssrProfiles.nonEmpty) { testSSRJob(ssrProfiles) }
+              // end of test
+              isTesting = false
+              val groupSize = 4
               ssrProfiles.zipWithIndex.foreach{case (profile: Profile, index: Int) => {
-                val groupSize = 4
                 if (isTesting && index % groupSize == 0) {
 
                   if (testAsyncJob.isInterrupted()) {

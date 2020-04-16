@@ -144,7 +144,7 @@ object Parser {
     val profile = new Profile
     profile.proxy_protocol = "vmess"
     profile.v_v = vmessBean.configVersion.toString
-    profile.v_ps = vmessBean.remarks
+    profile.v_ps = if (TextUtils.isEmpty(vmessBean.remarks)) vmessBean.address else vmessBean.remarks
     profile.v_add = vmessBean.address
     profile.v_port = vmessBean.port.toString
     profile.v_id = vmessBean.id

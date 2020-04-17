@@ -115,6 +115,13 @@
             android:persistent="false"
             android:summary="%s"
             android:title="@string/v_pref_security" />
+        <com.github.shadowsocks.preferences.DropDownPreference
+            android:entries="@array/headertypes"
+            android:entryValues="@array/headertypes"
+            android:key="v_headertypes"
+            android:persistent="false"
+            android:summary="%s"
+            android:title="@string/v_pref_headertypes" />
         <com.github.shadowsocks.preferences.SummaryEditTextPreference
             android:key="v_host"
             android:summary="Host"

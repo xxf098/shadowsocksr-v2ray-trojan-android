@@ -280,6 +280,7 @@
   <string name="v_pref_security">Security</string>
   <string name="v_pref_path">Path</string>
   <string name="v_pref_host">Host</string>
+  <string name="v_pref_headertypes">Header Type</string>
 
 <!--  settings -->
   <string name="title_pref_sort_method">Sort Method</string>

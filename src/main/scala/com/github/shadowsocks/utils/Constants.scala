@@ -317,6 +317,7 @@ object Key {
   val v_add_json = "v_add_json"
   val v_id_json = "v_id_json"
   val v_security = "v_security"
+  val v_headertypes = "v_headertypes"
 
   val profileTip = "profileTip"
 

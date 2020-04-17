@@ -485,6 +485,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       if (getPackageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA)) View.VISIBLE else View.GONE))
   }
 
+    // Add profiles counter
     def initGroupSpinner(groupName: Option[String] = None ): Unit = {
     currentGroupName = groupName.getOrElse(getString(R.string.allgroups))
     val groupSpinner = findViewById(R.id.group_choose_spinner).asInstanceOf[AppCompatSpinner]
@@ -1105,7 +1106,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               case Some(x) => {
                 val zeroV2RayProfiles = x.filter(p => p.elapsed == 0 && p.isV2Ray)
                 if (zeroV2RayProfiles.nonEmpty && zeroV2RayProfiles.length * 2 < v2rayProfiles.length) {
-                  testV2rayProfiles(zeroV2RayProfiles.grouped(2).toList, 2)
+                  testV2rayProfiles(zeroV2RayProfiles.grouped(1).toList, 1)
                 }
               }
               case None =>

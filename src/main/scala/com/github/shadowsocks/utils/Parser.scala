@@ -191,7 +191,7 @@ object Parser {
     vmess.port = vmessQRCode.port.toInt
     vmess.id = vmessQRCode.id
     vmess.alterId = vmessQRCode.aid.toInt
-    vmess.network = vmess.network
+    vmess.network = vmessQRCode.net
     vmess.headerType = Option(vmessQRCode.`type`).getOrElse("none")
     vmess.requestHost = Option(vmessQRCode.host).getOrElse("")
     vmess.path = Option(vmessQRCode.path).getOrElse("")

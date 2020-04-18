@@ -70,6 +70,7 @@ object Profile {
     }
     val v_security = if (TextUtils.isEmpty(profile.v_security)) "auto" else profile.v_security
     val routeMode = math.max(Route.ALL_ROUTES.indexOf(profile.route), 0)
+    // Log.e("Profile", s"v_host: ${profile.v_host}, v_path: ${profile.v_path}, v_tls: ${profile.v_tls}, v_add: ${profile.v_add}, v_port: ${profile.v_port}, v_aid: ${profile.v_aid}, v_net: ${profile.v_net}, v_id: ${profile.v_id}, v_type: ${profile.v_type}, v_security: ${profile.v_security}, routeMode: $routeMode")
     Tun2socks.newVmess(
       profile.v_host,
       profile.v_path,

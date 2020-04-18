@@ -99,7 +99,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
         case Some(ssrsub) => {
           handler.post(() => app.ssrsubManager.createSSRSub(ssrsub))
 //          addProfilesFromSubscription(ssrsub, responseString)
-          ssrsub.addProfiles(responseString)
+          ssrsub.addProfiles(responseString, url)
           notifyGroupNameChange(Some(ssrsub.url_group))
         }
         case None =>
@@ -188,7 +188,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
   private def updateSingleSubscription (ssrsub: SSRSub): Unit = {
     SSRSub.getSubscriptionResponse(ssrsub.url)
       .flatMap(response => Try {
-        ssrsub.addProfiles(response)
+        ssrsub.addProfiles(response, ssrsub.url)
         notifyGroupNameChange(Some(ssrsub.url_group))
         None
       }).recover{
@@ -333,7 +333,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
             item.url = url
             item.url_group = groupName
             app.ssrsubManager.updateSSRSub(item)
-            item.addProfiles(responseString)
+            item.addProfiles(responseString, url)
 //            addProfilesFromSubscription(item, responseString)
             updateText(false)
             notifyGroupNameChange(Some(groupName))

@@ -116,7 +116,7 @@ object SSRSub {
 
   implicit class SSRSubFunctions(ssrsub: SSRSub) {
 
-    def addProfiles(responseString: String): Unit = {
+    def addProfiles(responseString: String, subUrl: String =""): Unit = {
       var currentProfile = app.currentProfile
       val delete_profiles = app.profileManager.getAllProfilesBySSRSub(ssrsub) match {
         case Some(subProfiles) =>
@@ -125,15 +125,30 @@ object SSRSub {
       }
       var limit_num = -1
       var encounter_num = 0
-      if (responseString.indexOf("MAX=") == 0) {
-        limit_num = responseString.split("\\n")(0).split("MAX=")(1).replaceAll("\\D+","").toInt
+      val findAllSSR = (responseString: String) => {
+        if (responseString.indexOf("MAX=") == 0) {
+          limit_num = responseString.split("\\n")(0).split("MAX=")(1).replaceAll("\\D+","").toInt
+        }
+        var profiles_ssr = Parser.findAll_ssr(responseString)
+        if (responseString.indexOf("MAX=") == 0) {
+          profiles_ssr = scala.util.Random.shuffle(profiles_ssr)
+        }
+        profiles_ssr
       }
-      var profiles_ssr = Parser.findAll_ssr(responseString)
-      if (responseString.indexOf("MAX=") == 0) {
-        profiles_ssr = scala.util.Random.shuffle(profiles_ssr)
+      val profiles = subUrl match {
+        case url if url.indexOf("sub=1") > 0 => findAllSSR(responseString)
+        case url if url.indexOf("sub=3") > 0 => Parser.findAllVmess(responseString)
+        case _ => findAllSSR(responseString) ++ Parser.findAllVmess(responseString)
       }
-      val profiles_vmess = Parser.findAllVmess(responseString)
-      val profiles = profiles_ssr ++ profiles_vmess
+//      if (responseString.indexOf("MAX=") == 0) {
+//        limit_num = responseString.split("\\n")(0).split("MAX=")(1).replaceAll("\\D+","").toInt
+//      }
+//      var profiles_ssr = Parser.findAll_ssr(responseString)
+//      if (responseString.indexOf("MAX=") == 0) {
+//        profiles_ssr = scala.util.Random.shuffle(profiles_ssr)
+//      }
+//      val profiles_vmess = Parser.findAllVmess(responseString)
+//      val profiles = profiles_ssr ++ profiles_vmess
       var isProfileAdded = false
       profiles.foreach((profile: Profile) => {
         if (encounter_num < limit_num && limit_num != -1 || limit_num == -1) {

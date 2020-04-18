@@ -47,7 +47,7 @@ class SSRSubUpdateJob() extends Job {
           val successCount = ssrsubs.map(ssrsub =>
             SSRSub.getSubscriptionResponse(ssrsub.url)
             .flatMap(response => Try {
-              ssrsub.addProfiles(response)
+              ssrsub.addProfiles(response, ssrsub.url)
               1
             }).recover {
             case e: Exception => 0

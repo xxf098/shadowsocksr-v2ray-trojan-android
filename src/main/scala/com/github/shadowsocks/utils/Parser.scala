@@ -184,19 +184,18 @@ object Parser {
     vmess.configType = EConfigType.Vmess
     vmess.security = "auto"
     vmess.network = "tcp"
-    vmess.headerType = "none"
 
     vmess.configVersion = Option(vmessQRCode.v).getOrElse("2").toInt
-    vmess.remarks = vmessQRCode.ps
+    vmess.remarks = Option(vmessQRCode.ps).getOrElse(vmessQRCode.add)
     vmess.address = vmessQRCode.add
     vmess.port = vmessQRCode.port.toInt
     vmess.id = vmessQRCode.id
     vmess.alterId = vmessQRCode.aid.toInt
-    vmess.network = vmessQRCode.net
-    vmess.headerType = vmessQRCode.`type`
-    vmess.requestHost = vmessQRCode.host
-    vmess.path = vmessQRCode.path
-    vmess.streamSecurity = vmessQRCode.tls
+    vmess.network = vmess.network
+    vmess.headerType = Option(vmessQRCode.`type`).getOrElse("none")
+    vmess.requestHost = Option(vmessQRCode.host).getOrElse("")
+    vmess.path = Option(vmessQRCode.path).getOrElse("")
+    vmess.streamSecurity = Option(vmessQRCode.tls).getOrElse("")
     vmess.subid = ""
     vmess.url_group = if (TextUtils.isEmpty(vmessQRCode.url_group)) vmess.url_group else vmessQRCode.url_group
     Some(vmess)

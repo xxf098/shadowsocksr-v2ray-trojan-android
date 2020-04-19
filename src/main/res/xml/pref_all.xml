@@ -116,6 +116,13 @@
             android:summary="%s"
             android:title="@string/v_pref_security" />
         <com.github.shadowsocks.preferences.DropDownPreference
+            android:entries="@array/networks"
+            android:entryValues="@array/networks"
+            android:key="v_net"
+            android:persistent="false"
+            android:summary="%s"
+            android:title="@string/v_pref_networks" />
+        <com.github.shadowsocks.preferences.DropDownPreference
             android:entries="@array/headertypes"
             android:entryValues="@array/headertypes"
             android:key="v_headertypes"

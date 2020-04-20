@@ -1117,7 +1117,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           // connection pool time
 
 
-          val testSSRProfiles = (ssrProfiles: List[List[Profile]], size: Int, offset: Int, OKClient: OkHttpClient) => {
+          val testSSRProfiles = (ssrProfiles: List[List[Profile]], size: Int, offset: Int) => {
             ssrProfiles.indices.foreach(index => {
               val profiles: List[Profile] = ssrProfiles(index)
               try {
@@ -1171,39 +1171,12 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                   if (List("www.google.com", "127.0.0.1", "8.8.8.8", "1.2.3.4", "1.1.1.1").contains(host)) {
                     throw new IOException(s"Bypass Host $host")
                   }
-
-                  val request = new Request.Builder()
-                    //.addHeader("Cache-Control", "no-cache")
-                    .addHeader("Connection", "close")
-                    .url("http://127.0.0.1:" + (profile.localPort + index * size + i + offset) + "/generate_204").removeHeader("Host").addHeader("Host", "www.google.com")
-                    .build()
-                  var response1: Response = null
-                  try {
-                    response1 = OKClient.newCall(request).execute()
-                  } catch {
-                    case e: Exception =>
-                  } finally {
-                      Option(response1).foreach(_.body().close())
-                  }
-//                  val code = response1.code()
-//                  if (code == 204 || code == 200 && response1.body().contentLength == 0) {
-                    val start = currentTimeMillis
-                    val response = OKClient.newCall(request).execute()
-                    val elapsed = currentTimeMillis - start
-                    val code = response.code()
-                    if (code == 204 || code == 200 && response.body().contentLength == 0) {
-                      result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
-                      profile.elapsed = elapsed
-                      // Log.e(TAG, s"host:${profile.host}, elapsed: $elapsed")
-                      app.profileManager.updateProfile(profile)
-                    }
-                    else {
-                      response.body().close()
-                      throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
-                    }
-                    response.body().close()
-//                  } else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
-//                  response1.body().close()
+                  // TODO: batch test with go
+                  val elapsed = Tun2socks.testURLLatency("http://127.0.0.1:" + (profile.localPort + index * size + i + offset) + "/generate_204")
+                  result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
+                  profile.elapsed = elapsed
+                  Log.e(TAG, s"host:${profile.host}, elapsed: $elapsed")
+                  app.profileManager.updateProfile(profile)
                   result
                 }.recover {
                   case e: Exception => {
@@ -1232,14 +1205,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           }
 
           val testSSRJob = (ssrProfiles: List[Profile]) => {
-            val builder = new OkHttpClient.Builder()
-              .connectTimeout(3, TimeUnit.SECONDS)
-              .writeTimeout(3, TimeUnit.SECONDS)
-              .readTimeout(3, TimeUnit.SECONDS)
-              .connectionPool(new ConnectionPool(0, 15, TimeUnit.SECONDS))
-              .retryOnConnectionFailure(true)
-            val OKClient = builder.build()
-            testSSRProfiles(ssrProfiles.grouped(4).toList, 4, 0, OKClient)
+            testSSRProfiles(ssrProfiles.grouped(4).toList, 4, 0)
             // retest 0
             val zeroProfiles = if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles
             else app.profileManager.getAllProfilesByGroup(currentGroupName)
@@ -1247,14 +1213,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               case Some(x) => {
                 val zeroSSRProfiles = x.filter(p => p.elapsed == 0 && !p.isV2Ray)
                 if (zeroSSRProfiles.nonEmpty) {
-                  testSSRProfiles(zeroSSRProfiles.grouped(2).toList, 2, ssrProfiles.size, OKClient)
+                  testSSRProfiles(zeroSSRProfiles.grouped(2).toList, 2, ssrProfiles.size)
                 }
               }
               case None =>
             }
-            OKClient.dispatcher().executorService().shutdownNow()
-            OKClient.connectionPool().evictAll()
-//            OKClient.cache().close()
           }
           testAsyncJob = new Thread {
             override def run() {

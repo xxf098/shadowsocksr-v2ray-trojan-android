@@ -1114,14 +1114,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           }
 
           // TODO: refactor
-          val builder = new OkHttpClient.Builder()
-            .connectTimeout(3, TimeUnit.SECONDS)
-            .writeTimeout(3, TimeUnit.SECONDS)
-            .readTimeout(3, TimeUnit.SECONDS)
-            .retryOnConnectionFailure(true)
-          val OKClient = builder.build()
+          // connection pool time
 
-          val testSSRProfiles = (ssrProfiles: List[List[Profile]], size: Int, offset: Int) => {
+
+          val testSSRProfiles = (ssrProfiles: List[List[Profile]], size: Int, offset: Int, OKClient: OkHttpClient) => {
             ssrProfiles.indices.foreach(index => {
               val profiles: List[Profile] = ssrProfiles(index)
               try {
@@ -1178,7 +1174,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
                   val request = new Request.Builder()
                     //.addHeader("Cache-Control", "no-cache")
-                    // .addHeader("Connection", "close")
+                    .addHeader("Connection", "close")
                     .url("http://127.0.0.1:" + (profile.localPort + index * size + i + offset) + "/generate_204").removeHeader("Host").addHeader("Host", "www.google.com")
                     .build()
                   var response1: Response = null
@@ -1224,7 +1220,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                   msg.setTarget(showProgresshandler)
                   msg.sendToTarget()
                 }))
-                Await.ready(Future.sequence(futures), Duration(6 * size, SECONDS))
+                Await.ready(Future.sequence(futures), Duration(5 * size, SECONDS))
               } catch {
                 case e: Exception => e.printStackTrace()
               }
@@ -1236,7 +1232,14 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           }
 
           val testSSRJob = (ssrProfiles: List[Profile]) => {
-            testSSRProfiles(ssrProfiles.grouped(4).toList, 4, 0)
+            val builder = new OkHttpClient.Builder()
+              .connectTimeout(3, TimeUnit.SECONDS)
+              .writeTimeout(3, TimeUnit.SECONDS)
+              .readTimeout(3, TimeUnit.SECONDS)
+              .connectionPool(new ConnectionPool(0, 15, TimeUnit.SECONDS))
+              .retryOnConnectionFailure(true)
+            val OKClient = builder.build()
+            testSSRProfiles(ssrProfiles.grouped(4).toList, 4, 0, OKClient)
             // retest 0
             val zeroProfiles = if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles
             else app.profileManager.getAllProfilesByGroup(currentGroupName)
@@ -1244,12 +1247,12 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               case Some(x) => {
                 val zeroSSRProfiles = x.filter(p => p.elapsed == 0 && !p.isV2Ray)
                 if (zeroSSRProfiles.nonEmpty) {
-                  testSSRProfiles(zeroSSRProfiles.grouped(2).toList, 2, ssrProfiles.size)
+                  testSSRProfiles(zeroSSRProfiles.grouped(2).toList, 2, ssrProfiles.size, OKClient)
                 }
               }
               case None =>
             }
-            OKClient.dispatcher().executorService().shutdown()
+            OKClient.dispatcher().executorService().shutdownNow()
             OKClient.connectionPool().evictAll()
 //            OKClient.cache().close()
           }

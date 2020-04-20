@@ -1118,8 +1118,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             .connectTimeout(3, TimeUnit.SECONDS)
             .writeTimeout(3, TimeUnit.SECONDS)
             .readTimeout(3, TimeUnit.SECONDS)
-            .connectionPool(new ConnectionPool(16, 3, TimeUnit.MINUTES))
-
+            .retryOnConnectionFailure(true)
           val OKClient = builder.build()
 
           val testSSRProfiles = (ssrProfiles: List[List[Profile]], size: Int, offset: Int) => {
@@ -1140,14 +1139,14 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                   )
                 }).mkString(",")
                 val confTest = ConfigUtils.SHADOWSOCKSR_TEST_CONF.formatLocal(Locale.ENGLISH,
-                  confServer, 600, "www.gstatic.com:80")
+                  confServer, 600, "www.google.com:80")
                 Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-test.conf"))(p => {
                   p.println(confTest)
                 })
 
                 val cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.SS_LOCAL)
                   , "-t", "600"
-                  , "-L", "www.gstatic.com:80"
+                  , "-L", "www.google.com:80"
                   , "-c", getApplicationInfo.dataDir + "/ss-local-test.conf")
 
                 if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
@@ -1178,16 +1177,17 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                   }
 
                   val request = new Request.Builder()
+                    //.addHeader("Cache-Control", "no-cache")
+                    // .addHeader("Connection", "close")
                     .url("http://127.0.0.1:" + (profile.localPort + index * size + i + offset) + "/generate_204").removeHeader("Host").addHeader("Host", "www.google.com")
                     .build()
                   var response1: Response = null
                   try {
                     response1 = OKClient.newCall(request).execute()
                   } catch {
-                    case e: SocketTimeoutException =>
-                    case e: Exception => throw e
+                    case e: Exception =>
                   } finally {
-                      response1.close()
+                      Option(response1).foreach(_.body().close())
                   }
 //                  val code = response1.code()
 //                  if (code == 204 || code == 200 && response1.body().contentLength == 0) {
@@ -1201,7 +1201,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                       // Log.e(TAG, s"host:${profile.host}, elapsed: $elapsed")
                       app.profileManager.updateProfile(profile)
                     }
-                    else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
+                    else {
+                      response.body().close()
+                      throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
+                    }
                     response.body().close()
 //                  } else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
 //                  response1.body().close()
@@ -1246,6 +1249,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               }
               case None =>
             }
+            OKClient.dispatcher().executorService().shutdown()
+            OKClient.connectionPool().evictAll()
+//            OKClient.cache().close()
           }
           testAsyncJob = new Thread {
             override def run() {

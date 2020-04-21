@@ -1121,7 +1121,6 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             ssrProfiles.indices.foreach(index => {
               val profiles: List[Profile] = ssrProfiles(index)
               try {
-                // TODO: concurrency
                 val confServer = profiles.indices.map(i => {
                   val profile = profiles(i)
                   var host = profile.host
@@ -1167,15 +1166,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                 val futures = profiles.indices.map(i => Future {
                   var result = ""
                   val profile = profiles(i)
-                  val host = profile.host
-                  if (List("www.google.com", "127.0.0.1", "8.8.8.8", "1.2.3.4", "1.1.1.1").contains(host)) {
-                    throw new IOException(s"Bypass Host $host")
-                  }
                   // TODO: batch test with go
                   val elapsed = Tun2socks.testURLLatency("http://127.0.0.1:" + (profile.localPort + index * size + i + offset) + "/generate_204")
                   result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
                   profile.elapsed = elapsed
-                  Log.e(TAG, s"host:${profile.host}, elapsed: $elapsed")
+                  // Log.e(TAG, s"host:${profile.host}, elapsed: $elapsed")
                   app.profileManager.updateProfile(profile)
                   result
                 }.recover {
@@ -1204,26 +1199,21 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             })
           }
 
+          // TODO: Retry
           val testSSRJob = (ssrProfiles: List[Profile]) => {
             testSSRProfiles(ssrProfiles.grouped(4).toList, 4, 0)
-            // retest 0
-            val zeroProfiles = if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles
-            else app.profileManager.getAllProfilesByGroup(currentGroupName)
-            zeroProfiles match {
-              case Some(x) => {
-                val zeroSSRProfiles = x.filter(p => p.elapsed == 0 && !p.isV2Ray)
-                if (zeroSSRProfiles.nonEmpty) {
-                  testSSRProfiles(zeroSSRProfiles.grouped(2).toList, 2, ssrProfiles.size)
-                }
-              }
-              case None =>
+            val zeroSSRProfiles = ssrProfiles.filter(p => p.elapsed == 0 && !p.isV2Ray)
+            if (zeroSSRProfiles.nonEmpty) {
+              testSSRProfiles(zeroSSRProfiles.grouped(2).toList, 2, ssrProfiles.size)
             }
           }
           testAsyncJob = new Thread {
             override def run() {
               // Do some background work
               Looper.prepare()
-              val (v2rayProfiles, ssrProfiles) = profiles.partition(_.isV2Ray)
+              val (v2rayProfiles, ssrProfiles) = profiles
+                .filter(p => !List("www.google.com", "127.0.0.1", "8.8.8.8", "1.2.3.4", "1.1.1.1").contains(p.host))
+                .partition(_.isV2Ray)
               if (v2rayProfiles.nonEmpty) { testV2rayJob(v2rayProfiles) }
               if (ssrProfiles.nonEmpty) { testSSRJob(ssrProfiles) }
               // end of test

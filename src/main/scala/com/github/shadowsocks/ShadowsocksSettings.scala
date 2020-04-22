@@ -41,7 +41,7 @@ object ShadowsocksSettings {
   private final val TAG = "ShadowsocksSettings"
   private val PROXY_PREFS = Array(Key.group_name, Key.name, Key.host, Key.remotePort, Key.localPort, Key.password, Key.method,
     Key.protocol, Key.obfs, Key.obfs_param, Key.dns, Key.china_dns, Key.protocol_param, Key.v_ps,
-    Key.v_id, Key.v_add, Key.v_host, Key.v_port, Key.v_path, Key.v_aid, Key.v_id_json, Key.v_add_json, Key.v_security, Key.v_tls)
+    Key.v_id, Key.v_add, Key.v_host, Key.v_port, Key.v_path, Key.v_aid, Key.v_id_json, Key.v_add_json, Key.v_security, Key.v_tls, Key.v_headertypes, Key.v_net)
   private val FEATURE_PREFS = Array(Key.route, Key.proxyApps, Key.udpdns, Key.ipv6, Key.tfo)
 
   // Helper functions
@@ -80,6 +80,8 @@ object ShadowsocksSettings {
         case Key.v_host => updateSummaryEditTextPreference(pref, profile.v_host)
         case Key.v_security => updateDropDownPreference(pref, v_security)
         case Key.v_tls => updateDropDownPreference(pref, profile.v_tls)
+        case Key.v_headertypes => updateDropDownPreference(pref, profile.v_type)
+        case Key.v_net => updateDropDownPreference(pref, profile.v_net)
         case Key.route => updateDropDownPreference(pref, profile.route)
 //        case Key.proxyApps => updateSwitchPreference(pref, isPerAppProxyEnabled)
         case Key.udpdns => updateSwitchPreference(pref, profile.udpdns)
@@ -243,6 +245,20 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
 
     findPreference(Key.v_security).setOnPreferenceChangeListener((_, value) => {
       profile.v_security = value.asInstanceOf[String]
+      app.profileManager.updateProfile(profile)
+    })
+
+    val networkPreference = findPreference(Key.v_net).asInstanceOf[DropDownPreference]
+    networkPreference.setDropDownWidth(R.dimen.default_dropdown_width)
+    networkPreference.setOnPreferenceChangeListener((_, value) => {
+      profile.v_net = value.asInstanceOf[String]
+      app.profileManager.updateProfile(profile)
+    })
+
+    val headerTypesPreference = findPreference(Key.v_headertypes).asInstanceOf[DropDownPreference]
+    headerTypesPreference.setDropDownWidth(R.dimen.default_dropdown_width)
+    headerTypesPreference.setOnPreferenceChangeListener((_, value) => {
+      profile.v_type = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
     })
 

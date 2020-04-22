@@ -252,6 +252,8 @@
   <string name="v_pref_security">加密方式</string>
   <string name="v_pref_path">路径</string>
   <string name="v_pref_host">伪装域名</string>
+  <string name="v_pref_headertypes">伪装类型</string>
+  <string name="v_pref_networks">传输协议</string>
 
   <string name="title_pref_sort_method">排序方式</string>
   <string-array name="sort_method_entry">

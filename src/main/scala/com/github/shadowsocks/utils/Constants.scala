@@ -136,6 +136,7 @@ object ConfigUtils {
       | timeout = 10;
       | daemon = off;
       | par_queries = 4;
+      | debug = on;
       |}
       |
       |%s
@@ -174,6 +175,21 @@ object ConfigUtils {
         | reject_recursively = on;
         |}
       """.stripMargin
+
+  val REMOTE_SERVER1 =
+    """
+      |server {
+      | label = "remote-servers1";
+      | ip = 223.5.5.5,1.1.1.1;
+      | timeout = 3;
+      | proxy_only=on;
+      | lean_query=on;
+      | query_method = udp_only;
+      | policy = included;
+      | reject_policy = fail;
+      | reject_recursively = on;
+      |}
+    """.stripMargin
 
   val V2RAY_CONFIG =
     """{
@@ -391,7 +407,7 @@ object Route {
   )
   val BLOCK_DOMAIN = List(
 //    "baidu.com",
-    "www.auspiciousvp.com",
+//    "www.auspiciousvp.com",
     "auspiciousvp.com",
 //    "baidustatic.com",
 //    "umeng.com",

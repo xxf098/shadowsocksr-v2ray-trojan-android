@@ -132,11 +132,11 @@ object ConfigUtils {
       | server_port = %d;
       | query_method = udp_only;
       | min_ttl = 15m;
-      | max_ttl = 1w;
+      | max_ttl = 3d;
       | timeout = 10;
       | daemon = off;
       | par_queries = 4;
-      | debug = on;
+      | debug = off;
       |}
       |
       |%s
@@ -181,7 +181,7 @@ object ConfigUtils {
       |server {
       | label = "remote-servers1";
       | ip = 223.5.5.5,1.1.1.1;
-      | timeout = 3;
+      | timeout = 5;
       | proxy_only=on;
       | lean_query=on;
       | query_method = udp_only;

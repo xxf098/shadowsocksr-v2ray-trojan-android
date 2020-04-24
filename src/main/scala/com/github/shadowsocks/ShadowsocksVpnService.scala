@@ -408,10 +408,14 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       }
     }
 
-    for (china_dns <- profile.china_dns.split(",")) {
-      china_dns_settings += ConfigUtils.REMOTE_SERVER.formatLocal(Locale.ENGLISH, china_dns.split(":")(0), china_dns.split(":")(1).toInt,
-        black_list, reject)
-    }
+//    for (china_dns <- profile.china_dns.split(",")) {
+//      china_dns_settings += ConfigUtils.REMOTE_SERVER.formatLocal(Locale.ENGLISH, china_dns.split(":")(0), china_dns.split(":")(1).toInt,
+//        black_list, reject)
+//    }
+    var dns_addr = profile.china_dns.split(",").head
+    china_dns_settings += ConfigUtils.REMOTE_SERVER.formatLocal(Locale.ENGLISH, dns_addr.split(":")(0), dns_addr.split(":")(1).toInt, black_list, reject)
+    dns_addr = profile.dns.split(",").head
+    china_dns_settings += ConfigUtils.REMOTE_SERVER.formatLocal(Locale.ENGLISH, dns_addr.split(":")(0), dns_addr.split(":")(1).toInt, "", reject)
 
     val conf = profile.route match {
       case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST |
@@ -439,6 +443,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       }
     }
 
+//    Log.e(TAG, s"conf: $conf")
     Utils.printToFile (new File(getApplicationInfo.dataDir + "/pdnsd-vpn.conf"))(p => {
       p.println(conf)
       Route.BLOCK_DOMAIN.foreach(domain => p.println(s"neg { name = $domain; types = domain; }"))

@@ -28,10 +28,12 @@ import android.content.Context
 import com.github.shadowsocks.utils._
 import java.io.InputStreamReader
 import java.io.BufferedReader
+import java.util.concurrent.TimeUnit
 
 import android.text.TextUtils
 import android.util.Log
 import com.github.shadowsocks.Shadowsocks.TAG
+import okhttp3.{OkHttpClient, Request}
 
 import scala.collection.mutable
 import scala.io.Source
@@ -311,7 +313,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
           getPreferenceManager.getSharedPreferences.edit.putString(Key.aclurl, url).commit()
           downloadAcl(url)
           app.profileManager.updateAllProfile_String(Key.route, value.asInstanceOf[String])
-        })
+        }, true)
 //        val AclUrlEditText = new EditText(activity);
 //        AclUrlEditText.setText(getPreferenceManager.getSharedPreferences.getString(Key.aclurl, ""));
 //        new AlertDialog.Builder(activity)
@@ -408,7 +410,9 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       showACLDialog(url => {
         val routeMode = app.currentProfile.map(profile => profile.route)
           .filter(mode => Route.ACL4SSR_ROUTES.contains(mode))
-        getPreferenceManager.getSharedPreferences.edit.putString(Key.aclurl, url).commit()
+        if (URLUtil.isHttpsUrl(url) || URLUtil.isHttpUrl(url)) {
+          getPreferenceManager.getSharedPreferences.edit.putString(Key.aclurl, url).commit()
+        }
         downloadAcl(url, routeMode)
       })
 //      val url = getPreferenceManager.getSharedPreferences.getString(Key.aclurl, "");
@@ -514,14 +518,16 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     })
   }
 
-  def showACLDialog (onOk: String => Unit): Unit = {
+  def showACLDialog (onOk: String => Unit, checkUrl : Boolean = false): Unit = {
     val AclUrlEditText = new EditText(activity)
     AclUrlEditText.setText(getPreferenceManager.getSharedPreferences.getString(Key.aclurl, ""));
     new AlertDialog.Builder(activity)
       .setTitle(getString(R.string.acl_file))
       .setPositiveButton(android.R.string.ok, ((_, _) => {
         val url = AclUrlEditText.getText.toString
-        if(URLUtil.isHttpsUrl(url) || URLUtil.isHttpUrl(url)) { onOk(url) } else { setProfile(profile) }
+        if (checkUrl) {
+          if(URLUtil.isHttpsUrl(url) || URLUtil.isHttpUrl(url)) onOk(url) else setProfile(profile)
+        } else onOk(url)
       }): DialogInterface.OnClickListener)
       .setNegativeButton(android.R.string.no,  ((_, _) => {
         setProfile(profile)

@@ -26,6 +26,11 @@
             android:title="@string/title_auto_test_connectivity" />
 
         <CheckBoxPreference
+            android:key="pref_ssr_dns_nocache"
+            android:summary="@string/summary_ssr_dns_nocache"
+            android:title="@string/title_ssr_dns_nocache" />
+
+        <CheckBoxPreference
             android:key="pref_hide_server"
             android:summary="@string/summary_pref_hide_server"
             android:title="@string/title_pref_hide_server" />

@@ -136,7 +136,7 @@ object ConfigUtils {
       | timeout = 10;
       | daemon = off;
       | par_queries = 4;
-      | debug = off;
+      | debug = on;
       |}
       |
       |%s
@@ -365,6 +365,7 @@ object Key {
   val HIDE_SERVER = "pref_hide_server"
   val AUTO_UPDATE_SUBSCRIPTION = "pref_auto_update_subscription"
   val AUTO_TEST_CONNECTIVITY = "pref_auto_test_connectivity"
+  val SSR_DNS_NOCAHCE = "pref_ssr_dns_nocache"
 }
 
 object State {

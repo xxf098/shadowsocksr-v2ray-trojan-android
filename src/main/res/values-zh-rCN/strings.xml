@@ -266,8 +266,11 @@
 
   <string name="summary_ssrsub_autoupdate_enable">自动更新订阅</string>
 
-  <string name="title_auto_test_connection">自动测试</string>
-  <string name="summary_auto_test_connection">启动VPN后自动测试网络连接</string>
+  <string name="title_auto_test_connectivity">自动测试</string>
+  <string name="summary_auto_test_connectivity">启动VPN后自动测试网络连接</string>
+
+  <string name="title_ssr_dns_nocache">DNS缓存</string>
+  <string name="summary_ssr_dns_nocache">关闭SSR DNS缓存</string>
 
 
 </resources>

@@ -390,21 +390,21 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         })
     }
 
-    val black_list = profile.route match {
+    val (black_list, black_list_cn) = profile.route match {
       case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST |
            Route.ACL4SSR_BANDAD | Route.ACL4SSR_GFWLIST_BANAD | Route.ACL4SSR_ONLYBANAD |
            Route.ACL4SSR_FULLGFWLIST | Route.ACL4SSR_BACKCN_BANAD | Route.ACL4SSR_NOBANAD => {
-        getBlackList
+        (getBlackList(), getBlackList("cn"))
       }
       case Route.ACL => {
         if (remote_dns) {
-            ""
+          ("", "")
         } else {
-            getBlackList
+          (getBlackList(), getBlackList("cn"))
         }
       }
       case _ => {
-        ""
+        ("", "")
       }
     }
 
@@ -415,7 +415,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     var dns_addr = profile.china_dns.split(",").head
     china_dns_settings += ConfigUtils.REMOTE_SERVER.formatLocal(Locale.ENGLISH, dns_addr.split(":")(0), dns_addr.split(":")(1).toInt, black_list, reject)
     dns_addr = profile.dns.split(",").head
-    china_dns_settings += ConfigUtils.REMOTE_SERVER.formatLocal(Locale.ENGLISH, dns_addr.split(":")(0), dns_addr.split(":")(1).toInt, "", reject)
+    china_dns_settings += ConfigUtils.REMOTE_SERVER.formatLocal(Locale.ENGLISH, dns_addr.split(":")(0), dns_addr.split(":")(1).toInt, black_list_cn, reject)
 
     val nocache = app.appStateManager.getAppState().map(appState => appState.dns_nocache).getOrElse("off")
     val conf = profile.route match {
@@ -444,7 +444,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       }
     }
 
-    Log.e(TAG, s"conf: $conf")
+//    Log.e(TAG, s"conf: $conf")
     Utils.printToFile (new File(getApplicationInfo.dataDir + "/pdnsd-vpn.conf"))(p => {
       p.println(conf)
       Route.BLOCK_DOMAIN.foreach(domain => p.println(s"neg { name = $domain; types = domain; }"))

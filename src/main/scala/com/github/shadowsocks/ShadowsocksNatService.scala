@@ -176,13 +176,13 @@ class ShadowsocksNatService extends BaseService {
       case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST |
            Route.ACL4SSR_BANDAD | Route.ACL4SSR_GFWLIST_BANAD | Route.ACL4SSR_ONLYBANAD |
            Route.ACL4SSR_FULLGFWLIST | Route.ACL4SSR_BACKCN_BANAD | Route.ACL4SSR_NOBANAD => {
-        getBlackList
+        getBlackList()
       }
       case Route.ACL => {
         if (remote_dns) {
             ""
         } else {
-            getBlackList
+            getBlackList()
         }
       }
       case _ => {

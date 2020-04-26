@@ -138,7 +138,7 @@ object ConfigUtils {
       | daemon = off;
       | par_queries = 4;
       | nocache = %s;
-      | debug = on;
+      | debug = off;
       |}
       |
       |%s

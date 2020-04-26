@@ -417,7 +417,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     dns_addr = profile.dns.split(",").head
     china_dns_settings += ConfigUtils.REMOTE_SERVER.formatLocal(Locale.ENGLISH, dns_addr.split(":")(0), dns_addr.split(":")(1).toInt, black_list_cn, reject)
 
-    val nocache = app.appStateManager.getAppState().map(appState => appState.dns_nocache).getOrElse("off")
+    val nocache = app.appStateManager.getAppState()
+      .flatMap(appState => if(appState.dns_nocache == "on") Option(s"nocache = on;") else None).getOrElse("")
     val conf = profile.route match {
       case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST |
            Route.ACL4SSR_BANDAD | Route.ACL4SSR_GFWLIST_BANAD | Route.ACL4SSR_ONLYBANAD |
@@ -444,7 +445,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       }
     }
 
-//    Log.e(TAG, s"conf: $conf")
+    // Log.e(TAG, s"conf: $conf")
     Utils.printToFile (new File(getApplicationInfo.dataDir + "/pdnsd-vpn.conf"))(p => {
       p.println(conf)
       Route.BLOCK_DOMAIN.foreach(domain => p.println(s"neg { name = $domain; types = domain; }"))

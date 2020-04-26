@@ -137,7 +137,7 @@ object ConfigUtils {
       | timeout = 10;
       | daemon = off;
       | par_queries = 4;
-      | nocache = %s;
+      | %s
       | debug = off;
       |}
       |

@@ -102,6 +102,7 @@ object ConfigUtils {
       | max_ttl = 1w;
       | timeout = 10;
       | daemon = off;
+      | nocache = %s;
       |}
       |
       |server {
@@ -125,17 +126,18 @@ object ConfigUtils {
   val PDNSD_DIRECT =
     """
       |global {
-      | perm_cache = 2048;
+      | perm_cache = 4096;
       | %s
       | cache_dir = "%s";
       | server_ip = %s;
       | server_port = %d;
       | query_method = udp_only;
       | min_ttl = 15m;
-      | max_ttl = 3d;
+      | max_ttl = 5d;
       | timeout = 10;
       | daemon = off;
       | par_queries = 4;
+      | nocache = %s;
       | debug = on;
       |}
       |
@@ -200,7 +202,7 @@ object ConfigUtils {
       |    },
       |    "dns": {
       |        "servers": [
-      |            "1.0.0.1",
+      |            "1.1.1.1",
       |            "localhost"
       |        ]
       |    },

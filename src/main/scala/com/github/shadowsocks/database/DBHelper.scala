@@ -65,7 +65,7 @@ object DBHelper {
 }
 
 class DBHelper(val context: Context)
-  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 31) {
+  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 32) {
   import DBHelper._
 
   lazy val profileDao: Dao[Profile, Int] = getDao(classOf[Profile])
@@ -198,6 +198,9 @@ class DBHelper(val context: Context)
               appStateDao.create(appState)
             }
           }
+        }
+        if (oldVersion < 32) {
+          profileDao.executeRawNoArgs("ALTER TABLE `appstate` ADD COLUMN dns_nocache VARCHAR DEFAULT 'off';")
         }
       } catch {
         case ex: Exception =>

@@ -62,6 +62,7 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
     ssrDNSNoCache.setOnPreferenceChangeListener((_, value) => {
       val nocache = value.asInstanceOf[Boolean]
       prefs.edit().putBoolean(Key.SSR_DNS_NOCAHCE, nocache).apply()
+      app.appStateManager.saveDNSNoCache(nocache)
       true
     })
 

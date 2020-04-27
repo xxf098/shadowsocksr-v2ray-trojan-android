@@ -53,7 +53,7 @@ import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatDelegate
 import android.util.Log
 import com.evernote.android.job.JobManager
-import com.github.shadowsocks.database.{AppStateManager, DBHelper, ProfileManager, SSRSubManager}
+import com.github.shadowsocks.database.{AppStateManager, DBHelper, Profile, ProfileManager, SSRSubManager}
 import com.github.shadowsocks.job.DonaldTrump
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils._
@@ -128,9 +128,9 @@ class ShadowsocksApplication extends Application {
 
   def currentProfile = profileManager.getProfile(profileId)
 
-  def switchProfile(id: Int) = {
+  def switchProfile(id: Int): Option[Profile] = {
     profileId(id)
-    profileManager.getProfile(id) getOrElse profileManager.createProfile()
+    profileManager.getProfile(id)
   }
 
   def getV2rayAssetsPath (): String = getApplicationInfo.dataDir + "/files/"

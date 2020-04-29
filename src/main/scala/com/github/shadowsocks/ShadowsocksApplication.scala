@@ -233,11 +233,13 @@ class ShadowsocksApplication extends Application {
     if (Build.VERSION.SDK_INT >= 26) {
       val notification = getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
       val importance = if (Build.VERSION.SDK_INT >= 28) NotificationManager.IMPORTANCE_MIN else NotificationManager.IMPORTANCE_LOW
-      notification.createNotificationChannels(List(
-        new NotificationChannel("service-ssr", getText(R.string.service_ssr), importance),
-        new NotificationChannel("service-v2ray", getText(R.string.service_v2ray), importance),
-        new NotificationChannel("service-nat", getText(R.string.service_nat), importance)
-      ).asJava)
+      val ssrChannel = new NotificationChannel("service-ssr", getText(R.string.service_ssr), importance)
+      ssrChannel.setShowBadge(false)
+      val v2rayChannel = new NotificationChannel("service-v2ray", getText(R.string.service_v2ray), importance)
+      v2rayChannel.setShowBadge(false)
+      val natChannel = new NotificationChannel("service-nat", getText(R.string.service_nat), importance)
+      natChannel.setShowBadge(false)
+      notification.createNotificationChannels(List(ssrChannel, v2rayChannel, natChannel).asJava)
     }
   }
 

@@ -261,6 +261,11 @@
     <item>延迟</item>
   </string-array>
 
+  <string-array name="switch_entry">
+      <item>开启</item>
+      <item>关闭</item>
+  </string-array>
+
   <string name="title_pref_hide_server">隐藏地址</string>
   <string name="summary_pref_hide_server">隐藏配置列表的服务器地址</string>
 
@@ -269,8 +274,7 @@
   <string name="title_auto_test_connectivity">自动测试</string>
   <string name="summary_auto_test_connectivity">启动VPN后自动测试网络连接</string>
 
-  <string name="title_ssr_dns_nocache">DNS缓存</string>
-  <string name="summary_ssr_dns_nocache">关闭SSR DNS缓存</string>
+  <string name="title_ssr_dns_nocache">SSR DNS缓存</string>
 
 
 </resources>

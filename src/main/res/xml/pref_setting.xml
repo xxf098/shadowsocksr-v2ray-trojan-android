@@ -9,12 +9,20 @@
         android:key="@string/featurePreferenceGroup">
 
         <com.github.shadowsocks.preferences.DropDownPreference
-            android:defaultValue="Default"
+            android:defaultValue="default"
             android:entries="@array/sort_method_entry"
             android:entryValues="@array/sort_method_value"
             android:key="pref_sort_method"
             android:summary="%s"
             android:title="@string/title_pref_sort_method" />
+
+        <com.github.shadowsocks.preferences.DropDownPreference
+            android:defaultValue="on"
+            android:entries="@array/switch_entry"
+            android:entryValues="@array/switch_value"
+            android:key="pref_ssr_dns_nocache1"
+            android:summary="%s"
+            android:title="@string/title_ssr_dns_nocache" />
 
         <CheckBoxPreference
             android:key="pref_auto_update_subscription"
@@ -24,11 +32,6 @@
             android:key="pref_auto_test_connectivity"
             android:summary="@string/summary_auto_test_connectivity"
             android:title="@string/title_auto_test_connectivity" />
-
-        <CheckBoxPreference
-            android:key="pref_ssr_dns_nocache"
-            android:summary="@string/summary_ssr_dns_nocache"
-            android:title="@string/title_ssr_dns_nocache" />
 
         <CheckBoxPreference
             android:key="pref_hide_server"

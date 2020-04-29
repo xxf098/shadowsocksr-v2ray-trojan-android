@@ -367,7 +367,7 @@ object Key {
   val HIDE_SERVER = "pref_hide_server"
   val AUTO_UPDATE_SUBSCRIPTION = "pref_auto_update_subscription"
   val AUTO_TEST_CONNECTIVITY = "pref_auto_test_connectivity"
-  val SSR_DNS_NOCAHCE = "pref_ssr_dns_nocache"
+  val SSR_DNS_NOCAHCE = "pref_ssr_dns_nocache1"
 }
 
 object State {

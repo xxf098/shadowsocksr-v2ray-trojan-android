@@ -123,8 +123,8 @@ class AppStateManager(dbHelper: DBHelper) {
     saveAppStateAsync(None, None, None, Some(packageNames))
   }
 
-  def saveDNSNoCache(nocache: Boolean): Unit = {
-    val dnsNoCache = if(nocache) "on" else "off"
+  def saveDNSNoCache(nocache: String): Unit = {
+    val dnsNoCache = if(nocache == "on") "on" else "off"
     saveAppStateAsync(None, None, None, None, Option(dnsNoCache))
   }
 

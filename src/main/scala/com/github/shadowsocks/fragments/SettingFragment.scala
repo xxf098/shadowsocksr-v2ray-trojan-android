@@ -27,6 +27,7 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
   lazy val hideServer = findPreference(Key.HIDE_SERVER).asInstanceOf[CheckBoxPreference]
   lazy val autoUpdate = findPreference(Key.AUTO_UPDATE_SUBSCRIPTION).asInstanceOf[CheckBoxPreference]
   lazy val autoTestConnectivity = findPreference(Key.AUTO_TEST_CONNECTIVITY).asInstanceOf[CheckBoxPreference]
+  lazy val ssrDNSNoCache = findPreference(Key.SSR_DNS_NOCAHCE).asInstanceOf[DropDownPreference]
   lazy val aboutPref = findPreference("about")
   lazy val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
   private def activity = getActivity.asInstanceOf[SettingActivity]
@@ -55,6 +56,14 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
     autoTestConnectivity.setOnPreferenceChangeListener((_, value) => {
       val autoTestEnabled = value.asInstanceOf[Boolean]
       prefs.edit().putBoolean(Key.AUTO_TEST_CONNECTIVITY, autoTestEnabled).apply()
+      true
+    })
+
+    ssrDNSNoCache.setDropDownWidth(R.dimen.default_dropdown_width)
+    ssrDNSNoCache.setOnPreferenceChangeListener((_, value) => {
+      val nocache = value.asInstanceOf[String]
+      prefs.edit().putString(Key.SSR_DNS_NOCAHCE, nocache).apply()
+      app.appStateManager.saveDNSNoCache(nocache)
       true
     })
 

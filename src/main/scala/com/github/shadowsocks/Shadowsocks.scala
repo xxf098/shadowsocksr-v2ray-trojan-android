@@ -452,8 +452,8 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     }
     // Check if current profile changed
     if (preferences.profile == null || app.profileId != preferences.profile.id) {
-      updatePreferenceScreen(app.currentProfile match {
-        case Some(profile) => profile // updated
+      val profile = app.currentProfile match {
+        case Some(profile) => Option(profile) // updated
         case None => // removed
           app.switchProfile((app.profileManager.getFirstProfile match {
             case Some(first) => first
@@ -463,7 +463,8 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
               defaultProfile
             }
           }).id)
-      })
+      }
+      profile.foreach(updatePreferenceScreen)
 
       if (serviceStarted) serviceLoad()
 

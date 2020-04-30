@@ -390,55 +390,62 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         })
     }
 
-    val black_list = profile.route match {
+    val (black_list, black_list_cn) = profile.route match {
       case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST |
            Route.ACL4SSR_BANDAD | Route.ACL4SSR_GFWLIST_BANAD | Route.ACL4SSR_ONLYBANAD |
            Route.ACL4SSR_FULLGFWLIST | Route.ACL4SSR_BACKCN_BANAD | Route.ACL4SSR_NOBANAD => {
-        getBlackList
+        (getBlackList(), getBlackList("cn"))
       }
       case Route.ACL => {
         if (remote_dns) {
-            ""
+          ("", "")
         } else {
-            getBlackList
+          (getBlackList(), getBlackList("cn"))
         }
       }
       case _ => {
-        ""
+        ("", "")
       }
     }
 
-    for (china_dns <- profile.china_dns.split(",")) {
-      china_dns_settings += ConfigUtils.REMOTE_SERVER.formatLocal(Locale.ENGLISH, china_dns.split(":")(0), china_dns.split(":")(1).toInt,
-        black_list, reject)
-    }
+//    for (china_dns <- profile.china_dns.split(",")) {
+//      china_dns_settings += ConfigUtils.REMOTE_SERVER.formatLocal(Locale.ENGLISH, china_dns.split(":")(0), china_dns.split(":")(1).toInt,
+//        black_list, reject)
+//    }
+    var dns_addr = profile.china_dns.split(",").head
+    china_dns_settings += ConfigUtils.REMOTE_SERVER.formatLocal(Locale.ENGLISH, dns_addr.split(":")(0), dns_addr.split(":")(1).toInt, black_list, reject)
+    dns_addr = profile.dns.split(",").head
+    china_dns_settings += ConfigUtils.REMOTE_SERVER.formatLocal(Locale.ENGLISH, dns_addr.split(":")(0), dns_addr.split(":")(1).toInt, black_list_cn, reject)
 
+    val nocache = app.appStateManager.getAppState()
+      .flatMap(appState => if(appState.dns_nocache == "on") Option(s"nocache = on;") else None).getOrElse("")
     val conf = profile.route match {
       case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST |
            Route.ACL4SSR_BANDAD | Route.ACL4SSR_GFWLIST_BANAD | Route.ACL4SSR_ONLYBANAD |
            Route.ACL4SSR_FULLGFWLIST | Route.ACL4SSR_BACKCN_BANAD | Route.ACL4SSR_NOBANAD => {
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, protect, getApplicationInfo.dataDir,
-          "0.0.0.0", profile.localPort + 53, china_dns_settings, profile.localPort + 63, reject)
+          "0.0.0.0", profile.localPort + 53, nocache, china_dns_settings, profile.localPort + 63, reject)
       }
       case Route.CHINALIST => {
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, protect, getApplicationInfo.dataDir,
-          "0.0.0.0", profile.localPort + 53, china_dns_settings, profile.localPort + 63, reject)
+          "0.0.0.0", profile.localPort + 53, nocache, china_dns_settings, profile.localPort + 63, reject)
       }
       case Route.ACL => {
         if (!remote_dns) {
             ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, protect, getApplicationInfo.dataDir,
-              "0.0.0.0", profile.localPort + 53, china_dns_settings, profile.localPort + 63, reject)
+              "0.0.0.0", profile.localPort + 53, nocache, china_dns_settings, profile.localPort + 63, reject)
         } else {
             ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, protect, getApplicationInfo.dataDir,
-              "0.0.0.0", profile.localPort + 53, profile.localPort + 63, reject)
+              "0.0.0.0", profile.localPort + 53, nocache, profile.localPort + 63, reject)
         }
       }
       case _ => {
         ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, protect, getApplicationInfo.dataDir,
-          "0.0.0.0", profile.localPort + 53, profile.localPort + 63, reject)
+          "0.0.0.0", profile.localPort + 53, nocache, profile.localPort + 63, reject)
       }
     }
 
+    // Log.e(TAG, s"conf: $conf")
     Utils.printToFile (new File(getApplicationInfo.dataDir + "/pdnsd-vpn.conf"))(p => {
       p.println(conf)
       Route.BLOCK_DOMAIN.foreach(domain => p.println(s"neg { name = $domain; types = domain; }"))

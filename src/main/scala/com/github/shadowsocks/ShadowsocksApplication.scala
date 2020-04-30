@@ -53,7 +53,7 @@ import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatDelegate
 import android.util.Log
 import com.evernote.android.job.JobManager
-import com.github.shadowsocks.database.{AppStateManager, DBHelper, ProfileManager, SSRSubManager}
+import com.github.shadowsocks.database.{AppStateManager, DBHelper, Profile, ProfileManager, SSRSubManager}
 import com.github.shadowsocks.job.DonaldTrump
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils._
@@ -128,9 +128,9 @@ class ShadowsocksApplication extends Application {
 
   def currentProfile = profileManager.getProfile(profileId)
 
-  def switchProfile(id: Int) = {
+  def switchProfile(id: Int): Option[Profile] = {
     profileId(id)
-    profileManager.getProfile(id) getOrElse profileManager.createProfile()
+    profileManager.getProfile(id)
   }
 
   def getV2rayAssetsPath (): String = getApplicationInfo.dataDir + "/files/"
@@ -233,11 +233,13 @@ class ShadowsocksApplication extends Application {
     if (Build.VERSION.SDK_INT >= 26) {
       val notification = getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
       val importance = if (Build.VERSION.SDK_INT >= 28) NotificationManager.IMPORTANCE_MIN else NotificationManager.IMPORTANCE_LOW
-      notification.createNotificationChannels(List(
-        new NotificationChannel("service-ssr", getText(R.string.service_ssr), importance),
-        new NotificationChannel("service-v2ray", getText(R.string.service_v2ray), importance),
-        new NotificationChannel("service-nat", getText(R.string.service_nat), importance)
-      ).asJava)
+      val ssrChannel = new NotificationChannel("service-ssr", getText(R.string.service_ssr), importance)
+      ssrChannel.setShowBadge(false)
+      val v2rayChannel = new NotificationChannel("service-v2ray", getText(R.string.service_v2ray), importance)
+      v2rayChannel.setShowBadge(false)
+      val natChannel = new NotificationChannel("service-nat", getText(R.string.service_nat), importance)
+      natChannel.setShowBadge(false)
+      notification.createNotificationChannels(List(ssrChannel, v2rayChannel, natChannel).asJava)
     }
   }
 

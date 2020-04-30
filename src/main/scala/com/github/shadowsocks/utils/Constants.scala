@@ -102,6 +102,7 @@ object ConfigUtils {
       | max_ttl = 1w;
       | timeout = 10;
       | daemon = off;
+      | nocache = %s;
       |}
       |
       |server {
@@ -125,17 +126,19 @@ object ConfigUtils {
   val PDNSD_DIRECT =
     """
       |global {
-      | perm_cache = 2048;
+      | perm_cache = 4096;
       | %s
       | cache_dir = "%s";
       | server_ip = %s;
       | server_port = %d;
       | query_method = udp_only;
       | min_ttl = 15m;
-      | max_ttl = 1w;
+      | max_ttl = 5d;
       | timeout = 10;
       | daemon = off;
       | par_queries = 4;
+      | %s
+      | debug = off;
       |}
       |
       |%s
@@ -175,6 +178,21 @@ object ConfigUtils {
         |}
       """.stripMargin
 
+  val REMOTE_SERVER1 =
+    """
+      |server {
+      | label = "remote-servers1";
+      | ip = 223.5.5.5,1.1.1.1;
+      | timeout = 5;
+      | proxy_only=on;
+      | lean_query=on;
+      | query_method = udp_only;
+      | policy = included;
+      | reject_policy = fail;
+      | reject_recursively = on;
+      |}
+    """.stripMargin
+
   val V2RAY_CONFIG =
     """{
       |    "log": {
@@ -184,7 +202,7 @@ object ConfigUtils {
       |    },
       |    "dns": {
       |        "servers": [
-      |            "1.0.0.1",
+      |            "1.1.1.1",
       |            "localhost"
       |        ]
       |    },
@@ -349,6 +367,7 @@ object Key {
   val HIDE_SERVER = "pref_hide_server"
   val AUTO_UPDATE_SUBSCRIPTION = "pref_auto_update_subscription"
   val AUTO_TEST_CONNECTIVITY = "pref_auto_test_connectivity"
+  val SSR_DNS_NOCAHCE = "pref_ssr_dns_nocache1"
 }
 
 object State {
@@ -391,7 +410,7 @@ object Route {
   )
   val BLOCK_DOMAIN = List(
 //    "baidu.com",
-    "www.auspiciousvp.com",
+//    "www.auspiciousvp.com",
     "auspiciousvp.com",
 //    "baidustatic.com",
 //    "umeng.com",

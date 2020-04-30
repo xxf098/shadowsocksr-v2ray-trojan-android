@@ -19,4 +19,7 @@ class AppState {
 
   @DatabaseField
   var package_names: String = ""
+
+  @DatabaseField
+  var dns_nocache: String = "off"
 }

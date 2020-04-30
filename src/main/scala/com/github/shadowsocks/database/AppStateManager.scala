@@ -65,7 +65,11 @@ class AppStateManager(dbHelper: DBHelper) {
 //
 //  }
 
-  def saveAppState(profileId: Option[Int], perAppProxyEnabled: Option[Boolean], isBypassMode: Option[Boolean], packageNames: Option[String]): Option[AppState] = {
+  def saveAppState(profileId: Option[Int],
+                   perAppProxyEnabled: Option[Boolean],
+                   isBypassMode: Option[Boolean],
+                   packageNames: Option[String],
+                  dnsNoCache: Option[String] = None): Option[AppState] = {
     try {
       dbHelper.appStateDao.queryBuilder().queryForFirst() match {
         case appState: AppState => {
@@ -74,6 +78,7 @@ class AppStateManager(dbHelper: DBHelper) {
           perAppProxyEnabled.foreach(per_app_proxy_enable => appState.per_app_proxy_enable = per_app_proxy_enable)
           isBypassMode.foreach(bypass_mode => appState.bypass_mode = bypass_mode)
           packageNames.foreach(package_names => appState.package_names = package_names)
+          dnsNoCache.foreach(dns_nocache => appState.dns_nocache = dns_nocache)
           dbHelper.appStateDao.update(appState)
           Some(appState)
         }
@@ -83,6 +88,7 @@ class AppStateManager(dbHelper: DBHelper) {
             per_app_proxy_enable = perAppProxyEnabled.getOrElse(false)
             bypass_mode = isBypassMode.getOrElse(false)
             package_names = packageNames.getOrElse("")
+            dns_nocache = dnsNoCache.getOrElse("off")
           }
           dbHelper.appStateDao.create(appState)
           Some(appState)
@@ -95,9 +101,13 @@ class AppStateManager(dbHelper: DBHelper) {
     }
   }
 
-  def saveAppStateAsync(profileId: Option[Int], perAppProxyEnabled: Option[Boolean], isBypassMode: Option[Boolean], packageNames: Option[String]): Unit = {
+  def saveAppStateAsync(profileId: Option[Int],
+                        perAppProxyEnabled: Option[Boolean],
+                        isBypassMode: Option[Boolean],
+                        packageNames: Option[String],
+                        dnsNoCache: Option[String] = None): Unit = {
     Future{
-      saveAppState(profileId, perAppProxyEnabled, isBypassMode, packageNames)
+      saveAppState(profileId, perAppProxyEnabled, isBypassMode, packageNames, dnsNoCache)
     }
   }
 
@@ -111,6 +121,11 @@ class AppStateManager(dbHelper: DBHelper) {
 
   def savePackageNames(packageNames: String): Unit = {
     saveAppStateAsync(None, None, None, Some(packageNames))
+  }
+
+  def saveDNSNoCache(nocache: String): Unit = {
+    val dnsNoCache = if(nocache == "on") "on" else "off"
+    saveAppStateAsync(None, None, None, None, Option(dnsNoCache))
   }
 
   def createDefault(profileId: Int): AppState = {

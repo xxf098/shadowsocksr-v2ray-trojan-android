@@ -286,8 +286,11 @@ trait BaseService extends Service {
     })
   }
 
-  def getBlackList = {
-    val default = getString(R.string.black_list)
+  def getBlackList (region: String = ""): String = {
+    val default = region match {
+      case "cn" => getString(R.string.black_list_cn)
+      case _ => getString(R.string.black_list)
+    }
     try {
       val container = app.containerHolder.getContainer
       val update = container.getString("black_list_lite")

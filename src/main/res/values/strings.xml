@@ -295,12 +295,24 @@
     <item>elapsed</item>
   </string-array>
 
+  <string-array name="switch_entry">
+    <item>On</item>
+    <item>Off</item>
+  </string-array>
+
+  <string-array name="switch_value">
+    <item>on</item>
+    <item>off</item>
+  </string-array>
+
   <string name="title_pref_hide_server">Hide Server</string>
-  <string name="summary_pref_hide_server">Hide Server Address for Privacy</string>
+  <string name="summary_pref_hide_server">Hide Server Addresses for Privacy</string>
 
   <string name="summary_ssrsub_autoupdate_enable">Auto Update Subscriptions</string>
 
   <string name="title_auto_test_connectivity">Auto Test</string>
   <string name="summary_auto_test_connectivity">Auto Test Connectivity on Start VPN</string>
+
+  <string name="title_ssr_dns_nocache">SSR DNS Cache</string>
 
 </resources>

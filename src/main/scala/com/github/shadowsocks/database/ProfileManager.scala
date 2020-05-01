@@ -53,6 +53,7 @@ class ProfileManager(dbHelper: DBHelper) {
   def setProfileAddedListener(listener: Profile => Any) = this.profileAddedListener = listener
 
   def createProfile(p: Profile = null): Profile = {
+    // if (p=null) return new Profile()
     val profile = if (p == null) new Profile else p
     profile.id = 0
     profile.url_group = if (profile.url_group.isEmpty) "Default Group"  else profile.url_group
@@ -213,6 +214,22 @@ class ProfileManager(dbHelper: DBHelper) {
     } catch {
       case ex: Exception =>
         Log.e(TAG, "updateProfile", ex)
+        app.track(ex)
+        false
+    }
+  }
+
+  def updateAllProfileRoute(profileType:String, value:String): Boolean = {
+    try {
+      if (profileType == "v2ray") {
+        dbHelper.profileDao.executeRawNoArgs("UPDATE `profile` SET route" + " = '" + value + "' where coalesce(v_add, '') != '';")
+      } else {
+        dbHelper.profileDao.executeRawNoArgs("UPDATE `profile` SET route" + " = '" + value + "' where coalesce(v_add, '') = '';")
+      }
+      true
+    } catch {
+      case ex: Exception =>
+        Log.e(TAG, "updateProfileRoute", ex)
         app.track(ex)
         false
     }

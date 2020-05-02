@@ -95,10 +95,12 @@ object SSRSub {
 
   def createSSRSub(responseString: String, requestURL: String, groupName: String = ""): Option[SSRSub] = {
     val profiles_ssr = Parser.findAll_ssr(responseString).toList
-    if(profiles_ssr.nonEmpty && profiles_ssr.head.url_group != "") {
+    if(profiles_ssr.nonEmpty) {
       val ssrsub = new SSRSub {
         url = requestURL
-        url_group = if (TextUtils.isEmpty(groupName)) profiles_ssr.head.url_group else groupName
+        url_group = if (TextUtils.isEmpty(groupName)) {
+          if (TextUtils.isEmpty(profiles_ssr.head.url_group)) new URL(requestURL).getHost else profiles_ssr.head.url_group
+        } else groupName
       }
       return Some(ssrsub)
     } else {

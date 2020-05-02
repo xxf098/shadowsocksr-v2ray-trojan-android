@@ -102,7 +102,7 @@ object ConfigUtils {
       | max_ttl = 1w;
       | timeout = 10;
       | daemon = off;
-      | nocache = %s;
+      | %s
       |}
       |
       |server {

@@ -418,7 +418,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     china_dns_settings += ConfigUtils.REMOTE_SERVER.formatLocal(Locale.ENGLISH, dns_addr.split(":")(0), dns_addr.split(":")(1).toInt, black_list_cn, reject)
 
     val nocache = app.appStateManager.getAppState()
-      .flatMap(appState => if(appState.dns_nocache == "on") Option(s"nocache = on;") else None).getOrElse("")
+      .flatMap(appState => if(appState.dns_nocache == "off") Option(s"nocache = on;") else None).getOrElse("")
     val conf = profile.route match {
       case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST |
            Route.ACL4SSR_BANDAD | Route.ACL4SSR_GFWLIST_BANAD | Route.ACL4SSR_ONLYBANAD |

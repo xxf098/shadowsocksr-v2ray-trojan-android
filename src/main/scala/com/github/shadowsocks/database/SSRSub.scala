@@ -98,9 +98,9 @@ object SSRSub {
     if(profiles_ssr.nonEmpty) {
       val ssrsub = new SSRSub {
         url = requestURL
-        url_group = if (TextUtils.isEmpty(groupName)) {
-          if (TextUtils.isEmpty(profiles_ssr.head.url_group)) new URL(requestURL).getHost else profiles_ssr.head.url_group
-        } else groupName
+        url_group = if (!TextUtils.isEmpty(groupName)) groupName
+        else if (!TextUtils.isEmpty(profiles_ssr.head.url_group)) profiles_ssr.head.url_group
+        else new URL(requestURL).getHost
       }
       return Some(ssrsub)
     } else {

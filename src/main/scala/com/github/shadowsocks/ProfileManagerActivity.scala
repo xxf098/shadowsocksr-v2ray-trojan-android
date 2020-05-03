@@ -68,6 +68,12 @@ object ProfileManagerActivity {
       case (_, false) => app.profileManager.getAllProfilesByGroup(groupName)
     }}.getOrElse(List.empty[Profile])
   }
+
+  def countProfilesByGroup (groupName: String): Long = {
+    val allGroup = app.getString(R.string.allgroups)
+    val group = if (groupName == allGroup) None else Some(groupName)
+    app.profileManager.countAllProfilesByGroup(group)
+  }
 }
 
 // TODO: AndroidX
@@ -337,6 +343,28 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     }
   }
 
+  private class GroupAdapter(context: Context, resID: Int) extends ArrayAdapter[String](context, resID) {
+
+    def getCustomView (position: Int, convertView: View, parent: ViewGroup): View = {
+      val layout = getLayoutInflater.inflate(R.layout.layout_group_spinner_item, parent, false)
+      val tv1 = layout.findViewById(android.R.id.text1).asInstanceOf[TextView]
+      val tv2 = layout.findViewById(android.R.id.text2).asInstanceOf[TextView]
+      val groupName = getItem(position)
+      tv1.setText(groupName)
+      if (groupName == currentGroupName) {
+        val count = ProfileManagerActivity.countProfilesByGroup(currentGroupName)
+        tv2.setText(s"$count")
+      } else {
+        tv2.setText("")
+      }
+      layout
+    }
+
+    override def getDropDownView(position: Int, convertView: View, parent: ViewGroup): View = getCustomView(position, convertView, parent)
+
+    override def getView(position: Int, convertView: View, parent: ViewGroup): View = getCustomView(position, convertView, parent)
+  }
+
   private var selectedItem: ProfileViewHolder = _
   private val handler = new Handler
 
@@ -489,7 +517,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     def initGroupSpinner(groupName: Option[String] = None ): Unit = {
     currentGroupName = groupName.getOrElse(getString(R.string.allgroups))
     val groupSpinner = findViewById(R.id.group_choose_spinner).asInstanceOf[AppCompatSpinner]
-    val groupAdapter = new ArrayAdapter[String](this, android.R.layout.simple_spinner_dropdown_item)
+    val groupAdapter = new GroupAdapter(this, R.layout.layout_group_spinner_item)
     val selectIndex = app.profileManager.getGroupNames match {
       case Some(groupNames) => {
         val allGroupNames = getString(R.string.allgroups) +: groupNames
@@ -505,6 +533,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       def onItemSelected(parent: AdapterView[_], view: View, position: Int, id: Long): Unit = {
         currentGroupName = parent.getItemAtPosition(position).toString
         profilesAdapter.onGroupChange(currentGroupName)
+        groupAdapter.notifyDataSetChanged()
         app.editor.putString(Key.currentGroupName, currentGroupName).apply()
       }
     })

@@ -381,6 +381,19 @@ class ProfileManager(dbHelper: DBHelper) {
     }
   }
 
+  def countAllProfilesByGroup (groupName: Option[String]): Long = {
+    try {
+      groupName match {
+        case Some(name) => dbHelper.profileDao.queryBuilder().where().eq("url_group", name).countOf()
+        case None => dbHelper.profileDao.countOf()
+      }
+    } catch {
+      case ex: Exception =>
+        Log.e(TAG, "getAllProfiles", ex)
+        0L
+    }
+  }
+
   def getGroupNames: Option[List[String]] = {
     try {
       import scala.collection.JavaConversions._

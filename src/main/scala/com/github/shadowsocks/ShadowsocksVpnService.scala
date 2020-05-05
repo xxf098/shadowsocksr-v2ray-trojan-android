@@ -84,9 +84,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   var proxychains_enable: Boolean = false
   var host_arg = ""
   var dns_address = ""
-  var dns_port = 0
+  var dns_port = 53
   var china_dns_address = ""
-  var china_dns_port = 0
+  var china_dns_port = 53
 
   var v2rayThread: V2RayVpnThread = _
 
@@ -182,23 +182,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       proxychains_enable = false
     }
 
-    try {
-      val dns = scala.util.Random.shuffle(profile.dns.split(",").toList).head
-      dns_address = dns.split(":")(0)
-      dns_port = dns.split(":")(1).toInt
-
-      val china_dns = scala.util.Random.shuffle(profile.china_dns.split(",").toList).head
-      china_dns_address = china_dns.split(":")(0)
-      china_dns_port = china_dns.split(":")(1).toInt
-    } catch {
-      case ex: Exception =>
-        dns_address = "1.1.1.1"
-        dns_port = 53
-
-        china_dns_address = "223.5.5.5"
-        china_dns_port = 53
-    }
-
+    val dnsConf = profile.getDNSConf()
+    dns_address = dnsConf._1
+    dns_port = dnsConf._2
+    china_dns_address = dnsConf._3
+    china_dns_port = dnsConf._4
     // v2ray ipv6
     if (profile.isV2Ray) {
       if (!Utils.isNumeric(profile.v_add)) Utils.resolve(profile.v_add, enableIPv6 = false, hostname=dns_address) match {

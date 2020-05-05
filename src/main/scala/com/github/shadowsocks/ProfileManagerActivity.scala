@@ -246,6 +246,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       profiles += item
       handler.post(() => {
         if (item.url_group != currentGroupName) initGroupSpinner(Some(item.url_group))
+        else groupAdapter.notifyDataSetChanged()
         notifyItemInserted(pos)
       })
     }
@@ -280,9 +281,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     def commit(actions: Iterator[(Int, Profile)]) = for ((index, item) <- actions) {
       app.profileManager.delProfile(item.id)
       if (item.id == app.profileId) app.profileId(-1)
-      if (profiles.isEmpty) {
-        initGroupSpinner()
-      }
+      if (profiles.isEmpty) initGroupSpinner()
+      else groupAdapter.notifyDataSetChanged()
     }
   }
 
@@ -373,6 +373,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   private lazy val profilesAdapter = new ProfilesAdapter
   private lazy val ssrsubAdapter = new SSRSubAdapter
   private var undoManager: UndoSnackbarManager[Profile] = _
+  private lazy val groupAdapter = new GroupAdapter(this, R.layout.layout_group_spinner_item)
 
   private lazy val clipboard = getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
 
@@ -517,7 +518,6 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     def initGroupSpinner(groupName: Option[String] = None ): Unit = {
     currentGroupName = groupName.getOrElse(getString(R.string.allgroups))
     val groupSpinner = findViewById(R.id.group_choose_spinner).asInstanceOf[AppCompatSpinner]
-    val groupAdapter = new GroupAdapter(this, R.layout.layout_group_spinner_item)
     val selectIndex = app.profileManager.getGroupNames match {
       case Some(groupNames) => {
         val allGroupNames = getString(R.string.allgroups) +: groupNames
@@ -921,7 +921,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       case REQUEST_CONFIG_RESULT => {
         val groupName = Option(data.getStringExtra(Key.SUBSCRIPTION_GROUP_NAME))
         undoManager.flush
-        initGroupSpinner(groupName)
+        if (groupName.getOrElse("") != currentGroupName) initGroupSpinner(groupName)
+        else groupAdapter.notifyDataSetChanged()
         profilesAdapter.notifyDataSetChanged()
       }
       case REQUEST_SETTINGS => {

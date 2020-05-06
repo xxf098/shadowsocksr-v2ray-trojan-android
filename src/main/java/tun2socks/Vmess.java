@@ -13,11 +13,11 @@ public final class Vmess implements Seq.Proxy
         return this.refnum;
     }
 
-    public Vmess(final String s, final String s2, final String s3, final String s4, final long n, final long n2, final String s5, final String s6, final String s7, final String s8, final long n3, final String s9) {
-        Seq.trackGoRef(this.refnum = __NewVmess(s, s2, s3, s4, n, n2, s5, s6, s7, s8, n3, s9), this);
+    public Vmess(final String s, final String s2, final String s3, final String s4, final long n, final long n2, final String s5, final String s6, final String s7, final String s8, final long n3, final String s9, final String s10) {
+        Seq.trackGoRef(this.refnum = __NewVmess(s, s2, s3, s4, n, n2, s5, s6, s7, s8, n3, s9, s10), this);
     }
 
-    private static native int __NewVmess(final String p0, final String p1, final String p2, final String p3, final long p4, final long p5, final String p6, final String p7, final String p8, final String p9, final long p10, final String p11);
+    private static native int __NewVmess(final String p0, final String p1, final String p2, final String p3, final long p4, final long p5, final String p6, final String p7, final String p8, final String p9, final long p10, final String p11, final String p12);
 
     Vmess(final int refnum) {
         Seq.trackGoRef(this.refnum = refnum, this);
@@ -66,6 +66,10 @@ public final class Vmess implements Seq.Proxy
     public final native long getRouteMode();
 
     public final native void setRouteMode(final long p0);
+
+    public final native String getDNS();
+
+    public final native void setDNS(final String p0);
 
     public final native String getLoglevel();
 
@@ -166,6 +170,16 @@ public final class Vmess implements Seq.Proxy
         if (this.getRouteMode() != vmess.getRouteMode()) {
             return false;
         }
+        final String dns = this.getDNS();
+        final String dns2 = vmess.getDNS();
+        if (dns == null) {
+            if (dns2 != null) {
+                return false;
+            }
+        }
+        else if (!dns.equals(dns2)) {
+            return false;
+        }
         final String loglevel = this.getLoglevel();
         final String loglevel2 = vmess.getLoglevel();
         if (loglevel == null) {
@@ -181,7 +195,7 @@ public final class Vmess implements Seq.Proxy
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[] { this.getHost(), this.getPath(), this.getTLS(), this.getAdd(), this.getPort(), this.getAid(), this.getNet(), this.getID(), this.getType(), this.getSecurity(), this.getRouteMode(), this.getLoglevel() });
+        return Arrays.hashCode(new Object[] { this.getHost(), this.getPath(), this.getTLS(), this.getAdd(), this.getPort(), this.getAid(), this.getNet(), this.getID(), this.getType(), this.getSecurity(), this.getRouteMode(), this.getDNS(), this.getLoglevel() });
     }
 
     @Override
@@ -199,6 +213,7 @@ public final class Vmess implements Seq.Proxy
         sb.append("Type:").append(this.getType()).append(",");
         sb.append("Security:").append(this.getSecurity()).append(",");
         sb.append("RouteMode:").append(this.getRouteMode()).append(",");
+        sb.append("DNS:").append(this.getDNS()).append(",");
         sb.append("Loglevel:").append(this.getLoglevel()).append(",");
         return sb.append("}").toString();
     }

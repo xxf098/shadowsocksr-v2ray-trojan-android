@@ -516,27 +516,29 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
     // Add profiles counter
     def initGroupSpinner(groupName: Option[String] = None ): Unit = {
-    currentGroupName = groupName.getOrElse(getString(R.string.allgroups))
-    val groupSpinner = findViewById(R.id.group_choose_spinner).asInstanceOf[AppCompatSpinner]
-    val selectIndex = app.profileManager.getGroupNames match {
-      case Some(groupNames) => {
-        val allGroupNames = getString(R.string.allgroups) +: groupNames
-        allGroupNames.foreach(name => groupAdapter.add(name))
-        Math.max(0, allGroupNames.indexOf(currentGroupName))
+      currentGroupName = groupName.getOrElse(getString(R.string.allgroups))
+      val groupSpinner = findViewById(R.id.group_choose_spinner).asInstanceOf[AppCompatSpinner]
+      groupAdapter.clear()
+      val selectIndex = app.profileManager.getGroupNames match {
+        case Some(groupNames) => {
+          val allGroupNames = getString(R.string.allgroups) +: groupNames
+          allGroupNames.foreach(name => groupAdapter.add(name))
+          Math.max(0, allGroupNames.indexOf(currentGroupName))
+        }
+        case None => 0
       }
-      case None => 0
-    }
-    groupSpinner.setAdapter(groupAdapter)
-    groupSpinner.setSelection(selectIndex)
-    groupSpinner.setOnItemSelectedListener(new OnItemSelectedListener {
-      def onNothingSelected(parent: AdapterView[_]): Unit = {}
-      def onItemSelected(parent: AdapterView[_], view: View, position: Int, id: Long): Unit = {
-        currentGroupName = parent.getItemAtPosition(position).toString
-        profilesAdapter.onGroupChange(currentGroupName)
-        groupAdapter.notifyDataSetChanged()
-        app.editor.putString(Key.currentGroupName, currentGroupName).apply()
-      }
-    })
+      groupSpinner.setAdapter(groupAdapter)
+      groupSpinner.setSelection(selectIndex)
+      groupSpinner.setOnItemSelectedListener(new OnItemSelectedListener {
+        def onNothingSelected(parent: AdapterView[_]): Unit = {}
+
+        def onItemSelected(parent: AdapterView[_], view: View, position: Int, id: Long): Unit = {
+          currentGroupName = parent.getItemAtPosition(position).toString
+          profilesAdapter.onGroupChange(currentGroupName)
+          groupAdapter.notifyDataSetChanged()
+          app.editor.putString(Key.currentGroupName, currentGroupName).apply()
+        }
+      })
   }
 
 

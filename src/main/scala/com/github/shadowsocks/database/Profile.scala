@@ -200,7 +200,7 @@ class Profile {
   var dns: String = "1.1.1.1:53,8.8.8.8:53"
 
   @DatabaseField
-  var china_dns: String = "223.5.5.5:53,223.6.6.6:53"
+  var china_dns: String = "223.5.5.5:53,114.114.114.114:53"
 
   @DatabaseField
   var ipv6: Boolean = false

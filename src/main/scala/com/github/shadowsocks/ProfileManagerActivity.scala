@@ -56,6 +56,7 @@ import com.github.shadowsocks.database.VmessAction.profile
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{Duration, SECONDS}
 import scala.concurrent.{Await, Future}
+import scala.util.Try
 
 object ProfileManagerActivity {
   // profiles count
@@ -270,19 +271,26 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       notifyItemMoved(from, to)
     }
 
+    private def updateGroupSpinner (extraCount: Int = 0): Unit = {
+      groupAdapter.setExtraCount(extraCount)
+      if (profiles.isEmpty) initGroupSpinner()
+      else groupAdapter.notifyDataSetChanged()
+    }
+
     def remove(pos: Int) {
       profiles.remove(pos)
       notifyItemRemoved(pos)
+      updateGroupSpinner(-1-undoManager.getCount())
     }
     def undo(actions: Iterator[(Int, Profile)]) = for ((index, item) <- actions) {
       profiles.insert(index, item)
       notifyItemInserted(index)
+      updateGroupSpinner()
     }
     def commit(actions: Iterator[(Int, Profile)]) = for ((index, item) <- actions) {
       app.profileManager.delProfile(item.id)
       if (item.id == app.profileId) app.profileId(-1)
-      if (profiles.isEmpty) initGroupSpinner()
-      else groupAdapter.notifyDataSetChanged()
+      updateGroupSpinner()
     }
   }
 
@@ -345,19 +353,25 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   private class GroupAdapter(context: Context, resID: Int) extends ArrayAdapter[String](context, resID) {
 
+    private var extraCount = 0
+
     def getCustomView (position: Int, convertView: View, parent: ViewGroup): View = {
       val layout = getLayoutInflater.inflate(R.layout.layout_group_spinner_item, parent, false)
       val tv1 = layout.findViewById(android.R.id.text1).asInstanceOf[TextView]
-      val tv2 = layout.findViewById(android.R.id.text2).asInstanceOf[TextView]
+      val tv2: TextView = layout.findViewById(android.R.id.text2).asInstanceOf[TextView]
       val groupName = getItem(position)
       tv1.setText(groupName)
       if (groupName == currentGroupName) {
         val count = ProfileManagerActivity.countProfilesByGroup(currentGroupName)
-        tv2.setText(s"$count")
+        tv2.setText(s"${count + extraCount}")
       } else {
         tv2.setText("")
       }
       layout
+    }
+
+    def setExtraCount (count: Int): Unit = {
+      extraCount = count
     }
 
     override def getDropDownView(position: Int, convertView: View, parent: ViewGroup): View = getCustomView(position, convertView, parent)
@@ -518,6 +532,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     def initGroupSpinner(groupName: Option[String] = None ): Unit = {
       currentGroupName = groupName.getOrElse(getString(R.string.allgroups))
       val groupSpinner = findViewById(R.id.group_choose_spinner).asInstanceOf[AppCompatSpinner]
+      groupAdapter.setExtraCount(0)
       groupAdapter.clear()
       val selectIndex = app.profileManager.getGroupNames match {
         case Some(groupNames) => {

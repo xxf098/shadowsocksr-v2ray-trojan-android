@@ -70,6 +70,7 @@ object Profile {
     }
     val v_security = if (TextUtils.isEmpty(profile.v_security)) "auto" else profile.v_security
     val routeMode = math.max(Route.ALL_ROUTES.indexOf(profile.route), 0)
+    val (dns_address, dns_port, china_dns_address, china_dns_port) =  profile.getDNSConf()
     // Log.e("Profile", s"v_host: ${profile.v_host}, v_path: ${profile.v_path}, v_tls: ${profile.v_tls}, v_add: ${profile.v_add}, v_port: ${profile.v_port}, v_aid: ${profile.v_aid}, v_net: ${profile.v_net}, v_id: ${profile.v_id}, v_type: ${profile.v_type}, v_security: ${profile.v_security}, routeMode: $routeMode")
     Tun2socks.newVmess(
       profile.v_host,
@@ -83,6 +84,7 @@ object Profile {
       profile.v_type,
       v_security,
       routeMode,
+      s"$dns_address:$dns_port,$china_dns_address:$china_dns_port",
       "error" // TODO: config log level
     )
   }
@@ -115,6 +117,29 @@ object Profile {
         app.profileManager.updateProfile(profile)
         result.msg
       }).get
+    }
+
+    def getDNSConf() : (String, Int, String, Int) = {
+      var dns_address = ""
+      var dns_port = 53
+      var china_dns_address = ""
+      var china_dns_port = 53
+      try {
+        val dns = scala.util.Random.shuffle(profile.dns.split(",").toList).head
+        dns_address = dns.split(":")(0)
+        dns_port = dns.split(":")(1).toInt
+
+        val china_dns = scala.util.Random.shuffle(profile.china_dns.split(",").toList).head
+        china_dns_address = china_dns.split(":")(0)
+        china_dns_port = china_dns.split(":")(1).toInt
+      } catch {
+        case ex: Exception =>
+          dns_address = "1.1.1.1"
+          dns_port = 53
+          china_dns_address = "223.5.5.5"
+          china_dns_port = 53
+      }
+      (dns_address, dns_port, china_dns_address, china_dns_port)
     }
   }
 }
@@ -175,7 +200,7 @@ class Profile {
   var dns: String = "1.1.1.1:53,8.8.8.8:53"
 
   @DatabaseField
-  var china_dns: String = "223.5.5.5:53,223.6.6.6:53"
+  var china_dns: String = "223.5.5.5:53,114.114.114.114:53"
 
   @DatabaseField
   var ipv6: Boolean = false

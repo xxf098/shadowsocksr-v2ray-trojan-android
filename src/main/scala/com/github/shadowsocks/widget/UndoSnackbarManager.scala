@@ -43,4 +43,6 @@ class UndoSnackbarManager[T](view: View, undo: Iterator[(Int, T)] => Unit,
   }
 
   def flush = if (last != null) last.dismiss
+
+  def getCount(): Int = recycleBin.length
 }

@@ -23,7 +23,7 @@ A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) and [V2Ray](http
 
 * Download [Android Studio](https://developer.android.com/studio)
 * Download [Android NDK r12b](https://developer.android.com/ndk/downloads/older_releases)
-* Set proxy for sbt in Android Studio: open `Settings -> Build, Execution, Deployment -> Build Tool -> sbt`, in `VM parameters` input:
+* Set proxy for sbt in Android Studio: open `Settings -> Build, Execution, Deployment -> Build Tool -> sbt`, in `VM parameters` input (or Welcome Page `Configure -> Edit Custom VM Options`):
 
         -Dhttp.proxyHost=127.0.0.1
         -Dhttp.proxyPort=8080

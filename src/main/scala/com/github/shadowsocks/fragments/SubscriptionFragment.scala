@@ -18,7 +18,7 @@ import android.support.v7.widget.{DefaultItemAnimator, DividerItemDecoration, Li
 import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.util.Log
-import android.view.{KeyEvent, LayoutInflater, MenuItem, View, ViewGroup}
+import android.view.{Gravity, KeyEvent, LayoutInflater, MenuItem, View, ViewGroup}
 import android.widget.{CompoundButton, EditText, ImageView, PopupMenu, Switch, TextView, Toast}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.{Profile, SSRSub}
@@ -26,7 +26,6 @@ import com.github.shadowsocks.utils.{Key, Parser, Utils}
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.github.shadowsocks.{ConfigActivity, ProfileManagerActivity, R}
 import okhttp3.{OkHttpClient, Request}
-import android.view.View
 import android.webkit.URLUtil
 
 import scala.collection.mutable.ArrayBuffer
@@ -252,21 +251,8 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     var item: SSRSub = _
     private val text1 = itemView.findViewById(android.R.id.text1).asInstanceOf[TextView]
     private val text2 = itemView.findViewById(android.R.id.text2).asInstanceOf[TextView]
-    private val ivUpdateSubscription = itemView.findViewById(R.id.update_subscription).asInstanceOf[ImageView]
     private val ivEditSubscription = itemView.findViewById(R.id.edit_subscription).asInstanceOf[ImageView]
     text1.setOnClickListener(this)
-    ivUpdateSubscription.setOnClickListener(_ => {
-      Utils.ThrowableFuture {
-        handler.post(() => {
-          testProgressDialog = ProgressDialog.show(getActivity, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true)
-        })
-        updateSingleSubscription(item)
-        handler.post(() => {
-          testProgressDialog.dismiss
-          testProgressDialog = null
-        })
-      }
-    })
     ivEditSubscription.setOnClickListener(_ => {
       val popup = new PopupMenu(requireContext(), ivEditSubscription)
       popup.getMenuInflater.inflate(R.menu.subscription_edit_popup, popup.getMenu)
@@ -308,6 +294,19 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     override def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
       case R.id.action_edit_subscription => {
         edit_subscription()
+        true
+      }
+      case R.id.action_update_subscription => {
+        Utils.ThrowableFuture {
+          handler.post(() => {
+            testProgressDialog = ProgressDialog.show(getActivity, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true)
+          })
+          updateSingleSubscription(this.item)
+          handler.post(() => {
+            testProgressDialog.dismiss
+            testProgressDialog = null
+          })
+        }
         true
       }
       case R.id.action_copy_subscription => {

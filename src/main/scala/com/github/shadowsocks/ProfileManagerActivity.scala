@@ -56,6 +56,7 @@ import com.github.shadowsocks.database.VmessAction.profile
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{Duration, SECONDS}
 import scala.concurrent.{Await, Future}
+import scala.util.Try
 
 object ProfileManagerActivity {
   // profiles count
@@ -67,6 +68,12 @@ object ProfileManagerActivity {
       case (_, true) => app.profileManager.getAllProfilesByGroupOrderByElapse(groupName)
       case (_, false) => app.profileManager.getAllProfilesByGroup(groupName)
     }}.getOrElse(List.empty[Profile])
+  }
+
+  def countProfilesByGroup (groupName: String): Long = {
+    val allGroup = app.getString(R.string.allgroups)
+    val group = if (groupName == allGroup) None else Some(groupName)
+    app.profileManager.countAllProfilesByGroup(group)
   }
 }
 
@@ -240,6 +247,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       profiles += item
       handler.post(() => {
         if (item.url_group != currentGroupName) initGroupSpinner(Some(item.url_group))
+        else groupAdapter.notifyDataSetChanged()
         notifyItemInserted(pos)
       })
     }
@@ -263,20 +271,26 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       notifyItemMoved(from, to)
     }
 
+    private def updateGroupSpinner (extraCount: Int = 0): Unit = {
+      groupAdapter.setExtraCount(extraCount)
+      if (profiles.isEmpty) initGroupSpinner()
+      else groupAdapter.notifyDataSetChanged()
+    }
+
     def remove(pos: Int) {
       profiles.remove(pos)
       notifyItemRemoved(pos)
+      updateGroupSpinner(-1-undoManager.getCount())
     }
     def undo(actions: Iterator[(Int, Profile)]) = for ((index, item) <- actions) {
       profiles.insert(index, item)
       notifyItemInserted(index)
+      updateGroupSpinner()
     }
     def commit(actions: Iterator[(Int, Profile)]) = for ((index, item) <- actions) {
       app.profileManager.delProfile(item.id)
       if (item.id == app.profileId) app.profileId(-1)
-      if (profiles.isEmpty) {
-        initGroupSpinner()
-      }
+      updateGroupSpinner()
     }
   }
 
@@ -337,6 +351,34 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     }
   }
 
+  private class GroupAdapter(context: Context, resID: Int) extends ArrayAdapter[String](context, resID) {
+
+    private var extraCount = 0
+
+    def getCustomView (position: Int, convertView: View, parent: ViewGroup): View = {
+      val layout = getLayoutInflater.inflate(R.layout.layout_group_spinner_item, parent, false)
+      val tv1 = layout.findViewById(android.R.id.text1).asInstanceOf[TextView]
+      val tv2: TextView = layout.findViewById(android.R.id.text2).asInstanceOf[TextView]
+      val groupName = getItem(position)
+      tv1.setText(groupName)
+      if (groupName == currentGroupName) {
+        val count = ProfileManagerActivity.countProfilesByGroup(currentGroupName)
+        tv2.setText(s"${count + extraCount}")
+      } else {
+        tv2.setText("")
+      }
+      layout
+    }
+
+    def setExtraCount (count: Int): Unit = {
+      extraCount = count
+    }
+
+    override def getDropDownView(position: Int, convertView: View, parent: ViewGroup): View = getCustomView(position, convertView, parent)
+
+    override def getView(position: Int, convertView: View, parent: ViewGroup): View = getCustomView(position, convertView, parent)
+  }
+
   private var selectedItem: ProfileViewHolder = _
   private val handler = new Handler
 
@@ -345,6 +387,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   private lazy val profilesAdapter = new ProfilesAdapter
   private lazy val ssrsubAdapter = new SSRSubAdapter
   private var undoManager: UndoSnackbarManager[Profile] = _
+  private lazy val groupAdapter = new GroupAdapter(this, R.layout.layout_group_spinner_item)
 
   private lazy val clipboard = getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
 
@@ -487,27 +530,30 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
     // Add profiles counter
     def initGroupSpinner(groupName: Option[String] = None ): Unit = {
-    currentGroupName = groupName.getOrElse(getString(R.string.allgroups))
-    val groupSpinner = findViewById(R.id.group_choose_spinner).asInstanceOf[AppCompatSpinner]
-    val groupAdapter = new ArrayAdapter[String](this, android.R.layout.simple_spinner_dropdown_item)
-    val selectIndex = app.profileManager.getGroupNames match {
-      case Some(groupNames) => {
-        val allGroupNames = getString(R.string.allgroups) +: groupNames
-        allGroupNames.foreach(name => groupAdapter.add(name))
-        Math.max(0, allGroupNames.indexOf(currentGroupName))
+      currentGroupName = groupName.getOrElse(getString(R.string.allgroups))
+      val groupSpinner = findViewById(R.id.group_choose_spinner).asInstanceOf[AppCompatSpinner]
+      groupAdapter.setExtraCount(0)
+      groupAdapter.clear()
+      val selectIndex = app.profileManager.getGroupNames match {
+        case Some(groupNames) => {
+          val allGroupNames = getString(R.string.allgroups) +: groupNames
+          allGroupNames.foreach(name => groupAdapter.add(name))
+          Math.max(0, allGroupNames.indexOf(currentGroupName))
+        }
+        case None => 0
       }
-      case None => 0
-    }
-    groupSpinner.setAdapter(groupAdapter)
-    groupSpinner.setSelection(selectIndex)
-    groupSpinner.setOnItemSelectedListener(new OnItemSelectedListener {
-      def onNothingSelected(parent: AdapterView[_]): Unit = {}
-      def onItemSelected(parent: AdapterView[_], view: View, position: Int, id: Long): Unit = {
-        currentGroupName = parent.getItemAtPosition(position).toString
-        profilesAdapter.onGroupChange(currentGroupName)
-        app.editor.putString(Key.currentGroupName, currentGroupName).apply()
-      }
-    })
+      groupSpinner.setAdapter(groupAdapter)
+      groupSpinner.setSelection(selectIndex)
+      groupSpinner.setOnItemSelectedListener(new OnItemSelectedListener {
+        def onNothingSelected(parent: AdapterView[_]): Unit = {}
+
+        def onItemSelected(parent: AdapterView[_], view: View, position: Int, id: Long): Unit = {
+          currentGroupName = parent.getItemAtPosition(position).toString
+          profilesAdapter.onGroupChange(currentGroupName)
+          groupAdapter.notifyDataSetChanged()
+          app.editor.putString(Key.currentGroupName, currentGroupName).apply()
+        }
+      })
   }
 
 
@@ -892,7 +938,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       case REQUEST_CONFIG_RESULT => {
         val groupName = Option(data.getStringExtra(Key.SUBSCRIPTION_GROUP_NAME))
         undoManager.flush
-        initGroupSpinner(groupName)
+        if (groupName.getOrElse("") != currentGroupName) initGroupSpinner(groupName)
+        else groupAdapter.notifyDataSetChanged()
         profilesAdapter.notifyDataSetChanged()
       }
       case REQUEST_SETTINGS => {

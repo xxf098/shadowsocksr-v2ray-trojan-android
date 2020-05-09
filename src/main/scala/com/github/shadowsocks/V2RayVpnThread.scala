@@ -85,10 +85,6 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 //      val config = Parser.getV2rayConfig(profile).orNull
       profile match {
         case p if p.isVmess => {
-          // val config = Tun2socks.generateVmessString(profile.toVmess)
-          // Log.e(TAG, config)
-          // Log.e(TAG, Tun2socks.checkVersion())
-          // Tun2socks.startV2Ray(flow, service, config.getBytes(StandardCharsets.UTF_8), assetPath, vpnService.getFilesDir.getAbsolutePath)
           Tun2socks.startV2RayWithVmess(flow, service, androidLogService, profile, assetPath)
         }
         case p if p.isV2RayJSON => {

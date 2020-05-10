@@ -17,6 +17,14 @@
             android:title="@string/title_pref_sort_method" />
 
         <com.github.shadowsocks.preferences.DropDownPreference
+            android:defaultValue="default"
+            android:entries="@array/ping_method_entry"
+            android:entryValues="@array/ping_method_value"
+            android:key="pref_ping_method"
+            android:summary="%s"
+            android:title="@string/title_pref_ping_method" />
+
+        <com.github.shadowsocks.preferences.DropDownPreference
             android:defaultValue="on"
             android:entries="@array/switch_entry"
             android:entryValues="@array/switch_value"

@@ -262,6 +262,8 @@
     <item>延迟</item>
   </string-array>
 
+  <string name="title_pref_ping_method">Ping方式</string>
+
   <string-array name="switch_entry">
       <item>启用</item>
       <item>禁用</item>

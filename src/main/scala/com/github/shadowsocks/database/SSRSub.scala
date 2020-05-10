@@ -47,7 +47,7 @@ import android.text.TextUtils
 import android.util.{Base64, Log}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.CloseUtils.autoClose
-import com.github.shadowsocks.utils.Parser
+import com.github.shadowsocks.utils.{Parser, Utils}
 import com.j256.ormlite.field.{DataType, DatabaseField}
 import okhttp3.{ConnectionPool, OkHttpClient, Request}
 import com.github.shadowsocks.R
@@ -98,6 +98,7 @@ object SSRSub {
     if(profiles_ssr.nonEmpty) {
       val ssrsub = new SSRSub {
         url = requestURL
+        updated_at = Utils.today
         url_group = if (!TextUtils.isEmpty(groupName)) groupName
         else if (!TextUtils.isEmpty(profiles_ssr.head.url_group)) profiles_ssr.head.url_group
         else new URL(requestURL).getHost
@@ -108,6 +109,7 @@ object SSRSub {
       if (profiles_vmess.nonEmpty) {
         val ssrsub = new SSRSub {
           url = requestURL
+          updated_at = Utils.today
           url_group = if (TextUtils.isEmpty(groupName)) new URL(requestURL).getHost else groupName
         }
         return Some(ssrsub)
@@ -198,4 +200,7 @@ class SSRSub {
 
   @DatabaseField
   var url_group: String = ""
+
+  @DatabaseField
+  var updated_at: String = ""
 }

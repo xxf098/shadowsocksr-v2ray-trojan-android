@@ -33,6 +33,17 @@
             android:textStyle="bold"
             tools:text="Subscription Name"/>
 
+        <TextView
+            android:id="@+id/subscription_update_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="?android:attr/textColorSecondary"
+            tools:text="1979-01-01"/>
+
         <ImageView
             android:id="@+id/edit_subscription"
             android:layout_width="wrap_content"

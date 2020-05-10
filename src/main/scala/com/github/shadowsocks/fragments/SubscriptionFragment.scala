@@ -251,6 +251,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     var item: SSRSub = _
     private val text1 = itemView.findViewById(android.R.id.text1).asInstanceOf[TextView]
     private val text2 = itemView.findViewById(android.R.id.text2).asInstanceOf[TextView]
+    private val tvUpdateDate = itemView.findViewById(R.id.subscription_update_date).asInstanceOf[TextView]
     private val ivEditSubscription = itemView.findViewById(R.id.edit_subscription).asInstanceOf[ImageView]
     text1.setOnClickListener(this)
     ivEditSubscription.setOnClickListener(_ => {
@@ -273,6 +274,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       }
       handler.post(() => {
         text1.setText(this.item.url_group)
+        tvUpdateDate.setText(this.item.updated_at)
         if (!TextUtils.isEmpty(builder)) {
           text2.setText(builder)
           text2.setVisibility(View.VISIBLE)

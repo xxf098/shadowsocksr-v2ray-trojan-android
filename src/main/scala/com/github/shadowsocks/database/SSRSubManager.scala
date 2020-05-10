@@ -39,8 +39,10 @@
 
 package com.github.shadowsocks.database
 
+import android.text.TextUtils
 import android.util.Log
 import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.utils.Utils
 
 object SSRSubManager {
   private final val TAG = "SSRSubManager"
@@ -57,6 +59,9 @@ class SSRSubManager(dbHelper: DBHelper) {
   def createSSRSub(p: SSRSub = null): SSRSub = {
     val ssrsub = if (p == null) new SSRSub else p
     ssrsub.id = 0
+    if (TextUtils.isEmpty(p.updated_at)) {
+      p.updated_at = Utils.today
+    }
     try {
       dbHelper.ssrsubDao.createOrUpdate(ssrsub)
 
@@ -135,6 +140,7 @@ class SSRSubManager(dbHelper: DBHelper) {
     val ssrsub = new SSRSub {
       url = "https://raw.githubusercontent.com/breakwa11/breakwa11.github.io/master/free/freenodeplain.txt"
       url_group = "Default Group"
+      updated_at = Utils.today
     }
     createSSRSub(ssrsub)
   }

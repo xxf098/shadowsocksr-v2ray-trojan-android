@@ -188,6 +188,8 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     SSRSub.getSubscriptionResponse(ssrsub.url)
       .flatMap(response => Try {
         ssrsub.addProfiles(response, ssrsub.url)
+        ssrsub.updated_at = Utils.today
+        app.ssrsubManager.updateSSRSub(ssrsub)
         notifyGroupNameChange(Some(ssrsub.url_group))
         None
       }).recover{

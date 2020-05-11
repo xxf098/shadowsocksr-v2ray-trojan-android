@@ -48,6 +48,8 @@ class SSRSubUpdateJob() extends Job {
             SSRSub.getSubscriptionResponse(ssrsub.url)
             .flatMap(response => Try {
               ssrsub.addProfiles(response, ssrsub.url)
+              ssrsub.updated_at = Utils.today
+              app.ssrsubManager.updateSSRSub(ssrsub)
               1
             }).recover {
             case e: Exception => 0

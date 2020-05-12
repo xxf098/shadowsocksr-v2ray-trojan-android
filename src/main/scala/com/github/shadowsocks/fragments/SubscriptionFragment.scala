@@ -178,6 +178,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       handler.post(() => {
         testProgressDialog.dismiss
         testProgressDialog = null
+        ssrsubAdapter.notifyDataSetChanged()
       })
 //      finish()
 //      startActivity(new Intent(getIntent()))
@@ -309,6 +310,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
           handler.post(() => {
             testProgressDialog.dismiss
             testProgressDialog = null
+            updateText()
           })
         }
         true

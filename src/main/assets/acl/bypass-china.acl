@@ -1,6 +1,27 @@
 [proxy_all]
 
 [bypass_list]
+# Tencent
+(^|\.)foxmail\.com$
+(^|\.)gtimg\.com$
+(^|\.)idqqimg\.com$
+(^|\.)igamecj\.com$
+(^|\.)myapp\.com$
+(^|\.)myqcloud\.com$
+(^|\.)qq\.com$
+(^|\.)qqmail\.com$
+(^|\.)qqurl\.com$
+(^|\.)smtcdns\.com$
+(^|\.)smtcdns\.net$
+(^|\.)soso\.com$
+(^|\.)tencent-cloud\.net$
+(^|\.)tencent\.com$
+(^|\.)tencentmind\.com$
+(^|\.)tenpay\.com $
+(^|\.)weixin\.com$
+(^|\.)weiyun\.com$
+(^|\.)qpic\.cn$
+(^|\.)qlogo\.cn$
 1.0.1.0/24
 1.0.2.0/23
 1.0.8.0/21
@@ -11283,6 +11304,7 @@
 (?:^|\.)raremovie\.net$
 (?:^|\.)rawgit\.com$
 (?:^|\.)rawgithub\.com$
+(?:^|\.)raw\.githubusercontent\.com$
 (?:^|\.)razyboard\.com$
 (?:^|\.)rcam\.target\.com$
 (?:^|\.)rcinet\.ca$

@@ -279,5 +279,7 @@
 
   <string name="title_ssr_dns_nocache">SSR DNS缓存</string>
 
+  <string name="ssr_category">SSR设置</string>
+
 
 </resources>

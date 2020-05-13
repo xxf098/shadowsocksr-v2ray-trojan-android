@@ -328,4 +328,6 @@
 
   <string name="title_ssr_dns_nocache">SSR DNS Cache</string>
 
+  <string name="ssr_category">SSR Settings</string>
+
 </resources>

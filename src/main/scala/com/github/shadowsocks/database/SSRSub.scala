@@ -39,10 +39,11 @@
 
 package com.github.shadowsocks.database
 
-import java.net.{URL, URLEncoder}
+import java.net.{HttpURLConnection, URL, URLEncoder}
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
+import android.os.Build
 import android.text.TextUtils
 import android.util.{Base64, Log}
 import com.github.shadowsocks.ShadowsocksApplication.app
@@ -57,7 +58,11 @@ import scala.util.Try
 object SSRSub {
 
   // custom dns
+  // https://github.com/square/okhttp#requirements
    def getSubscriptionResponse (url: String): Try[String] = Try{
+    if (Build.VERSION.SDK_INT < 21) {
+      return getSubscriptionResponse4(url)
+    }
      val builder = new OkHttpClient.Builder()
        .connectTimeout(60, TimeUnit.SECONDS)
        .writeTimeout(60, TimeUnit.SECONDS)
@@ -75,6 +80,25 @@ object SSRSub {
       result
     } else {
       response.body().close()
+      throw new Exception(app.getString(R.string.ssrsub_error, code: Integer))
+    }
+  }
+
+  def getSubscriptionResponse4(url: String): Try[String] = Try{
+    val conn = new URL(url).openConnection().asInstanceOf[HttpURLConnection]
+    conn.setConnectTimeout(60 * 1000)
+    conn.setReadTimeout(60 * 1000)
+    conn.connect()
+    val code = conn.getResponseCode
+    if (code ==  200) {
+      var subscribes = ""
+      autoClose(conn.getInputStream())(in => {
+        subscribes = scala.io.Source.fromInputStream(in).mkString
+        subscribes = new String(Base64.decode(subscribes, Base64.URL_SAFE))
+      })
+      subscribes
+    } else {
+      conn.disconnect()
       throw new Exception(app.getString(R.string.ssrsub_error, code: Integer))
     }
   }

@@ -287,10 +287,14 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       notifyItemInserted(index)
       updateGroupSpinner()
     }
-    def commit(actions: Iterator[(Int, Profile)]) = for ((index, item) <- actions) {
-      app.profileManager.delProfile(item.id)
-      if (item.id == app.profileId) app.profileId(-1)
-      updateGroupSpinner()
+    def commit(actions: Iterator[(Int, Profile)]) = {
+      for ((index, item) <- actions) {
+        app.profileManager.delProfile(item.id)
+        if (item.id == app.profileId) app.profileId(-1)
+      }
+      groupAdapter.setExtraCount(0)
+      if (profiles.isEmpty || currentGroupName == getString(R.string.allgroups)) initGroupSpinner()
+      else groupAdapter.notifyDataSetChanged()
     }
   }
 

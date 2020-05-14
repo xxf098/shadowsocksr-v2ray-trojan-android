@@ -19,8 +19,8 @@
                 android:layout_height="50dp"
                 android:layout_marginLeft="9dp"
                 android:layout_marginStart="9dp"
-                android:layout_marginRight="-9dp"
-                android:layout_marginEnd="-9dp"/>
+                android:layout_marginRight="-3dp"
+                android:layout_marginEnd="-3dp"/>
 
             <android.support.v7.widget.RecyclerView android:id="@+id/profilesList"
                 android:layout_width="match_parent"

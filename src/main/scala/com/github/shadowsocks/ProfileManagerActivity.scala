@@ -277,15 +277,16 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       notifyItemMoved(from, to)
     }
 
-    private def updateGroupSpinner (extraCount: Int = 0): Unit = {
-      if (profiles.isEmpty) initGroupSpinner(None, Option(currentGroupName))
+    private def updateGroupSpinner (bypassGroupName: Option[String] = None): Unit = {
+      if (profiles.isEmpty) initGroupSpinner(None, bypassGroupName)
+      else if (currentGroupName == getString(R.string.allgroups) && bypassGroupName.isEmpty) initGroupSpinner()
       else groupAdapter.notifyDataSetChanged()
     }
 
     def remove(pos: Int) {
       profiles.remove(pos)
       notifyItemRemoved(pos)
-      updateGroupSpinner(-1-undoManager.getCount())
+      updateGroupSpinner(Option(currentGroupName))
     }
     def undo(actions: Iterator[(Int, Profile)]) = for ((index, item) <- actions) {
       profiles.insert(index, item)
@@ -297,8 +298,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         app.profileManager.delProfile(item.id)
         if (item.id == app.profileId) app.profileId(-1)
       }
-      if (profiles.isEmpty || currentGroupName == getString(R.string.allgroups)) initGroupSpinner()
-      else groupAdapter.notifyDataSetChanged()
+      updateGroupSpinner()
     }
   }
 

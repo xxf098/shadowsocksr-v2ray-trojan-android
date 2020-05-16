@@ -60,6 +60,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
 import ProfileConverter._
+import com.github.shadowsocks.database.VmessAction.profile
 import com.github.shadowsocks.types.{FailureConnect, Result, SuccessConnect}
 // automatic from Android without pc
 
@@ -104,12 +105,55 @@ object Profile {
         }
     }
 
+    // TODO: refactor
+    def testTCPLatency(): Future[Result[Long]] = {
+      var profileAddr = if(profile.isV2Ray) profile.v_add else profile.host
+      val profilePort = if(profile.isV2Ray) profile.v_port.toInt else profile.remotePort
+      // Log.e("testTCPPingLatency", s"profileAddr: $profileAddr, profilePort: $profilePort")
+      if (!Utils.isNumeric(profileAddr)) Utils.resolve(profileAddr, enableIPv6 = false) match {
+        case Some(addr) => profileAddr = addr
+        case None => throw new IOException("Host Not Resolved")
+      }
+      Future(Tun2socks.testTCPPing(profileAddr, profilePort))
+        .map(SuccessConnect)
+        .recover {
+          case e: Exception => {
+            e.printStackTrace()
+            FailureConnect(e.getMessage)
+          }
+        }
+    }
+
     def testLatencyThread(port: Long): String = {
       Try(profile.getElapsed(port))
         .map(SuccessConnect)
         .recover {
           case e: Exception => {
 //            e.printStackTrace()
+            FailureConnect(e.getMessage)
+          }
+        }.map(result => {
+        profile.elapsed = result.data
+        app.profileManager.updateProfile(profile)
+        result.msg
+      }).get
+    }
+
+    // support ssr & v2ray
+    // TODO: refactor
+    def testTCPLatencyThread () : String  = {
+      var profileAddr = if(profile.isV2Ray) profile.v_add else profile.host
+      val profilePort = if(profile.isV2Ray) profile.v_port.toInt else profile.remotePort
+      Log.e("testTCPPingLatency", s"profileAddr: $profileAddr, profilePort: $profilePort")
+      if (!Utils.isNumeric(profileAddr)) Utils.resolve(profileAddr, enableIPv6 = false) match {
+        case Some(addr) => profileAddr = addr
+        case None => throw new IOException("Host Not Resolved")
+      }
+      Try(Tun2socks.testTCPPing(profileAddr, profilePort))
+        .map(SuccessConnect)
+        .recover {
+          case e: Exception => {
+            e.printStackTrace()
             FailureConnect(e.getMessage)
           }
         }.map(result => {

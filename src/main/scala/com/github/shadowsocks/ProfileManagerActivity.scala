@@ -144,8 +144,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
         getWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
-        item.testLatency()
-          .foreach(result => {
+        val pingFunc = () => if (app.settings.getString(Key.PING_METHOD, "google") == "google") item.testLatency() else item.testTCPLatency()
+        pingFunc().foreach(result => {
             item.elapsed = result.data
             app.profileManager.updateProfile(item)
             this.updateText(0, 0, result.data)
@@ -1127,11 +1127,12 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           getWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
           val testV2rayProfiles = (v2rayProfiles: List[List[Profile]], size: Int) => {
+            val pingMethod = app.settings.getString(Key.PING_METHOD, "google")
             v2rayProfiles.indices.foreach(index => {
               val profiles = v2rayProfiles(index)
               val futures = profiles.indices.map(i =>{
                 val p = profiles(i)
-                Future(p.testLatencyThread(8900L + index * size + i))
+                Future(if (pingMethod == "google") p.testLatencyThread(8900L + index * size + i) else p.testTCPLatencyThread())
                   .map(testResult => {
                     val msg = Message.obtain()
                     msg.obj = s"${profile.name} $testResult"
@@ -1258,10 +1259,12 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
           // TODO: Retry
           val testSSRJob = (ssrProfiles: List[Profile]) => {
-            testSSRProfiles(ssrProfiles.grouped(4).toList, 4, 0)
+            val pingMethod = app.settings.getString(Key.PING_METHOD, "google")
+            val pingFunc = if (pingMethod == "google") testSSRProfiles else testTCPSSRProfiles
+            pingFunc(ssrProfiles.grouped(4).toList, 4, ssrProfiles.size)
             val zeroSSRProfiles = ssrProfiles.filter(p => p.elapsed == 0 && !p.isV2Ray)
             if (zeroSSRProfiles.nonEmpty) {
-              testSSRProfiles(zeroSSRProfiles.grouped(2).toList, 2, ssrProfiles.size)
+              pingFunc(zeroSSRProfiles.grouped(2).toList, 2, ssrProfiles.size)
             }
           }
           testAsyncJob = new Thread {

@@ -108,15 +108,16 @@ object Profile {
 
     // TODO: refactor
     def testTCPLatency(): Future[Result[Long]] = {
-      var profileAddr = if(profile.isV2Ray) profile.v_add else profile.host
-      val profilePort = if(profile.isV2Ray) profile.v_port.toInt else profile.remotePort
-      // Log.e("testTCPPingLatency", s"profileAddr: $profileAddr, profilePort: $profilePort")
-      if (!Utils.isNumeric(profileAddr)) Utils.resolve(profileAddr, enableIPv6 = false) match {
-        case Some(addr) => profileAddr = addr
-        case None => throw new IOException("Host Not Resolved")
-      }
-      Future(Tun2socks.testTCPPing(profileAddr, profilePort))
-        .map(SuccessConnect)
+      Future{
+        var profileAddr = if(profile.isV2Ray) profile.v_add else profile.host
+        val profilePort = if(profile.isV2Ray) profile.v_port.toInt else profile.remotePort
+        // Log.e("testTCPPingLatency", s"profileAddr: $profileAddr, profilePort: $profilePort")
+        if (!Utils.isNumeric(profileAddr)) Utils.resolve(profileAddr, enableIPv6 = false) match {
+          case Some(addr) => profileAddr = addr
+          case None => throw new IOException("Host Not Resolved")
+        }
+        Tun2socks.testTCPPing(profileAddr, profilePort)
+      }.map(SuccessConnect)
         .recover {
           case e: Exception => {
             e.printStackTrace()

@@ -43,6 +43,10 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
     })
 
     pingMethod.setDropDownWidth(R.dimen.default_dropdown_width)
+    pingMethod.setOnPreferenceChangeListener((_, value) => {
+      prefs.edit().putString(Key.PING_METHOD, value.asInstanceOf[String]).apply()
+      true
+    })
 
     hideServer.setOnPreferenceChangeListener((_, value) => {
       prefs.edit().putBoolean(Key.HIDE_SERVER, value.asInstanceOf[Boolean]).apply()

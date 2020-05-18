@@ -1242,16 +1242,14 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           val testTCPSSRProfiles = (ssrProfiles: List[List[Profile]], size: Int, offset: Int) => {
             ssrProfiles.indices.foreach(index => {
               val profiles: List[Profile] = ssrProfiles(index)
-                val futures = profiles.indices.map(i =>{
-                  val p = profiles(i)
-                  Future(p.testTCPLatencyThread())
-                    .map(testResult => {
-                      val msg = Message.obtain()
-                      msg.obj = s"${profile.name} $testResult"
-                      msg.setTarget(showProgresshandler)
-                      msg.sendToTarget()
-                    })
-                })
+              val futures = profiles.map(p => Future {
+                val testResult = p.testTCPLatencyThread()
+                Log.e(TAG, s"${p.name} $testResult")
+                val msg = Message.obtain()
+                msg.obj = s"${p.name} $testResult"
+                msg.setTarget(showProgresshandler)
+                msg.sendToTarget()
+              })
               Await.ready(Future.sequence(futures), Duration(5 * size, SECONDS))
             })
           }

@@ -95,6 +95,11 @@ object Profile {
 
   implicit class LatencyTest(profile: Profile) {
 
+    def pingItem: PartialFunction[String, Future[Result[Long]]] = {
+      case "tcp" => this.testTCPLatency()
+      case "google" => this.testLatency()
+    }
+
     def testLatency(): Future[Result[Long]] = {
       Future(profile.getElapsed())
         .map(SuccessConnect)
@@ -106,7 +111,6 @@ object Profile {
         }
     }
 
-    // TODO: refactor
     def testTCPLatency(): Future[Result[Long]] = {
       Future{
         var profileAddr = if(profile.isV2Ray) profile.v_add else profile.host
@@ -124,6 +128,11 @@ object Profile {
             FailureConnect(e.getMessage)
           }
         }
+    }
+
+    def pingItemThread: PartialFunction[(String, Long), String] = {
+      case ("tcp", _) => this.testTCPLatencyThread()
+      case ("google", port) => this.testLatencyThread(port)
     }
 
     def testLatencyThread(port: Long): String = {

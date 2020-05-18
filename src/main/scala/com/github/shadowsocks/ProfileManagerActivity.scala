@@ -144,8 +144,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
         getWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
-        val pingFunc = () => if (app.settings.getString(Key.PING_METHOD, "google") == "google") item.testLatency() else item.testTCPLatency()
-        pingFunc().foreach(result => {
+        item.pingItem(app.settings.getString(Key.PING_METHOD, "google")).foreach(result => {
             item.elapsed = result.data
             app.profileManager.updateProfile(item)
             this.updateText(0, 0, result.data)
@@ -1132,7 +1131,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               val profiles = v2rayProfiles(index)
               val futures = profiles.indices.map(i =>{
                 val p = profiles(i)
-                Future(if (pingMethod == "google") p.testLatencyThread(8900L + index * size + i) else p.testTCPLatencyThread())
+                Future(p.pingItemThread(pingMethod, 8900L + index * size + i))
                   .map(testResult => {
                     val msg = Message.obtain()
                     msg.obj = s"${profile.name} $testResult"

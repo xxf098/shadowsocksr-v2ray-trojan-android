@@ -1244,7 +1244,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               val profiles: List[Profile] = ssrProfiles(index)
               val futures = profiles.map(p => Future {
                 val testResult = p.testTCPLatencyThread()
-                Log.e(TAG, s"${p.name} $testResult")
+                // Log.e(TAG, s"${p.name} $testResult")
                 val msg = Message.obtain()
                 msg.obj = s"${p.name} $testResult"
                 msg.setTarget(showProgresshandler)

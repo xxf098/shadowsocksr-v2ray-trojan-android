@@ -39,15 +39,16 @@
 
 package com.github.shadowsocks.database
 
-import java.net.{URL, URLEncoder}
+import java.net.{HttpURLConnection, URL, URLEncoder}
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
+import android.os.Build
 import android.text.TextUtils
 import android.util.{Base64, Log}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.CloseUtils.autoClose
-import com.github.shadowsocks.utils.Parser
+import com.github.shadowsocks.utils.{Parser, Utils}
 import com.j256.ormlite.field.{DataType, DatabaseField}
 import okhttp3.{ConnectionPool, OkHttpClient, Request}
 import com.github.shadowsocks.R
@@ -57,7 +58,11 @@ import scala.util.Try
 object SSRSub {
 
   // custom dns
+  // https://github.com/square/okhttp#requirements
    def getSubscriptionResponse (url: String): Try[String] = Try{
+    if (Build.VERSION.SDK_INT < 21) {
+      return getSubscriptionResponse4(url)
+    }
      val builder = new OkHttpClient.Builder()
        .connectTimeout(60, TimeUnit.SECONDS)
        .writeTimeout(60, TimeUnit.SECONDS)
@@ -75,6 +80,25 @@ object SSRSub {
       result
     } else {
       response.body().close()
+      throw new Exception(app.getString(R.string.ssrsub_error, code: Integer))
+    }
+  }
+
+  def getSubscriptionResponse4(url: String): Try[String] = Try{
+    val conn = new URL(url).openConnection().asInstanceOf[HttpURLConnection]
+    conn.setConnectTimeout(60 * 1000)
+    conn.setReadTimeout(60 * 1000)
+    conn.connect()
+    val code = conn.getResponseCode
+    if (code ==  200) {
+      var subscribes = ""
+      autoClose(conn.getInputStream())(in => {
+        subscribes = scala.io.Source.fromInputStream(in).mkString
+        subscribes = new String(Base64.decode(subscribes, Base64.URL_SAFE))
+      })
+      subscribes
+    } else {
+      conn.disconnect()
       throw new Exception(app.getString(R.string.ssrsub_error, code: Integer))
     }
   }
@@ -98,6 +122,7 @@ object SSRSub {
     if(profiles_ssr.nonEmpty) {
       val ssrsub = new SSRSub {
         url = requestURL
+        updated_at = Utils.today
         url_group = if (!TextUtils.isEmpty(groupName)) groupName
         else if (!TextUtils.isEmpty(profiles_ssr.head.url_group)) profiles_ssr.head.url_group
         else new URL(requestURL).getHost
@@ -108,6 +133,7 @@ object SSRSub {
       if (profiles_vmess.nonEmpty) {
         val ssrsub = new SSRSub {
           url = requestURL
+          updated_at = Utils.today
           url_group = if (TextUtils.isEmpty(groupName)) new URL(requestURL).getHost else groupName
         }
         return Some(ssrsub)
@@ -198,4 +224,7 @@ class SSRSub {
 
   @DatabaseField
   var url_group: String = ""
+
+  @DatabaseField
+  var updated_at: String = ""
 }

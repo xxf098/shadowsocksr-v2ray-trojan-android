@@ -42,6 +42,8 @@ public abstract class Tun2socks
 
     public static native long testURLLatency(final String p0) throws Exception;
 
+    public static native long testTCPPing(final String p0, final long p1) throws Exception;
+
     static {
         Seq.touch();
         _init();

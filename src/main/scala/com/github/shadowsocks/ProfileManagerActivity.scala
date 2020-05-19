@@ -144,8 +144,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
         getWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
-        item.testLatency()
-          .foreach(result => {
+        item.pingItem(app.settings.getString(Key.PING_METHOD, "google")).foreach(result => {
             item.elapsed = result.data
             app.profileManager.updateProfile(item)
             this.updateText(0, 0, result.data)
@@ -219,7 +218,13 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       notifyDataSetChanged()
     }
 
-    def getProfilesByGroup (groupName: String): List[Profile] = ProfileManagerActivity.getProfilesByGroup(groupName, is_sort)
+    def getProfilesByGroup (groupName: String): List[Profile] = {
+      val undoProfileIds = getUndoProfileIds
+      ProfileManagerActivity.getProfilesByGroup(groupName, is_sort)
+        .filter(p => !undoProfileIds.contains(p.id))
+    }
+
+    def getUndoProfileIds = Option(undoManager).map(_.getUndoItems.map(_._2.id).toList).getOrElse(List())
 
     def getItemCount = profiles.length
 
@@ -271,25 +276,27 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       notifyItemMoved(from, to)
     }
 
-    private def updateGroupSpinner (extraCount: Int = 0): Unit = {
-      groupAdapter.setExtraCount(extraCount)
-      if (profiles.isEmpty) initGroupSpinner()
+    private def updateGroupSpinner (bypassGroupName: Option[String] = None): Unit = {
+      if (profiles.isEmpty) initGroupSpinner(None, bypassGroupName)
+      else if (currentGroupName == getString(R.string.allgroups) && bypassGroupName.isEmpty) initGroupSpinner()
       else groupAdapter.notifyDataSetChanged()
     }
 
     def remove(pos: Int) {
       profiles.remove(pos)
       notifyItemRemoved(pos)
-      updateGroupSpinner(-1-undoManager.getCount())
+      updateGroupSpinner(Option(currentGroupName))
     }
     def undo(actions: Iterator[(Int, Profile)]) = for ((index, item) <- actions) {
       profiles.insert(index, item)
       notifyItemInserted(index)
       updateGroupSpinner()
     }
-    def commit(actions: Iterator[(Int, Profile)]) = for ((index, item) <- actions) {
-      app.profileManager.delProfile(item.id)
-      if (item.id == app.profileId) app.profileId(-1)
+    def commit(actions: Iterator[(Int, Profile)]) = {
+      for ((index, item) <- actions) {
+        app.profileManager.delProfile(item.id)
+        if (item.id == app.profileId) app.profileId(-1)
+      }
       updateGroupSpinner()
     }
   }
@@ -353,7 +360,6 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   private class GroupAdapter(context: Context, resID: Int) extends ArrayAdapter[String](context, resID) {
 
-    private var extraCount = 0
 
     def getCustomView (position: Int, convertView: View, parent: ViewGroup): View = {
       val layout = getLayoutInflater.inflate(R.layout.layout_group_spinner_item, parent, false)
@@ -363,15 +369,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       tv1.setText(groupName)
       if (groupName == currentGroupName) {
         val count = ProfileManagerActivity.countProfilesByGroup(currentGroupName)
-        tv2.setText(s"${count + extraCount}")
+        tv2.setText(s"${count - undoManager.getCount()}")
       } else {
         tv2.setText("")
       }
       layout
-    }
-
-    def setExtraCount (count: Int): Unit = {
-      extraCount = count
     }
 
     override def getDropDownView(position: Int, convertView: View, parent: ViewGroup): View = getCustomView(position, convertView, parent)
@@ -529,15 +531,14 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   }
 
     // Add profiles counter
-    def initGroupSpinner(groupName: Option[String] = None ): Unit = {
+    def initGroupSpinner(groupName: Option[String] = None, ignoreGroupName: Option[String] = None ): Unit = {
       currentGroupName = groupName.getOrElse(getString(R.string.allgroups))
       val groupSpinner = findViewById(R.id.group_choose_spinner).asInstanceOf[AppCompatSpinner]
-      groupAdapter.setExtraCount(0)
       groupAdapter.clear()
       val selectIndex = app.profileManager.getGroupNames match {
         case Some(groupNames) => {
           val allGroupNames = getString(R.string.allgroups) +: groupNames
-          allGroupNames.foreach(name => groupAdapter.add(name))
+          allGroupNames.filter(_ != ignoreGroupName.orNull).foreach(name => groupAdapter.add(name))
           Math.max(0, allGroupNames.indexOf(currentGroupName))
         }
         case None => 0
@@ -1125,11 +1126,12 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           getWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
           val testV2rayProfiles = (v2rayProfiles: List[List[Profile]], size: Int) => {
+            val pingMethod = app.settings.getString(Key.PING_METHOD, "google")
             v2rayProfiles.indices.foreach(index => {
               val profiles = v2rayProfiles(index)
               val futures = profiles.indices.map(i =>{
                 val p = profiles(i)
-                Future(p.testLatencyThread(8900L + index * size + i))
+                Future(p.pingItemThread(pingMethod, 8900L + index * size + i))
                   .map(testResult => {
                     val msg = Message.obtain()
                     msg.obj = s"${profile.name} $testResult"
@@ -1145,19 +1147,6 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
           val testV2rayJob = (v2rayProfiles: List[Profile]) => {
             testV2rayProfiles(v2rayProfiles.grouped(4).toList, 4)
-            // retest 0
-            // TODO: get profiles from v2rayProfiles
-//            val zeroProfiles = if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles
-//            else app.profileManager.getAllProfilesByGroup(currentGroupName)
-//            zeroProfiles match {
-//              case Some(x) => {
-//                val zeroV2RayProfiles = x.filter(p => p.elapsed == 0 && p.isV2Ray)
-//                if (zeroV2RayProfiles.nonEmpty) {
-//                  testV2rayProfiles(zeroV2RayProfiles.grouped(1).toList, 1)
-//                }
-//              }
-//              case None =>
-//            }
             val zeroV2RayProfiles = v2rayProfiles.filter(p => p.elapsed == 0 && p.isV2Ray)
             if (zeroV2RayProfiles.nonEmpty) {
               testV2rayProfiles(zeroV2RayProfiles.grouped(2).toList, 2)
@@ -1250,12 +1239,29 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             })
           }
 
+          val testTCPSSRProfiles = (ssrProfiles: List[List[Profile]], size: Int, offset: Int) => {
+            ssrProfiles.indices.foreach(index => {
+              val profiles: List[Profile] = ssrProfiles(index)
+              val futures = profiles.map(p => Future {
+                val testResult = p.testTCPLatencyThread()
+                // Log.e(TAG, s"${p.name} $testResult")
+                val msg = Message.obtain()
+                msg.obj = s"${p.name} $testResult"
+                msg.setTarget(showProgresshandler)
+                msg.sendToTarget()
+              })
+              Await.ready(Future.sequence(futures), Duration(5 * size, SECONDS))
+            })
+          }
+
           // TODO: Retry
           val testSSRJob = (ssrProfiles: List[Profile]) => {
-            testSSRProfiles(ssrProfiles.grouped(4).toList, 4, 0)
+            val pingMethod = app.settings.getString(Key.PING_METHOD, "google")
+            val pingFunc = if (pingMethod == "google") testSSRProfiles else testTCPSSRProfiles
+            pingFunc(ssrProfiles.grouped(4).toList, 4, ssrProfiles.size)
             val zeroSSRProfiles = ssrProfiles.filter(p => p.elapsed == 0 && !p.isV2Ray)
             if (zeroSSRProfiles.nonEmpty) {
-              testSSRProfiles(zeroSSRProfiles.grouped(2).toList, 2, ssrProfiles.size)
+              pingFunc(zeroSSRProfiles.grouped(2).toList, 2, ssrProfiles.size)
             }
           }
           testAsyncJob = new Thread {

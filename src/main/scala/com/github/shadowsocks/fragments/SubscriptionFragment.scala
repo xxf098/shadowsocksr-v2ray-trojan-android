@@ -178,6 +178,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       handler.post(() => {
         testProgressDialog.dismiss
         testProgressDialog = null
+        ssrsubAdapter.notifyDataSetChanged()
       })
 //      finish()
 //      startActivity(new Intent(getIntent()))
@@ -188,6 +189,8 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     SSRSub.getSubscriptionResponse(ssrsub.url)
       .flatMap(response => Try {
         ssrsub.addProfiles(response, ssrsub.url)
+        ssrsub.updated_at = Utils.today
+        app.ssrsubManager.updateSSRSub(ssrsub)
         notifyGroupNameChange(Some(ssrsub.url_group))
         None
       }).recover{
@@ -251,6 +254,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     var item: SSRSub = _
     private val text1 = itemView.findViewById(android.R.id.text1).asInstanceOf[TextView]
     private val text2 = itemView.findViewById(android.R.id.text2).asInstanceOf[TextView]
+    private val tvUpdateDate = itemView.findViewById(R.id.subscription_update_date).asInstanceOf[TextView]
     private val ivEditSubscription = itemView.findViewById(R.id.edit_subscription).asInstanceOf[ImageView]
     text1.setOnClickListener(this)
     ivEditSubscription.setOnClickListener(_ => {
@@ -273,6 +277,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       }
       handler.post(() => {
         text1.setText(this.item.url_group)
+        tvUpdateDate.setText(this.item.updated_at)
         if (!TextUtils.isEmpty(builder)) {
           text2.setText(builder)
           text2.setVisibility(View.VISIBLE)
@@ -305,6 +310,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
           handler.post(() => {
             testProgressDialog.dismiss
             testProgressDialog = null
+            updateText()
           })
         }
         true

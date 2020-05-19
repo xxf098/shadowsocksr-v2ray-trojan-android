@@ -41,7 +41,8 @@ package com.github.shadowsocks.utils
 import java.io.File
 import java.net._
 import java.security.MessageDigest
-import java.util.{Scanner, StringTokenizer}
+import java.text.SimpleDateFormat
+import java.util.{Date, Scanner, StringTokenizer}
 
 import android.animation.{Animator, AnimatorListenerAdapter}
 import android.content.pm.PackageManager
@@ -282,4 +283,6 @@ object Utils {
   def b64Encode (input: Array[Byte])(implicit flags: Int): String = Base64.encodeToString(input, flags)
 
   def getAbsPath (fileName: String): String = new File(app.getApplicationInfo.nativeLibraryDir, fileName).getAbsolutePath
+
+  def today = new SimpleDateFormat("yyyy-MM-dd").format(new Date())
 }

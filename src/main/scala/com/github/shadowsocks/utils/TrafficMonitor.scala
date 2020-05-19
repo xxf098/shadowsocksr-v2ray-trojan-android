@@ -1,7 +1,10 @@
 package com.github.shadowsocks.utils
 
 import java.text.DecimalFormat
+import java.util.Locale
 
+import android.content.res.Configuration
+import android.os.Build
 import com.github.shadowsocks.R
 import com.github.shadowsocks.ShadowsocksApplication.app
 import android.text.format.Formatter
@@ -21,7 +24,18 @@ object TrafficMonitor {
   var timestampLast: Long = _
   @volatile var dirty = true
 
-  def formatTraffic(size: Long): String = Formatter.formatFileSize(app, size)
+  private val units = Array("KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB", "NB", "DB", "CB")
+  private val numberFormat = new DecimalFormat("@@@")
+  def formatTraffic(size: Long): String = {
+    var n: Double = size
+    var i = -1
+    while (n >= 1000) {
+      n /= 1024
+      i = i + 1
+    }
+    if (i < 0) size + " " + app.getResources.getQuantityString(R.plurals.bytes, size.toInt)
+    else numberFormat.format(n) + ' ' + units(i)
+  }
 
   def updateRate() = {
     val now = System.currentTimeMillis()

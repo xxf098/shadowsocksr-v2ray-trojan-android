@@ -365,6 +365,7 @@ object Key {
   // settings
   val SORT_METHOD = "pref_sort_method"
   val HIDE_SERVER = "pref_hide_server"
+  val PING_METHOD = "pref_ping_method"
   val AUTO_UPDATE_SUBSCRIPTION = "pref_auto_update_subscription"
   val AUTO_TEST_CONNECTIVITY = "pref_auto_test_connectivity"
   val SSR_DNS_NOCAHCE = "pref_ssr_dns_nocache1"

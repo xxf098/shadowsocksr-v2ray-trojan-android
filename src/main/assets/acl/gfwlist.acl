@@ -3702,6 +3702,7 @@
 (?:^|\.)raremovie\.net$
 (?:^|\.)rawgit\.com$
 (?:^|\.)rawgithub\.com$
+(?:^|\.)raw\.githubusercontent\.com$
 (?:^|\.)razyboard\.com$
 (?:^|\.)rcam\.target\.com$
 (?:^|\.)rcinet\.ca$

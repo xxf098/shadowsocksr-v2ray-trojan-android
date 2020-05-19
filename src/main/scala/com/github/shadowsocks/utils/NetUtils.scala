@@ -54,7 +54,7 @@ object NetUtils {
     val client = builder.build()
     val request = new Request.Builder()
       .url(url)
-      .removeHeader("Host").addHeader("Host", "www.gstatic.com")
+      .removeHeader("Host").addHeader("Host", "www.google.com")
       .build()
     val response = client.newCall(request).execute()
     val code = response.code()

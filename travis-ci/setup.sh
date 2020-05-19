@@ -12,7 +12,7 @@ export PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:
 unzip_from_cache () {
     CACHE_FILE_NAME=$1
     CAHCE_FILE_PATH=$ANDROID_CACHE_DIR/$CACHE_FILE_NAME
-    if [ ! -f  "$CAHCE_FILE_PATH"]; then
+    if [ ! -f  "$CAHCE_FILE_PATH" ]; then
         wget -q -O "$CAHCE_FILE_PATH" https://dl.google.com/android/repository/$CACHE_FILE_NAME
     fi
     cp "$CAHCE_FILE_PATH" ./$CACHE_FILE_NAME

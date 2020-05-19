@@ -60,6 +60,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
 import ProfileConverter._
+import com.github.shadowsocks.database.VmessAction.profile
 import com.github.shadowsocks.types.{FailureConnect, Result, SuccessConnect}
 // automatic from Android without pc
 
@@ -71,7 +72,8 @@ object Profile {
     val v_security = if (TextUtils.isEmpty(profile.v_security)) "auto" else profile.v_security
     val routeMode = math.max(Route.ALL_ROUTES.indexOf(profile.route), 0)
     val (dns_address, dns_port, china_dns_address, china_dns_port) =  profile.getDNSConf()
-    // Log.e("Profile", s"v_host: ${profile.v_host}, v_path: ${profile.v_path}, v_tls: ${profile.v_tls}, v_add: ${profile.v_add}, v_port: ${profile.v_port}, v_aid: ${profile.v_aid}, v_net: ${profile.v_net}, v_id: ${profile.v_id}, v_type: ${profile.v_type}, v_security: ${profile.v_security}, routeMode: $routeMode")
+//    Log.e("Profile", s"v_host: ${profile.v_host}, v_path: ${profile.v_path}, v_tls: ${profile.v_tls}, v_add: ${profile.v_add},v_port: ${profile.v_port}, v_aid: ${profile.v_aid}, " +
+//      s"v_net: ${profile.v_net}, v_id: ${profile.v_id}, v_type: ${profile.v_type}, v_security: ${profile.v_security}, routeMode: $routeMode, dns: $dns_address:$dns_port,$china_dns_address:$china_dns_port")
     Tun2socks.newVmess(
       profile.v_host,
       profile.v_path,
@@ -93,6 +95,11 @@ object Profile {
 
   implicit class LatencyTest(profile: Profile) {
 
+    def pingItem: PartialFunction[String, Future[Result[Long]]] = {
+      case "tcp" => this.testTCPLatency()
+      case "google" => this.testLatency()
+    }
+
     def testLatency(): Future[Result[Long]] = {
       Future(profile.getElapsed())
         .map(SuccessConnect)
@@ -104,12 +111,60 @@ object Profile {
         }
     }
 
+    def testTCPLatency(): Future[Result[Long]] = {
+      Future{
+        var profileAddr = if(profile.isV2Ray) profile.v_add else profile.host
+        val profilePort = if(profile.isV2Ray) profile.v_port.toInt else profile.remotePort
+        // Log.e("testTCPPingLatency", s"profileAddr: $profileAddr, profilePort: $profilePort")
+        if (!Utils.isNumeric(profileAddr)) Utils.resolve(profileAddr, enableIPv6 = false) match {
+          case Some(addr) => profileAddr = addr
+          case None => throw new IOException("Host Not Resolved")
+        }
+        Tun2socks.testTCPPing(profileAddr, profilePort)
+      }.map(SuccessConnect)
+        .recover {
+          case e: Exception => {
+            e.printStackTrace()
+            FailureConnect(e.getMessage)
+          }
+        }
+    }
+
+    def pingItemThread: PartialFunction[(String, Long), String] = {
+      case ("tcp", _) => this.testTCPLatencyThread()
+      case ("google", port) => this.testLatencyThread(port)
+    }
+
     def testLatencyThread(port: Long): String = {
       Try(profile.getElapsed(port))
         .map(SuccessConnect)
         .recover {
           case e: Exception => {
 //            e.printStackTrace()
+            FailureConnect(e.getMessage)
+          }
+        }.map(result => {
+        profile.elapsed = result.data
+        app.profileManager.updateProfile(profile)
+        result.msg
+      }).get
+    }
+
+    // support ssr & v2ray
+    // TODO: refactor
+    def testTCPLatencyThread () : String  = {
+      var profileAddr = if(profile.isV2Ray) profile.v_add else profile.host
+      val profilePort = if(profile.isV2Ray) profile.v_port.toInt else profile.remotePort
+      // Log.e("testTCPPingLatency", s"profileAddr: $profileAddr, profilePort: $profilePort")
+      if (!Utils.isNumeric(profileAddr)) Utils.resolve(profileAddr, enableIPv6 = false) match {
+        case Some(addr) => profileAddr = addr
+        case None => throw new IOException("Host Not Resolved")
+      }
+      Try(Tun2socks.testTCPPing(profileAddr, profilePort))
+        .map(SuccessConnect)
+        .recover {
+          case e: Exception => {
+            e.printStackTrace()
             FailureConnect(e.getMessage)
           }
         }.map(result => {

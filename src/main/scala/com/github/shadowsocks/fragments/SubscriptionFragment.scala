@@ -315,6 +315,9 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
         }
         true
       }
+      case R.id.action_delete_subscription => {
+        true
+      }
       case R.id.action_copy_subscription => {
         clipboard.setPrimaryClip(ClipData.newPlainText(null, this.item.url))
         true

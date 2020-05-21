@@ -4,6 +4,8 @@
         android:title="@string/edit"/>
     <item android:id="@+id/action_update_subscription"
         android:title="@string/update"/>
+    <item android:id="@+id/action_delete_subscription"
+        android:title="@string/delete"/>
     <item android:id="@+id/action_copy_subscription"
         android:title="@string/copy_url"/>
 </menu>

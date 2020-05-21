@@ -88,6 +88,7 @@
   <string name="action_select_proxy_app">自动选中需代理应用</string>
   <string name="edit">编辑</string>
   <string name="update">更新</string>
+  <string name="delete">删除</string>
   <string name="NEW">新建</string>
 
 

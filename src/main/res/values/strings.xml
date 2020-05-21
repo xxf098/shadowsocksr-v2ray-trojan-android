@@ -183,6 +183,7 @@
   <string name="action_select_proxy_app">Auto select proxy app</string>
   <string name="edit">Edit</string>
   <string name="update">Update</string>
+  <string name="delete">Delete</string>
   <string name="NEW">New</string>
 
 

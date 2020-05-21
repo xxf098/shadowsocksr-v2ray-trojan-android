@@ -24,7 +24,7 @@ case class VmessQRCode(v: String,
   override def toString: String = {
     val vmessJson = new GsonBuilder().setPrettyPrinting().create().toJson(this)
     "vmess://" + Base64.encodeToString(vmessJson.getBytes(Charset.forName("UTF-8")),
-      Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP)
+     Base64.NO_WRAP)
   }
 }
 

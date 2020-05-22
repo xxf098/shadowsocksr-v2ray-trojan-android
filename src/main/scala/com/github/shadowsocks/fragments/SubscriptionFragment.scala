@@ -203,6 +203,39 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     ))
   }
 
+  private  def showRemoveDialog (index : Int, item: SSRSub): Unit = {
+    new AlertDialog.Builder(getActivity)
+      .setTitle(getString(R.string.ssrsub_remove_tip_title))
+      .setPositiveButton(R.string.ssrsub_remove_tip_direct, ((_, _) => {
+        ssrsubAdapter.remove(index)
+        app.ssrsubManager.delSSRSub(item.id)
+      }): DialogInterface.OnClickListener)
+      .setNegativeButton(android.R.string.no,  ((_, _) => {
+        ssrsubAdapter.notifyDataSetChanged()
+      }): DialogInterface.OnClickListener)
+      .setNeutralButton(R.string.ssrsub_remove_tip_delete,  ((_, _) => {
+        val delete_profiles = app.profileManager.getAllProfilesBySSRSub(item) match {
+          case Some(profiles) =>
+            profiles.filter(profile=> profile.ssrsub_id <= 0 || profile.ssrsub_id == item.id)
+          case _ => List()
+        }
+
+        delete_profiles.foreach((profile: Profile) => {
+          if (profile.id != app.profileId) {
+            app.profileManager.delProfile(profile.id)
+          }
+        })
+
+        ssrsubAdapter.remove(index)
+        app.ssrsubManager.delSSRSub(item.id)
+        notifyGroupNameChange(None)
+      }): DialogInterface.OnClickListener)
+      .setMessage(getString(R.string.ssrsub_remove_tip))
+      .setCancelable(false)
+      .create()
+      .show()
+  }
+
   private[this] def setupRemoveSubscription (ssusubsList: RecyclerView): Unit = {
     new ItemTouchHelper(new SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
       ItemTouchHelper.START | ItemTouchHelper.END) {
@@ -316,6 +349,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
         true
       }
       case R.id.action_delete_subscription => {
+        showRemoveDialog(this.getAdapterPosition, this.item)
         true
       }
       case R.id.action_copy_subscription => {

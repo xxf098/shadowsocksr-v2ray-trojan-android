@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit
 import java.util.{GregorianCalendar, Locale}
 
 import android.app.backup.BackupManager
-import android.app.{Activity, ProgressDialog}
+import android.app.{Activity, NotificationManager, ProgressDialog}
 import android.content._
 import android.graphics.Typeface
 import android.net.VpnService
@@ -222,6 +222,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   //private var adView: AdView = _
   private lazy val preferences =
   getFragmentManager.findFragmentById(android.R.id.content).asInstanceOf[ShadowsocksSettings]
+  private lazy val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
 
   val handler = new Handler()
 
@@ -583,7 +584,10 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   }
 
   def serviceStop() {
-    if (bgService != null) bgService.use(-1)
+    if (bgService != null) {
+      bgService.use(-1)
+      notificationManager.cancel(1)
+    }
   }
 
   /** Called when connect button is clicked. */

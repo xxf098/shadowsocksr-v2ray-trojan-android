@@ -8,6 +8,7 @@ import android.app.ProgressDialog
 import android.content.{ClipData, ClipboardManager, Context, DialogInterface, Intent}
 import android.os.{Bundle, Handler}
 import android.preference.PreferenceManager
+import android.support.design.widget.{BottomSheetBehavior, BottomSheetDialog}
 import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView.ViewHolder
@@ -291,13 +292,49 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     private val ivEditSubscription = itemView.findViewById(R.id.edit_subscription).asInstanceOf[ImageView]
     text1.setOnClickListener(this)
     ivEditSubscription.setOnClickListener(_ => {
-      val popup = new PopupMenu(requireContext(), ivEditSubscription)
-      popup.getMenuInflater.inflate(R.menu.subscription_edit_popup, popup.getMenu)
-      popup.setOnMenuItemClickListener(this)
-      popup.show()
-
+//      val popup = new PopupMenu(requireContext(), ivEditSubscription)
+//      popup.getMenuInflater.inflate(R.menu.subscription_edit_popup, popup.getMenu)
+//      popup.setOnMenuItemClickListener(this)
+//      popup.show()
+      showBottomMenu()
     })
 
+
+    def showBottomMenu (): Unit = {
+      val subscriptionMenu = new BottomSheetDialog(configActivity)
+      val sheetView: View = configActivity.getLayoutInflater.inflate(R.layout.layout_subscription_menu, null)
+      subscriptionMenu.setContentView(sheetView)
+      for (id <- List(R.id.subscription_menu_update, R.id.subscription_menu_edit, R.id.subscription_menu_delete, R.id.subscription_menu_copy_url)) {
+        sheetView.findViewById[View](id).setOnClickListener(bottomMenuClickListener(subscriptionMenu))
+      }
+      subscriptionMenu.show()
+    }
+
+    def bottomMenuClickListener(subscriptionMenu: BottomSheetDialog) = new View.OnClickListener {
+      override def onClick(v: View): Unit = {
+        val viewHolder = SSRSubViewHolder.this
+        v.getId match {
+          case R.id.subscription_menu_update => {
+            Utils.ThrowableFuture {
+              handler.post(() => {
+                testProgressDialog = ProgressDialog.show(getActivity, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true)
+              })
+              updateSingleSubscription(viewHolder.item)
+              handler.post(() => {
+                testProgressDialog.dismiss
+                testProgressDialog = null
+                updateText()
+              })
+            }
+          }
+          case R.id.subscription_menu_edit => edit_subscription()
+          case R.id.subscription_menu_delete => showRemoveDialog(viewHolder.getAdapterPosition, viewHolder.item)
+          case R.id.subscription_menu_copy_url => clipboard.setPrimaryClip(ClipData.newPlainText(null, viewHolder.item.url))
+          case _ =>
+        }
+        subscriptionMenu.dismiss()
+      }
+    }
 
     def updateText(isShowUrl: Boolean = false) {
       val builder = new SpannableStringBuilder

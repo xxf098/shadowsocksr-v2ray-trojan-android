@@ -2,6 +2,8 @@ package com.github.shadowsocks.fragments
 
 import java.io.IOException
 import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.concurrent.TimeUnit
 
 import android.app.ProgressDialog
@@ -347,7 +349,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       }
       handler.post(() => {
         text1.setText(this.item.url_group)
-        tvUpdateDate.setText(this.item.updated_at)
+        tvUpdateDate.setText(formatUpdateAt(this.item.updated_at))
         if (!TextUtils.isEmpty(builder)) {
           text2.setText(builder)
           text2.setVisibility(View.VISIBLE)
@@ -355,6 +357,25 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
           text2.setVisibility(View.GONE)
         }
       })
+    }
+
+    def formatUpdateAt (updatedAt: String): String = {
+      if (updatedAt.matches("\\d{13,}")) {
+        val interval = System.currentTimeMillis() - updatedAt.toLong
+//        val year= interval / (12 * 30 * 24 * 60 * 60 * 1000)
+//        val month = interval / (30 * 24 * 60 * 60 * 1000)
+        val day = interval / (24 * 60 * 60 * 1000)
+        val hour = interval / (60 * 60 * 1000)
+        val minute = interval / (60 * 1000)
+        val getString = (resId: Int, quantity: Long) => configActivity.getResources.getQuantityString(resId, quantity.toInt: Integer, quantity: java.lang.Long)
+//        if (year > 0) getString(R.plurals.format_years, year)
+//        else if (month > 0) getString(R.plurals.format_months, month)
+        if (day >= 4) new SimpleDateFormat("yyyy-MM-dd").format(new Date(updatedAt.toLong))
+        else if (day > 0 && day < 4) getString(R.plurals.format_days, day)
+        else if (hour > 0) getString(R.plurals.format_hours, hour)
+        else if (minute > 0) getString(R.plurals.format_minutes, minute)
+        else configActivity.getString(R.string.now)
+      } else updatedAt
     }
 
     def bind(item: SSRSub) {

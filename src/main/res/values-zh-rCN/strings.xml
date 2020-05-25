@@ -282,5 +282,21 @@
 
   <string name="ssr_category">SSR设置</string>
 
+  <plurals name="format_minutes">
+    <item quantity="other">%d 分钟</item>
+  </plurals>
+  <plurals name="format_hours">
+    <item quantity="other">%d 小时</item>
+  </plurals>
+  <plurals name="format_days">
+    <item quantity="other">%d 天</item>
+  </plurals>
+  <plurals name="format_months">
+    <item quantity="other">%d 月</item>
+  </plurals>
+  <plurals name="format_years">
+    <item quantity="other">%d 年</item>
+  </plurals>
+  <string name="now">刚刚</string>
 
 </resources>

@@ -284,5 +284,5 @@ object Utils {
 
   def getAbsPath (fileName: String): String = new File(app.getApplicationInfo.nativeLibraryDir, fileName).getAbsolutePath
 
-  def today = new SimpleDateFormat("yyyy-MM-dd").format(new Date())
+  def today = s"${System.currentTimeMillis()}"
 }

@@ -103,11 +103,10 @@ object Profile {
     def testLatency(): Future[Result[Long]] = {
       Future(profile.getElapsed())
         .map(SuccessConnect)
-        .recover {
-          case e: Exception => {
-            e.printStackTrace()
-            FailureConnect(e.getMessage)
-          }
+        .recoverWith {
+          case _: Exception => Future(profile.getElapsed()).map(SuccessConnect).recover{
+              case e: Exception => FailureConnect(e.getMessage)
+            }
         }
     }
 

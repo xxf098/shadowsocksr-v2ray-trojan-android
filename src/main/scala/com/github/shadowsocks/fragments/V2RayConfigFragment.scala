@@ -1,10 +1,13 @@
 package com.github.shadowsocks.fragments
 
+import java.nio.charset.StandardCharsets
+
 import android.app.TaskStackBuilder
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.Toolbar
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
+import android.util.Log
 import android.view.{LayoutInflater, MenuItem, View, ViewGroup}
 import android.widget.{EditText, TextView, Toast}
 import com.github.shadowsocks.ConfigActivity
@@ -16,6 +19,8 @@ import com.github.shadowsocks.R
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Try
+import tun2socks.Tun2socks
 
 class V2RayConfigFragment extends Fragment with OnMenuItemClickListener {
 
@@ -66,9 +71,8 @@ class V2RayConfigFragment extends Fragment with OnMenuItemClickListener {
   def saveConfig(config: String): Unit = {
     val future = checkConfig(config)
     future onSuccess {
-      case Some(prettyConfig) => {
+      case Some(newProfile) => {
         runOnUiThread(() => {
-          val newProfile = Parser.getV2RayJSONProfile(prettyConfig)
           if (profile == null) {
             profile = app.profileManager.createProfile(newProfile)
           } else {
@@ -77,7 +81,7 @@ class V2RayConfigFragment extends Fragment with OnMenuItemClickListener {
             newProfile.name = profile.name
             app.profileManager.updateProfile(newProfile)
           }
-          Toast.makeText(getActivity, "Saved!", Toast.LENGTH_SHORT).show()
+          Toast.makeText(getActivity, "Saved", Toast.LENGTH_SHORT).show()
         })
       }
       case _ => runOnUiThread(() => Toast.makeText(getActivity, "Config is not valid!", Toast.LENGTH_SHORT))
@@ -91,19 +95,23 @@ class V2RayConfigFragment extends Fragment with OnMenuItemClickListener {
   }
 
 
-  def checkConfig(config: String): Future[Option[String]] = {
+  // display id aid
+  def checkConfig(config: String): Future[Option[Profile]] = {
     Future {
       val jsonObject = new JsonParser().parse(config).getAsJsonObject
-      //        val outbounds = jsonObject.getAsJsonArray("outbounds")
-      //        val vmess = outbounds.get(0).getAsJsonObject
-      //        val settings = vmess.getAsJsonObject("settings")
-      //        val vnext = vmess.getAsJsonArray("vnext")
-      //        Log.e(TAG, vmess.toString)
-      //        Log.e(TAG, "protocol==")
       val prettyConfig = new GsonBuilder().setPrettyPrinting().create().toJson(jsonObject)
-      //        val assetPath = getApplicationInfo.dataDir + "/files/"
-      //        Tun2socks.testConfig(prettyConfig, assetPath)
-      Option(prettyConfig)
+      for {
+        p <- Option(prettyConfig).map(Parser.getV2RayJSONProfile)
+        v <- Try(Tun2socks.convertJSONToVmess(config.getBytes(StandardCharsets.UTF_8))).toOption
+      } yield {
+        // Log.e("V2RayConfigFragment", s"${v.getAdd}, ${v.getPort} ${v.getID} ${v.getAid} ${v.getSecurity}")
+        p.v_add = v.getAdd
+        p.v_port = s"${v.getPort}"
+        p.v_id = v.getID
+        p.v_aid = s"${v.getAid}"
+        p.v_security = v.getSecurity
+        p
+      }
     }
   }
 }

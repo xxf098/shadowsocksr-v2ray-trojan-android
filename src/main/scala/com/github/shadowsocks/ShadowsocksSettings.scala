@@ -592,7 +592,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
   def startV2RayConfigActivity (profile: Profile): Boolean = {
     val intent = new Intent(app, classOf[ConfigActivity])
     intent.putExtra(Key.EXTRA_PROFILE_ID, profile.id)
-    app.startActivity(intent)
+    startActivity(intent)
     true
   }
 

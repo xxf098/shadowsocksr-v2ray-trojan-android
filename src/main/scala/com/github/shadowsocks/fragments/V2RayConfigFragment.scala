@@ -66,7 +66,7 @@ class V2RayConfigFragment extends Fragment with OnMenuItemClickListener {
   def saveConfig(config: String): Unit = {
     val future = checkConfig(config)
     future onSuccess {
-      case prettyConfig if prettyConfig != null => {
+      case Some(prettyConfig) => {
         runOnUiThread(() => {
           val newProfile = Parser.getV2RayJSONProfile(prettyConfig)
           if (profile == null) {
@@ -85,13 +85,13 @@ class V2RayConfigFragment extends Fragment with OnMenuItemClickListener {
     future onFailure {
       case e: Exception => {
         e.printStackTrace()
-        runOnUiThread(() => Toast.makeText(getActivity, "config is not valid!", Toast.LENGTH_SHORT).show())
+        runOnUiThread(() => Toast.makeText(getActivity, s"config is not valid: ${e.getMessage}", Toast.LENGTH_SHORT).show())
       }
     }
   }
 
 
-  def checkConfig(config: String): Future[String] = {
+  def checkConfig(config: String): Future[Option[String]] = {
     Future {
       val jsonObject = new JsonParser().parse(config).getAsJsonObject
       //        val outbounds = jsonObject.getAsJsonArray("outbounds")
@@ -103,7 +103,7 @@ class V2RayConfigFragment extends Fragment with OnMenuItemClickListener {
       val prettyConfig = new GsonBuilder().setPrettyPrinting().create().toJson(jsonObject)
       //        val assetPath = getApplicationInfo.dataDir + "/files/"
       //        Tun2socks.testConfig(prettyConfig, assetPath)
-      prettyConfig
+      Option(prettyConfig)
     }
   }
 }

@@ -112,7 +112,10 @@ object SSRSub {
         subscribes = new String(Base64.decode(subscribes, Base64.URL_SAFE))
       })
     } else {
-      subscribes = new String(Base64.decode(response.body().string, Base64.URL_SAFE))
+      val resp = response.body().string.replaceAll("=", "")
+          .replaceAll("\\+", "-")
+          .replaceAll("/", "_")
+      subscribes = new String(Base64.decode(resp, Base64.URL_SAFE), "UTF-8")
     }
     subscribes
   }

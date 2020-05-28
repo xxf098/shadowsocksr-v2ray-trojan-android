@@ -43,7 +43,8 @@ object ShadowsocksSettings {
   private final val TAG = "ShadowsocksSettings"
   private val PROXY_PREFS = Array(Key.group_name, Key.name, Key.host, Key.remotePort, Key.localPort, Key.password, Key.method,
     Key.protocol, Key.obfs, Key.obfs_param, Key.dns, Key.china_dns, Key.protocol_param, Key.v_ps,
-    Key.v_id, Key.v_add, Key.v_host, Key.v_port, Key.v_path, Key.v_aid, Key.v_id_json, Key.v_add_json, Key.v_security, Key.v_tls, Key.v_headertypes, Key.v_net)
+    Key.v_id, Key.v_add, Key.v_host, Key.v_port, Key.v_path, Key.v_aid, Key.v_id_json, Key.v_add_json, Key.v_aid_json, Key.v_security_json,
+    Key.v_security, Key.v_tls, Key.v_headertypes, Key.v_net)
   private val FEATURE_PREFS = Array(Key.route, Key.proxyApps, Key.udpdns, Key.ipv6, Key.tfo)
 
   // Helper functions
@@ -67,6 +68,10 @@ object ShadowsocksSettings {
 
   def updateSwitchPreference(pref: Preference, value: Boolean) {
     pref.asInstanceOf[SwitchPreference].setChecked(value)
+  }
+
+  def updatePreference(pref: Preference, value: String): Unit = {
+    pref.setSummary(value)
   }
 
   def updatePreference(pref: Preference, name: String, profile: Profile) {
@@ -98,6 +103,8 @@ object ShadowsocksSettings {
       name match {
         case Key.group_name => updateSummaryEditTextPreference(pref, profile.url_group)
         case Key.v_ps => updateSummaryEditTextPreference(pref, profile.v_ps)
+        case Key.v_aid_json => updatePreference(pref, profile.v_aid)
+        case Key.v_security_json => updatePreference(pref, profile.v_security)
         case _ =>
       }
       return
@@ -294,13 +301,9 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       true
     })
 
-    findPreference(Key.v_add_json).setOnPreferenceClickListener((preference: Preference) => {
-      startV2RayConfigActivity(profile)
-    })
-
-    findPreference(Key.v_id_json).setOnPreferenceClickListener((preference: Preference) => {
-      startV2RayConfigActivity(profile)
-    })
+    for (key <- List(Key.v_add_json, Key.v_id_json, Key.v_aid_json, Key.v_security_json)) {
+      findPreference(key).setOnPreferenceClickListener(_ => startV2RayConfigActivity(profile))
+    }
 
     findPreference(Key.route).setOnPreferenceChangeListener((_, value) => {
       if(value == "self") {

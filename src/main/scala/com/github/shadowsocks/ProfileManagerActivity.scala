@@ -369,7 +369,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       tv1.setText(groupName)
       if (groupName == currentGroupName) {
         val count = ProfileManagerActivity.countProfilesByGroup(currentGroupName)
-        tv2.setText(s"${count - undoManager.getCount()}")
+        val txtCount = if (undoManager.getCount() > 0) {
+          count - undoManager.getUndoItems.count(_._2.url_group == currentGroupName)
+        } else count
+        tv2.setText(s"${if (txtCount > 0) txtCount else ""}")
       } else {
         tv2.setText("")
       }

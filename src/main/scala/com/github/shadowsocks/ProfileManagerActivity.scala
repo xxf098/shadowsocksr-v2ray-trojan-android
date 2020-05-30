@@ -56,7 +56,7 @@ import com.github.shadowsocks.database.VmessAction.profile
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{Duration, SECONDS}
 import scala.concurrent.{Await, Future}
-import scala.util.Try
+import com.github.shadowsocks.types.Nested._
 
 object ProfileManagerActivity {
   // profiles count
@@ -369,7 +369,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       tv1.setText(groupName)
       if (groupName == currentGroupName) {
         val count = ProfileManagerActivity.countProfilesByGroup(currentGroupName)
-        tv2.setText(s"${count - undoManager.getCount()}")
+        val txtCount = if (undoManager.getCount() > 0) {
+          count - undoManager.getUndoItems.count(_._2.url_group == currentGroupName)
+        } else count
+        tv2.setText(s"${if (txtCount > 0) txtCount else ""}")
       } else {
         tv2.setText("")
       }
@@ -1127,22 +1130,30 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
           val testV2rayProfiles = (v2rayProfiles: List[List[Profile]], size: Int) => {
             val pingMethod = app.settings.getString(Key.PING_METHOD, "google")
-            v2rayProfiles.indices.foreach(index => {
-              val profiles = v2rayProfiles(index)
-              val futures = profiles.indices.map(i =>{
-                val p = profiles(i)
-                Future(p.pingItemThread(pingMethod, 8900L + index * size + i))
-                  .map(testResult => {
-                    val msg = Message.obtain()
-                    msg.obj = s"${profile.name} $testResult"
-                    msg.setTarget(showProgresshandler)
-                    msg.sendToTarget()
-                  })
-              }
-              )
-              // TODO: Duration
-              Await.ready(Future.sequence(futures), Duration(15, SECONDS))
-            })
+            v2rayProfiles.nestedIndexMap((p, index, i) =>
+              Future(p.pingItemThread(pingMethod, 8900L + index * size + i))
+              .map(testResult => {
+                val msg = Message.obtain()
+                msg.obj = s"${profile.name} $testResult"
+                msg.setTarget(showProgresshandler)
+                msg.sendToTarget()
+              })).foreach(futures => Await.ready(Future.sequence(futures), Duration(15, SECONDS)))
+//            v2rayProfiles.indices.foreach(index => {
+//              val profiles = v2rayProfiles(index)
+//              val futures = profiles.indices.map(i =>{
+//                val p = profiles(i)
+//                Future(p.pingItemThread(pingMethod, 8900L + index * size + i))
+//                  .map(testResult => {
+//                    val msg = Message.obtain()
+//                    msg.obj = s"${profile.name} $testResult"
+//                    msg.setTarget(showProgresshandler)
+//                    msg.sendToTarget()
+//                  })
+//              }
+//              )
+//              // TODO: Duration
+//              Await.ready(Future.sequence(futures), Duration(15, SECONDS))
+//            })
           }
 
           val testV2rayJob = (v2rayProfiles: List[Profile]) => {
@@ -1240,18 +1251,25 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           }
 
           val testTCPSSRProfiles = (ssrProfiles: List[List[Profile]], size: Int, offset: Int) => {
-            ssrProfiles.indices.foreach(index => {
-              val profiles: List[Profile] = ssrProfiles(index)
-              val futures = profiles.map(p => Future {
-                val testResult = p.testTCPLatencyThread()
-                // Log.e(TAG, s"${p.name} $testResult")
-                val msg = Message.obtain()
-                msg.obj = s"${p.name} $testResult"
-                msg.setTarget(showProgresshandler)
-                msg.sendToTarget()
-              })
-              Await.ready(Future.sequence(futures), Duration(5 * size, SECONDS))
-            })
+            // TODO:
+            ssrProfiles.nestedMap(p => Future {
+              val testResult = p.testTCPLatencyThread()
+              val msg = Message.obtain()
+              msg.obj = s"${p.name} $testResult"
+              msg.setTarget(showProgresshandler)
+              msg.sendToTarget()
+            }).foreach(futures => Await.ready(Future.sequence(futures), Duration(5 * size, SECONDS)))
+//            ssrProfiles.indices.foreach(index => {
+//              val profiles: List[Profile] = ssrProfiles(index)
+//              val futures = profiles.map(p => Future {
+//                val testResult = p.testTCPLatencyThread()
+//                val msg = Message.obtain()
+//                msg.obj = s"${p.name} $testResult"
+//                msg.setTarget(showProgresshandler)
+//                msg.sendToTarget()
+//              })
+//              Await.ready(Future.sequence(futures), Duration(5 * size, SECONDS))
+//            })
           }
 
           // TODO: Retry

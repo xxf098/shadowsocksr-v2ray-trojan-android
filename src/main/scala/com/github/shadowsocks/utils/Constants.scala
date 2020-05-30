@@ -334,6 +334,8 @@ object Key {
   val v_class = "v_class"
   val v_add_json = "v_add_json"
   val v_id_json = "v_id_json"
+  val v_aid_json = "v_aid_json"
+  val v_security_json = "v_security_json"
   val v_security = "v_security"
   val v_headertypes = "v_headertypes"
 

@@ -2,12 +2,15 @@ package com.github.shadowsocks.fragments
 
 import java.io.IOException
 import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.concurrent.TimeUnit
 
 import android.app.ProgressDialog
 import android.content.{ClipData, ClipboardManager, Context, DialogInterface, Intent}
 import android.os.{Bundle, Handler}
 import android.preference.PreferenceManager
+import android.support.design.widget.{BottomSheetBehavior, BottomSheetDialog}
 import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView.ViewHolder
@@ -203,6 +206,39 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     ))
   }
 
+  private  def showRemoveDialog (index : Int, item: SSRSub): Unit = {
+    new AlertDialog.Builder(getActivity)
+      .setTitle(getString(R.string.ssrsub_remove_tip_title))
+      .setPositiveButton(R.string.ssrsub_remove_tip_direct, ((_, _) => {
+        ssrsubAdapter.remove(index)
+        app.ssrsubManager.delSSRSub(item.id)
+      }): DialogInterface.OnClickListener)
+      .setNegativeButton(android.R.string.no,  ((_, _) => {
+        ssrsubAdapter.notifyDataSetChanged()
+      }): DialogInterface.OnClickListener)
+      .setNeutralButton(R.string.ssrsub_remove_tip_delete,  ((_, _) => {
+        val delete_profiles = app.profileManager.getAllProfilesBySSRSub(item) match {
+          case Some(profiles) =>
+            profiles.filter(profile=> profile.ssrsub_id <= 0 || profile.ssrsub_id == item.id)
+          case _ => List()
+        }
+
+        delete_profiles.foreach((profile: Profile) => {
+          if (profile.id != app.profileId) {
+            app.profileManager.delProfile(profile.id)
+          }
+        })
+
+        ssrsubAdapter.remove(index)
+        app.ssrsubManager.delSSRSub(item.id)
+        notifyGroupNameChange(None)
+      }): DialogInterface.OnClickListener)
+      .setMessage(getString(R.string.ssrsub_remove_tip))
+      .setCancelable(false)
+      .create()
+      .show()
+  }
+
   private[this] def setupRemoveSubscription (ssusubsList: RecyclerView): Unit = {
     new ItemTouchHelper(new SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
       ItemTouchHelper.START | ItemTouchHelper.END) {
@@ -258,13 +294,49 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     private val ivEditSubscription = itemView.findViewById(R.id.edit_subscription).asInstanceOf[ImageView]
     text1.setOnClickListener(this)
     ivEditSubscription.setOnClickListener(_ => {
-      val popup = new PopupMenu(requireContext(), ivEditSubscription)
-      popup.getMenuInflater.inflate(R.menu.subscription_edit_popup, popup.getMenu)
-      popup.setOnMenuItemClickListener(this)
-      popup.show()
-
+//      val popup = new PopupMenu(requireContext(), ivEditSubscription)
+//      popup.getMenuInflater.inflate(R.menu.subscription_edit_popup, popup.getMenu)
+//      popup.setOnMenuItemClickListener(this)
+//      popup.show()
+      showBottomMenu()
     })
 
+
+    def showBottomMenu (): Unit = {
+      val subscriptionMenu = new BottomSheetDialog(configActivity)
+      val sheetView: View = configActivity.getLayoutInflater.inflate(R.layout.layout_subscription_menu, null)
+      subscriptionMenu.setContentView(sheetView)
+      for (id <- List(R.id.subscription_menu_update, R.id.subscription_menu_edit, R.id.subscription_menu_delete, R.id.subscription_menu_copy_url)) {
+        sheetView.findViewById[View](id).setOnClickListener(bottomMenuClickListener(subscriptionMenu))
+      }
+      subscriptionMenu.show()
+    }
+
+    def bottomMenuClickListener(subscriptionMenu: BottomSheetDialog) = new View.OnClickListener {
+      override def onClick(v: View): Unit = {
+        val viewHolder = SSRSubViewHolder.this
+        v.getId match {
+          case R.id.subscription_menu_update => {
+            Utils.ThrowableFuture {
+              handler.post(() => {
+                testProgressDialog = ProgressDialog.show(getActivity, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true)
+              })
+              updateSingleSubscription(viewHolder.item)
+              handler.post(() => {
+                testProgressDialog.dismiss
+                testProgressDialog = null
+                updateText()
+              })
+            }
+          }
+          case R.id.subscription_menu_edit => edit_subscription()
+          case R.id.subscription_menu_delete => showRemoveDialog(viewHolder.getAdapterPosition, viewHolder.item)
+          case R.id.subscription_menu_copy_url => clipboard.setPrimaryClip(ClipData.newPlainText(null, viewHolder.item.url))
+          case _ =>
+        }
+        subscriptionMenu.dismiss()
+      }
+    }
 
     def updateText(isShowUrl: Boolean = false) {
       val builder = new SpannableStringBuilder
@@ -277,7 +349,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       }
       handler.post(() => {
         text1.setText(this.item.url_group)
-        tvUpdateDate.setText(this.item.updated_at)
+        tvUpdateDate.setText(formatUpdateAt(this.item.updated_at))
         if (!TextUtils.isEmpty(builder)) {
           text2.setText(builder)
           text2.setVisibility(View.VISIBLE)
@@ -285,6 +357,25 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
           text2.setVisibility(View.GONE)
         }
       })
+    }
+
+    def formatUpdateAt (updatedAt: String): String = {
+      if (updatedAt.matches("\\d{13,}")) {
+        val interval = System.currentTimeMillis() - updatedAt.toLong
+//        val year= interval / (12 * 30 * 24 * 60 * 60 * 1000)
+//        val month = interval / (30 * 24 * 60 * 60 * 1000)
+        val day = interval / (24 * 60 * 60 * 1000)
+        val hour = interval / (60 * 60 * 1000)
+        val minute = interval / (60 * 1000)
+        val getString = (resId: Int, quantity: Long) => configActivity.getResources.getQuantityString(resId, quantity.toInt: Integer, quantity: java.lang.Long)
+//        if (year > 0) getString(R.plurals.format_years, year)
+//        else if (month > 0) getString(R.plurals.format_months, month)
+        if (day >= 4) new SimpleDateFormat("yyyy-MM-dd").format(new Date(updatedAt.toLong))
+        else if (day > 0 && day < 4) getString(R.plurals.format_days, day)
+        else if (hour > 0) getString(R.plurals.format_hours, hour)
+        else if (minute > 0) getString(R.plurals.format_minutes, minute)
+        else configActivity.getString(R.string.now)
+      } else updatedAt
     }
 
     def bind(item: SSRSub) {
@@ -313,6 +404,10 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
             updateText()
           })
         }
+        true
+      }
+      case R.id.action_delete_subscription => {
+        showRemoveDialog(this.getAdapterPosition, this.item)
         true
       }
       case R.id.action_copy_subscription => {

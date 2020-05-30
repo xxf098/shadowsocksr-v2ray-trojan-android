@@ -88,6 +88,7 @@
   <string name="action_select_proxy_app">自动选中需代理应用</string>
   <string name="edit">编辑</string>
   <string name="update">更新</string>
+  <string name="delete">删除</string>
   <string name="NEW">新建</string>
 
 
@@ -222,7 +223,7 @@
   <string name="ssrsub_list">订阅列表</string>
   <string name="ssrsub_error">订阅失败: %s</string>
   <string name="ssrsub_progres">处理中</string>
-  <string name="ssrsub_progres_text">请稍候</string>
+  <string name="ssrsub_progres_text">请稍候(如果订阅失败，请打开代理后重试)</string>
   <string name="ssrsub_toast_start">开始更新订阅。</string>
   <string name="ssrsub_toast_success">成功更新订阅！</string>
   <string name="ssrsub_toast_fail">更新订阅失败！</string>
@@ -281,5 +282,21 @@
 
   <string name="ssr_category">SSR设置</string>
 
+  <plurals name="format_minutes">
+    <item quantity="other">%d 分钟</item>
+  </plurals>
+  <plurals name="format_hours">
+    <item quantity="other">%d 小时</item>
+  </plurals>
+  <plurals name="format_days">
+    <item quantity="other">%d 天</item>
+  </plurals>
+  <plurals name="format_months">
+    <item quantity="other">%d 月</item>
+  </plurals>
+  <plurals name="format_years">
+    <item quantity="other">%d 年</item>
+  </plurals>
+  <string name="now">刚刚</string>
 
 </resources>

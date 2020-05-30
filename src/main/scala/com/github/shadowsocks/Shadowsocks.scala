@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit
 import java.util.{GregorianCalendar, Locale}
 
 import android.app.backup.BackupManager
-import android.app.{Activity, ProgressDialog}
+import android.app.{Activity, NotificationManager, ProgressDialog}
 import android.content._
 import android.graphics.Typeface
 import android.net.VpnService
@@ -67,6 +67,7 @@ import com.github.shadowsocks.utils._
 import com.github.shadowsocks.job.SSRSubUpdateJob
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.types.{FailureConnect, Result, SuccessConnect}
+import com.github.shadowsocks.utils.NetUtils.testConnectionStartup
 import okhttp3._
 
 import scala.concurrent.Future
@@ -222,6 +223,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   //private var adView: AdView = _
   private lazy val preferences =
   getFragmentManager.findFragmentById(android.R.id.content).asInstanceOf[ShadowsocksSettings]
+  private lazy val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
 
   val handler = new Handler()
 
@@ -271,28 +273,33 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       testCount
     }
     Future{
-      val client = new OkHttpClient.Builder()
-        .connectTimeout(timeout, TimeUnit.SECONDS)
-        .writeTimeout(timeout, TimeUnit.SECONDS)
-        .readTimeout(timeout, TimeUnit.SECONDS)
-        .retryOnConnectionFailure(false)
-        .build()
-      val request = new Request.Builder()
-        .url("http://clients3.google.com/generate_204")
-        .build()
-      if (testCount!=id) return
-      client.newCall(request).execute().body().close()
-      val start = SystemClock.elapsedRealtime()
-      val response = client.newCall(request).execute()
-      val elapsed = SystemClock.elapsedRealtime() - start
-      if (response.code != 204) {
-        throw new Exception(getString(R.string.connection_test_error_status_code, response.code: Integer))
+      if (Build.VERSION.SDK_INT < 21) {
+        val elapsed = NetUtils.testConnectionStartup4("http://clients3.google.com/generate_204", timeout)
+        getString(R.string.connection_test_available, elapsed: java.lang.Long)
+      } else {
+        val client = new OkHttpClient.Builder()
+          .connectTimeout(timeout, TimeUnit.SECONDS)
+          .writeTimeout(timeout, TimeUnit.SECONDS)
+          .readTimeout(timeout, TimeUnit.SECONDS)
+          .retryOnConnectionFailure(false)
+          .build()
+        val request = new Request.Builder()
+          .url("http://clients3.google.com/generate_204")
+          .build()
+        if (testCount!=id) return
+        client.newCall(request).execute().body().close()
+        val start = SystemClock.elapsedRealtime()
+        val response = client.newCall(request).execute()
+        val elapsed = SystemClock.elapsedRealtime() - start
+        if (response.code != 204) {
+          throw new Exception(getString(R.string.connection_test_error_status_code, response.code: Integer))
+        }
+        getString(R.string.connection_test_available, elapsed: java.lang.Long)
       }
-      getString(R.string.connection_test_available, elapsed: java.lang.Long)
     }
       .recover{
         case e => {
-//          e.printStackTrace()
+          e.printStackTrace()
 //          Log.e(TAG, e.getMessage)
           getString(R.string.connection_test_fail)
         }
@@ -583,7 +590,10 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   }
 
   def serviceStop() {
-    if (bgService != null) bgService.use(-1)
+    if (bgService != null) {
+      bgService.use(-1)
+      notificationManager.cancel(1)
+    }
   }
 
   /** Called when connect button is clicked. */

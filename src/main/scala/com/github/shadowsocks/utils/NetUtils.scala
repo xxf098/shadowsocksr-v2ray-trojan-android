@@ -2,14 +2,17 @@ package com.github.shadowsocks.utils
 
 import java.io.IOException
 import java.lang.System.currentTimeMillis
-import java.net.{Inet4Address, InetAddress, Socket}
+import java.net.{HttpURLConnection, Inet4Address, InetAddress, Socket, URL}
 import java.util
 import java.util.concurrent.TimeUnit
 
-import android.os.SystemClock
+import android.os.{Build, SystemClock}
+import android.util.Base64
 import com.github.shadowsocks.R
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.SSRAction.profile
+import com.github.shadowsocks.database.SSRSub.getSubscriptionResponse4
+import com.github.shadowsocks.utils.CloseUtils.autoClose
 import okhttp3.{ConnectionPool, Dns, OkHttpClient, Request}
 
 import scala.util.{Success, Try}
@@ -73,6 +76,9 @@ object NetUtils {
   }
 
   def testConnectionStartup (url: String, timeout: Int = 2): Long = {
+    if (Build.VERSION.SDK_INT < 21) {
+      return testConnectionStartup4(url, timeout)
+    }
     val dns = new Dns {
       override def lookup(s: String): util.List[InetAddress] = {
         val address = if (!Utils.isNumeric(s)) {
@@ -104,6 +110,22 @@ object NetUtils {
       throw new Exception(app.getString(R.string.connection_test_error_status_code, response.code: Integer))
     }
     response.body().close()
+    elapsed
+  }
+
+  // android 4.x
+  def testConnectionStartup4 (url: String, timeout: Int = 2): Long = {
+    val conn = new URL(url).openConnection().asInstanceOf[HttpURLConnection]
+    conn.setConnectTimeout(timeout * 1000)
+    conn.setReadTimeout(timeout * 1000)
+    val start = SystemClock.elapsedRealtime()
+    conn.connect()
+    val elapsed = SystemClock.elapsedRealtime() - start
+    val code = conn.getResponseCode
+    if (code >= 300) {
+      conn.disconnect()
+      throw new Exception(app.getString(R.string.connection_test_error_status_code, code: Integer))
+    }
     elapsed
   }
 

@@ -167,7 +167,17 @@
             android:key="v_id_json"
             android:persistent="false"
             android:summary="Click to see user id"
-            android:title="UserID" />
+            android:title="@string/v_pref_id" />
+
+        <Preference
+            android:key="v_aid_json"
+            android:persistent="false"
+            android:title="@string/v_pref_alterid" />
+
+        <Preference
+            android:key="v_security_json"
+            android:persistent="false"
+            android:title="@string/v_pref_security" />
 
     </PreferenceCategory>
 

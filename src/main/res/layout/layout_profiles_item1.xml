@@ -40,7 +40,7 @@
             android:layout_gravity="top"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:focusable="true"
-            android:padding="6dp"
+            android:padding="7dp"
             android:contentDescription="@string/ping"
             app:srcCompat="@drawable/ic_click"/>
 
@@ -53,7 +53,7 @@
             android:contentDescription="@string/share"
             android:focusable="true"
             android:nextFocusLeft="@+id/container"
-            android:padding="6dp"
+            android:padding="7dp"
             app:srcCompat="@drawable/ic_social_share"/>
     </LinearLayout>
 

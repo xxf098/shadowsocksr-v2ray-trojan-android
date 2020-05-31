@@ -24,19 +24,12 @@ import com.github.shadowsocks.preferences._
 import com.github.shadowsocks.utils.{Key, TcpFastOpen, Utils}
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils.IOUtils
-import android.content.Context
 import com.github.shadowsocks.utils._
-import java.io.InputStreamReader
-import java.io.BufferedReader
-import java.util.concurrent.TimeUnit
 
 import android.text.TextUtils
 import android.util.Log
-import com.github.shadowsocks.Shadowsocks.TAG
-import okhttp3.{OkHttpClient, Request}
 
-import scala.collection.mutable
-import scala.io.Source
+import scala.language.implicitConversions
 
 object ShadowsocksSettings {
   // Constants
@@ -127,6 +120,16 @@ object ShadowsocksSettings {
       case Key.china_dns => updateSummaryEditTextPreference(pref, profile.china_dns)
       case Key.ipv6 => updateSwitchPreference(pref, profile.ipv6)
       case _ => {}
+    }
+  }
+
+  implicit class PrefKeyListener(setting: ShadowsocksSettings) {
+
+    def onSettingChange[T](key: String, func: T => Unit): Unit = {
+      setting.findPreference(key).setOnPreferenceChangeListener((_, value) => {
+        func(value.asInstanceOf[T])
+        app.profileManager.updateProfile(setting.profile)
+      })
     }
   }
 }
@@ -232,30 +235,36 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       true
     })
 
-    findPreference(Key.v_port).setOnPreferenceChangeListener((_, value) => {
-      profile.v_port = value.asInstanceOf[Int].toString
-      app.profileManager.updateProfile(profile)
-    })
+//    findPreference(Key.v_port).setOnPreferenceChangeListener((_, value) => {
+//      profile.v_port = value.asInstanceOf[Int].toString
+//      app.profileManager.updateProfile(profile)
+//    })
 
-    findPreference(Key.v_aid).setOnPreferenceChangeListener((_, value) => {
-      profile.v_aid = value.asInstanceOf[Int].toString
-      app.profileManager.updateProfile(profile)
-    })
+//    findPreference(Key.v_aid).setOnPreferenceChangeListener((_, value) => {
+//      profile.v_aid = value.asInstanceOf[Int].toString
+//      app.profileManager.updateProfile(profile)
+//    })
 
-    findPreference(Key.v_host).setOnPreferenceChangeListener((_, value) => {
-      profile.v_host = value.asInstanceOf[String]
-      app.profileManager.updateProfile(profile)
-    })
+//    findPreference(Key.v_host).setOnPreferenceChangeListener((_, value) => {
+//      profile.v_host = value.asInstanceOf[String]
+//      app.profileManager.updateProfile(profile)
+//    })
+//
+//    findPreference(Key.v_path).setOnPreferenceChangeListener((_, value) => {
+//      profile.v_path = value.asInstanceOf[String]
+//      app.profileManager.updateProfile(profile)
+//    })
+//
+//    findPreference(Key.v_security).setOnPreferenceChangeListener((_, value) => {
+//      profile.v_security = value.asInstanceOf[String]
+//      app.profileManager.updateProfile(profile)
+//    })
 
-    findPreference(Key.v_path).setOnPreferenceChangeListener((_, value) => {
-      profile.v_path = value.asInstanceOf[String]
-      app.profileManager.updateProfile(profile)
-    })
-
-    findPreference(Key.v_security).setOnPreferenceChangeListener((_, value) => {
-      profile.v_security = value.asInstanceOf[String]
-      app.profileManager.updateProfile(profile)
-    })
+    this.onSettingChange[Int](Key.v_port, value => profile.v_port = value.toString)
+    this.onSettingChange[Int](Key.v_aid, value => profile.v_aid = value.toString)
+    this.onSettingChange[String](Key.v_host, value => profile.v_host = value)
+    this.onSettingChange[String](Key.v_path, value => profile.v_path = value)
+    this.onSettingChange[String](Key.v_security, value => profile.v_security = value)
 
     val networkPreference = findPreference(Key.v_net).asInstanceOf[DropDownPreference]
     networkPreference.setDropDownWidth(R.dimen.default_dropdown_width)

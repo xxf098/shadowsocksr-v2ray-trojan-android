@@ -52,7 +52,10 @@ jobs:
       uses: actions/cache@v1
       with:
         path: ~/.sbt
-        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}    
+        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
+    - name: init Application.mk
+      run: |
+        echo -e "APP_ABI      			:= armeabi-v7a x86\nAPP_PLATFORM 			:= android-16\nAPP_STL      			:= stlport_static\nNDK_TOOLCHAIN_VERSION 	:= clang\n" > './src/main/jni/Application.mk'
     - name: Build apk
       run: |
         ./travis-ci/setup.sh

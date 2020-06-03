@@ -83,6 +83,7 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
       Tun2socks.setLocalDNS(s"${vpnService.dns_address}:${vpnService.dns_port}")
     try {
 //      val config = Parser.getV2rayConfig(profile).orNull
+//      Log.e(TAG, Tun2socks.checkVersion())
       profile match {
         case p if p.isVmess => {
           Tun2socks.startV2RayWithVmess(flow, service, androidLogService, profile, assetPath)

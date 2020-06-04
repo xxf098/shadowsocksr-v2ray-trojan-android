@@ -66,11 +66,11 @@
         <menu>
             <group android:checkableBehavior="single">
                 <item
-                    android:id="@+id/sort_by_default"
+                    android:id="@+id/action_sort_by_default"
                     android:title="@string/sort_by_default"
                     android:checked="true" />
                 <item
-                    android:id="@+id/sort_by_latency"
+                    android:id="@+id/action_sort_by_latency"
                     android:title="@string/sort_by_elapsed" />
             </group>
         </menu>

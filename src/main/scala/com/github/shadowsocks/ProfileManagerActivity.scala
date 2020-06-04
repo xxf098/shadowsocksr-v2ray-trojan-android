@@ -241,7 +241,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
     def resetProfiles (): Unit = {
       profilesAdapter.hideServer = app.settings.getBoolean(Key.HIDE_SERVER, false)
-      is_sort = app.settings.getString(Key.SORT_METHOD, "default") == "elapsed"
+      is_sort = app.settings.getString(Key.SORT_METHOD, Key.SORT_METHOD_DEFAULT) == Key.SORT_METHOD_ELAPSED
       profiles.clear()
       profiles ++= getProfilesByGroup(currentGroupName)
     }
@@ -459,6 +459,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     })
     toolbar.inflateMenu(R.menu.profile_manager_menu)
     toolbar.setOnMenuItemClickListener(this)
+    val sortMethod = app.settings.getString(Key.SORT_METHOD, Key.SORT_METHOD_DEFAULT)
+    val menuId = if (sortMethod == Key.SORT_METHOD_ELAPSED) R.id.action_sort_by_latency else R.id.action_sort_by_default
+    toolbar.getMenu.findItem(menuId).setChecked(true)
 
     initFab()
     // get current group name
@@ -1338,6 +1341,22 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     }
     case R.id.action_settings => {
       startActivityForResult(new Intent(this, classOf[SettingActivity]), REQUEST_SETTINGS)
+      true
+    }
+    case R.id.action_sort_by_default => {
+      item.setChecked(true)
+      app.settings.edit().putString(Key.SORT_METHOD, Key.SORT_METHOD_DEFAULT).apply()
+      is_sort = false
+      profilesAdapter.resetProfiles()
+      profilesAdapter.notifyDataSetChanged()
+      true
+    }
+    case R.id.action_sort_by_latency => {
+      item.setChecked(true)
+      app.settings.edit().putString(Key.SORT_METHOD, Key.SORT_METHOD_ELAPSED).apply()
+      is_sort = true
+      profilesAdapter.resetProfiles()
+      profilesAdapter.notifyDataSetChanged()
       true
     }
     case _ => false

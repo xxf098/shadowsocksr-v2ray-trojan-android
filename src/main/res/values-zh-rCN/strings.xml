@@ -258,9 +258,11 @@
   <string name="v_pref_networks">传输协议</string>
 
   <string name="title_pref_sort_method">排序方式</string>
+  <string name="sort_by_default">默认</string>
+  <string name="sort_by_elapsed">延迟</string>
   <string-array name="sort_method_entry">
-    <item>默认</item>
-    <item>延迟</item>
+    <item>@string/sort_by_default</item>
+    <item>@string/sort_by_elapsed</item>
   </string-array>
 
   <string name="title_pref_ping_method">Ping方式</string>

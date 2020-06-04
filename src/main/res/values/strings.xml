@@ -287,9 +287,11 @@
 
 <!--  settings -->
   <string name="title_pref_sort_method">Sort Method</string>
+  <string name="sort_by_default">By Default</string>
+  <string name="sort_by_elapsed">By Elapsed</string>
   <string-array name="sort_method_entry">
-    <item>By Default</item>
-    <item>By Elapsed</item>
+    <item>@string/sort_by_default</item>
+    <item>@string/sort_by_elapsed</item>
   </string-array>
 
   <string-array name="sort_method_value">

@@ -62,6 +62,19 @@
                 android:numericShortcut="5"/>
         </menu>
     </item>
+    <item android:title="@string/title_pref_sort_method">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/sort_by_default"
+                    android:title="@string/sort_by_default"
+                    android:checked="true" />
+                <item
+                    android:id="@+id/sort_by_latency"
+                    android:title="@string/sort_by_elapsed" />
+            </group>
+        </menu>
+    </item>
     <item android:id="@+id/action_batch_delete"
         android:title="@string/batch_delete"
         android:alphabeticShortcut="g"

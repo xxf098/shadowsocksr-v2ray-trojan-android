@@ -23,7 +23,7 @@ import scala.collection.mutable
 
 
 class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeListener {
-  lazy val sortMethod = findPreference(Key.SORT_METHOD).asInstanceOf[DropDownPreference]
+//  lazy val sortMethod = findPreference(Key.SORT_METHOD).asInstanceOf[DropDownPreference]
   lazy val pingMethod = findPreference(Key.PING_METHOD).asInstanceOf[DropDownPreference]
   lazy val hideServer = findPreference(Key.HIDE_SERVER).asInstanceOf[CheckBoxPreference]
   lazy val autoUpdate = findPreference(Key.AUTO_UPDATE_SUBSCRIPTION).asInstanceOf[CheckBoxPreference]
@@ -36,11 +36,11 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
   override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
     addPreferencesFromResource(R.xml.pref_setting)
-    sortMethod.setDropDownWidth(R.dimen.default_dropdown_width)
-    sortMethod.setOnPreferenceChangeListener((_, value) => {
-      prefs.edit().putString(Key.SORT_METHOD, value.asInstanceOf[String]).apply()
-      true
-    })
+//    sortMethod.setDropDownWidth(R.dimen.default_dropdown_width)
+//    sortMethod.setOnPreferenceChangeListener((_, value) => {
+//      prefs.edit().putString(Key.SORT_METHOD, value.asInstanceOf[String]).apply()
+//      true
+//    })
 
     pingMethod.setDropDownWidth(R.dimen.default_dropdown_width)
     pingMethod.setOnPreferenceChangeListener((_, value) => {

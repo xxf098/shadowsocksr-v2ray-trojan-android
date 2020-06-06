@@ -9,8 +9,14 @@ A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) and [V2Ray](http
 
 
 ### PREREQUISITES
-
+* A really fast proxy
 * JDK 1.8
+```bash
+    sudo apt-get install openjdk-8-jdk
+    export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+    export PATH=$PATH:$JAVA_HOME/bin
+    java -version
+```
 * SBT 0.13.8
 * Android SDK
   - Build Tools 29+
@@ -23,7 +29,8 @@ A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) and [V2Ray](http
 
 * Download [Android Studio](https://developer.android.com/studio)
 * Download [Android NDK r12b](https://developer.android.com/ndk/downloads/older_releases)
-* Set proxy for sbt in Android Studio: open `Settings -> Build, Execution, Deployment -> Build Tool -> sbt`, in `VM parameters` input (or Welcome Page `Configure -> Edit Custom VM Options`):
+* Set proxy for Android Studio: `File | Settings | Appearance & Behavior | System Settings | HTTP Proxy`   
+Set proxy for sbt: `File | Settings | Build, Execution, Deployment | Build Tools | sbt`, in `VM parameters` input:
 
         -Dhttp.proxyHost=127.0.0.1
         -Dhttp.proxyPort=8080

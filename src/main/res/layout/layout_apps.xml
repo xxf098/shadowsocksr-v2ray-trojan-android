@@ -6,7 +6,28 @@
     android:layout_height="fill_parent"
     android:orientation="vertical"
     android:duplicateParentState="false">
-  <include layout="@layout/toolbar_light_dark"/>
+  <android.support.v7.widget.Toolbar
+      xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      android:layout_height="?attr/actionBarSize"
+      android:layout_width="match_parent"
+      android:background="?attr/colorPrimary"
+      android:elevation="4dp"
+      android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+      app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+      android:id="@+id/toolbar" >
+    <RelativeLayout
+        android:id="@+id/searchview_wrapper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        >
+      <android.support.v7.widget.SearchView
+          android:id="@+id/action_search"
+          android:layout_alignParentRight="true"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content" />
+    </RelativeLayout>
+  </android.support.v7.widget.Toolbar>
   <LinearLayout android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:elevation="1dp"

@@ -1133,14 +1133,6 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
           val testV2rayProfiles = (v2rayProfiles: List[List[Profile]], size: Int) => {
             val pingMethod = app.settings.getString(Key.PING_METHOD, "google")
-//            v2rayProfiles.nestedIndexMap((p, index, i) =>
-//              Future(p.pingItemThread(pingMethod, 8900L + index * size + i))
-//              .map(testResult => {
-//                val msg = Message.obtain()
-//                msg.obj = s"${profile.name} $testResult"
-//                msg.setTarget(showProgresshandler)
-//                msg.sendToTarget()
-//              })).foreach(futures => Await.ready(Future.sequence(futures), Duration(15, SECONDS)))
             v2rayProfiles.indices.foreach(index => {
               val profiles = v2rayProfiles(index)
               val futures = profiles.indices.map(i =>{
@@ -1152,10 +1144,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                     msg.setTarget(showProgresshandler)
                     msg.sendToTarget()
                   })
-              }
-              )
+              })
               // TODO: Duration
-              Await.ready(Future.sequence(futures), Duration(20, SECONDS))
+              Await.ready(Future.sequence(futures), Duration(20, SECONDS)).onFailure{
+                case e: Exception => e.printStackTrace()
+              }
             })
           }
 
@@ -1242,7 +1235,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                   msg.setTarget(showProgresshandler)
                   msg.sendToTarget()
                 }))
-                Await.ready(Future.sequence(futures), Duration(5 * size, SECONDS))
+                Await.ready(Future.sequence(futures), Duration(5 * size, SECONDS)).onFailure{
+                  case e: Exception => e.printStackTrace()
+                }
               } catch {
                 case e: Exception => e.printStackTrace()
               }
@@ -1254,13 +1249,6 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           }
 
           val testTCPSSRProfiles = (ssrProfiles: List[List[Profile]], size: Int, offset: Int) => {
-//            ssrProfiles.nestedMap(p => Future {
-//              val testResult = p.testTCPLatencyThread()
-//              val msg = Message.obtain()
-//              msg.obj = s"${p.name} $testResult"
-//              msg.setTarget(showProgresshandler)
-//              msg.sendToTarget()
-//            }).foreach(futures => Await.ready(Future.sequence(futures), Duration(5 * size, SECONDS)))
             ssrProfiles.indices.foreach(index => {
               val profiles: List[Profile] = ssrProfiles(index)
               val futures = profiles.map(p => Future {
@@ -1270,7 +1258,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                 msg.setTarget(showProgresshandler)
                 msg.sendToTarget()
               })
-              Await.ready(Future.sequence(futures), Duration(5 * size, SECONDS))
+              Await.ready(Future.sequence(futures), Duration(5 * size, SECONDS)).onFailure{
+                case e: Exception => e.printStackTrace()
+              }
             })
           }
 

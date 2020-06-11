@@ -362,7 +362,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startDnsDaemon() {
     val reject = if (profile.ipv6) "224.0.0.0/3" else "224.0.0.0/3, ::/0"
-    val protect = "protect = \"" + protectPath +"\";"
+//    val protect = "protect = \"" + protectPath +"\";"
+    val protect: String = ""
 
     var china_dns_settings = ""
 

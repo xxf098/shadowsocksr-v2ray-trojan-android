@@ -59,6 +59,7 @@ import com.github.shadowsocks.utils.CloseUtils.autoClose
 import com.github.shadowsocks.utils.{Key, Utils}
 import android.support.v7.widget.SearchView
 
+
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.language.implicitConversions
@@ -295,17 +296,25 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
     instance = this
     loadAppsAsync()
     // search
-    findViewById(R.id.action_search).asInstanceOf[SearchView]
-      .setOnQueryTextListener(new SearchView.OnQueryTextListener {
-        override def onQueryTextSubmit(s: String): Boolean = false
+    val searchView = findViewById(R.id.action_search).asInstanceOf[SearchView]
+    val searchTextView = searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text).asInstanceOf[AutoCompleteTextView]
+    try {
+      val mCursorDrawableRes = classOf[TextView].getDeclaredField("mCursorDrawableRes")
+      mCursorDrawableRes.setAccessible(true)
+      mCursorDrawableRes.set(searchTextView, R.drawable.cursor)
+    } catch{
+      case e: Exception =>
+    }
+    searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener {
+      override def onQueryTextSubmit(s: String): Boolean = false
 
-        override def onQueryTextChange(s: String): Boolean = {
-          val adapter = appListView.getAdapter.asInstanceOf[AppsAdapter]
-          if (adapter == null) return true
-          adapter.applyFilter(s.toLowerCase())
-          true
-        }
-      })
+      override def onQueryTextChange(s: String): Boolean = {
+        val adapter = appListView.getAdapter.asInstanceOf[AppsAdapter]
+        if (adapter == null) return true
+        adapter.applyFilter(s.toLowerCase())
+        true
+      }
+    })
   }
 
 

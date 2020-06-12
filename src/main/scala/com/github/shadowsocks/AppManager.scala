@@ -310,8 +310,9 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
 
       override def onQueryTextChange(s: String): Boolean = {
         val adapter = appListView.getAdapter.asInstanceOf[AppsAdapter]
-        if (adapter == null) return true
-        adapter.applyFilter(s.toLowerCase())
+        if (adapter != null) {
+          adapter.applyFilter(s.toLowerCase())
+        }
         true
       }
     })

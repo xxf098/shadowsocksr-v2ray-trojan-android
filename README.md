@@ -39,7 +39,6 @@ Set proxy for sbt: `File | Settings | Build, Execution, Deployment | Build Tools
         
 * Set environment variable `ANDROID_HOME` to `/path/to/Android/Sdk`
 * Set environment variable `ANDROID_NDK_HOME` to `/path/to/Android/android-ndk-r20b`
-* Set environment variable `TERM` to `xterm-color`
 * Create your key following the instructions at https://developer.android.com/studio/publish/app-signing.html
 * Put your key in ~/.keystore or any other place
 * Create `local.properties` from `local.properties.example` with your own key information
@@ -56,10 +55,9 @@ Set proxy for sbt: `File | Settings | Build, Execution, Deployment | Build Tools
     export https_proxy=http://127.0.0.1:8080
     export ANDROID_HOME=/path/to/Android/Sdk
     export ANDROID_NDK_HOME=/path/to/Android/android-ndk-r20b
-    export TERM=xterm-color
     # install and update all git submodule
     git submodule update --init
-    # Build the App
+    # Build the App and fix the problems as the error messages indicated
     sbt native-build clean android:package-release
     # run app
     sbt android:run

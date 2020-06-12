@@ -8,13 +8,13 @@
             android:title="@string/feature_cat"
         android:key="@string/featurePreferenceGroup">
 
-        <com.github.shadowsocks.preferences.DropDownPreference
-            android:defaultValue="default"
-            android:entries="@array/sort_method_entry"
-            android:entryValues="@array/sort_method_value"
-            android:key="pref_sort_method"
-            android:summary="%s"
-            android:title="@string/title_pref_sort_method" />
+<!--        <com.github.shadowsocks.preferences.DropDownPreference-->
+<!--            android:defaultValue="default"-->
+<!--            android:entries="@array/sort_method_entry"-->
+<!--            android:entryValues="@array/sort_method_value"-->
+<!--            android:key="pref_sort_method"-->
+<!--            android:summary="%s"-->
+<!--            android:title="@string/title_pref_sort_method" />-->
 
         <com.github.shadowsocks.preferences.DropDownPreference
             android:defaultValue="default"

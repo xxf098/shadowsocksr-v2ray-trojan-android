@@ -57,6 +57,8 @@ import android.widget._
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.CloseUtils.autoClose
 import com.github.shadowsocks.utils.{Key, Utils}
+import android.support.v7.widget.SearchView
+
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -64,6 +66,7 @@ import scala.language.implicitConversions
 
 // TODO: Apply setting to all config
 object AppManager {
+  val TAG = "AppManager"
   case class ProxiedApp(name: String, packageName: String, icon: Drawable)
   private case class ListEntry(switch: Switch, text: TextView, icon: ImageView)
 
@@ -128,10 +131,11 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
   }
 
   private final class AppsAdapter extends RecyclerView.Adapter[AppViewHolder] {
-    private lazy val apps = getApps(getPackageManager).sortWith((a, b) => {
+    private lazy val appsCache = getApps(getPackageManager).sortWith((a, b) => {
       val aProxied = proxiedApps.contains(a.packageName)
       if (aProxied ^ proxiedApps.contains(b.packageName)) aProxied else a.name.compareToIgnoreCase(b.name) < 0
     })
+    private var apps = appsCache
 
     lazy val packageNames = apps.map(_.packageName)
 
@@ -139,6 +143,13 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
     def onBindViewHolder(vh: AppViewHolder, i: Int) = vh.bind(apps(i))
     def onCreateViewHolder(vg: ViewGroup, i: Int) =
       new AppViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_apps_item, vg, false))
+
+    // TODO: parallelStream
+    def applyFilter(keyword: String) = {
+      apps = if(keyword.length == 0) appsCache
+      else apps.filter(a => a.name.toLowerCase.contains(keyword) || a.packageName.toLowerCase.contains(keyword))
+      notifyDataSetChanged()
+    }
   }
 
   private var proxiedApps: mutable.HashSet[String] = _
@@ -284,6 +295,27 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
 
     instance = this
     loadAppsAsync()
+    // search
+    val searchView = findViewById(R.id.action_search).asInstanceOf[SearchView]
+    val searchTextView = searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text).asInstanceOf[AutoCompleteTextView]
+    try {
+      val mCursorDrawableRes = classOf[TextView].getDeclaredField("mCursorDrawableRes")
+      mCursorDrawableRes.setAccessible(true)
+      mCursorDrawableRes.set(searchTextView, R.drawable.cursor)
+    } catch{
+      case e: Exception =>
+    }
+    searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener {
+      override def onQueryTextSubmit(s: String): Boolean = false
+
+      override def onQueryTextChange(s: String): Boolean = {
+        val adapter = appListView.getAdapter.asInstanceOf[AppsAdapter]
+        if (adapter != null) {
+          adapter.applyFilter(s.toLowerCase())
+        }
+        true
+      }
+    })
   }
 
 

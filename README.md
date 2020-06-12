@@ -9,21 +9,28 @@ A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) and [V2Ray](http
 
 
 ### PREREQUISITES
-
+* A really fast proxy
 * JDK 1.8
+```bash
+    sudo apt-get install openjdk-8-jdk
+    export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+    export PATH=$PATH:$JAVA_HOME/bin
+    java -version
+```
 * SBT 0.13.8
 * Android SDK
   - Build Tools 29+
   - Android Support Repository and Google Repository (see `build.sbt` for version)
-* Android NDK r12b `High version may case something build fail`
+* Android NDK r20b+
 
 ### BUILD with Android Studio
 
 *Warnning: Cannot build in windows*
 
 * Download [Android Studio](https://developer.android.com/studio)
-* Download [Android NDK r12b](https://developer.android.com/ndk/downloads/older_releases)
-* Set proxy for sbt in Android Studio: open `Settings -> Build, Execution, Deployment -> Build Tool -> sbt`, in `VM parameters` input (or Welcome Page `Configure -> Edit Custom VM Options`):
+* Download [Android NDK r20b](https://developer.android.com/ndk/downloads/older_releases)
+* Set proxy for Android Studio: `File | Settings | Appearance & Behavior | System Settings | HTTP Proxy`   
+Set proxy for sbt: `File | Settings | Build, Execution, Deployment | Build Tools | sbt`, in `VM parameters` input:
 
         -Dhttp.proxyHost=127.0.0.1
         -Dhttp.proxyPort=8080
@@ -31,7 +38,7 @@ A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) and [V2Ray](http
         -Dhttps.proxyPort=8080
         
 * Set environment variable `ANDROID_HOME` to `/path/to/Android/Sdk`
-* Set environment variable `ANDROID_NDK_HOME` to `/path/to/Android/android-ndk-r12b`
+* Set environment variable `ANDROID_NDK_HOME` to `/path/to/Android/android-ndk-r20b`
 * Set environment variable `TERM` to `xterm-color`
 * Create your key following the instructions at https://developer.android.com/studio/publish/app-signing.html
 * Put your key in ~/.keystore or any other place
@@ -48,7 +55,7 @@ A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) and [V2Ray](http
 ```bash
     export https_proxy=http://127.0.0.1:8080
     export ANDROID_HOME=/path/to/Android/Sdk
-    export ANDROID_NDK_HOME=/path/to/Android/android-ndk-r12b
+    export ANDROID_NDK_HOME=/path/to/Android/android-ndk-r20b
     export TERM=xterm-color
     # install and update all git submodule
     git submodule update --init
@@ -117,9 +124,6 @@ Checkout this [link](http://srodrigo.me/setting-up-scala-on-android/)
 * go-tun2socks: [BSD](https://github.com/eycorsican/go-tun2socks/blob/master/LICENSE)
 
 ### LICENSE
-
-Copyright (C) 2016 by Max Lv <<max.c.lv@gmail.com>> <br/>
-Copyright (C) 2016 by Mygod Studio <<mygodstudio@gmail.com>>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

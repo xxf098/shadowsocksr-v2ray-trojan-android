@@ -366,6 +366,8 @@ object Key {
 
   // settings
   val SORT_METHOD = "pref_sort_method"
+  val SORT_METHOD_DEFAULT = "default"
+  val SORT_METHOD_ELAPSED = "elapsed"
   val HIDE_SERVER = "pref_hide_server"
   val PING_METHOD = "pref_ping_method"
   val AUTO_UPDATE_SUBSCRIPTION = "pref_auto_update_subscription"

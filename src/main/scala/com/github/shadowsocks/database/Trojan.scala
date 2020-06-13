@@ -3,6 +3,8 @@ package com.github.shadowsocks.database
 import java.net.URI
 
 import scala.util.Try
+import org.json.JSONArray
+import org.json.JSONObject
 
 
 object Trojan {
@@ -50,7 +52,24 @@ case class Trojan(localAddr: String,
                   enableIpv6: Boolean,
                   cipherList: String,
                   tls13CipherList: String
-                 )
+                 ) {
+  def toJSON(): Option[String] = Try(new JSONObject()
+    .put("local_addr", localAddr)
+    .put("local_port", localPort)
+    .put("remote_addr", remoteAddr)
+    .put("remote_port", remotePort)
+    .put("password", new JSONArray().put(password))
+    .put("log_level", 2)
+    .put("ssl", new JSONObject()
+      .put("verify", verifyCert)
+      .put("cert", caCertPath)
+      .put("cipher", cipherList)
+      .put("cipher_tls13", tls13CipherList)
+      .put("alpn", new JSONArray().put("h2").put("http/1.1")))
+    .put("enable_ipv6", enableIpv6))
+    .map(_.toString)
+    .toOption
+}
 
 case class TrojanURL(remoteAddr: String,
                      remotePort: Int,

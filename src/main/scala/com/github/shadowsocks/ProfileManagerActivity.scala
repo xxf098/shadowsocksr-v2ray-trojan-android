@@ -924,13 +924,17 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           val filePath = data.getData
           getContentResolver.openOutputStream(filePath)
         })(out => {
-          app.profileManager.getAllProfiles match {
-            case Some(profiles) =>
-              val buffer = profiles.mkString("\n").getBytes(Charset.forName("UTF-8"))
-              out.write(buffer)
-              Toast.makeText(this, R.string.action_export_file_msg, Toast.LENGTH_SHORT).show
-            case _ => Toast.makeText(this, R.string.action_export_file_err, Toast.LENGTH_SHORT).show
-          }
+          val profiles = ProfileManagerActivity.getProfilesByGroup(currentGroupName, false)
+          val buffer = profiles.mkString("\n").getBytes(Charset.forName("UTF-8"))
+          out.write(buffer)
+          Toast.makeText(this, R.string.action_export_file_msg, Toast.LENGTH_SHORT).show
+//          app.profileManager.getAllProfiles match {
+//            case Some(profiles) =>
+//              val buffer = profiles.mkString("\n").getBytes(Charset.forName("UTF-8"))
+//              out.write(buffer)
+//              Toast.makeText(this, R.string.action_export_file_msg, Toast.LENGTH_SHORT).show
+//            case _ => Toast.makeText(this, R.string.action_export_file_err, Toast.LENGTH_SHORT).show
+//          }
         })
       }
       case REQUEST_IMPORT_PROFILES => {
@@ -1057,12 +1061,15 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
     case R.id.action_export =>
-      app.profileManager.getAllProfiles match {
-        case Some(profiles) =>
-          clipboard.setPrimaryClip(ClipData.newPlainText(null, profiles.mkString("\n")))
-          Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show
-        case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
-      }
+      val profiles = ProfileManagerActivity.getProfilesByGroup(currentGroupName, false)
+      clipboard.setPrimaryClip(ClipData.newPlainText(null, profiles.mkString("\n")))
+      Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show
+//      app.profileManager.getAllProfiles match {
+//        case Some(profiles) =>
+//          clipboard.setPrimaryClip(ClipData.newPlainText(null, profiles.mkString("\n")))
+//          Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show
+//        case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
+//      }
       true
     case R.id.action_import_clipboard =>
       if (clipboard.hasPrimaryClip) {

@@ -1085,7 +1085,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val intent = new Intent(Intent.ACTION_CREATE_DOCUMENT)
       intent.addCategory(Intent.CATEGORY_OPENABLE)
       intent.setType("text/plain")
-      intent.putExtra(Intent.EXTRA_TITLE, s"profiles-$date.ssr")
+      intent.putExtra(Intent.EXTRA_TITLE, s"profiles-$date.txt")
       startActivityForResult(intent, REQUEST_CREATE_DOCUMENT)
       true
     case R.id.action_import_file =>

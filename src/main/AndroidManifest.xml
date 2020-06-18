@@ -209,6 +209,11 @@
             </intent-filter>
         </service>
 
+        <service
+            android:name="com.github.shadowsocks.services.LatencyTestService"
+            android:exported="false">
+        </service>
+
         <receiver android:name=".BootReceiver" android:enabled="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>

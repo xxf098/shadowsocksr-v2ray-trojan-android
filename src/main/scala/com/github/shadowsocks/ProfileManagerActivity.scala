@@ -52,6 +52,7 @@ import tun2socks.Tun2socks
 import scala.language.implicitConversions
 import Profile._
 import com.github.shadowsocks.database.VmessAction.profile
+import com.github.shadowsocks.services.{BgResultReceiver, GetResultCallBack, LatencyTestService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{Duration, SECONDS}
@@ -395,6 +396,13 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   private lazy val groupAdapter = new GroupAdapter(this, R.layout.layout_group_spinner_item)
 
   private lazy val clipboard = getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
+  private lazy val bgResultReceiver = new BgResultReceiver(new Handler(), (code: Int, bundle: Bundle) => {
+    profilesAdapter.resetProfiles()
+    profilesAdapter.notifyDataSetChanged()
+    if (code == 100) {
+      Toast.makeText(this, "Test Finished", Toast.LENGTH_SHORT).show
+    }
+  })
 
   private var nfcAdapter : NfcAdapter = _
   private var nfcShareItem: Array[Byte] = _

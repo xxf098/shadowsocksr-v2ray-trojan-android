@@ -25,7 +25,7 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
   var pfd: ParcelFileDescriptor = _
   var inputStream: FileInputStream = _
   var outputStream: FileOutputStream = _
-  var buffer = ByteBuffer.allocate(1501)
+  var buffer = ByteBuffer.allocate(4096)
 
   var txTotal: Long = 0 // download
   var rxTotal: Long = 0 // upload
@@ -131,5 +131,6 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
     outputStream = null
     running = false
     vpnService.stopSelf()
+    android.os.Process.killProcess(android.os.Process.myPid())
   }
 }

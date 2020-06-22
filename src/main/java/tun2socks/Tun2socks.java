@@ -46,6 +46,12 @@ public abstract class Tun2socks
 
     public static native Vmess convertJSONToVmess(final byte[] p0) throws Exception;
 
+    public static native long getFreePort() throws Exception;
+
+    public static native void startSocks(final PacketFlow p0, final String p1, final long p2);
+
+    public static native void stopSocks();
+
     static {
         Seq.touch();
         _init();

@@ -52,6 +52,7 @@ import tun2socks.Tun2socks
 import scala.language.implicitConversions
 import Profile._
 import com.github.shadowsocks.database.VmessAction.profile
+import com.github.shadowsocks.services.{BgResultReceiver, GetResultCallBack, LatencyTestService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{Duration, SECONDS}
@@ -395,6 +396,13 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   private lazy val groupAdapter = new GroupAdapter(this, R.layout.layout_group_spinner_item)
 
   private lazy val clipboard = getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
+  private lazy val bgResultReceiver = new BgResultReceiver(new Handler(), (code: Int, bundle: Bundle) => {
+    profilesAdapter.resetProfiles()
+    profilesAdapter.notifyDataSetChanged()
+    if (code == 100) {
+      Toast.makeText(this, "Test Finished", Toast.LENGTH_SHORT).show
+    }
+  })
 
   private var nfcAdapter : NfcAdapter = _
   private var nfcShareItem: Array[Byte] = _
@@ -924,13 +932,17 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           val filePath = data.getData
           getContentResolver.openOutputStream(filePath)
         })(out => {
-          app.profileManager.getAllProfiles match {
-            case Some(profiles) =>
-              val buffer = profiles.mkString("\n").getBytes(Charset.forName("UTF-8"))
-              out.write(buffer)
-              Toast.makeText(this, R.string.action_export_file_msg, Toast.LENGTH_SHORT).show
-            case _ => Toast.makeText(this, R.string.action_export_file_err, Toast.LENGTH_SHORT).show
-          }
+          val profiles = ProfileManagerActivity.getProfilesByGroup(currentGroupName, false)
+          val buffer = profiles.mkString("\n").getBytes(Charset.forName("UTF-8"))
+          out.write(buffer)
+          Toast.makeText(this, R.string.action_export_file_msg, Toast.LENGTH_SHORT).show
+//          app.profileManager.getAllProfiles match {
+//            case Some(profiles) =>
+//              val buffer = profiles.mkString("\n").getBytes(Charset.forName("UTF-8"))
+//              out.write(buffer)
+//              Toast.makeText(this, R.string.action_export_file_msg, Toast.LENGTH_SHORT).show
+//            case _ => Toast.makeText(this, R.string.action_export_file_err, Toast.LENGTH_SHORT).show
+//          }
         })
       }
       case REQUEST_IMPORT_PROFILES => {
@@ -1057,12 +1069,15 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
     case R.id.action_export =>
-      app.profileManager.getAllProfiles match {
-        case Some(profiles) =>
-          clipboard.setPrimaryClip(ClipData.newPlainText(null, profiles.mkString("\n")))
-          Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show
-        case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
-      }
+      val profiles = ProfileManagerActivity.getProfilesByGroup(currentGroupName, false)
+      clipboard.setPrimaryClip(ClipData.newPlainText(null, profiles.mkString("\n")))
+      Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show
+//      app.profileManager.getAllProfiles match {
+//        case Some(profiles) =>
+//          clipboard.setPrimaryClip(ClipData.newPlainText(null, profiles.mkString("\n")))
+//          Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show
+//        case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
+//      }
       true
     case R.id.action_import_clipboard =>
       if (clipboard.hasPrimaryClip) {
@@ -1078,7 +1093,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val intent = new Intent(Intent.ACTION_CREATE_DOCUMENT)
       intent.addCategory(Intent.CATEGORY_OPENABLE)
       intent.setType("text/plain")
-      intent.putExtra(Intent.EXTRA_TITLE, s"profiles-$date.ssr")
+      intent.putExtra(Intent.EXTRA_TITLE, s"profiles-$date.txt")
       startActivityForResult(intent, REQUEST_CREATE_DOCUMENT)
       true
     case R.id.action_import_file =>

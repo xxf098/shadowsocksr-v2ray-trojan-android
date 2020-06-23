@@ -289,7 +289,7 @@ class ShadowsocksApplication extends Application {
     copyAssets(System.getABI)
     copyAssets("acl")
     val assetPath = getApplicationInfo.dataDir + "/files/"
-    app.copyAssets("dat", assetPath)
+    copyAssets("dat", assetPath)
 //    Shell.SH.run(EXECUTABLES.map("chmod 755 " + getApplicationInfo.dataDir + '/' + _))
     editor.putInt(Key.currentVersionCode, BuildConfig.VERSION_CODE).apply()
   }

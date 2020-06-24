@@ -57,7 +57,7 @@ import com.github.shadowsocks.services.{BgResultReceiver, GetResultCallBack, Lat
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{Duration, SECONDS}
 import scala.concurrent.{Await, Future}
-import com.github.shadowsocks.types.Nested._
+import scala.collection.immutable.HashMap
 
 object ProfileManagerActivity {
   // profiles count
@@ -299,6 +299,22 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         if (item.id == app.profileId) app.profileId(-1)
       }
       updateGroupSpinner()
+    }
+    def updateByIds (ids: List[Int]): Unit = {
+      val maps = app.profileManager.getProfileElapsed(ids) match {
+        case Some(x) => x.map(p => (p.id, p.elapsed)).toMap
+        case None => new HashMap[Int, Long]()
+      }
+      Log.e(TAG, s"updateByIds: ${maps.mkString(", ")}")
+      profiles.zipWithIndex.foreach{
+        case (p, i) => {
+          val elapsed = maps.get(p.id)
+          if (elapsed.nonEmpty) {
+            p.elapsed = elapsed.getOrElse(p.elapsed)
+            notifyItemChanged(i)
+          }
+        }
+      }
     }
   }
 

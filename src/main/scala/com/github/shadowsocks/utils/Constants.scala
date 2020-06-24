@@ -373,6 +373,9 @@ object Key {
   val AUTO_UPDATE_SUBSCRIPTION = "pref_auto_update_subscription"
   val AUTO_TEST_CONNECTIVITY = "pref_auto_test_connectivity"
   val SSR_DNS_NOCAHCE = "pref_ssr_dns_nocache1"
+
+  // message
+  val TEST_PROFILE_IDS = "test_profile_ids"
 }
 
 object State {

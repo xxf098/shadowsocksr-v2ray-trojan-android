@@ -5,11 +5,12 @@ import java.net.Socket
 import java.util
 import java.util.Locale
 
-import android.app.{NotificationManager, ProgressDialog, Service}
+import android.app.{NotificationManager, PendingIntent, ProgressDialog, Service}
 import android.content.DialogInterface.OnCancelListener
-import android.content.{Context, DialogInterface, Intent}
+import android.content.{BroadcastReceiver, Context, DialogInterface, Intent, IntentFilter}
 import android.os.{Bundle, IBinder, Looper, Message, ResultReceiver}
 import android.support.v4.app.NotificationCompat
+import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.view.WindowManager
 import android.widget.Toast
@@ -254,6 +255,7 @@ class LatencyTestService extends Service {
 
   private def showNotification (max: Int): Unit = {
     notification = new NotificationCompat.Builder(this, "service-test")
+      .setColor(ContextCompat.getColor(this, R.color.material_accent_500))
       .setPriority(NotificationCompat.PRIORITY_LOW)
       .setCategory(NotificationCompat.CATEGORY_PROGRESS)
       .setSmallIcon(R.drawable.ic_click_white)

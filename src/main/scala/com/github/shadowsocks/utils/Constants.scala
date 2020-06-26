@@ -392,6 +392,7 @@ object Action {
   val QUICK_SWITCH = "com.xxf098.ssrray.QUICK_SWITCH"
   val SCAN = "com.xxf098.ssrray.intent.action.SCAN"
   val SORT = "com.xxf098.ssrray.intent.action.SORT"
+  val STOP_TEST = "com.xxf098.ssrray.intent.action.STOP_TEST"
 }
 
 object Route {

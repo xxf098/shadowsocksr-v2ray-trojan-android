@@ -40,12 +40,22 @@ class LatencyTestService extends Service {
   private var notification: NotificationCompat.Builder = _
   private var counter = 0
   private var max = 0
+  private val stopReceiver: BroadcastReceiver = (context: Context, intent: Intent) => {
+    Toast.makeText(context, R.string.stopping, Toast.LENGTH_SHORT).show()
+    stopSelf()
+  }
+  private var receiverRegistered = false
 
   override def onBind(intent: Intent): IBinder = null
 
   override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
     if (isTesting) stopSelf(startId)
     isTesting = true
+    if (!receiverRegistered) {
+      val filter = new IntentFilter()
+      filter.addAction(Action.STOP_TEST)
+      registerReceiver(stopReceiver, filter)
+    }
     val currentGroupName = intent.getStringExtra(Key.currentGroupName)
     val isSort = intent.getBooleanExtra("is_sort", false)
     bgResultReceiver = intent.getParcelableExtra("BgResultReceiver")
@@ -67,7 +77,7 @@ class LatencyTestService extends Service {
                 .map(testResult => {
                   Log.e(TAG, s"testResult: ${testResult}")
                   counter += 1
-                  updateNotification(s"${p.name} $testResult", max, counter)
+                  updateNotification(p.name, testResult, max, counter)
                 })
             })
             // TODO: Duration
@@ -161,7 +171,7 @@ class LatencyTestService extends Service {
                 Log.e(TAG, s"testResult: ${testResult}")
                 val p = profiles(i)
                 counter += 1
-                updateNotification(s"${p.name} $testResult", max, counter)
+                updateNotification(p.name, testResult, max, counter)
                 testResult
               }))
               Await.ready(Future.sequence(futures), Duration(5 * size, SECONDS)).onFailure{
@@ -185,7 +195,7 @@ class LatencyTestService extends Service {
               val testResult = p.testTCPLatencyThread()
               Log.e(TAG, s"testResult: ${testResult}")
               counter += 1
-              updateNotification(s"${p.name} $testResult", max, counter)
+              updateNotification(p.name, testResult, max, counter)
             })
             Await.ready(Future.sequence(futures), Duration(5 * size, SECONDS)).onFailure{
               case e: Exception => e.printStackTrace()
@@ -229,6 +239,15 @@ class LatencyTestService extends Service {
     return Service.START_NOT_STICKY
   }
 
+
+  override def onDestroy(): Unit = {
+    if (receiverRegistered) {
+      unregisterReceiver(stopReceiver)
+      receiverRegistered = false
+    }
+    super.onDestroy()
+  }
+
   def isPortAvailable (port: Int):Boolean = {
     // Assume no connection is possible.
     var result = true;
@@ -263,11 +282,22 @@ class LatencyTestService extends Service {
       .setOngoing(true)
       .setContentTitle(getString(R.string.service_test_working))
       .setProgress(max, 0, false)
+    val stopAction = new NotificationCompat.Action.Builder(
+      R.drawable.ic_navigation_close,
+      getString(R.string.stop),
+      PendingIntent.getBroadcast(this, 0, new Intent(Action.STOP_TEST).setPackage(getPackageName), 0)
+    ).build()
+    notification.addAction(stopAction)
     notificationService.notify(LatencyTestService.NOTIFICATION_ID, notification.build())
   }
 
-  private def updateNotification (title: String, max: Int, counter: Int): Unit = {
-    notification.setContentTitle(title).setProgress(max, counter, false)
+  private def updateNotification (title: String, testResult: String, max: Int, counter: Int): Unit = {
+    val latency = """\d+ms""".r findFirstIn testResult
+    val formatTitle = title.substring(0, 16) + "  " + latency.getOrElse("0ms")
+    Log.e(TAG, s"formatTitle: $formatTitle")
+    notification.setContentTitle(title.substring(0, 20))
+      .setContentText(latency.getOrElse("0ms"))
+      .setProgress(max, counter, false)
     notificationService.notify(LatencyTestService.NOTIFICATION_ID, notification.build())
   }
 }

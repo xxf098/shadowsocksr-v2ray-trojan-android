@@ -210,7 +210,8 @@
 
   <string name="tips_testing">Testing...</string>
   <string name="tips_sorting">Sorting...</string>
-  <string name="action_full_test">Full latency test</string>
+  <string name="action_full_test">Full Latency Test</string>
+  <string name="action_full_test_bg">Run full latency test in background</string>
   <string name="action_sort">Auto sort by latency</string>
   <string name="ping">Ping</string>
   <string name="batch_delete">Batch Delete</string>

@@ -203,6 +203,7 @@
   <string name="tips_testing">测试中...</string>
   <string name="tips_sorting">排序中...</string>
   <string name="action_full_test">完整延时测试</string>
+  <string name="action_full_test_bg">后台运行完整延时测试</string>
   <string name="action_sort">基于延时自动排序</string>
   <string name="ping">测试延时</string>
   <string name="batch_delete">批量删除</string>

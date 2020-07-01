@@ -414,11 +414,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   private lazy val clipboard = getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
   private lazy val bgResultReceiver = new BgResultReceiver(new Handler(), (code: Int, bundle: Bundle) => {
-
     if (code == 100) {
       profilesAdapter.resetProfiles()
       profilesAdapter.notifyDataSetChanged()
-      Toast.makeText(this, "Test Finished", Toast.LENGTH_SHORT).show
+      Toast.makeText(this, getString(R.string.action_full_test_finished), Toast.LENGTH_SHORT).show
     }
     if (code == 101) {
       val ids = bundle.getIntegerArrayList(Key.TEST_PROFILE_IDS)

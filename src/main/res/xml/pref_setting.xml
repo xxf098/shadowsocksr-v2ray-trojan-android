@@ -38,10 +38,7 @@
             android:summary="@string/summary_pref_hide_server"
             android:title="@string/title_pref_hide_server" />
 
-        <CheckBoxPreference
-            android:key="pref_full_test_bg"
-            android:summary="@string/action_full_test_bg"
-            android:title="@string/action_full_test" />
+
 
     </PreferenceCategory>
 

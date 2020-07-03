@@ -373,6 +373,11 @@ object Key {
   val AUTO_UPDATE_SUBSCRIPTION = "pref_auto_update_subscription"
   val AUTO_TEST_CONNECTIVITY = "pref_auto_test_connectivity"
   val SSR_DNS_NOCAHCE = "pref_ssr_dns_nocache1"
+  val FULL_TEST_BG = "pref_full_test_bg"
+
+
+  // message
+  val TEST_PROFILE_IDS = "test_profile_ids"
 }
 
 object State {
@@ -389,6 +394,7 @@ object Action {
   val QUICK_SWITCH = "com.xxf098.ssrray.QUICK_SWITCH"
   val SCAN = "com.xxf098.ssrray.intent.action.SCAN"
   val SORT = "com.xxf098.ssrray.intent.action.SORT"
+  val STOP_TEST = "com.xxf098.ssrray.intent.action.STOP_TEST"
 }
 
 object Route {

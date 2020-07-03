@@ -5,7 +5,7 @@ import java.util.{Date, Locale, Random}
 import java.io.{BufferedReader, BufferedWriter, File, IOException, InputStreamReader}
 import java.net._
 
-import android.app.{Activity, ProgressDialog, TaskStackBuilder}
+import android.app.{Activity, NotificationManager, PendingIntent, ProgressDialog, TaskStackBuilder}
 import android.content._
 import android.content.pm.PackageManager
 import android.nfc.NfcAdapter.CreateNdefMessageCallback
@@ -51,13 +51,14 @@ import tun2socks.Tun2socks
 
 import scala.language.implicitConversions
 import Profile._
+import android.support.v4.app.NotificationCompat
 import com.github.shadowsocks.database.VmessAction.profile
 import com.github.shadowsocks.services.{BgResultReceiver, GetResultCallBack, LatencyTestService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{Duration, SECONDS}
 import scala.concurrent.{Await, Future}
-import com.github.shadowsocks.types.Nested._
+import scala.collection.immutable.HashMap
 
 object ProfileManagerActivity {
   // profiles count
@@ -300,6 +301,22 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       }
       updateGroupSpinner()
     }
+    def updateByIds (ids: List[Int]): Unit = {
+      val maps = app.profileManager.getProfileElapsed(ids) match {
+        case Some(x) => x.map(p => (p.id, p.elapsed)).toMap
+        case None => new HashMap[Int, Long]()
+      }
+      Log.e(TAG, s"updateByIds: ${maps.mkString(", ")}")
+      profiles.zipWithIndex.foreach{
+        case (p, i) => {
+          val elapsed = maps.get(p.id)
+          if (elapsed.nonEmpty) {
+            p.elapsed = elapsed.getOrElse(p.elapsed)
+            notifyItemChanged(i)
+          }
+        }
+      }
+    }
   }
 
   private final class SSRSubViewHolder(val view: View) extends RecyclerView.ViewHolder(view)
@@ -397,10 +414,15 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   private lazy val clipboard = getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
   private lazy val bgResultReceiver = new BgResultReceiver(new Handler(), (code: Int, bundle: Bundle) => {
-    profilesAdapter.resetProfiles()
-    profilesAdapter.notifyDataSetChanged()
     if (code == 100) {
-      Toast.makeText(this, "Test Finished", Toast.LENGTH_SHORT).show
+      profilesAdapter.resetProfiles()
+      profilesAdapter.notifyDataSetChanged()
+      Toast.makeText(this, getString(R.string.action_full_test_finished), Toast.LENGTH_SHORT).show
+    }
+    if (code == 101) {
+      val ids = bundle.getIntegerArrayList(Key.TEST_PROFILE_IDS)
+      import scala.collection.JavaConversions._
+      profilesAdapter.updateByIds(ids.toList.map(_.toInt))
     }
   })
 
@@ -1121,6 +1143,15 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       startActivity(new Intent(this, classOf[ConfigActivity]))
       true
     case R.id.action_full_test =>
+//      if (app.settings.getBoolean(Key.FULL_TEST_BG, false)) {
+      if (1 == 1) {
+        val intent = new Intent(this, classOf[LatencyTestService])
+        intent.putExtra(Key.currentGroupName, currentGroupName)
+        intent.putExtra("BgResultReceiver", bgResultReceiver)
+        intent.putExtra("is_sort", is_sort)
+        startService(intent)
+        return true
+      }
       val testProfiles = if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles
       else app.profileManager.getAllProfilesByGroup(currentGroupName)
       testProfiles match {

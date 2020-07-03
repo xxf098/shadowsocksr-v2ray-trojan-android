@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit
 
 import android.annotation.SuppressLint
 import android.app.{Application, NotificationChannel, NotificationManager}
-import android.content.Context
+import android.content.{Context, Intent}
 import android.content.res.Configuration
 import android.os.{Build, LocaleList}
 import android.preference.PreferenceManager
@@ -239,7 +239,9 @@ class ShadowsocksApplication extends Application {
       v2rayChannel.setShowBadge(false)
       val natChannel = new NotificationChannel("service-nat", getText(R.string.service_nat), importance)
       natChannel.setShowBadge(false)
-      notification.createNotificationChannels(List(ssrChannel, v2rayChannel, natChannel).asJava)
+      val testChannel = new NotificationChannel("service-test", getText(R.string.service_test), importance)
+      testChannel.setShowBadge(true)
+      notification.createNotificationChannels(List(ssrChannel, v2rayChannel, natChannel, testChannel).asJava)
     }
   }
 
@@ -289,7 +291,7 @@ class ShadowsocksApplication extends Application {
     copyAssets(System.getABI)
     copyAssets("acl")
     val assetPath = getApplicationInfo.dataDir + "/files/"
-    app.copyAssets("dat", assetPath)
+    copyAssets("dat", assetPath)
 //    Shell.SH.run(EXECUTABLES.map("chmod 755 " + getApplicationInfo.dataDir + '/' + _))
     editor.putInt(Key.currentVersionCode, BuildConfig.VERSION_CODE).apply()
   }

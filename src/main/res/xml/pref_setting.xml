@@ -38,6 +38,8 @@
             android:summary="@string/summary_pref_hide_server"
             android:title="@string/title_pref_hide_server" />
 
+
+
     </PreferenceCategory>
 
     <PreferenceCategory

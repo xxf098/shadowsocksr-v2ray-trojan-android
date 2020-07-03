@@ -125,8 +125,11 @@
   <string name="service_ssr" translatable="false">SSR Service</string>
   <string name="service_v2ray" translatable="false">V2Ray Service</string>
   <string name="service_nat" translatable="false">Nat Service</string>
+  <string name="service_test" translatable="false">Latency Test Service</string>
+  <string name="service_test_working">Testing profiles…</string>
 
-  <!-- alert category -->
+
+    <!-- alert category -->
   <string name="close">Close</string>
   <string name="proxy_empty">\'Proxy\' and \'Password\' should not be empty</string>
   <string name="connect">Connect</string>
@@ -207,7 +210,9 @@
 
   <string name="tips_testing">Testing...</string>
   <string name="tips_sorting">Sorting...</string>
-  <string name="action_full_test">Full latency test</string>
+  <string name="action_full_test">Full Latency Test</string>
+  <string name="action_full_test_bg">Run full latency test in background</string>
+  <string name="action_full_test_finished">Test Finished</string>
   <string name="action_sort">Auto sort by latency</string>
   <string name="ping">Ping</string>
   <string name="batch_delete">Batch Delete</string>

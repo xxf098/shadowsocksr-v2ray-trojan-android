@@ -278,6 +278,20 @@ class ProfileManager(dbHelper: DBHelper) {
     }
   }
 
+  def getProfileElapsed(ids: List[Int]): Option[List[Profile]] = {
+    try {
+      import scala.collection.JavaConversions._
+      Option(dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder
+        .selectColumns("id", "elapsed")
+        .where().in("id", ids.mkString(", ")).prepare)
+        .toList)
+    } catch {
+      case ex: Exception =>
+        Log.e(TAG, "getProfileElapsed", ex)
+        None
+    }
+  }
+
   def delProfile(id: Int): Boolean = {
     try {
       dbHelper.profileDao.deleteById(id)

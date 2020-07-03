@@ -2,40 +2,65 @@ package com.github.shadowsocks.services
 
 import java.io.File
 import java.net.Socket
+import java.util
 import java.util.Locale
 
-import android.app.{ProgressDialog, Service}
+import android.app.{NotificationManager, PendingIntent, ProgressDialog, Service}
 import android.content.DialogInterface.OnCancelListener
-import android.content.{DialogInterface, Intent}
-import android.os.{IBinder, Looper, Message}
+import android.content.{BroadcastReceiver, Context, DialogInterface, Intent, IntentFilter}
+import android.os.{Bundle, IBinder, Looper, Message, ResultReceiver}
+import android.support.v4.app.NotificationCompat
+import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.view.WindowManager
 import android.widget.Toast
-import com.github.shadowsocks.GuardedProcess
+import com.github.shadowsocks.{GuardedProcess, ProfileManagerActivity, R}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.VmessAction.profile
 import com.github.shadowsocks.utils.{Action, ConfigUtils, ExeNative, Key, TcpFastOpen, Utils}
 import tun2socks.Tun2socks
-import com.github.shadowsocks.R
 
+import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.{Duration, SECONDS}
 import scala.concurrent.ExecutionContext.Implicits.global
 
+object LatencyTestService {
+  val NOTIFICATION_ID = 2
+}
+
 class LatencyTestService extends Service {
   val TAG = "LatencyTestService"
   var isTesting = false
   private var ssTestProcess: GuardedProcess = _
+  private var bgResultReceiver: ResultReceiver = _
+  private lazy val notificationService = getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
+  private var notification: NotificationCompat.Builder = _
+  private var counter = 0
+  private var max = 0
+  private val stopReceiver: BroadcastReceiver = (context: Context, intent: Intent) => {
+    Toast.makeText(context, R.string.stopping, Toast.LENGTH_SHORT).show()
+    stopSelf()
+  }
+  private var receiverRegistered = false
+
   override def onBind(intent: Intent): IBinder = null
 
   override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
     if (isTesting) stopSelf(startId)
     isTesting = true
+    if (!receiverRegistered) {
+      val filter = new IntentFilter()
+      filter.addAction(Action.STOP_TEST)
+      registerReceiver(stopReceiver, filter)
+    }
     val currentGroupName = intent.getStringExtra(Key.currentGroupName)
-    val testProfiles = if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles
-    else app.profileManager.getAllProfilesByGroup(currentGroupName)
+    val isSort = intent.getBooleanExtra("is_sort", false)
+    bgResultReceiver = intent.getParcelableExtra("BgResultReceiver")
+    val testProfiles = Option(ProfileManagerActivity.getProfilesByGroup(currentGroupName, isSort))
+    showNotification(testProfiles.size)
     testProfiles match {
       //      app.profileManager.getAllProfiles match {
       case Some(profiles) =>
@@ -51,19 +76,25 @@ class LatencyTestService extends Service {
               Future(p.pingItemThread(pingMethod, 8900L + index * size + i))
                 .map(testResult => {
                   Log.e(TAG, s"testResult: ${testResult}")
+                  counter += 1
+                  updateNotification(p.name, testResult, max, counter)
                 })
             })
             // TODO: Duration
             Await.ready(Future.sequence(futures), Duration(20, SECONDS)).onFailure{
               case e: Exception => e.printStackTrace()
             }
+            sendProfileIds(profiles)
+            Log.e(TAG, s"testResult: ${index}")
           })
         }
 
         val testV2rayJob = (v2rayProfiles: List[Profile]) => {
+          max = v2rayProfiles.size * 3 / 2
           testV2rayProfiles(v2rayProfiles.grouped(4).toList, 4)
           val zeroV2RayProfiles = v2rayProfiles.filter(p => p.elapsed == 0 && p.isV2Ray)
           if (zeroV2RayProfiles.nonEmpty) {
+            max = v2rayProfiles.size + zeroV2RayProfiles.size
             testV2rayProfiles(zeroV2RayProfiles.grouped(2).toList, 2)
           }
         }
@@ -138,11 +169,15 @@ class LatencyTestService extends Service {
                 }
               }.map(testResult => {
                 Log.e(TAG, s"testResult: ${testResult}")
+                val p = profiles(i)
+                counter += 1
+                updateNotification(p.name, testResult, max, counter)
                 testResult
               }))
               Await.ready(Future.sequence(futures), Duration(5 * size, SECONDS)).onFailure{
                 case e: Exception => e.printStackTrace()
               }
+              sendProfileIds(profiles)
             } catch {
               case e: Exception => e.printStackTrace()
             }
@@ -159,19 +194,25 @@ class LatencyTestService extends Service {
             val futures = profiles.map(p => Future {
               val testResult = p.testTCPLatencyThread()
               Log.e(TAG, s"testResult: ${testResult}")
+              counter += 1
+              updateNotification(p.name, testResult, max, counter)
             })
             Await.ready(Future.sequence(futures), Duration(5 * size, SECONDS)).onFailure{
               case e: Exception => e.printStackTrace()
             }
+            sendProfileIds(profiles)
+            Log.e(TAG, s"testResult: ${index}")
           })
         }
 
         val testSSRJob = (ssrProfiles: List[Profile]) => {
+          max = ssrProfiles.size * 3 / 2
           val pingMethod = app.settings.getString(Key.PING_METHOD, "google")
           val pingFunc = if (pingMethod == "google") testSSRProfiles else testTCPSSRProfiles
           pingFunc(ssrProfiles.grouped(4).toList, 4, ssrProfiles.size)
           val zeroSSRProfiles = ssrProfiles.filter(p => p.elapsed == 0 && !p.isV2Ray)
           if (zeroSSRProfiles.nonEmpty) {
+            max = ssrProfiles.size + zeroSSRProfiles.size
             pingFunc(zeroSSRProfiles.grouped(2).toList, 2, ssrProfiles.size)
           }
         }
@@ -184,6 +225,9 @@ class LatencyTestService extends Service {
               .partition(_.isV2Ray)
             if (v2rayProfiles.nonEmpty) { testV2rayJob(v2rayProfiles) }
             if (ssrProfiles.nonEmpty) { testSSRJob(ssrProfiles) }
+            notificationService.cancel(LatencyTestService.NOTIFICATION_ID)
+            // refresh
+            bgResultReceiver.send(100, new Bundle())
             Looper.loop()
           }
         }
@@ -193,6 +237,15 @@ class LatencyTestService extends Service {
     }
 
     return Service.START_NOT_STICKY
+  }
+
+
+  override def onDestroy(): Unit = {
+    if (receiverRegistered) {
+      unregisterReceiver(stopReceiver)
+      receiverRegistered = false
+    }
+    super.onDestroy()
   }
 
   def isPortAvailable (port: Int):Boolean = {
@@ -206,6 +259,45 @@ class LatencyTestService extends Service {
       case e: Exception => Unit
     }
 
-    return result;
+    return result
+  }
+
+  private def sendProfileIds (profiles: List[Profile]) = {
+    val bundle = new Bundle()
+    val ids = profiles.foldLeft(new util.ArrayList[Integer]())((b, p) => {
+      b.add(p.id)
+      b
+    })
+    bundle.putIntegerArrayList(Key.TEST_PROFILE_IDS, ids)
+    bgResultReceiver.send(101, bundle)
+  }
+
+  private def showNotification (max: Int): Unit = {
+    notification = new NotificationCompat.Builder(this, "service-test")
+      .setColor(ContextCompat.getColor(this, R.color.material_accent_500))
+      .setPriority(NotificationCompat.PRIORITY_LOW)
+      .setCategory(NotificationCompat.CATEGORY_PROGRESS)
+      .setSmallIcon(R.drawable.ic_click_white)
+      .setAutoCancel(false)
+      .setOngoing(true)
+      .setContentTitle(getString(R.string.service_test_working))
+      .setProgress(max, 0, false)
+    val stopAction = new NotificationCompat.Action.Builder(
+      R.drawable.ic_navigation_close,
+      getString(R.string.stop),
+      PendingIntent.getBroadcast(this, 0, new Intent(Action.STOP_TEST).setPackage(getPackageName), 0)
+    ).build()
+    notification.addAction(stopAction)
+    notificationService.notify(LatencyTestService.NOTIFICATION_ID, notification.build())
+  }
+
+  private def updateNotification (title: String, testResult: String, max: Int, counter: Int): Unit = {
+    val latency = """\d+ms""".r findFirstIn testResult
+    val formatTitle = title.substring(0, 16) + "  " + latency.getOrElse("0ms")
+    Log.e(TAG, s"formatTitle: $formatTitle")
+    notification.setContentTitle(title.substring(0, 20))
+      .setContentText(latency.getOrElse("0ms"))
+      .setProgress(max, counter, false)
+    notificationService.notify(LatencyTestService.NOTIFICATION_ID, notification.build())
   }
 }

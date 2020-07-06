@@ -41,19 +41,38 @@ package com.github.shadowsocks.preferences
 
 import android.content.Context
 import android.preference.EditTextPreference
-import android.util.AttributeSet
+import android.util.{AttributeSet, Log}
+import android.view.View
+import android.widget.EditText
+import com.github.shadowsocks.R
 
 class PasswordEditTextPreference(context: Context, attrs: AttributeSet, defStyle: Int)
   extends EditTextPreference(context, attrs, defStyle) {
 
+  var txtPassword = ""
+  var etPassword: EditText = _
+
   def this(context: Context, attrs: AttributeSet) = {
     this(context, attrs, android.R.attr.editTextPreferenceStyle)
     mDefaultSummary = getSummary
+    setDialogLayoutResource(R.layout.preference_dialog_password)
   }
 
   override def setText(text: String) {
     super.setText(text)
     setSummary(text)
+    txtPassword = text
+  }
+
+  override def onAddEditTextToDialogView(dialogView: View, editText: EditText): Unit = {
+    etPassword = dialogView.findViewById(android.R.id.edit).asInstanceOf[EditText]
+    if (etPassword != null) { etPassword.setText(txtPassword) }
+    super.onAddEditTextToDialogView(dialogView, editText)
+  }
+
+  override def onDialogClosed(positiveResult: Boolean): Unit = {
+    Option(getEditText).foreach(_.setText(etPassword.getText))
+    super.onDialogClosed(positiveResult)
   }
 
   override def setSummary(summary: CharSequence) {

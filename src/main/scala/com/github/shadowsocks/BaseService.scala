@@ -200,7 +200,7 @@ trait BaseService extends Service {
       closeReceiverRegistered = true
     }
 
-    app.track(getClass.getSimpleName, "start")
+//    app.track(getClass.getSimpleName, "start")
 
     changeState(State.CONNECTING)
 

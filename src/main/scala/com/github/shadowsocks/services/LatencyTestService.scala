@@ -41,9 +41,9 @@ class LatencyTestService extends Service {
   private var counter = 0
   private var max = 0
   private var stopReceiverRegistered = false
-  private val stopReceiver: BroadcastReceiver = (context: Context, intent: Intent) => {
+  private lazy val stopReceiver: BroadcastReceiver = (context: Context, intent: Intent) => {
     Toast.makeText(context, R.string.stopping, Toast.LENGTH_SHORT).show()
-    stopTest(true)
+    stopTest()
   }
   private var testJob: Thread = _
 
@@ -102,8 +102,6 @@ class LatencyTestService extends Service {
 
         // TODO: refactor
         // connection pool time
-
-
         val testSSRProfiles = (ssrProfiles: List[List[Profile]], size: Int, offset: Int) => {
           ssrProfiles.indices.foreach(index => {
             val profiles: List[Profile] = ssrProfiles(index)
@@ -244,15 +242,9 @@ class LatencyTestService extends Service {
     Service.START_NOT_STICKY
   }
 
-  private def stopTest(needStopSelf: Boolean = false): Unit = {
+  private def stopTest(): Unit = {
     notificationService.cancel(LatencyTestService.NOTIFICATION_ID)
-    if (needStopSelf) {
-      this.stopSelf()
-    }
-    if (stopReceiverRegistered) {
-      unregisterReceiver(stopReceiver)
-      stopReceiverRegistered = false
-    }
+    stopSelf()
   }
 
   override def onDestroy(): Unit = {

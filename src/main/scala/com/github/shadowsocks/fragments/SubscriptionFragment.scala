@@ -195,6 +195,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
         ssrsub.updated_at = Utils.today
         app.ssrsubManager.updateSSRSub(ssrsub)
         notifyGroupNameChange(Some(ssrsub.url_group))
+        configActivity.putStringExtra(Key.SUBSCRIPTION_UPDATED, "true")
         None
       }).recover{
       case e: Exception => {

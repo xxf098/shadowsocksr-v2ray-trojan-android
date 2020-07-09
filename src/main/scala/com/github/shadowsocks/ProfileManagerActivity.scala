@@ -981,6 +981,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         undoManager.flush
         if (groupName.getOrElse("") != currentGroupName) initGroupSpinner(groupName)
         else groupAdapter.notifyDataSetChanged()
+        if (data.getStringExtra(Key.SUBSCRIPTION_UPDATED) == "true" && groupName.getOrElse("") == currentGroupName) profilesAdapter.resetProfiles()
         profilesAdapter.notifyDataSetChanged()
       }
       case REQUEST_SETTINGS => {

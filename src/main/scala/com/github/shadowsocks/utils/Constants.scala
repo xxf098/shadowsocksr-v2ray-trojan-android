@@ -363,6 +363,7 @@ object Key {
   val FRAGMENT_SUBSCRIPTION = "FRAGMENT_SUBSCRIPTION"
   val FRAGMENT_NEW_PROFILE = "FRAGMENT_NEW_PROFILE"
   val SUBSCRIPTION_GROUP_NAME = "SUBSCRIPTION_GROUP_NAME"
+  val SUBSCRIPTION_UPDATED = "SUBSCRIPTION_UPDATED"
 
   // settings
   val SORT_METHOD = "pref_sort_method"
@@ -394,7 +395,7 @@ object Action {
   val QUICK_SWITCH = "com.xxf098.ssrray.QUICK_SWITCH"
   val SCAN = "com.xxf098.ssrray.intent.action.SCAN"
   val SORT = "com.xxf098.ssrray.intent.action.SORT"
-  val STOP_TEST = "com.xxf098.ssrray.intent.action.STOP_TEST"
+  val STOP_TEST = "com.xxf098.ssrray.STOP_TEST"
 }
 
 object Route {

@@ -4,6 +4,14 @@ import go.Seq;
 
 public abstract class Tun2socks
 {
+    public static final long AddrTypeFQDN = 3L;
+    public static final long AddrTypeIPv4 = 1L;
+    public static final long AddrTypeIPv6 = 4L;
+    public static final long AuthMethodNotRequired = 0L;
+    public static final long SocksCmdConnect = 1L;
+    public static final long StatusSucceeded = 0L;
+    public static final long Version5 = 5L;
+
     private Tun2socks() {
     }
 
@@ -14,9 +22,13 @@ public abstract class Tun2socks
 
     public static native String checkVersion();
 
+    public static native Vmess convertJSONToVmess(final byte[] p0) throws Exception;
+
     public static native void copyAssets(final String p0, final boolean p1) throws Exception;
 
     public static native String generateVmessString(final Vmess p0) throws Exception;
+
+    public static native long getFreePort() throws Exception;
 
     public static native void inputPacket(final byte[] p0);
 
@@ -28,9 +40,13 @@ public abstract class Tun2socks
 
     public static native boolean setNonblock(final long p0, final boolean p1);
 
+    public static native void startTrojan(final byte[] p0, final Tun2socksStartOptions p1);
+
     public static native void startV2Ray(final PacketFlow p0, final VpnService p1, final LogService p2, final byte[] p3, final String p4) throws Exception;
 
     public static native void startV2RayWithVmess(final PacketFlow p0, final VpnService p1, final LogService p2, final Vmess p3, final String p4) throws Exception;
+
+    public static native void stopTrojan();
 
     public static native void stopV2Ray();
 
@@ -38,19 +54,15 @@ public abstract class Tun2socks
 
     public static native long testConfigLatency(final byte[] p0, final String p1) throws Exception;
 
-    public static native long testVmessLatency(final Vmess p0, final String p1, final long p2) throws Exception;
+    public static native long testTCPPing(final String p0, final long p1) throws Exception;
 
     public static native long testURLLatency(final String p0) throws Exception;
 
-    public static native long testTCPPing(final String p0, final long p1) throws Exception;
+    public static native long testVmessLatency(final Vmess p0, final String p1, final long p2) throws Exception;
 
-    public static native Vmess convertJSONToVmess(final byte[] p0) throws Exception;
+    public static native void startTrojanAndSocks(final byte[] p0, final PacketFlow p1, final String p2, final long p3);
 
-    public static native long getFreePort() throws Exception;
-
-    public static native void startSocks(final PacketFlow p0, final String p1, final long p2);
-
-    public static native void stopSocks();
+    public static native void stopTrojanAndSocks();
 
     static {
         Seq.touch();

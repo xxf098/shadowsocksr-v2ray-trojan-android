@@ -126,7 +126,7 @@
   <string name="service_v2ray" translatable="false">V2Ray Service</string>
   <string name="service_nat" translatable="false">Nat Service</string>
   <string name="service_test" translatable="false">Latency Test Service</string>
-  <string name="service_test_working">Testing profiles…</string>
+  <string name="service_test_working">Testing Profiles…</string>
 
 
     <!-- alert category -->

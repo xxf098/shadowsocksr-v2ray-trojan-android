@@ -73,7 +73,8 @@ object Profile {
     val routeMode = math.max(Route.ALL_ROUTES.indexOf(profile.route), 0)
     val (dns_address, dns_port, china_dns_address, china_dns_port) =  profile.getDNSConf()
 //    Log.e("Profile", s"v_host: ${profile.v_host}, v_path: ${profile.v_path}, v_tls: ${profile.v_tls}, v_add: ${profile.v_add},v_port: ${profile.v_port}, v_aid: ${profile.v_aid}, " +
-//      s"v_net: ${profile.v_net}, v_id: ${profile.v_id}, v_type: ${profile.v_type}, v_security: ${profile.v_security}, routeMode: $routeMode, dns: $dns_address:$dns_port,$china_dns_address:$china_dns_port")
+//      s"v_net: ${profile.v_net}, v_id: ${profile.v_id}, v_type: ${profile.v_type}, v_security: ${profile.v_security}, routeMode: $routeMode, useIPv6: ${profile.ipv6}" +
+//      s"dns: $dns_address:$dns_port,$china_dns_address:$china_dns_port")
     Tun2socks.newVmess(
       profile.v_host,
       profile.v_path,
@@ -87,6 +88,7 @@ object Profile {
       v_security,
       routeMode,
       s"$dns_address:$dns_port,$china_dns_address:$china_dns_port",
+      profile.ipv6,
       "error" // TODO: config log level
     )
   }
@@ -251,10 +253,10 @@ class Profile {
   var ssrsub_id: Int = 0
 
   @DatabaseField
-  var dns: String = "1.1.1.1:53,8.8.8.8:53"
+  var dns: String = "1.1.1.1:53,1.0.0.1:53"
 
   @DatabaseField
-  var china_dns: String = "223.5.5.5:53,114.114.114.114:53"
+  var china_dns: String = "223.5.5.5:53,223.6.6.6:53"
 
   @DatabaseField
   var ipv6: Boolean = false

@@ -3,6 +3,7 @@ package com.github.shadowsocks.fragments
 import java.nio.charset.StandardCharsets
 
 import android.app.TaskStackBuilder
+import android.content.{ClipData, ClipboardManager, Context, DialogInterface}
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.Toolbar
@@ -27,6 +28,8 @@ class V2RayConfigFragment extends Fragment with OnMenuItemClickListener {
   private final val TAG = "V2RayConfigFragment"
   private var etConfig: EditText = _
   private var profile: Profile = _
+  private lazy val clipboard = getActivity.getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
+
 
 
   override def onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle): View = {
@@ -63,6 +66,10 @@ class V2RayConfigFragment extends Fragment with OnMenuItemClickListener {
     }
     case R.id.action_clear_v2ray_config => {
       etConfig.setText("", TextView.BufferType.EDITABLE)
+      true
+    }
+    case R.id.action_copy_v2ray_config => {
+      clipboard.setPrimaryClip(ClipData.newPlainText(null, etConfig.getText.toString))
       true
     }
     case _ => false

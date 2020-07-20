@@ -5,6 +5,7 @@ be.mygod.vpnhotspot
 ch.protonmail.android
 co.wanqu.android
 com.alphainventor.filemanager
+com.amazon.kindle
 com.amazon.mshop.android.shopping
 com.android.chrome
 com.android.providers.downloads
@@ -38,6 +39,8 @@ com.downloader.video.tumblr
 com.driverbrowser
 com.dropbox.android
 com.duolingo
+com.duckduckgo.mobile.android
+com.dv.adm
 com.estrongs.android.pop
 com.estrongs.android.pop.pro
 com.evernote
@@ -112,6 +115,7 @@ com.linecorp.linelite
 com.lingodeer
 com.mediapods.tumbpods
 com.mgoogle.android.gms
+com.microsoft.emmx
 com.microsoft.office.powerpoint
 com.microsoft.skydrive
 com.mixplorer
@@ -145,6 +149,7 @@ com.reddit.frontpage
 com.resilio.sync
 com.rhmsoft.edit
 com.rubenmayayo.reddit
+com.sec.android.app.sbrowser
 com.shanga.walli
 com.simplehabit.simplehabitapp
 com.slack
@@ -170,6 +175,8 @@ com.valvesoftware.android.steam.communimunity
 com.valvesoftware.android.steam.community
 com.vanced.android.youtube
 com.vimeo.android.videoapp
+com.vivaldi.browser
+com.vivaldi.browser.snapshot
 com.vkontakte.android
 com.whatsapp
 com.wire
@@ -188,6 +195,8 @@ flipboard.app
 fm.moon.app
 fr.gouv.etalab.mastodon
 github.tornaco.xposedmoduletest
+idm.internet.download.manager
+idm.internet.download.manager.plus
 io.github.javiewer
 io.github.skyhacker2.magnetsearch
 io.va.exposed
@@ -203,6 +212,8 @@ net.tsapps.appsales
 onion.fire
 org.fdroid.fdroid
 org.kustom.widget
+org.freedownloadmanager.fdm
+org.mozilla.fenix
 org.mozilla.fennec_aurora
 org.mozilla.firefox
 org.mozilla.focus

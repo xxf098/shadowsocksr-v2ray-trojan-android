@@ -79,7 +79,6 @@ object ProfileManagerActivity {
   }
 }
 
-// TODO: AndroidX
 // todo: import export
 final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext
   with View.OnClickListener with CreateNdefMessageCallback {
@@ -1092,7 +1091,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
     case R.id.action_export =>
-      val profiles = ProfileManagerActivity.getProfilesByGroup(currentGroupName, false)
+      val profiles = ProfileManagerActivity.getProfilesByGroup(currentGroupName, is_sort)
       clipboard.setPrimaryClip(ClipData.newPlainText(null, profiles.mkString("\n")))
       Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show
 //      app.profileManager.getAllProfiles match {

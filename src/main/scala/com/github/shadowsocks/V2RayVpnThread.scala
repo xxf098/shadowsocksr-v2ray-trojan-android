@@ -123,14 +123,16 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
     }
   }
 
-  def stopTun2Socks (): Unit = {
+  def stopTun2Socks (stopService: Boolean = true): Unit = {
     Tun2socks.stopV2Ray()
     if (pfd != null) pfd.close()
     pfd = null
     inputStream = null
     outputStream = null
     running = false
-    vpnService.stopSelf()
-    android.os.Process.killProcess(android.os.Process.myPid())
+    if (stopService) {
+      vpnService.stopSelf()
+      android.os.Process.killProcess(android.os.Process.myPid())
+    }
   }
 }

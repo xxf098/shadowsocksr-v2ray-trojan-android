@@ -126,7 +126,7 @@
   <string name="service_v2ray" translatable="false">V2Ray Service</string>
   <string name="service_nat" translatable="false">Nat Service</string>
   <string name="service_test" translatable="false">Latency Test Service</string>
-  <string name="service_test_working">Testing profiles…</string>
+  <string name="service_test_working">Testing Profiles…</string>
 
 
     <!-- alert category -->
@@ -202,6 +202,7 @@
   <string name="add_profile_nfc_hint">Keep both devices\' screen on. On the other device, click on the \'share\' button. Place both devices\' backs against each other.\nYou may also scan a nfc tag.</string>
   <string name="add_profile_scanner_permission_required">Camera permission is required for scanning QR code.</string>
   <string name="copy_url">Copy URL</string>
+  <string name="copy">Copy</string>
   <plurals name="removed">
     <item quantity="one">Removed</item>
     <item quantity="other">%d items removed</item>

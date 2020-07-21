@@ -138,7 +138,7 @@
   <string name="loading">Loading…</string>
   <string name="remove_profile">Remove this profile "%s"?</string>
 
-  <string name="dr">Duplicate Removal Add</string>
+  <string name="dr">No Duplicates</string>
   <string name="open_url">Open</string>
 
 
@@ -195,7 +195,7 @@
   <string name="profile_manager_dialog_content">&#8226; Tap to select a profile;\n&#8226; Swipe left/right or press left
     to remove;\n&#8226; Long press to reorder profiles.</string>
   <string name="gotcha">Gotcha!</string>
-  <string name="add_profile_dialog">Copy to clipboard?</string>
+  <string name="add_profile_dialog">Add Profiles?</string>
   <string name="add_profile_methods_scan_qr_code">Scan QR code</string>
   <string name="add_profile_methods_manual_settings">Manual Settings</string>
   <string name="add_profile_nfc_hint_title">Use Android Beam (NFC) to add a profile</string>

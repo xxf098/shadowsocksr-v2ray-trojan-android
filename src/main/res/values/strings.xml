@@ -337,7 +337,13 @@
 
   <string name="title_ssr_dns_nocache">SSR DNS Cache</string>
 
+  <string name="title_v2ray_sniff_enable">Enable Sniff Domain</string>
+  <string name="summary_v2ray_sniff_enable">Sniff Domain</string>
+
+
   <string name="ssr_category">SSR Settings</string>
+  <string name="v2ray_category">V2Ray Settings</string>
+
 
   <plurals name="format_minutes">
     <item quantity="one">%d minute</item>

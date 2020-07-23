@@ -54,6 +54,15 @@
             android:title="@string/title_ssr_dns_nocache" />
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:title="@string/v2ray_category"
+        android:key="@string/vmessPreferenceGroup">
+        <CheckBoxPreference
+            android:key="pref_enable_v2ray_sniff"
+            android:summary="@string/summary_v2ray_sniff_enable"
+            android:title="@string/title_v2ray_sniff_enable" />
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/misc_cat"
         android:key="@string/miscPreferenceGroup">
         <Preference android:key="ignore_battery_optimization" android:title="@string/ignore_battery_optimization"

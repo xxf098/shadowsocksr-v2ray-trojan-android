@@ -287,7 +287,11 @@
 
   <string name="title_ssr_dns_nocache">SSR DNS缓存</string>
 
+  <string name="title_v2ray_sniff_enable">启用域名探测</string>
+  <string name="summary_v2ray_sniff_enable">域名探测</string>
+
   <string name="ssr_category">SSR设置</string>
+  <string name="v2ray_category">V2Ray设置</string>
 
   <plurals name="format_minutes">
     <item quantity="other">%d 分钟</item>

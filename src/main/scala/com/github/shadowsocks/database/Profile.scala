@@ -75,6 +75,14 @@ object Profile {
 //    Log.e("Profile", s"v_host: ${profile.v_host}, v_path: ${profile.v_path}, v_tls: ${profile.v_tls}, v_add: ${profile.v_add},v_port: ${profile.v_port}, v_aid: ${profile.v_aid}, " +
 //      s"v_net: ${profile.v_net}, v_id: ${profile.v_id}, v_type: ${profile.v_type}, v_security: ${profile.v_security}, routeMode: $routeMode, useIPv6: ${profile.ipv6}" +
 //      s"dns: $dns_address:$dns_port,$china_dns_address:$china_dns_port")
+    val vmessOption =
+s"""
+  |{
+  |"useIPv6": ${profile.ipv6},
+  |"logLevel":"error",
+  |"routeMode": $routeMode
+  |}
+""".stripMargin
     Tun2socks.newVmess(
       profile.v_host,
       profile.v_path,
@@ -86,10 +94,8 @@ object Profile {
       profile.v_id,
       profile.v_type,
       v_security,
-      routeMode,
       s"$dns_address:$dns_port,$china_dns_address:$china_dns_port",
-      profile.ipv6,
-      "error" // TODO: config log level
+      vmessOption.getBytes(StandardCharsets.UTF_8)
     )
   }
 

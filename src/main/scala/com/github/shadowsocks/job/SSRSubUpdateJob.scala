@@ -54,6 +54,7 @@ class SSRSubUpdateJob() extends Job {
             }).recover {
             case e: Exception => 0
           }.getOrElse(0)).sum
+          app.SSRSubUpdateJobFinished = true
           val result = if (successCount == ssrsubs.length) 1 else 0
           if (result == 1) {
             Log.i(SSRSubUpdateJob.TAG, "update subscriptions successfully!")

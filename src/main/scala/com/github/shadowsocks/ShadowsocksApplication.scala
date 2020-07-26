@@ -98,6 +98,7 @@ class ShadowsocksApplication extends Application {
 
   var BLOCK_DOMAIN = List[String]()
   val DNS_CACHE =  scala.collection.mutable.Map[String, String]()
+  var SSRSubUpdateJobFinished = false
 
   def isNatEnabled = settings.getBoolean(Key.isNAT, false)
 

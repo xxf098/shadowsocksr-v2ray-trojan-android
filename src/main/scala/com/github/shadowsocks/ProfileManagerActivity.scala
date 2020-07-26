@@ -595,6 +595,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   override def onResume() {
     super.onResume()
+    if (app.SSRSubUpdateJobFinished) {
+      profilesAdapter.resetProfiles()
+      app.SSRSubUpdateJobFinished = false
+    }
     updateNfcState()
   }
 

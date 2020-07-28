@@ -58,9 +58,10 @@
         android:title="@string/v2ray_category"
         android:key="@string/vmessPreferenceGroup">
         <CheckBoxPreference
-            android:key="pref_enable_v2ray_sniff"
+            android:key="pref_enable_sniff_domain"
             android:summary="@string/summary_v2ray_sniff_enable"
-            android:title="@string/title_v2ray_sniff_enable" />
+            android:title="@string/title_v2ray_sniff_enable"
+            android:defaultValue="true"/>
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/misc_cat"

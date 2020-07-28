@@ -375,7 +375,7 @@ object Key {
   val AUTO_TEST_CONNECTIVITY = "pref_auto_test_connectivity"
   val SSR_DNS_NOCAHCE = "pref_ssr_dns_nocache1"
   val FULL_TEST_BG = "pref_full_test_bg"
-
+  val ENABLE_SNIFF_DOMAIN = "pref_enable_sniff_domain"
 
   // message
   val TEST_PROFILE_IDS = "test_profile_ids"

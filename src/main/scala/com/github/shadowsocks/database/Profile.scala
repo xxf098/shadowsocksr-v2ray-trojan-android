@@ -260,7 +260,7 @@ class Profile {
   var ssrsub_id: Int = 0
 
   @DatabaseField
-  var dns: String = "1.1.1.1:53,1.0.0.1:53"
+  var dns: String = "1.1.1.1:53,8.8.8.8:53"
 
   @DatabaseField
   var china_dns: String = "223.5.5.5:53,223.6.6.6:53"

@@ -193,6 +193,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         case Some(addr) => profile.v_add = addr
         case None => throw NameNotResolvedException()
       }
+      profile.enable_domain_sniff = app.settings.getBoolean(Key.ENABLE_SNIFF_DOMAIN, true)
       v2rayThread = new V2RayVpnThread(this)
       v2rayThread.start()
       return

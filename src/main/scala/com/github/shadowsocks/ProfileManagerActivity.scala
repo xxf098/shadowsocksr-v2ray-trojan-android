@@ -1039,7 +1039,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     val profiles_vmess = Parser.findAllVmess(contents).toList
     val profiles = profiles_ssr ::: profiles_normal ::: profiles_vmess
     if (profiles.isEmpty) {
-      finish()
+//      finish()
       return false
     }
     val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)

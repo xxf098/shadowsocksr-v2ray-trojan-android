@@ -79,8 +79,8 @@ object Profile {
 s"""
   |{
   |"useIPv6": ${profile.ipv6},
-  |"logLevel":"error",
-  |"enableSniffing": ${profile.enable_domain_sniff}
+  |"logLevel":"debug",
+  |"enableSniffing": ${profile.enable_domain_sniff},
   |"routeMode": $routeMode
   |}
 """.stripMargin

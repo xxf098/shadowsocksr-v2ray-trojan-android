@@ -130,7 +130,7 @@
   <string name="gotcha">好的</string>
   <string name="copy_url">复制 URL</string>
   <string name="copy">复制</string>
-  <string name="add_profile_dialog">为 ShadowsocksR 添加此配置文件？</string>
+  <string name="add_profile_dialog">添加配置文件？</string>
   <string name="add_profile_methods_scan_qr_code">扫描二维码</string>
   <string name="add_profile_methods_manual_settings">手动设置</string>
   <string name="add_profile_nfc_hint_title">使用 Android Beam (NFC) 来添加配置</string>
@@ -287,7 +287,11 @@
 
   <string name="title_ssr_dns_nocache">SSR DNS缓存</string>
 
+  <string name="title_v2ray_sniff_enable">启用域名探测</string>
+  <string name="summary_v2ray_sniff_enable">域名探测</string>
+
   <string name="ssr_category">SSR设置</string>
+  <string name="v2ray_category">V2Ray设置</string>
 
   <plurals name="format_minutes">
     <item quantity="other">%d 分钟</item>

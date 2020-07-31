@@ -79,7 +79,7 @@ object Profile {
 s"""
   |{
   |"useIPv6": ${profile.ipv6},
-  |"logLevel":"debug",
+  |"logLevel":"error",
   |"enableSniffing": ${profile.enable_domain_sniff},
   |"routeMode": $routeMode
   |}

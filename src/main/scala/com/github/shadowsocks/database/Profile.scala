@@ -81,6 +81,7 @@ s"""
   |"useIPv6": ${profile.ipv6},
   |"logLevel":"error",
   |"enableSniffing": ${profile.enable_domain_sniff},
+  |"dns": s"$dns_address:$dns_port,$china_dns_address:$china_dns_port",
   |"routeMode": $routeMode
   |}
 """.stripMargin
@@ -95,7 +96,6 @@ s"""
       profile.v_id,
       profile.v_type,
       v_security,
-      s"$dns_address:$dns_port,$china_dns_address:$china_dns_port",
       vmessOption.getBytes(StandardCharsets.UTF_8)
     )
   }

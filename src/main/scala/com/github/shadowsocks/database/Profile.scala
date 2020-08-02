@@ -287,7 +287,7 @@ class Profile {
   var userOrder: Long = _
 
   @DatabaseField
-  var proxy_protocol: String = "ssr" // ssr vmess v2ray_json
+  var proxy_protocol: String = "ssr" // ssr vmess v2ray_json trojan
 
   @DatabaseField
   var v_v: String = "2"
@@ -328,6 +328,21 @@ class Profile {
   @DatabaseField
   var v_security: String = ""
 
+  @DatabaseField
+  var t_addr: String = ""
+
+  @DatabaseField
+  var t_port:Int = 443
+
+  @DatabaseField
+  var t_password:String = ""
+
+  @DatabaseField
+  var t_allowInsecure: Boolean = false
+
+  @DatabaseField
+  var t_peer: String = ""
+
   var enable_domain_sniff = true
 
   override def toString(): String = {
@@ -335,6 +350,7 @@ class Profile {
     this match {
       case _ if isVmess => VmessQRCode(v_v, v_ps, v_add, v_port, v_id, v_aid, v_net, v_type, v_host, v_path, v_tls, url_group).toString
       case _ if isV2RayJSON => "vjson://" + Utils.b64Encode(v_json_config.getBytes(Charset.forName("UTF-8")))
+      case _ if isTrojan => s"trojan://$t_password@$t_addr:$t_port"
       case _ => "ssr://" + Utils.b64Encode("%s:%d:%s:%s:%s:%s/?obfsparam=%s&protoparam=%s&remarks=%s&group=%s".formatLocal(Locale.ENGLISH,
         host, remotePort, protocol, method, obfs,
         Utils.b64Encode("%s".formatLocal(Locale.ENGLISH, password).getBytes),
@@ -352,5 +368,7 @@ class Profile {
   def isV2RayJSON = this.proxy_protocol == "v2ray_json"
 
   def isV2Ray = isVmess || isV2RayJSON
+
+  def isTrojan = this.proxy_protocol == "trojan"
 
 }

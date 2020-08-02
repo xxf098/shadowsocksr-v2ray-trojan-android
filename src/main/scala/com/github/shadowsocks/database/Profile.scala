@@ -81,7 +81,7 @@ s"""
   |"useIPv6": ${profile.ipv6},
   |"logLevel":"error",
   |"enableSniffing": ${profile.enable_domain_sniff},
-  |"dns": s"$dns_address:$dns_port,$china_dns_address:$china_dns_port",
+  |"dns": "$dns_address:$dns_port,$china_dns_address:$china_dns_port",
   |"routeMode": $routeMode
   |}
 """.stripMargin

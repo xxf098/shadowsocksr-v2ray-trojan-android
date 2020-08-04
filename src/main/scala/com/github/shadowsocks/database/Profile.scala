@@ -58,7 +58,7 @@ import com.github.shadowsocks.utils.{Route, Utils}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Try
+import scala.util.{Random, Try}
 import ProfileConverter._
 import com.github.shadowsocks.database.VmessAction.profile
 import com.github.shadowsocks.types.{FailureConnect, Result, SuccessConnect}
@@ -110,10 +110,11 @@ s"""
     }
 
     def testLatency(): Future[Result[Long]] = {
+      val port = new Random().nextInt(24) + 8900
       Future(profile.getElapsed())
         .map(SuccessConnect)
         .recoverWith {
-          case _: Exception => Future(profile.getElapsed()).map(SuccessConnect).recover{
+          case _: Exception => Future(profile.getElapsed(port)).map(SuccessConnect).recover{
               case e: Exception => FailureConnect(e.getMessage)
             }
         }

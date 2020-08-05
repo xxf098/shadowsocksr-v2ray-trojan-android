@@ -301,9 +301,10 @@ class LatencyTestService extends Service {
 
   private def updateNotification (title: String, testResult: String, max: Int, counter: Int): Unit = {
     val latency = """\d+ms""".r findFirstIn testResult
-    val formatTitle = title.substring(0, 16) + "  " + latency.getOrElse("0ms")
-    Log.e(TAG, s"formatTitle: $formatTitle")
-    builder.setContentTitle(title.substring(0, 22))
+//    val formatTitle = title.substring(0, 16) + "  " + latency.getOrElse("0ms")
+//    Log.e(TAG, s"formatTitle: $formatTitle")
+    val length = math.min(title.length, 20)
+    builder.setContentTitle(title.substring(0, length))
       .setContentText(latency.getOrElse("0ms"))
       .setProgress(max, counter, false)
     notificationService.notify(LatencyTestService.NOTIFICATION_ID, builder.build())

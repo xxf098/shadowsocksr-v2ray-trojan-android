@@ -62,6 +62,9 @@ object Parser {
   private val decodedPattern_ssr_groupparam = "(?i)[?&]group=([A-Za-z0-9_=-]*)".r
 
   private val pattern_vmess = "(?i)(vmess://[A-Za-z0-9_/+=-]+)".r
+  private val pattern_trojan = "(?i)trojan://(.+?)@(.+?):(\\d{2,5})(\\?.+)?".r
+  private val pattern_trojan_query = "(?i)allowInsecure=([01])&peer=(.+?)#(.+)?".r
+
 
   def findAll(data: CharSequence) = pattern.findAllMatchIn(if (data == null) "" else data).map(m => try
     decodedPattern.findFirstMatchIn(new String(Base64.decode(m.group(1), Base64.NO_PADDING), "UTF-8")) match {
@@ -165,6 +168,41 @@ object Parser {
     profile.route = Route.ALL
     profile
   }
+
+  def findAllTrojan(data: CharSequence) = pattern_trojan
+    .findAllMatchIn(if (data == null) "" else data)
+    .flatMap(m => try {
+      Log.e(TAG, s"${m.group(1)}, ${m.group(2)}, ${m.group(3)}, ${m.group(4)}")
+      val profile = new Profile
+      profile.t_password = m.group(1)
+      profile.t_addr = m.group(2)
+      profile.t_port = m.group(3).toInt
+      profile.t_peer = profile.t_addr
+      profile.proxy_protocol = "trojan"
+      // common
+      profile.url_group = "trojan"
+      profile.host = profile.t_addr
+      profile.remotePort = profile.t_port
+      profile.name = m.group(2)
+      profile.route = Route.ALL
+      profile.password = profile.t_password
+      if (m.group(4) != null) {
+        pattern_trojan_query.findFirstMatchIn(m.group(4)) match {
+          case Some(m1) => {
+            Log.e(TAG, s"${m1.group(1)}, ${m1.group(2)}, ${m1.group(3)}")
+            if (m1.group(1) != null) { profile.t_allowInsecure = if (m1.group(1) == "1") true else false }
+            profile.t_peer = m1.group(2)
+            if (m1.group(3) != null) { profile.name = URLDecoder.decode(m1.group(3), "UTF-8") }
+          }
+          case None =>
+        }
+      }
+      Some(profile)
+    } catch {
+      case ex: Exception =>
+        Log.e(TAG, "parser error: " + m.source, ex) // Ignore
+        None
+    })
 
   // single link
   def findVmess (vmessLink: String): Option[VmessBean] = {

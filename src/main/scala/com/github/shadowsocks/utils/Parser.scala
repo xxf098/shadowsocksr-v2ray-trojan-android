@@ -177,7 +177,7 @@ object Parser {
       profile.t_password = m.group(1)
       profile.t_addr = m.group(2)
       profile.t_port = m.group(3).toInt
-      profile.t_peer = profile.t_addr
+      profile.t_peer = profile.t_addr  // check is ip
       profile.proxy_protocol = "trojan"
       // common
       profile.url_group = "trojan"
@@ -191,7 +191,7 @@ object Parser {
           case Some(m1) => {
             Log.e(TAG, s"${m1.group(1)}, ${m1.group(2)}, ${m1.group(3)}")
             if (m1.group(1) != null) { profile.t_allowInsecure = if (m1.group(1) == "1") true else false }
-            profile.t_peer = m1.group(2)
+//            profile.t_peer = m1.group(2)
             if (m1.group(3) != null) { profile.name = URLDecoder.decode(m1.group(3), "UTF-8") }
           }
           case None =>

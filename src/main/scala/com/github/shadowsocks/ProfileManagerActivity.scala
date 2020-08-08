@@ -1037,7 +1037,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     val profiles_normal = Parser.findAll(contents).toList
     val profiles_ssr = Parser.findAll_ssr(contents).toList
     val profiles_vmess = Parser.findAllVmess(contents).toList
-    val profiles = profiles_ssr ::: profiles_normal ::: profiles_vmess
+    val profiles_trojan = Parser.findAllTrojan(contents).toList
+    val profiles = profiles_ssr ::: profiles_normal ::: profiles_vmess ::: profiles_trojan
     if (profiles.isEmpty) {
 //      finish()
       return false
@@ -1156,6 +1157,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         startService(intent)
         return true
       }
+      // deprecated
       val testProfiles = if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles
       else app.profileManager.getAllProfilesByGroup(currentGroupName)
       testProfiles match {
@@ -1212,8 +1214,6 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
           // TODO: refactor
           // connection pool time
-
-
           val testSSRProfiles = (ssrProfiles: List[List[Profile]], size: Int, offset: Int) => {
             ssrProfiles.indices.foreach(index => {
               val profiles: List[Profile] = ssrProfiles(index)

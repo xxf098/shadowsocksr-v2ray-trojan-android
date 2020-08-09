@@ -58,6 +58,7 @@ class LatencyTestService extends Service {
       registerReceiver(stopReceiver, filter)
       stopReceiverRegistered = true
     }
+    // TODO: test options
     val currentGroupName = intent.getStringExtra(Key.currentGroupName)
     val isSort = intent.getBooleanExtra("is_sort", false)
     bgResultReceiver = intent.getParcelableExtra("BgResultReceiver")
@@ -109,7 +110,7 @@ class LatencyTestService extends Service {
               val confServer = profiles.indices.map(i => {
                 val profile = profiles(i)
                 var host = profile.host
-                if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = false) match {
+                Utils.resolve(host, enableIPv6 = false) match {
                   case Some(addr) => host = addr
                   case None => host = "127.0.0.1"
                 }

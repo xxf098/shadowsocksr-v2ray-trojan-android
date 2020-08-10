@@ -47,7 +47,7 @@ import java.util.Locale
 import android.util.{Base64, Log}
 import com.google.gson.GsonBuilder
 import com.j256.ormlite.field.{DataType, DatabaseField}
-import tun2socks.{Tun2socks, Vmess}
+import tun2socks.{Trojan, Tun2socks, Vmess}
 
 import scala.language.implicitConversions
 import Profile._
@@ -65,26 +65,32 @@ import com.github.shadowsocks.types.{FailureConnect, Result, SuccessConnect}
 // automatic from Android without pc
 
 object Profile {
+
+  def getOption (profile: Profile): String = {
+    val routeMode = math.max(Route.ALL_ROUTES.indexOf(profile.route), 0)
+    val (dns_address, dns_port, china_dns_address, china_dns_port) =  profile.getDNSConf()
+    val vmessOption =
+      s"""
+         |{
+         |"useIPv6": ${profile.ipv6},
+         |"logLevel":"error",
+         |"enableSniffing": ${profile.enable_domain_sniff},
+         |"dns": "$dns_address:$dns_port,$china_dns_address:$china_dns_port",
+         |"routeMode": $routeMode
+         |}
+""".stripMargin
+    vmessOption
+  }
+
   implicit def profileToVmess(profile: Profile): Vmess = {
     if (!profile.isVmess) {
       throw new Exception("Not a V2ray Profile")
     }
     val v_security = if (TextUtils.isEmpty(profile.v_security)) "auto" else profile.v_security
-    val routeMode = math.max(Route.ALL_ROUTES.indexOf(profile.route), 0)
-    val (dns_address, dns_port, china_dns_address, china_dns_port) =  profile.getDNSConf()
-//    Log.e("Profile", s"v_host: ${profile.v_host}, v_path: ${profile.v_path}, v_tls: ${profile.v_tls}, v_add: ${profile.v_add},v_port: ${profile.v_port}, v_aid: ${profile.v_aid}, " +
+    val vmessOption = getOption(profile)
+    //    Log.e("Profile", s"v_host: ${profile.v_host}, v_path: ${profile.v_path}, v_tls: ${profile.v_tls}, v_add: ${profile.v_add},v_port: ${profile.v_port}, v_aid: ${profile.v_aid}, " +
 //      s"v_net: ${profile.v_net}, v_id: ${profile.v_id}, v_type: ${profile.v_type}, v_security: ${profile.v_security}, routeMode: $routeMode, useIPv6: ${profile.ipv6}" +
 //      s"dns: $dns_address:$dns_port,$china_dns_address:$china_dns_port, domainSniff: ${profile.enable_domain_sniff}")
-    val vmessOption =
-s"""
-  |{
-  |"useIPv6": ${profile.ipv6},
-  |"logLevel":"error",
-  |"enableSniffing": ${profile.enable_domain_sniff},
-  |"dns": "$dns_address:$dns_port,$china_dns_address:$china_dns_port",
-  |"routeMode": $routeMode
-  |}
-""".stripMargin
     Tun2socks.newVmess(
       profile.v_host,
       profile.v_path,
@@ -97,6 +103,22 @@ s"""
       profile.v_type,
       v_security,
       vmessOption.getBytes(StandardCharsets.UTF_8)
+    )
+  }
+
+  implicit def profileToTrojan(profile: Profile): Trojan = {
+    if (!profile.isTrojan) {
+      throw new Exception("Not a Trojan Profile")
+    }
+    val trojanOption = getOption(profile)
+    Log.e("Profile", s"${profile.t_addr}, ${profile.t_port}, ${profile.t_password}, ${profile.t_peer}")
+    Tun2socks.newTrojan(
+      profile.t_addr,
+      profile.t_port,
+      profile.t_password,
+      profile.t_peer,
+      true,
+      trojanOption.getBytes(StandardCharsets.UTF_8)
     )
   }
 
@@ -125,7 +147,7 @@ s"""
         var profileAddr = if(profile.isV2Ray) profile.v_add else profile.host
         val profilePort = if(profile.isV2Ray) profile.v_port.toInt else profile.remotePort
         // Log.e("testTCPPingLatency", s"profileAddr: $profileAddr, profilePort: $profilePort")
-        if (!Utils.isNumeric(profileAddr)) Utils.resolve(profileAddr, enableIPv6 = false) match {
+        Utils.resolve(profileAddr, enableIPv6 = false) match {
           case Some(addr) => profileAddr = addr
           case None => throw new IOException("Host Not Resolved")
         }
@@ -160,12 +182,12 @@ s"""
     }
 
     // support ssr & v2ray
-    // TODO: refactor
+    // TODO: refactor PROFILE.RESOLVE
     def testTCPLatencyThread () : String  = {
       var profileAddr = if(profile.isV2Ray) profile.v_add else profile.host
       val profilePort = if(profile.isV2Ray) profile.v_port.toInt else profile.remotePort
       // Log.e("testTCPPingLatency", s"profileAddr: $profileAddr, profilePort: $profilePort")
-      if (!Utils.isNumeric(profileAddr)) Utils.resolve(profileAddr, enableIPv6 = false) match {
+      Utils.resolve(profileAddr, enableIPv6 = false) match {
         case Some(addr) => profileAddr = addr
         case None => throw new IOException("Host Not Resolved")
       }

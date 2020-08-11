@@ -46,6 +46,7 @@ import android.text.TextUtils
 import android.util.{Base64, Log}
 import com.github.shadowsocks.database.{DnsBean, InSettingsBean, InboundBean, LogBean, MuxBean, OutSettingsBean, OutboundBean, Profile, RoutingBean, RulesBean, StreamSettingsBean, TlssettingsBean, UsersBean, V2rayConfig, VmessBean, VmessQRCode, VnextBean, WsHeaderBean, WssettingsBean}
 import com.google.gson.{Gson, GsonBuilder}
+import android.net.Uri
 
 import scala.collection.JavaConverters._
 
@@ -62,8 +63,8 @@ object Parser {
   private val decodedPattern_ssr_groupparam = "(?i)[?&]group=([A-Za-z0-9_=-]*)".r
 
   private val pattern_vmess = "(?i)(vmess://[A-Za-z0-9_/+=-]+)".r
-  private val pattern_trojan = "(?i)trojan://(.+?)@(.+?):(\\d{2,5})(\\?.+)?".r
-  private val pattern_trojan_query = "(?i)allowInsecure=([01])&peer=(.+?)#(.+)?".r
+  private val pattern_trojan = "(?i)trojan://(.+?)@(.+?):(\\d{2,5})([\\?#].+)?".r
+  private val pattern_trojan_query = "(?i)allowInsecure=([01])&(peer|sni)=(.+?)#(.+)?".r
 
 
   def findAll(data: CharSequence) = pattern.findAllMatchIn(if (data == null) "" else data).map(m => try
@@ -165,11 +166,11 @@ object Parser {
     // common
     profile.name = profile.v_ps
     profile.url_group = vmessBean.url_group
-    profile.route = Route.ALL
+    profile.route = Route.BYPASS_LAN_CHN
     profile
   }
 
-  def findAllTrojan(data: CharSequence) = pattern_trojan
+  def findAllTrojanRegex(data: CharSequence) = pattern_trojan
     .findAllMatchIn(if (data == null) "" else data)
     .flatMap(m => try {
       Log.e(TAG, s"${m.group(1)}, ${m.group(2)}, ${m.group(3)}, ${m.group(4)}")
@@ -184,20 +185,64 @@ object Parser {
       profile.host = profile.t_addr
       profile.remotePort = profile.t_port
       profile.name = m.group(2)
-      profile.route = Route.ALL
+      profile.route = Route.BYPASS_LAN_CHN
       profile.password = profile.t_password
       if (m.group(4) != null) {
         pattern_trojan_query.findFirstMatchIn(m.group(4)) match {
           case Some(m1) => {
             Log.e(TAG, s"${m1.group(1)}, ${m1.group(2)}, ${m1.group(3)}")
             if (m1.group(1) != null) { profile.t_allowInsecure = if (m1.group(1) == "1") true else false }
-//            profile.t_peer = m1.group(2)
+            profile.t_peer = m1.group(2)
             if (m1.group(3) != null) { profile.name = URLDecoder.decode(m1.group(3), "UTF-8") }
           }
           case None =>
         }
       }
       Some(profile)
+    } catch {
+      case ex: Exception =>
+        Log.e(TAG, "parser error: " + m.source, ex) // Ignore
+        None
+    })
+
+  def findAllTrojan(data: CharSequence) = pattern_trojan
+    .findAllMatchIn(if (data == null) "" else data)
+    .flatMap(m => try {
+      Log.e(TAG, m.source.toString)
+      val trojanUri = Uri.parse(m.source.toString)
+      if (trojanUri.getScheme == "trojan") {
+        val profile = new Profile
+        val host = trojanUri.getHost
+        val port = trojanUri.getPort
+        val password = trojanUri.getUserInfo
+        profile.t_password = password
+        profile.t_addr = host
+        profile.t_port = port
+        profile.t_peer = host
+        profile.proxy_protocol = "trojan"
+        // common
+        profile.url_group = "trojan"
+        profile.host = host
+        profile.remotePort = port
+        profile.name = host
+        profile.route = Route.BYPASS_LAN_CHN
+        profile.password = password
+        // sni
+        var sni = trojanUri.getQueryParameter("sni")
+        sni = if (TextUtils.isEmpty(sni)) { trojanUri.getQueryParameter("peer") } else sni
+        if (!TextUtils.isEmpty(sni) && sni != profile.t_peer) {
+          profile.t_peer = sni
+          profile.t_allowInsecure = true
+        }
+        // get profile name
+        val splits = m.source.toString.split("#")
+        if (splits.length > 1) {
+          profile.name = URLDecoder.decode(splits.last, "UTF-8")
+        }
+        Some(profile)
+      } else {
+        None
+      }
     } catch {
       case ex: Exception =>
         Log.e(TAG, "parser error: " + m.source, ex) // Ignore

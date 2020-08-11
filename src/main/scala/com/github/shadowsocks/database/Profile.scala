@@ -73,7 +73,7 @@ object Profile {
       s"""
          |{
          |"useIPv6": ${profile.ipv6},
-         |"logLevel":"error",
+         |"logLevel":"debug",
          |"enableSniffing": ${profile.enable_domain_sniff},
          |"dns": "$dns_address:$dns_port,$china_dns_address:$china_dns_port",
          |"routeMode": $routeMode
@@ -117,7 +117,7 @@ object Profile {
       profile.t_port,
       profile.t_password,
       profile.t_peer,
-      true,
+      profile.t_allowInsecure, // SkipCertVerify
       trojanOption.getBytes(StandardCharsets.UTF_8)
     )
   }
@@ -361,7 +361,7 @@ class Profile {
   var t_password:String = ""
 
   @DatabaseField
-  var t_allowInsecure: Boolean = false
+  var t_allowInsecure: Boolean = false // skip verify
 
   @DatabaseField
   var t_peer: String = ""

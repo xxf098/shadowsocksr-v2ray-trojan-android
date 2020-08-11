@@ -339,6 +339,11 @@ object Key {
   val v_security = "v_security"
   val v_headertypes = "v_headertypes"
 
+  //trojan
+  val t_sni = "t_sni"
+  val t_addr = "t_addr"
+  val t_verify_certificate = "t_verify_certificate"
+
   val profileTip = "profileTip"
 
   val obfs = "obfs"
@@ -376,6 +381,7 @@ object Key {
   val SSR_DNS_NOCAHCE = "pref_ssr_dns_nocache1"
   val FULL_TEST_BG = "pref_full_test_bg"
   val ENABLE_SNIFF_DOMAIN = "pref_enable_sniff_domain"
+  val TEST_ZERO_MS = "pref_only_test_zero_ms"
 
   // message
   val TEST_PROFILE_IDS = "test_profile_ids"

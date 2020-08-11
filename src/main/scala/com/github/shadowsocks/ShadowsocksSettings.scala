@@ -174,15 +174,16 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
 
     ssrCategory = Option(ssrCategory).getOrElse(findPreference(getResources.getString(R.string.ssrPreferenceGroup)).asInstanceOf[PreferenceGroup])
     vmessCategory  = Option(vmessCategory).getOrElse(findPreference(getResources.getString(R.string.vmessPreferenceGroup)).asInstanceOf[PreferenceGroup])
-    val categories = List(ssrCategory, vmessCategory).filter(category => category != null)
+    trojanCategory  = Option(trojanCategory).getOrElse(findPreference(getResources.getString(R.string.trojanPreferenceGroup)).asInstanceOf[PreferenceGroup])
+    val categories = List(ssrCategory, vmessCategory, trojanCategory).filter(category => category != null)
     categories.foreach(_.findPreference(Key.group_name).setOnPreferenceChangeListener((_, value) => {
       profile.url_group = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
     }))
-    findPreference(Key.name).setOnPreferenceChangeListener((_, value) => {
+    List(ssrCategory, trojanCategory).filter(category => category != null).foreach(_.findPreference(Key.name).setOnPreferenceChangeListener((_, value) => {
       profile.name = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
-    })
+    }))
     findPreference(Key.host).setOnPreferenceClickListener((preference: Preference) => {
       val HostEditText = new EditText(activity);
       HostEditText.setText(profile.host);

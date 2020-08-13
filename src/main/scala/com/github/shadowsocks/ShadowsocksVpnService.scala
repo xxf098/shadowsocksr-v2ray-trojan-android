@@ -66,6 +66,7 @@ import android.net.LinkProperties
 import android.net.Network
 
 import scala.collection.mutable.ArrayBuffer
+import scala.concurrent.ExecutionContext.Implicits.global
 
 
 class ShadowsocksVpnService extends VpnService with BaseService {
@@ -193,7 +194,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         case Some(addr) => profile.v_add = addr
         case None => throw NameNotResolvedException()
       }
-      profile.enable_domain_sniff = app.settings.getBoolean(Key.ENABLE_SNIFF_DOMAIN, true)
+      profile.enable_domain_sniff = app.settings.getBoolean(Key.ENABLE_SNIFF_DOMAIN, false)
       v2rayThread = new V2RayVpnThread(this)
       v2rayThread.start()
       return

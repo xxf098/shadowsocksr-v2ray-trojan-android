@@ -238,11 +238,13 @@ class ShadowsocksApplication extends Application {
       ssrChannel.setShowBadge(false)
       val v2rayChannel = new NotificationChannel("service-v2ray", getText(R.string.service_v2ray), importance)
       v2rayChannel.setShowBadge(false)
+      val trojanChannel = new NotificationChannel("service-trojan", getText(R.string.service_trojan), importance)
+      trojanChannel.setShowBadge(false)
       val natChannel = new NotificationChannel("service-nat", getText(R.string.service_nat), importance)
       natChannel.setShowBadge(false)
       val testChannel = new NotificationChannel("service-test", getText(R.string.service_test), importance)
       testChannel.setShowBadge(true)
-      notification.createNotificationChannels(List(ssrChannel, v2rayChannel, natChannel, testChannel).asJava)
+      notification.createNotificationChannels(List(ssrChannel, v2rayChannel, trojanChannel, natChannel, testChannel).asJava)
     }
   }
 

@@ -36,7 +36,8 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
     override def writePacket(pkt: Array[Byte]): Unit = {
       flowOutputStream.write(pkt)
 //      rxTotal += pkt.length
-      rxTotal += Tun2socks.queryStats("up")
+//      rxTotal += Tun2socks.queryStats("up")
+      rxTotal += Tun2socks.queryOutboundStats("proxy", "downlink")
       TrafficMonitor.update(txTotal, rxTotal)
     }
   }
@@ -88,8 +89,15 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
         case p if p.isVmess => {
           Tun2socks.startV2RayWithVmess(flow, service, androidLogService, profile, assetPath)
         }
+        case p if p.isTrojan => {
+          Tun2socks.startTrojan(flow, service, androidLogService, profile, assetPath)
+        }
         case p if p.isV2RayJSON => {
-          val config = "\"address\":\\s*\".+?\"".r.replaceFirstIn(profile.v_json_config, s""""address": "${profile.v_add}"""")
+          val config = if (profile.v_json_config.contains("trojan")) {
+            profile.v_json_config
+          } else {
+            "\"address\":\\s*\".+?\"".r.replaceFirstIn(profile.v_json_config, s""""address": "${profile.v_add}"""")
+          }
           Tun2socks.startV2Ray(flow, service, androidLogService, config.getBytes(StandardCharsets.UTF_8), assetPath)
         }
         case _ => throw new Exception("Not Support!")
@@ -114,7 +122,8 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
           Tun2socks.inputPacket(buffer.array())
           buffer.clear()
 //          txTotal += n
-          txTotal += Tun2socks.queryStats("down")
+//          txTotal += Tun2socks.queryStats("down")
+          txTotal += Tun2socks.queryOutboundStats("proxy", "uplink")
           TrafficMonitor.update(txTotal, rxTotal)
         }
       } catch {

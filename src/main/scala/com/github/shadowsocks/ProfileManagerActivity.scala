@@ -1221,7 +1221,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                 val confServer = profiles.indices.map(i => {
                   val profile = profiles(i)
                   var host = profile.host
-                  if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = false) match {
+                  Utils.resolve(host, enableIPv6 = false) match {
                     case Some(addr) => host = addr
                     case None => host = "127.0.0.1"
                   }

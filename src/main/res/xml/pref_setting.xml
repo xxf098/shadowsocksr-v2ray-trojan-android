@@ -60,8 +60,7 @@
         <CheckBoxPreference
             android:key="pref_enable_sniff_domain"
             android:summary="@string/summary_v2ray_sniff_enable"
-            android:title="@string/title_v2ray_sniff_enable"
-            android:defaultValue="true"/>
+            android:title="@string/title_v2ray_sniff_enable"/>
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/misc_cat"

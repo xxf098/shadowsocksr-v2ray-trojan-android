@@ -29,6 +29,7 @@
   <!-- proxy category -->
   <string name="proxy_cat">Server Settings</string>
   <string name="proxy_v2ray" translatable="false">V2Ray Settings</string>
+  <string name="proxy_trojan" translatable="false">Trojan Settings</string>
   <string name="profile_name">Profile Name</string>
   <string name="proxy">Server</string>
   <string name="proxy_summary">Hostname or IP of the remote server</string>
@@ -124,6 +125,7 @@
   <string name="quick_switch">Switch</string>
   <string name="service_ssr" translatable="false">SSR Service</string>
   <string name="service_v2ray" translatable="false">V2Ray Service</string>
+  <string name="service_trojan" translatable="false">Trojan Service</string>
   <string name="service_nat" translatable="false">Nat Service</string>
   <string name="service_test" translatable="false">Latency Test Service</string>
   <string name="service_test_working">Testing Profiles…</string>
@@ -241,7 +243,11 @@
   <string name="ssrsub_toast_success">Successfully updated subscriptions.</string>
   <string name="ssrsub_toast_fail">Failed to update subscriptions!</string>
   <string name="group_name">Group Name</string>
-  <string name="proxy_click">Click on the group name to view its URL</string>
+  <string name="proxy_click">Click to view and edit server address</string>
+  <string name="sni_click">Click to view and edit SNI</string>
+  <string name="sni_title">Server Name Indication (SNI)</string>
+  <string name="verify_certificate">Verify Certificate</string>
+  <string name="verify_certificate_summary">Verify server\'s certificate and host name</string>
   <string name="ssrsub_remove_tip_title">Subscription removal</string>
   <string name="ssrsub_remove_tip">Delete this subscription without removing its nodes (nodes that bear its group name)?</string>
   <string name="ssrsub_remove_tip_direct">Delete the URL only</string>
@@ -273,6 +279,7 @@
   <string name="preferenceScreen" translatable="false">preferenceScreen</string>
   <string name="v2rayJSONPreferenceGroup" translatable="false">v2rayJSONPreferenceGroup</string>
   <string name="vmessPreferenceGroup" translatable="false">vmessPreferenceGroup</string>
+  <string name="trojanPreferenceGroup" translatable="false">trojanPreferenceGroup</string>
   <string name="ssrPreferenceGroup" translatable="false">ssrPreferenceGroup</string>
   <string name="featurePreferenceGroup" translatable="false">featurePreferenceGroup</string>
   <string name="miscPreferenceGroup" translatable="false">miscPreferenceGroup</string>

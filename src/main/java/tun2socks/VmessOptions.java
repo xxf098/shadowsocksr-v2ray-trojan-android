@@ -35,6 +35,14 @@ public final class VmessOptions implements Seq.Proxy
 
     public final native void setRouteMode(final long p0);
 
+    public final native boolean getEnableSniffing();
+
+    public final native void setEnableSniffing(final boolean p0);
+
+    public final native String getDNS();
+
+    public final native void setDNS(final String p0);
+
     @Override
     public boolean equals(final Object o) {
         if (o == null || !(o instanceof VmessOptions)) {
@@ -54,12 +62,28 @@ public final class VmessOptions implements Seq.Proxy
         else if (!loglevel.equals(loglevel2)) {
             return false;
         }
-        return this.getRouteMode() == vmessOptions.getRouteMode();
+        if (this.getRouteMode() != vmessOptions.getRouteMode()) {
+            return false;
+        }
+        if (this.getEnableSniffing() != vmessOptions.getEnableSniffing()) {
+            return false;
+        }
+        final String dns = this.getDNS();
+        final String dns2 = vmessOptions.getDNS();
+        if (dns == null) {
+            if (dns2 != null) {
+                return false;
+            }
+        }
+        else if (!dns.equals(dns2)) {
+            return false;
+        }
+        return true;
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[] { this.getUseIPv6(), this.getLoglevel(), this.getRouteMode() });
+        return Arrays.hashCode(new Object[] { this.getUseIPv6(), this.getLoglevel(), this.getRouteMode(), this.getEnableSniffing(), this.getDNS() });
     }
 
     @Override
@@ -69,6 +93,8 @@ public final class VmessOptions implements Seq.Proxy
         sb.append("UseIPv6:").append(this.getUseIPv6()).append(",");
         sb.append("Loglevel:").append(this.getLoglevel()).append(",");
         sb.append("RouteMode:").append(this.getRouteMode()).append(",");
+        sb.append("EnableSniffing:").append(this.getEnableSniffing()).append(",");
+        sb.append("DNS:").append(this.getDNS()).append(",");
         return sb.append("}").toString();
     }
 

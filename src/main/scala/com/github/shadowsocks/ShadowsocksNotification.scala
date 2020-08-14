@@ -33,6 +33,11 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
   private var lockReceiver: BroadcastReceiver = _
   private var callbackRegistered: Boolean = _
 
+  private val channelIcon = channel match {
+    case "service-v2ray" => R.drawable.ic_stat_v2ray
+    case "service-trojan" => R.drawable.ic_stat_trojan
+    case _ => R.drawable.ic_stat_shadowsocks
+  }
   private val builder = new NotificationCompat.Builder(service, channel)
     .setWhen(java.lang.System.currentTimeMillis())
     .setShowWhen(true)
@@ -41,7 +46,7 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     .setContentTitle(profileName)
     .setContentIntent(PendingIntent.getActivity(service, 0, new Intent(service, classOf[Shadowsocks])
       .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0))
-    .setSmallIcon(if (channel == "service-v2ray") R.drawable.ic_stat_v2ray else R.drawable.ic_stat_shadowsocks)
+    .setSmallIcon(channelIcon)
     .setCategory(NotificationCompat.CATEGORY_SERVICE)
   val closeAction = new NotificationCompat.Action.Builder(
     R.drawable.ic_navigation_close,

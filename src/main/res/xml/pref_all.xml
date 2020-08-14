@@ -147,6 +147,48 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:title="@string/proxy_trojan"
+        android:key="@string/trojanPreferenceGroup">
+        <com.github.shadowsocks.preferences.SummaryEditTextPreference
+            android:key="groupName"
+            android:persistent="false"
+            android:title="@string/group_name" />
+        <com.github.shadowsocks.preferences.SummaryEditTextPreference
+            android:key="profileName"
+            android:persistent="false"
+            android:title="@string/profile_name" />
+        <Preference
+            android:key="t_addr"
+            android:persistent="false"
+            android:summary="@string/proxy_click"
+            android:title="@string/proxy" />
+        <com.github.shadowsocks.preferences.NumberPickerPreference
+            android:key="remotePortNum"
+            android:persistent="false"
+            android:summary="@string/remote_port_summary"
+            android:title="@string/remote_port"
+            app:max="65535"
+            app:min="1" />
+        <com.github.shadowsocks.preferences.PasswordEditTextPreference
+            android:inputType="textPassword"
+            android:key="sitekey"
+            android:persistent="false"
+            android:summary="@string/sitekey_summary"
+            android:title="@string/sitekey" />
+        <Preference
+            android:key="t_sni"
+            android:persistent="false"
+            android:summary="@string/sni_click"
+            android:title="@string/sni_title" />
+
+        <SwitchPreference
+            android:key="t_verify_certificate"
+            android:persistent="false"
+            android:summary="@string/verify_certificate_summary"
+            android:title="@string/verify_certificate"/>
+
+    </PreferenceCategory>
+    <PreferenceCategory
         android:title="@string/proxy_v2ray"
         android:key="@string/v2rayJSONPreferenceGroup">
 

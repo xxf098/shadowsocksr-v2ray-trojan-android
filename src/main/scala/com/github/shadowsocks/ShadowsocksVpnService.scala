@@ -66,6 +66,7 @@ import android.net.LinkProperties
 import android.net.Network
 
 import scala.collection.mutable.ArrayBuffer
+import scala.concurrent.ExecutionContext.Implicits.global
 
 
 class ShadowsocksVpnService extends VpnService with BaseService {
@@ -127,7 +128,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       conn = null
     }
 
-    Option(profile).filter(_.isV2Ray).flatMap(_ => Option(v2rayThread))
+    Option(profile).filter(p => p.isV2Ray || p.isTrojan).flatMap(_ => Option(v2rayThread))
       .foreach(_ => v2rayThread.stopTun2Socks(stopService))
 
     super.stopRunner(stopService, msg)
@@ -168,7 +169,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def v2rayConnected(): Unit = {
     changeState(State.CONNECTED)
-    notification = new ShadowsocksNotification(this, profile.name, "service-v2ray")
+    val channel = if (profile.isTrojan) "service-trojan" else "service-v2ray"
+    notification = new ShadowsocksNotification(this, profile.name, channel)
   }
 
   override def connect() : Any = {
@@ -187,13 +189,21 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     dns_port = dnsConf._2
     china_dns_address = dnsConf._3
     china_dns_port = dnsConf._4
-    // v2ray ipv6
-    if (profile.isV2Ray) {
-      if (!Utils.isNumeric(profile.v_add)) Utils.resolve(profile.v_add, enableIPv6 = profile.ipv6, hostname=dns_address) match {
-        case Some(addr) => profile.v_add = addr
-        case None => throw NameNotResolvedException()
+    // v2ray ipv6 dns query from golib
+    if (profile.isV2Ray || profile.isTrojan) {
+      if (profile.isV2Ray) {
+        Utils.resolve(profile.v_add, enableIPv6 = profile.ipv6, hostname = dns_address) match {
+          case Some(addr) => profile.v_add = addr
+          case None => throw NameNotResolvedException()
+        }
       }
-      profile.enable_domain_sniff = app.settings.getBoolean(Key.ENABLE_SNIFF_DOMAIN, true)
+      if (profile.isTrojan) {
+        Utils.resolve(profile.t_addr, enableIPv6 = profile.ipv6, hostname=dns_address) match {
+          case Some(addr) => profile.t_addr = addr
+          case None => throw NameNotResolvedException()
+        }
+      }
+      profile.enable_domain_sniff = app.settings.getBoolean(Key.ENABLE_SNIFF_DOMAIN, false)
       v2rayThread = new V2RayVpnThread(this)
       v2rayThread.start()
       return
@@ -207,7 +217,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     // Resolve the server address
     host_arg = profile.host
-    if (!Utils.isNumeric(profile.host)) Utils.resolve(profile.host, enableIPv6 = true, hostname=dns_address) match {
+    Utils.resolve(profile.host, enableIPv6 = true, hostname=dns_address) match {
       case Some(addr) => profile.host = addr
       case None => throw NameNotResolvedException()
     }

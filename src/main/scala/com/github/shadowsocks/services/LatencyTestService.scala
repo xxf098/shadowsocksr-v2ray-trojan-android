@@ -58,6 +58,7 @@ class LatencyTestService extends Service {
       registerReceiver(stopReceiver, filter)
       stopReceiverRegistered = true
     }
+    // TODO: test options
     val currentGroupName = intent.getStringExtra(Key.currentGroupName)
     val isSort = intent.getBooleanExtra("is_sort", false)
     bgResultReceiver = intent.getParcelableExtra("BgResultReceiver")
@@ -109,7 +110,7 @@ class LatencyTestService extends Service {
               val confServer = profiles.indices.map(i => {
                 val profile = profiles(i)
                 var host = profile.host
-                if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = false) match {
+                Utils.resolve(host, enableIPv6 = false) match {
                   case Some(addr) => host = addr
                   case None => host = "127.0.0.1"
                 }
@@ -301,9 +302,10 @@ class LatencyTestService extends Service {
 
   private def updateNotification (title: String, testResult: String, max: Int, counter: Int): Unit = {
     val latency = """\d+ms""".r findFirstIn testResult
-    val formatTitle = title.substring(0, 16) + "  " + latency.getOrElse("0ms")
-    Log.e(TAG, s"formatTitle: $formatTitle")
-    builder.setContentTitle(title.substring(0, 22))
+//    val formatTitle = title.substring(0, 16) + "  " + latency.getOrElse("0ms")
+//    Log.e(TAG, s"formatTitle: $formatTitle")
+    val length = math.min(title.length, 20)
+    builder.setContentTitle(title.substring(0, length))
       .setContentText(latency.getOrElse("0ms"))
       .setProgress(max, counter, false)
     notificationService.notify(LatencyTestService.NOTIFICATION_ID, builder.build())

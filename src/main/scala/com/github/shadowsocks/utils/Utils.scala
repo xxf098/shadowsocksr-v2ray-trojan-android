@@ -206,7 +206,9 @@ object Utils {
     }
   }
 
+  // TODO: resolve by DOH
   def resolve(host: String, enableIPv6: Boolean, hostname: String = "223.5.5.5"): Option[String] = {
+    if (isNumeric(host)) { return Some(host) }
     if (enableIPv6 && Utils.isIPv6Support) {
       resolve(host, Type.AAAA, hostname) match {
         case Some(addr) =>

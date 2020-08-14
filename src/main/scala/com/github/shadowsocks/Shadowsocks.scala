@@ -494,10 +494,12 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   }
 
   private[this] def updateTitle (toolbar: Toolbar): Unit = {
-    app.currentProfile.filter(_.isV2Ray) match {
-      case Some(_) => toolbar.setTitle("V2Ray")
-      case None => toolbar.setTitle("shadowsocks R")
-    }
+    val title = app.currentProfile.map {
+      case p if p.isV2Ray => "V2Ray"
+      case p if p.isTrojan => "Trojan"
+      case _ => "shadowsocks R"
+    }.getOrElse("shadowsocks R")
+    toolbar.setTitle(title)
   }
 
   private def updatePreferenceScreen(profile: Profile) {

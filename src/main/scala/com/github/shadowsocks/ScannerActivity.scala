@@ -95,6 +95,7 @@ class ScannerActivity extends AppCompatActivity with ZXingScannerView.ResultHand
       Parser.findAll(uri).foreach(app.profileManager.createProfile)
       Parser.findAll_ssr(uri).foreach(app.profileManager.createProfile)
       Parser.findAllVmess(uri).foreach(app.profileManager.createProfile)
+      Parser.findAllTrojan(uri).foreach(app.profileManager.createProfile)
       if (android.util.Patterns.WEB_URL.matcher(uri).find()) {
         clipboard.setPrimaryClip(ClipData.newPlainText(null, uri))
       }

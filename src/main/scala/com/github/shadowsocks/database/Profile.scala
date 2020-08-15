@@ -144,8 +144,16 @@ object Profile {
 
     def testTCPLatency(): Future[Result[Long]] = {
       Future{
-        var profileAddr = if(profile.isV2Ray) profile.v_add else profile.host
-        val profilePort = if(profile.isV2Ray) profile.v_port.toInt else profile.remotePort
+        var profileAddr = profile match {
+          case p if p.isV2Ray => profile.v_add
+          case p if p.isTrojan => profile.t_addr
+          case _ => profile.host
+        }
+        val profilePort = profile match {
+          case p if p.isV2Ray => profile.v_port.toInt
+          case p if p.isTrojan => profile.t_port
+          case _ => profile.remotePort
+        }
         // Log.e("testTCPPingLatency", s"profileAddr: $profileAddr, profilePort: $profilePort")
         Utils.resolve(profileAddr, enableIPv6 = false) match {
           case Some(addr) => profileAddr = addr

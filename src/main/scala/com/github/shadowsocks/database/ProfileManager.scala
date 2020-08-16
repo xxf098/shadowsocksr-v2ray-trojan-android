@@ -167,19 +167,7 @@ class ProfileManager(dbHelper: DBHelper) {
   }
 
   def checkLastExistProfile(profile: Profile): Profile = {
-    if (!profile.isVmess) {
-      dbHelper.profileDao.queryBuilder()
-        .where().eq("name", profile.name)
-        .and().eq("host", profile.host)
-        .and().eq("remotePort", profile.remotePort)
-        .and().eq("password", profile.password)
-        .and().eq("protocol", profile.protocol)
-        .and().eq("protocol_param", profile.protocol_param)
-        .and().eq("obfs", profile.obfs)
-        .and().eq("obfs_param", profile.obfs_param)
-        .and().eq("url_group", profile.url_group)
-        .and().eq("method", profile.method).queryForFirst().asInstanceOf[Profile]
-    } else  {
+    if (profile.isVmess) {
       dbHelper.profileDao.queryBuilder()
         .where().eq("v_add", profile.v_add)
         .and().eq("v_port", profile.v_port)
@@ -192,6 +180,24 @@ class ProfileManager(dbHelper: DBHelper) {
         .and().eq("url_group", profile.url_group)
         .and().eq("v_ps", profile.v_ps)
         .and().eq("v_tls", profile.v_tls).queryForFirst()
+    } else if (profile.isTrojan) {
+      dbHelper.profileDao.queryBuilder()
+        .where().eq("t_addr", profile.t_addr)
+        .and().eq("t_port", profile.t_port)
+        .and().eq("t_password", profile.t_password)
+        .queryForFirst()
+    } else {
+      dbHelper.profileDao.queryBuilder()
+        .where().eq("name", profile.name)
+        .and().eq("host", profile.host)
+        .and().eq("remotePort", profile.remotePort)
+        .and().eq("password", profile.password)
+        .and().eq("protocol", profile.protocol)
+        .and().eq("protocol_param", profile.protocol_param)
+        .and().eq("obfs", profile.obfs)
+        .and().eq("obfs_param", profile.obfs_param)
+        .and().eq("url_group", profile.url_group)
+        .and().eq("method", profile.method).queryForFirst().asInstanceOf[Profile]
     }
   }
 
@@ -426,10 +432,10 @@ class ProfileManager(dbHelper: DBHelper) {
 
   def createDefault(): Profile = {
     val profile = new Profile {
-      name = "项目地址: https://github.com/xxf098/shadowsocksr-v2ray-android"
+      name = "项目地址: https://github.com/xxf098"
       host = "137.74.141.42"
       remotePort = 80
-      password = "androidssr"
+      password = "ssrray"
       protocol = "auth_chain_a"
       obfs = "http_simple"
       method = "none"

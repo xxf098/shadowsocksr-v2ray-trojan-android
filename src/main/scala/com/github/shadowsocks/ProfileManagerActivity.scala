@@ -1157,7 +1157,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         startService(intent)
         return true
       }
-      // deprecated
+      // @deprecated
       val testProfiles = if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles
       else app.profileManager.getAllProfilesByGroup(currentGroupName)
       testProfiles match {

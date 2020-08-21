@@ -238,4 +238,7 @@ class SSRSub {
 
   @DatabaseField
   var updated_at: String = ""
+
+  @DatabaseField
+  var enable_auto_update: Boolean = true
 }

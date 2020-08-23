@@ -242,6 +242,7 @@
   <string name="ssrsub_toast_start">Updating subscriptions...</string>
   <string name="ssrsub_toast_success">Successfully updated subscriptions.</string>
   <string name="ssrsub_toast_fail">Failed to update subscriptions!</string>
+  <string name="enable_auto_update_subscription">Enable Auto Update This Subscription</string>
   <string name="group_name">Group Name</string>
   <string name="proxy_click">Click to view and edit server address</string>
   <string name="sni_click">Click to view and edit SNI</string>

@@ -79,7 +79,7 @@ class PasswordEditTextPreference(context: Context, attrs: AttributeSet, defStyle
     if (summary.toString.isEmpty) {
       super.setSummary(mDefaultSummary)
     } else {
-      super.setSummary(summary.toString.map(c => "*").mkString)
+      super.setSummary("********")
     }
   }
 

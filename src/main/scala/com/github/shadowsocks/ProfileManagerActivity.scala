@@ -172,8 +172,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       } else ""
       handler.post(() => {
         text1.setText(item.name)
-        val serverAddress = if(item.isV2Ray) item.v_add else item.host
-        text2.setText(if (hideServer) item.url_group else serverAddress )
+        text2.setText(if (hideServer) item.url_group else item.getAddr() )
         tvTraffic.setText(trafficStatus)
       })
     }
@@ -1157,7 +1156,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         startService(intent)
         return true
       }
-      // deprecated
+      // @deprecated
       val testProfiles = if (currentGroupName == getString(R.string.allgroups)) app.profileManager.getAllProfiles
       else app.profileManager.getAllProfilesByGroup(currentGroupName)
       testProfiles match {

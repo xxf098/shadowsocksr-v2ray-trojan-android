@@ -65,7 +65,7 @@ object DBHelper {
 }
 
 class DBHelper(val context: Context)
-  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 34) {
+  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 35) {
   import DBHelper._
 
   lazy val profileDao: Dao[Profile, Int] = getDao(classOf[Profile])
@@ -203,7 +203,7 @@ class DBHelper(val context: Context)
           profileDao.executeRawNoArgs("ALTER TABLE `appstate` ADD COLUMN dns_nocache VARCHAR DEFAULT 'off';")
         }
         if (oldVersion < 33) {
-          profileDao.executeRawNoArgs("ALTER TABLE `ssrsub` ADD COLUMN updated_at VARCHAR DEFAULT '';")
+          ssrsubDao.executeRawNoArgs("ALTER TABLE `ssrsub` ADD COLUMN updated_at VARCHAR DEFAULT '';")
         }
         if (oldVersion < 34) {
           profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN t_addr VARCHAR DEFAULT '';")
@@ -211,6 +211,9 @@ class DBHelper(val context: Context)
           profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN t_password VARCHAR DEFAULT '';")
           profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN t_allowInsecure SMALLINT;")
           profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN t_peer VARCHAR DEFAULT '';")
+        }
+        if (oldVersion < 35) {
+          ssrsubDao.executeRawNoArgs("ALTER TABLE `ssrsub` ADD COLUMN enable_auto_update SMALLINT DEFAULT 1;")
         }
       } catch {
         case ex: Exception =>

@@ -22,7 +22,7 @@ import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.util.Log
 import android.view.{Gravity, KeyEvent, LayoutInflater, MenuItem, View, ViewGroup}
-import android.widget.{CompoundButton, EditText, ImageView, PopupMenu, Switch, TextView, Toast}
+import android.widget.{CheckBox, CompoundButton, EditText, ImageView, PopupMenu, Switch, TextView, Toast}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.{Profile, SSRSub}
 import com.github.shadowsocks.utils.{Key, Parser, Utils}
@@ -96,9 +96,10 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
   }
 
   private[this] def addSubscription(): Unit = {
-    showSubscriptionDialog(None) { (responseString, url, groupName) => {
+    showSubscriptionDialog(None) { (responseString, url, groupName, enableAutoSub) => {
       SSRSub.createSSRSub(responseString, url, groupName) match {
         case Some(ssrsub) => {
+          ssrsub.enable_auto_update = enableAutoSub
           handler.post(() => app.ssrsubManager.createSSRSub(ssrsub))
 //          addProfilesFromSubscription(ssrsub, responseString)
           ssrsub.addProfiles(responseString, url)
@@ -110,16 +111,18 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     }
   }
 
-  private  def showSubscriptionDialog (ssrSub: Option[SSRSub])(responseHandler: (String, String, String) => Unit): Unit = {
+  private  def showSubscriptionDialog (ssrSub: Option[SSRSub])(responseHandler: (String, String, String, Boolean) => Unit): Unit = {
     val context = getActivity
     val view = View.inflate(context, R.layout.layout_ssr_sub_add, null)
     val etAddUrl = view.findViewById(R.id.et_subscription_url).asInstanceOf[EditText]
     val etGroupName = view.findViewById(R.id.et_group_name).asInstanceOf[EditText]
+    val cbEnableAutoSub = view.findViewById(R.id.cb_enable_auto_update_subscription).asInstanceOf[CheckBox]
     var title = getString(R.string.ssrsub_add)
     ssrSub match {
       case Some(sub) => {
         etAddUrl.setText(sub.url)
         etGroupName.setText(sub.url_group)
+        cbEnableAutoSub.setChecked(sub.enable_auto_update)
         title = getString(R.string.ssrsub_edit)
       }
       case None =>
@@ -129,13 +132,14 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       .setPositiveButton(android.R.string.ok, ((_, _) => {
         val url = etAddUrl.getText.toString
         val groupName = etGroupName.getText.toString
+        val autoSubEnabled = cbEnableAutoSub.isChecked
         if(URLUtil.isHttpsUrl(url) || URLUtil.isHttpUrl(url)) {
           ssrSub match {
-            case Some(x) if x.url == url => responseHandler(null, url, groupName)
+            case Some(x) if x.url == url => responseHandler(null, url, groupName, autoSubEnabled)
             case _ => Utils.ThrowableFuture {
               handler.post(() => testProgressDialog = ProgressDialog.show(context, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true))
               SSRSub.getSubscriptionResponse(url).flatMap(responseString => Try{
-                responseHandler(responseString, url, groupName)
+                responseHandler(responseString, url, groupName, autoSubEnabled)
                 None
               }).recover{
                 case e: Exception => {
@@ -419,11 +423,14 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     }
 
     def edit_subscription(): Unit = {
-      showSubscriptionDialog(Some(item)) { (responseString, url, groupName) => {
+      showSubscriptionDialog(Some(item)) { (responseString, url, groupName, enableAutoSub) => {
+        Log.e(TAG, s"enableAutoSub: $enableAutoSub")
         (url, groupName) match {
-          case t if t._1 == item.url && t._2 != item.url_group => {
+          case t if t._1 == item.url &&
+            (t._2 != item.url_group || enableAutoSub != item.enable_auto_update) => {
             Utils.ThrowableFuture {
               this.item.url_group = groupName
+              this.item.enable_auto_update = enableAutoSub
               app.ssrsubManager.updateSSRSub(item)
               app.profileManager.updateGroupName(groupName, item.id)
               updateText(false)
@@ -433,6 +440,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
           case t if t._1 != item.url => {
             item.url = url
             item.url_group = groupName
+            item.enable_auto_update = enableAutoSub
             app.ssrsubManager.updateSSRSub(item)
             item.addProfiles(responseString, url)
 //            addProfilesFromSubscription(item, responseString)

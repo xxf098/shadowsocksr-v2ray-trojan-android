@@ -88,7 +88,7 @@ class ShadowsocksApplication extends Application {
 
   final val SIG_FUNC = "getSignature"
   var containerHolder: ContainerHolder = _
-  lazy val tracker = GoogleAnalytics.getInstance(this).newTracker(R.xml.tracker)
+//  lazy val tracker = GoogleAnalytics.getInstance(this).newTracker(R.xml.tracker)
   lazy val settings = PreferenceManager.getDefaultSharedPreferences(this)
   lazy val editor = settings.edit
   lazy val profileManager = new ProfileManager(new DBHelper(this))
@@ -105,15 +105,9 @@ class ShadowsocksApplication extends Application {
   def isVpnEnabled = !isNatEnabled
 
   // send event
-  def track(category: String, action: String) = tracker.send(new HitBuilders.EventBuilder()
-    .setAction(action)
-    .setLabel(BuildConfig.VERSION_NAME)
-    .build())
+  def track(category: String, action: String) = ""
 
-  def track(t: Throwable) = tracker.send(new HitBuilders.ExceptionBuilder()
-    .setDescription(new StandardExceptionParser(this, null).getDescription(Thread.currentThread.getName, t))
-    .setFatal(false)
-    .build())
+  def track(t: Throwable) = ""
 
   def profileId = {
 //    settings.getInt(Key.id, -1)

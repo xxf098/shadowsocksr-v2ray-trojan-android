@@ -73,7 +73,7 @@ object Profile {
       s"""
          |{
          |"useIPv6": ${profile.ipv6},
-         |"logLevel":"debug",
+         |"logLevel":"error",
          |"enableSniffing": ${profile.enable_domain_sniff},
          |"dns": "$dns_address:$dns_port,$china_dns_address:$china_dns_port",
          |"routeMode": $routeMode
@@ -144,8 +144,8 @@ object Profile {
 
     def testTCPLatency(): Future[Result[Long]] = {
       Future{
-        var profileAddr = if(profile.isV2Ray) profile.v_add else profile.host
-        val profilePort = if(profile.isV2Ray) profile.v_port.toInt else profile.remotePort
+        var profileAddr = this.getAddr()
+        val profilePort = this.getPort()
         // Log.e("testTCPPingLatency", s"profileAddr: $profileAddr, profilePort: $profilePort")
         Utils.resolve(profileAddr, enableIPv6 = false) match {
           case Some(addr) => profileAddr = addr
@@ -181,11 +181,28 @@ object Profile {
       }).get
     }
 
+    def getAddr (): String = {
+      profile match {
+        case p if p.isV2Ray => profile.v_add
+        case p if p.isTrojan => profile.t_addr
+        case _ => profile.host
+      }
+    }
+
+    def getPort (): Int = {
+      profile match {
+        case p if p.isV2Ray => profile.v_port.toInt
+        case p if p.isTrojan => profile.t_port
+        case _ => profile.remotePort
+      }
+    }
+
+
     // support ssr & v2ray
     // TODO: refactor PROFILE.RESOLVE
     def testTCPLatencyThread () : String  = {
-      var profileAddr = if(profile.isV2Ray) profile.v_add else profile.host
-      val profilePort = if(profile.isV2Ray) profile.v_port.toInt else profile.remotePort
+      var profileAddr = this.getAddr()
+      val profilePort = this.getPort()
       // Log.e("testTCPPingLatency", s"profileAddr: $profileAddr, profilePort: $profilePort")
       Utils.resolve(profileAddr, enableIPv6 = false) match {
         case Some(addr) => profileAddr = addr
@@ -373,7 +390,7 @@ class Profile {
     this match {
       case _ if isVmess => VmessQRCode(v_v, v_ps, v_add, v_port, v_id, v_aid, v_net, v_type, v_host, v_path, v_tls, url_group).toString
       case _ if isV2RayJSON => "vjson://" + Utils.b64Encode(v_json_config.getBytes(Charset.forName("UTF-8")))
-      case _ if isTrojan => s"trojan://$t_password@$t_addr:$t_port"
+      case _ if isTrojan => s"trojan://$t_password@$t_addr:$t_port?sni=$t_peer#$name"
       case _ => "ssr://" + Utils.b64Encode("%s:%d:%s:%s:%s:%s/?obfsparam=%s&protoparam=%s&remarks=%s&group=%s".formatLocal(Locale.ENGLISH,
         host, remotePort, protocol, method, obfs,
         Utils.b64Encode("%s".formatLocal(Locale.ENGLISH, password).getBytes),

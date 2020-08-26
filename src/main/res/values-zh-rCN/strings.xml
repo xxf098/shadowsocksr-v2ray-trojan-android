@@ -232,6 +232,7 @@
   <string name="ssrsub_toast_start">开始更新订阅。</string>
   <string name="ssrsub_toast_success">成功更新订阅！</string>
   <string name="ssrsub_toast_fail">更新订阅失败！</string>
+  <string name="enable_auto_update_subscription">允许自动更新该订阅</string>
   <string name="group_name">群组名</string>
   <string name="proxy_click">点击查看和编辑地址</string>
   <string name="sni_click">点击查看和编辑SNI</string>

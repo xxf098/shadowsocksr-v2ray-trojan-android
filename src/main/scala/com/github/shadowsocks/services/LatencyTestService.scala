@@ -94,10 +94,13 @@ class LatencyTestService extends Service {
         val testV2rayJob = (v2rayProfiles: List[Profile]) => {
           max = v2rayProfiles.size * 3 / 2
           testV2rayProfiles(v2rayProfiles.grouped(4).toList, 4)
-          val zeroV2RayProfiles = v2rayProfiles.filter(p => p.elapsed == 0 && p.isV2Ray)
-          if (zeroV2RayProfiles.nonEmpty) {
+          val zeroV2RayProfiles = v2rayProfiles.filter(p => p.elapsed < 1 && p.isV2Ray || p.isTrojan)
+          if (zeroV2RayProfiles.nonEmpty && !(zeroV2RayProfiles.size * 1.1 > v2rayProfiles.size && v2rayProfiles.size > 50)) {
             max = v2rayProfiles.size + zeroV2RayProfiles.size
-            testV2rayProfiles(zeroV2RayProfiles.grouped(2).toList, 2)
+            val size = if (zeroV2RayProfiles.size < 5 || (zeroV2RayProfiles.size * 5 < v2rayProfiles.size && v2rayProfiles.size < 100)) 1
+            else if (zeroV2RayProfiles.size * 2 > v2rayProfiles.size) 3
+            else 2
+            testV2rayProfiles(zeroV2RayProfiles.grouped(size).toList, size)
           }
         }
 
@@ -220,10 +223,10 @@ class LatencyTestService extends Service {
           override def run() {
             try {
               Looper.prepare()
-              val (v2rayProfiles, ssrProfiles) = profiles
+              val (v2rayTrojanProfiles, ssrProfiles) = profiles
                 .filter(p => !List("www.google.com", "127.0.0.1", "8.8.8.8", "1.2.3.4", "1.1.1.1").contains(p.host))
-                .partition(_.isV2Ray)
-              if (v2rayProfiles.nonEmpty) { testV2rayJob(v2rayProfiles) }
+                .partition(p => p.isV2Ray || p.isTrojan)
+              if (v2rayTrojanProfiles.nonEmpty) { testV2rayJob(v2rayTrojanProfiles) }
               if (ssrProfiles.nonEmpty) { testSSRJob(ssrProfiles) }
               notificationService.cancel(LatencyTestService.NOTIFICATION_ID)
               // refresh

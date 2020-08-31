@@ -72,14 +72,14 @@ object SSRAction extends ProfileFunctions {
 }
 
 object VmessAction extends ProfileFunctions {
-  override def getElapsed(port: Long = 8900): Long = {
+  override def getElapsed(port: Long = -1): Long = {
     checkBypassAddr()
     val vmess: Vmess = profile
     Utils.resolve(profile.v_add, enableIPv6 = false) match {
       case Some(addr) => vmess.setAdd(addr)
       case None => throw new IOException("Host Not Resolved")
     }
-    Tun2socks.testVmessLatency(vmess, app.getV2rayAssetsPath(), port)
+    Tun2socks.testVmessLatency(vmess, port)
   }
 
   override def isOK(): Boolean = !(TextUtils.isEmpty(profile.v_add) ||
@@ -111,7 +111,7 @@ object TrojanAction extends ProfileFunctions {
       case Some(addr) => trojan.setAdd(addr)
       case None => throw new IOException("Host Not Resolved")
     }
-    Tun2socks.testTrojanLatency(trojan, app.getV2rayAssetsPath(), port)
+    Tun2socks.testTrojanLatency(trojan)
   }
 
   override def isOK(): Boolean = !(TextUtils.isEmpty(profile.t_addr) ||

@@ -237,7 +237,7 @@ object Profile {
         china_dns_port = china_dns.split(":")(1).toInt
       } catch {
         case ex: Exception =>
-          dns_address = "1.1.1.1"
+          dns_address = "8.8.8.8"
           dns_port = 53
           china_dns_address = "223.5.5.5"
           china_dns_port = 53
@@ -300,7 +300,7 @@ class Profile {
   var ssrsub_id: Int = 0
 
   @DatabaseField
-  var dns: String = "1.1.1.1:53,8.8.8.8:53"
+  var dns: String = "8.8.8.8:53,1.1.1.1:53"
 
   @DatabaseField
   var china_dns: String = "223.5.5.5:53,223.6.6.6:53"

@@ -78,7 +78,7 @@
             android:text="@string/delete"/>
     </LinearLayout>
     <LinearLayout
-        android:id="@+id/subscription_menu_copy_url"
+        android:id="@+id/subscription_menu_share_url"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:clickable="true"
@@ -89,8 +89,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:tint="#000000"
-            app:srcCompat="@drawable/ic_content_copy"
+            app:srcCompat="@drawable/ic_social_share"
             />
         <TextView
             android:layout_width="wrap_content"
@@ -99,6 +98,6 @@
             android:layout_marginLeft="16dp"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="?android:attr/textColorPrimary"
-            android:text="@string/copy_url"/>
+            android:text="@string/share"/>
     </LinearLayout>
 </LinearLayout>

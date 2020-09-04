@@ -159,7 +159,7 @@ object SSRSub {
       val delete_profiles = app.profileManager.getAllProfilesBySSRSub(ssrsub) match {
         case Some(subProfiles) =>
           subProfiles.filter(profile=> profile.ssrsub_id <= 0 || profile.ssrsub_id == ssrsub.id)
-        case _ => null
+        case _ => List()
       }
       var limit_num = -1
       var encounter_num = 0
@@ -193,6 +193,7 @@ object SSRSub {
         if (encounter_num < limit_num && limit_num != -1 || limit_num == -1) {
           profile.ssrsub_id = ssrsub.id
           profile.url_group = ssrsub.url_group
+          profile.route = Option(delete_profiles.head).map(_.route).getOrElse("bypass-lan-china")
 //          notifyGroupNameChange(Some(profile.url_group))
           app.profileManager.createProfile_sub(profile)
           isProfileAdded = true
@@ -225,7 +226,6 @@ object SSRSub {
 
   }
 
-// TODO: TIME
 class SSRSub {
   @DatabaseField(generatedId = true)
   var id: Int = 0

@@ -31,14 +31,13 @@
         <CheckBoxPreference
             android:key="pref_auto_test_connectivity"
             android:summary="@string/summary_auto_test_connectivity"
-            android:title="@string/title_auto_test_connectivity" />
+            android:title="@string/title_auto_test_connectivity"
+            android:defaultValue="true"/>
 
         <CheckBoxPreference
             android:key="pref_hide_server"
             android:summary="@string/summary_pref_hide_server"
             android:title="@string/title_pref_hide_server" />
-
-
 
     </PreferenceCategory>
 

@@ -227,10 +227,10 @@ class ProfileManager(dbHelper: DBHelper) {
 
   def updateAllProfileRoute(profileType:String, value:String): Boolean = {
     try {
-      if (profileType == "v2ray") {
-        dbHelper.profileDao.executeRawNoArgs("UPDATE `profile` SET route" + " = '" + value + "' where coalesce(v_add, '') != '';")
+      if (profileType == "v2ray_trojan") {
+        dbHelper.profileDao.executeRawNoArgs("UPDATE `profile` SET route" + " = '" + value + "' where coalesce(v_add, '') != '' or coalesce(t_addr, '') != '';")
       } else {
-        dbHelper.profileDao.executeRawNoArgs("UPDATE `profile` SET route" + " = '" + value + "' where coalesce(v_add, '') = '';")
+        dbHelper.profileDao.executeRawNoArgs("UPDATE `profile` SET route" + " = '" + value + "' where coalesce(v_add, t_addr, '') = '';")
       }
       true
     } catch {

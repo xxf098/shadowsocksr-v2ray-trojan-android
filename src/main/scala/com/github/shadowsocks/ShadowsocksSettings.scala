@@ -383,7 +383,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       }
       else {
         app.currentProfile match {
-          case Some(x) if x.isV2Ray || x.isTrojan => app.profileManager.updateAllProfileRoute("v2ray", value.asInstanceOf[String])
+          case Some(x) if x.isV2Ray || x.isTrojan => app.profileManager.updateAllProfileRoute("v2ray_trojan", value.asInstanceOf[String])
           case Some(_) => app.profileManager.updateAllProfileRoute("ssr", value.asInstanceOf[String])
           case None =>
         }

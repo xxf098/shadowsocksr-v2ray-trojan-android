@@ -38,7 +38,7 @@ object NetUtils {
     val dns = new Dns {
       override def lookup(s: String): util.List[InetAddress] = {
         val address = if (!Utils.isNumeric(s)) {
-          Utils.resolve(s, enableIPv6 = false, hostname="1.1.1.1") match {
+          Utils.resolve(s, enableIPv6 = false, hostname="8.8.8.8") match {
             case Some(addr) => InetAddress.getByName(addr)
             case None => throw new IOException(s"Name Not Resolved: $s")
           }
@@ -82,7 +82,7 @@ object NetUtils {
     val dns = new Dns {
       override def lookup(s: String): util.List[InetAddress] = {
         val address = if (!Utils.isNumeric(s)) {
-          Utils.resolve(s, enableIPv6 = false, hostname="1.1.1.1") match {
+          Utils.resolve(s, enableIPv6 = false, hostname="8.8.8.8") match {
             case Some(addr) => InetAddress.getByName(addr)
             case None => throw new IOException(s"Name Not Resolved: $s")
           }

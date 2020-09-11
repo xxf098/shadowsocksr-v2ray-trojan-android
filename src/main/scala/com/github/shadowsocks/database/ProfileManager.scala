@@ -227,10 +227,10 @@ class ProfileManager(dbHelper: DBHelper) {
 
   def updateAllProfileRoute(profileType:String, value:String): Boolean = {
     try {
-      if (profileType == "v2ray") {
-        dbHelper.profileDao.executeRawNoArgs("UPDATE `profile` SET route" + " = '" + value + "' where coalesce(v_add, '') != '';")
+      if (profileType == "v2ray_trojan") {
+        dbHelper.profileDao.executeRawNoArgs("UPDATE `profile` SET route" + " = '" + value + "' where coalesce(v_add, '') != '' or coalesce(t_addr, '') != '';")
       } else {
-        dbHelper.profileDao.executeRawNoArgs("UPDATE `profile` SET route" + " = '" + value + "' where coalesce(v_add, '') = '';")
+        dbHelper.profileDao.executeRawNoArgs("UPDATE `profile` SET route" + " = '" + value + "' where coalesce(v_add, t_addr, '') = '';")
       }
       true
     } catch {
@@ -433,8 +433,8 @@ class ProfileManager(dbHelper: DBHelper) {
   def createDefault(): Profile = {
     val profile = new Profile {
       name = "项目地址: https://github.com/xxf098"
-      host = "137.74.141.42"
-      remotePort = 80
+      host = "1.2.3.4"
+      remotePort = 1234
       password = "ssrray"
       protocol = "auth_chain_a"
       obfs = "http_simple"

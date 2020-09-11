@@ -159,7 +159,7 @@ object SSRSub {
       val delete_profiles = app.profileManager.getAllProfilesBySSRSub(ssrsub) match {
         case Some(subProfiles) =>
           subProfiles.filter(profile=> profile.ssrsub_id <= 0 || profile.ssrsub_id == ssrsub.id)
-        case _ => null
+        case _ => List()
       }
       var limit_num = -1
       var encounter_num = 0
@@ -225,7 +225,6 @@ object SSRSub {
 
   }
 
-// TODO: TIME
 class SSRSub {
   @DatabaseField(generatedId = true)
   var id: Int = 0

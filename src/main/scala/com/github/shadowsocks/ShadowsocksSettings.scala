@@ -106,7 +106,7 @@ object ShadowsocksSettings {
       name match {
         case Key.group_name => updateSummaryEditTextPreference(pref, profile.url_group)
         case Key.name => updateSummaryEditTextPreference(pref, profile.name)
-        case Key.remotePort => updateNumberPickerPreference(pref, profile.remotePort)
+        case Key.remotePort => updateNumberPickerPreference(pref, profile.t_port)
         case Key.password => updatePasswordEditTextPreference(pref, profile.password)
         case Key.t_verify_certificate => updateSwitchPreference(pref, !profile.t_allowInsecure)
         case Key.route => updateDropDownPreference(pref, profile.route)
@@ -135,7 +135,7 @@ object ShadowsocksSettings {
       case Key.dns => updateSummaryEditTextPreference(pref, profile.dns)
       case Key.china_dns => updateSummaryEditTextPreference(pref, profile.china_dns)
       case Key.ipv6 => updateSwitchPreference(pref, profile.ipv6)
-      case _ => {}
+      case _ =>
     }
   }
 
@@ -201,8 +201,12 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
         .show()
       true
     })
-    findPreference(Key.remotePort).setOnPreferenceChangeListener((_, value) => {
+    ssrCategory.findPreference(Key.remotePort).setOnPreferenceChangeListener((_, value) => {
       profile.remotePort = value.asInstanceOf[Int]
+      app.profileManager.updateProfile(profile)
+    })
+    trojanCategory.findPreference(Key.remotePort).setOnPreferenceChangeListener((_, value) => {
+      profile.t_port = value.asInstanceOf[Int]
       app.profileManager.updateProfile(profile)
     })
     findPreference(Key.localPort).setOnPreferenceChangeListener((_, value) => {
@@ -383,7 +387,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       }
       else {
         app.currentProfile match {
-          case Some(x) if x.isV2Ray || x.isTrojan => app.profileManager.updateAllProfileRoute("v2ray", value.asInstanceOf[String])
+          case Some(x) if x.isV2Ray || x.isTrojan => app.profileManager.updateAllProfileRoute("v2ray_trojan", value.asInstanceOf[String])
           case Some(_) => app.profileManager.updateAllProfileRoute("ssr", value.asInstanceOf[String])
           case None =>
         }

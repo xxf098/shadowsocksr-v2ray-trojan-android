@@ -193,7 +193,6 @@ object SSRSub {
         if (encounter_num < limit_num && limit_num != -1 || limit_num == -1) {
           profile.ssrsub_id = ssrsub.id
           profile.url_group = ssrsub.url_group
-          profile.route = Option(delete_profiles.head).map(_.route).getOrElse("bypass-lan-china")
 //          notifyGroupNameChange(Some(profile.url_group))
           app.profileManager.createProfile_sub(profile)
           isProfileAdded = true

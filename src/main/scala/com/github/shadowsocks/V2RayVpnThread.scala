@@ -16,7 +16,7 @@ import com.google.gson.{GsonBuilder, JsonParser}
 import scala.language.implicitConversions
 import Profile._
 
-// TODO: connect error under some network
+// TODO: IPV6
 class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 
   val TAG = "V2RayVpnService"
@@ -25,7 +25,7 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
   var pfd: ParcelFileDescriptor = _
   var inputStream: FileInputStream = _
   var outputStream: FileOutputStream = _
-  var buffer = ByteBuffer.allocate(8192)
+  var buffer = ByteBuffer.allocateDirect(8192)
 
   var txTotal: Long = 0 // download
   var rxTotal: Long = 0 // upload

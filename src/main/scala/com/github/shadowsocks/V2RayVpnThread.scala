@@ -10,7 +10,7 @@ import android.util.Log
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils.{Parser, Route, State, TrafficMonitor, Utils}
-import tun2socks.{PacketFlow, Tun2socks, Vmess, LogService => Tun2socksLogService, VpnService => Tun2socksVpnService}
+import tun2socks.{PacketFlow, QuerySpeed, Tun2socks, Vmess, LogService => Tun2socksLogService, VpnService => Tun2socksVpnService}
 import com.google.gson.{GsonBuilder, JsonParser}
 
 import scala.language.implicitConversions
@@ -55,27 +55,33 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 //    }
 //  }
   class AndroidLogService extends Tun2socksLogService {
-  override def writeLog(p0: String): Unit = {
-    Log.e(TAG, "===" + p0)
+    override def writeLog(p0: String): Unit = {
+      Log.e(TAG, "===" + p0)
+    }
   }
-}
+
+  class QuerySpeedService extends QuerySpeed {
+    override def updateTraffic(p0: Long, p1: Long): Unit = {
+      txTotal += p0
+      rxTotal += p1
+      TrafficMonitor.update(txTotal, rxTotal)
+    }
+  }
 
   override def run(): Unit = {
 
     val builder = vpnService.initVPNBuilder()
     pfd = builder.establish()
-    if (pfd == null ||
-      !Tun2socks.setNonblock(pfd.getFd.toLong, false)) {
+    if (pfd == null) {
       Log.e(TAG, "failed to put tunFd in blocking mode")
       stopTun2Socks()
       return
     }
-    inputStream = new FileInputStream(pfd.getFileDescriptor)
-    outputStream = new FileOutputStream(pfd.getFileDescriptor)
 
-    val flow = new Flow(outputStream)
+    var flow: Option[PacketFlow] = None
     val service = new Service(vpnService)
     val androidLogService = new AndroidLogService()
+    val querySpeedService = new QuerySpeedService()
     val assetPath = app.getV2rayAssetsPath()
     // replace address with ip dns
     if (profile.route == Route.CHINALIST)
@@ -87,10 +93,12 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 //      Log.e(TAG, Tun2socks.checkVersion())
       profile match {
         case p if p.isVmess => {
-          Tun2socks.startV2RayWithVmess(flow, service, androidLogService, profile, assetPath)
+//          Tun2socks.startV2RayWithVmess(flow, service, androidLogService, profile, assetPath)
+          Tun2socks.startV2RayWithTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)
         }
         case p if p.isTrojan => {
-          Tun2socks.startTrojan(flow, service, androidLogService, profile, assetPath)
+//          Tun2socks.startTrojan(flow, service, androidLogService, profile, assetPath)
+          Tun2socks.startTrojanTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)
         }
         case p if p.isV2RayJSON => {
           val config = if (profile.v_json_config.contains("trojan")) {
@@ -98,7 +106,10 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
           } else {
             "\"address\":\\s*\".+?\"".r.replaceFirstIn(profile.v_json_config, s""""address": "${profile.v_add}"""")
           }
-          Tun2socks.startV2Ray(flow, service, androidLogService, config.getBytes(StandardCharsets.UTF_8), assetPath)
+          inputStream = new FileInputStream(pfd.getFileDescriptor)
+          outputStream = new FileOutputStream(pfd.getFileDescriptor)
+          flow = Some(new Flow(outputStream))
+          Tun2socks.startV2Ray(flow.get, service, androidLogService, config.getBytes(StandardCharsets.UTF_8), assetPath)
         }
         case _ => throw new Exception("Not Support!")
       }
@@ -110,7 +121,7 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
     }
     running = true
     vpnService.v2rayConnected()
-    handlePackets()
+    if (flow.isDefined) { handlePackets() }
   }
 
   private def handlePackets(): Unit = {
@@ -134,11 +145,11 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 
   def stopTun2Socks (stopService: Boolean = true): Unit = {
     Tun2socks.stopV2Ray()
+    running = false
     if (pfd != null) pfd.close()
     pfd = null
     inputStream = null
     outputStream = null
-    running = false
     if (stopService) {
       vpnService.stopSelf()
       android.os.Process.killProcess(android.os.Process.myPid())

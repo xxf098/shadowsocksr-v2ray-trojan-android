@@ -346,11 +346,19 @@ class ProfileManager(dbHelper: DBHelper) {
     }
   }
 
-  def getAllProfilesBySSRSub(ssrsub: SSRSub): Option[List[Profile]] = {
+  def getAllProfilesBySSRSub(ssrsub: SSRSub, compareUrlGroup: Boolean = false): Option[List[Profile]] = {
     try {
       import scala.collection.JavaConversions._
       if (ssrsub.id > 0) {
-        Option(dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.where().eq("ssrsub_id", ssrsub.id).prepare).toList)
+        if (compareUrlGroup) {
+          // prevent delete regrouped profiles
+          Option(dbHelper.profileDao.query(
+            dbHelper.profileDao.queryBuilder.where()
+              .eq("ssrsub_id", ssrsub.id).and()
+              .eq("url_group", ssrsub.url_group).prepare).toList)
+        } else {
+          Option(dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.where().eq("ssrsub_id", ssrsub.id).prepare).toList)
+        }
       } else {
         getAllProfilesByGroup(ssrsub.url_group)
       }

@@ -13,11 +13,11 @@ public final class Vmess implements Seq.Proxy
         return this.refnum;
     }
 
-    public Vmess(final String s, final String s2, final String s3, final String s4, final long n, final long n2, final String s5, final String s6, final String s7, final String s8, final long n3, final String s9, final byte[] array) {
-        Seq.trackGoRef(this.refnum = __NewVmess(s, s2, s3, s4, n, n2, s5, s6, s7, s8, n3, s9, array), this);
+    public Vmess(final String s, final String s2, final String s3, final String s4, final long n, final long n2, final String s5, final String s6, final String s7, final String s8, final byte[] array) {
+        Seq.trackGoRef(this.refnum = __NewVmess(s, s2, s3, s4, n, n2, s5, s6, s7, s8, array), this);
     }
 
-    private static native int __NewVmess(final String p0, final String p1, final String p2, final String p3, final long p4, final long p5, final String p6, final String p7, final String p8, final String p9, final long p10, final String p11, final byte[] p12);
+    private static native int __NewVmess(final String p0, final String p1, final String p2, final String p3, final long p4, final long p5, final String p6, final String p7, final String p8, final String p9, final byte[] p10);
 
     Vmess(final int refnum) {
         Seq.trackGoRef(this.refnum = refnum, this);
@@ -63,13 +63,9 @@ public final class Vmess implements Seq.Proxy
 
     public final native void setSecurity(final String p0);
 
-    public final native long getRouteMode();
+    public final native Trojan getTrojan();
 
-    public final native void setRouteMode(final long p0);
-
-    public final native String getDNS();
-
-    public final native void setDNS(final String p0);
+    public final native void setTrojan(final Trojan p0);
 
     @Override
     public boolean equals(final Object o) {
@@ -163,17 +159,14 @@ public final class Vmess implements Seq.Proxy
         else if (!security.equals(security2)) {
             return false;
         }
-        if (this.getRouteMode() != vmess.getRouteMode()) {
-            return false;
-        }
-        final String dns = this.getDNS();
-        final String dns2 = vmess.getDNS();
-        if (dns == null) {
-            if (dns2 != null) {
+        final Trojan trojan = this.getTrojan();
+        final Trojan trojan2 = vmess.getTrojan();
+        if (trojan == null) {
+            if (trojan2 != null) {
                 return false;
             }
         }
-        else if (!dns.equals(dns2)) {
+        else if (!trojan.equals(trojan2)) {
             return false;
         }
         return true;
@@ -181,7 +174,7 @@ public final class Vmess implements Seq.Proxy
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[] { this.getHost(), this.getPath(), this.getTLS(), this.getAdd(), this.getPort(), this.getAid(), this.getNet(), this.getID(), this.getType(), this.getSecurity(), this.getRouteMode(), this.getDNS() });
+        return Arrays.hashCode(new Object[] { this.getHost(), this.getPath(), this.getTLS(), this.getAdd(), this.getPort(), this.getAid(), this.getNet(), this.getID(), this.getType(), this.getSecurity(), this.getTrojan() });
     }
 
     @Override
@@ -198,8 +191,7 @@ public final class Vmess implements Seq.Proxy
         sb.append("ID:").append(this.getID()).append(",");
         sb.append("Type:").append(this.getType()).append(",");
         sb.append("Security:").append(this.getSecurity()).append(",");
-        sb.append("RouteMode:").append(this.getRouteMode()).append(",");
-        sb.append("DNS:").append(this.getDNS()).append(",");
+        sb.append("Trojan:").append(this.getTrojan()).append(",");
         return sb.append("}").toString();
     }
 

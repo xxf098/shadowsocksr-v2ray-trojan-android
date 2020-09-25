@@ -37,7 +37,7 @@ object ShadowsocksSettings {
   private val PROXY_PREFS = Array(Key.group_name, Key.name, Key.host, Key.remotePort, Key.localPort, Key.password, Key.method,
     Key.protocol, Key.obfs, Key.obfs_param, Key.dns, Key.china_dns, Key.protocol_param, Key.v_ps,
     Key.v_id, Key.v_add, Key.v_host, Key.v_port, Key.v_path, Key.v_aid, Key.v_id_json, Key.v_add_json, Key.v_aid_json, Key.v_security_json,
-    Key.v_security, Key.v_tls, Key.v_headertypes, Key.v_net, Key.t_addr, Key.t_sni, Key.t_verify_certificate)
+    Key.v_security, Key.v_tls, Key.v_headertypes, Key.v_net, Key.v_allowInsecure, Key.t_addr, Key.t_sni, Key.t_verify_certificate)
   private val FEATURE_PREFS = Array(Key.route, Key.proxyApps, Key.udpdns, Key.ipv6, Key.tfo)
 
   // Helper functions
@@ -71,6 +71,7 @@ object ShadowsocksSettings {
 //    val isPerAppProxyEnabled = app.appStateManager.getAppState().map(_.per_app_proxy_enable).getOrElse(false)
     if (profile.isVmess) {
       val v_security = if (TextUtils.isEmpty(profile.v_security)) "auto" else profile.v_security
+      val v_allowInsecure = if (profile.t_allowInsecure) "true" else "false"
       name match {
         case Key.group_name => updateSummaryEditTextPreference(pref, profile.url_group)
         case Key.v_ps => updateSummaryEditTextPreference(pref, profile.v_ps)
@@ -88,6 +89,7 @@ object ShadowsocksSettings {
         case Key.dns => updateSummaryEditTextPreference(pref, profile.dns)
         case Key.china_dns => updateSummaryEditTextPreference(pref, profile.china_dns)
         case Key.ipv6 => updateSwitchPreference(pref, profile.ipv6)
+        case Key.v_allowInsecure => updateDropDownPreference(pref, v_allowInsecure)
         case _ =>
       }
       return
@@ -325,6 +327,13 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     tlsPreference.setDropDownWidth(R.dimen.default_dropdown_width)
     tlsPreference.setOnPreferenceChangeListener((_, value) => {
       profile.v_tls = value.asInstanceOf[String]
+      app.profileManager.updateProfile(profile)
+    })
+
+    val allowInsecurePreference = findPreference(Key.v_allowInsecure).asInstanceOf[DropDownPreference]
+    allowInsecurePreference.setDropDownWidth(R.dimen.default_dropdown_width)
+    allowInsecurePreference.setOnPreferenceChangeListener((_, value) => {
+      profile.t_allowInsecure = if (value.asInstanceOf[String] == "true") true else false
       app.profileManager.updateProfile(profile)
     })
 

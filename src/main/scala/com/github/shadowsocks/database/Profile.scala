@@ -76,7 +76,8 @@ object Profile {
          |"logLevel":"error",
          |"enableSniffing": ${profile.enable_domain_sniff},
          |"dns": "$dns_address:$dns_port,$china_dns_address:$china_dns_port",
-         |"routeMode": $routeMode
+         |"routeMode": $routeMode,
+         |"allowInsecure": ${profile.t_allowInsecure}
          |}
 """.stripMargin
     vmessOption
@@ -377,7 +378,7 @@ class Profile {
   var t_password:String = ""
 
   @DatabaseField
-  var t_allowInsecure: Boolean = false // skip verify
+  var t_allowInsecure: Boolean = true // skip verify
 
   @DatabaseField
   var t_peer: String = ""

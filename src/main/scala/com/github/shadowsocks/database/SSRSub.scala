@@ -156,7 +156,7 @@ object SSRSub {
 
     def addProfiles(responseString: String, subUrl: String =""): Unit = {
       var currentProfile = app.currentProfile
-      val delete_profiles = app.profileManager.getAllProfilesBySSRSub(ssrsub) match {
+      val delete_profiles = app.profileManager.getAllProfilesBySSRSub(ssrsub, true) match {
         case Some(subProfiles) =>
           subProfiles.filter(profile=> profile.ssrsub_id <= 0 || profile.ssrsub_id == ssrsub.id)
         case _ => List()

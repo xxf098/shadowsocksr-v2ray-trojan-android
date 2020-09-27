@@ -338,6 +338,7 @@ object Key {
   val v_security_json = "v_security_json"
   val v_security = "v_security"
   val v_headertypes = "v_headertypes"
+  val v_allowInsecure = "v_allowInsecure"
 
   //trojan
   val t_sni = "t_sni"

@@ -144,6 +144,14 @@
             android:persistent="false"
             android:summary="%s"
             android:title="TLS" />
+
+        <com.github.shadowsocks.preferences.DropDownPreference
+            android:entries="@array/allowInsecure_entry"
+            android:entryValues="@array/allowInsecure_value"
+            android:key="v_allowInsecure"
+            android:persistent="false"
+            android:summary="%s"
+            android:title="AllowInsecure" />
     </PreferenceCategory>
 
     <PreferenceCategory

@@ -46,7 +46,11 @@ public abstract class Tun2socks
 
     public static native void startTrojan(final PacketFlow p0, final VpnService p1, final LogService p2, final Trojan p3, final String p4) throws Exception;
 
+    public static native void startTrojanTunFd(final long p0, final VpnService p1, final LogService p2, final QuerySpeed p3, final Trojan p4, final String p5) throws Exception;
+
     public static native void startV2Ray(final PacketFlow p0, final VpnService p1, final LogService p2, final byte[] p3, final String p4) throws Exception;
+
+    public static native void startV2RayWithTunFd(final long p0, final VpnService p1, final LogService p2, final QuerySpeed p3, final Vmess p4, final String p5) throws Exception;
 
     public static native void startV2RayWithVmess(final PacketFlow p0, final VpnService p1, final LogService p2, final Vmess p3, final String p4) throws Exception;
 
@@ -103,6 +107,24 @@ public abstract class Tun2socks
 
         @Override
         public native void writePacket(final byte[] p0);
+    }
+
+    private static final class proxyQuerySpeed implements Seq.Proxy, QuerySpeed
+    {
+        private final int refnum;
+
+        @Override
+        public final int incRefnum() {
+            Seq.incGoRef(this.refnum, this);
+            return this.refnum;
+        }
+
+        proxyQuerySpeed(final int refnum) {
+            Seq.trackGoRef(this.refnum = refnum, this);
+        }
+
+        @Override
+        public native void updateTraffic(final long p0, final long p1);
     }
 
     private static final class proxyVpnService implements Seq.Proxy, VpnService

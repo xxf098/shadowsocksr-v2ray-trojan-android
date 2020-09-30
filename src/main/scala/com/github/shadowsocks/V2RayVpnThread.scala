@@ -37,8 +37,8 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
       flowOutputStream.write(pkt)
 //      rxTotal += pkt.length
 //      rxTotal += Tun2socks.queryStats("up")
-      rxTotal += Tun2socks.queryOutboundStats("proxy", "downlink")
-      TrafficMonitor.update(txTotal, rxTotal)
+//      rxTotal += Tun2socks.queryOutboundStats("proxy", "downlink")
+//      TrafficMonitor.update(txTotal, rxTotal)
     }
   }
 
@@ -109,7 +109,7 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
           inputStream = new FileInputStream(pfd.getFileDescriptor)
           outputStream = new FileOutputStream(pfd.getFileDescriptor)
           flow = Some(new Flow(outputStream))
-          Tun2socks.startV2Ray(flow.get, service, androidLogService, config.getBytes(StandardCharsets.UTF_8), assetPath)
+          Tun2socks.startV2Ray(flow.get, service, androidLogService, querySpeedService, config.getBytes(StandardCharsets.UTF_8), assetPath)
         }
         case _ => throw new Exception("Not Support!")
       }
@@ -134,8 +134,8 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
           buffer.clear()
 //          txTotal += n
 //          txTotal += Tun2socks.queryStats("down")
-          txTotal += Tun2socks.queryOutboundStats("proxy", "uplink")
-          TrafficMonitor.update(txTotal, rxTotal)
+//          txTotal += Tun2socks.queryOutboundStats("proxy", "uplink")
+//          TrafficMonitor.update(txTotal, rxTotal)
         }
       } catch {
         case e: Exception => Log.e(TAG, "failed to read bytes from TUN fd")

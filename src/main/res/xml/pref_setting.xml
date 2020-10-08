@@ -8,15 +8,7 @@
             android:title="@string/feature_cat"
         android:key="@string/featurePreferenceGroup">
 
-<!--        <com.github.shadowsocks.preferences.DropDownPreference-->
-<!--            android:defaultValue="default"-->
-<!--            android:entries="@array/sort_method_entry"-->
-<!--            android:entryValues="@array/sort_method_value"-->
-<!--            android:key="pref_sort_method"-->
-<!--            android:summary="%s"-->
-<!--            android:title="@string/title_pref_sort_method" />-->
-
-        <com.github.shadowsocks.preferences.DropDownPreference
+        <ListPreference
             android:defaultValue="default"
             android:entries="@array/ping_method_entry"
             android:entryValues="@array/ping_method_value"
@@ -44,7 +36,7 @@
     <PreferenceCategory
         android:title="@string/ssr_category"
         android:key="@string/ssrPreferenceGroup">
-        <com.github.shadowsocks.preferences.DropDownPreference
+        <ListPreference
             android:defaultValue="on"
             android:entries="@array/switch_entry"
             android:entryValues="@array/switch_value"
@@ -57,10 +49,22 @@
         android:title="@string/v2ray_category"
         android:key="@string/vmessPreferenceGroup">
         <CheckBoxPreference
+            android:key="enable_local_http_proxy"
+            android:summary="Setup HTTP Proxy for Local Network"
+            android:title="HTTP Proxy" />
+        <CheckBoxPreference
             android:key="pref_enable_sniff_domain"
             android:summary="@string/summary_v2ray_sniff_enable"
             android:title="@string/title_v2ray_sniff_enable"
             android:defaultValue="true"/>
+
+        <ListPreference
+            android:defaultValue="error"
+            android:entries="@array/log_level"
+            android:entryValues="@array/log_level"
+            android:key="pref_log_level"
+            android:summary="%s"
+            android:title="Log Level" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/misc_cat"

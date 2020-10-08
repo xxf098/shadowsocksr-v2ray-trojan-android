@@ -172,7 +172,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       } else ""
       handler.post(() => {
         text1.setText(item.name)
-        text2.setText(if (hideServer) item.url_group else item.getAddr() )
+        text2.setText(if (hideServer) item.url_group else s"${item.getAddr()}:${item.getPortStr()}" )
         tvTraffic.setText(trafficStatus)
       })
     }

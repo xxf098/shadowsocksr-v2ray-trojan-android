@@ -54,7 +54,7 @@ import Profile._
 import android.text.TextUtils
 import com.github.shadowsocks.R
 import com.github.shadowsocks.ShadowsocksApplication.app
-import com.github.shadowsocks.utils.{Route, Utils}
+import com.github.shadowsocks.utils.{Key, Route, Utils}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -69,15 +69,16 @@ object Profile {
   def getOption (profile: Profile): String = {
     val routeMode = math.max(Route.ALL_ROUTES.indexOf(profile.route), 0)
     val (dns_address, dns_port, china_dns_address, china_dns_port) =  profile.getDNSConf()
+    val logLevel = app.settings.getString(Key.LOG_LEVEL, "error")
     val vmessOption =
       s"""
          |{
          |"useIPv6": ${profile.ipv6},
-         |"logLevel":"error",
+         |"logLevel":"$logLevel",
          |"enableSniffing": ${profile.enable_domain_sniff},
          |"dns": "$dns_address:$dns_port,$china_dns_address:$china_dns_port",
          |"routeMode": $routeMode,
-         |"allowInsecure": ${profile.t_allowInsecure}
+         |"allowInsecure": true
          |}
 """.stripMargin
     vmessOption
@@ -89,8 +90,8 @@ object Profile {
     }
     val v_security = if (TextUtils.isEmpty(profile.v_security)) "auto" else profile.v_security
     val vmessOption = getOption(profile)
-//        Log.e("Profile", s"v_host: ${profile.v_host}, v_path: ${profile.v_path}, v_tls: ${profile.v_tls}, v_add: ${profile.v_add},v_port: ${profile.v_port}, v_aid: ${profile.v_aid}, " +
-//      s"v_net: ${profile.v_net}, v_id: ${profile.v_id}, v_type: ${profile.v_type}, v_security: ${profile.v_security}, useIPv6: ${profile.ipv6}" + s"vmessOption: $vmessOption, domainSniff: ${profile.enable_domain_sniff}")
+        Log.e("Profile", s"v_host: ${profile.v_host}, v_path: ${profile.v_path}, v_tls: ${profile.v_tls}, v_add: ${profile.v_add},v_port: ${profile.v_port}, v_aid: ${profile.v_aid}, " +
+      s"v_net: ${profile.v_net}, v_id: ${profile.v_id}, v_type: ${profile.v_type}, v_security: ${profile.v_security}, useIPv6: ${profile.ipv6}" + s"vmessOption: $vmessOption, domainSniff: ${profile.enable_domain_sniff}")
     Tun2socks.newVmess(
       profile.v_host,
       profile.v_path,
@@ -189,11 +190,20 @@ object Profile {
       }
     }
 
+    // fix conflict
     def getPort (): Int = {
       profile match {
         case p if p.isV2Ray => profile.v_port.toInt
         case p if p.isTrojan => profile.t_port
         case _ => profile.remotePort
+      }
+    }
+
+    def getPortStr (): String = {
+      profile match {
+        case p if p.isV2Ray => profile.v_port
+        case p if p.isTrojan => profile.t_port.toString
+        case _ => profile.remotePort.toString
       }
     }
 
@@ -378,7 +388,7 @@ class Profile {
   var t_password:String = ""
 
   @DatabaseField
-  var t_allowInsecure: Boolean = true // skip verify
+  var t_allowInsecure: Boolean = false // skip verify
 
   @DatabaseField
   var t_peer: String = ""

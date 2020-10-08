@@ -199,13 +199,7 @@ object Profile {
       }
     }
 
-    def getPortStr (): String = {
-      profile match {
-        case p if p.isV2Ray => profile.v_port
-        case p if p.isTrojan => profile.t_port.toString
-        case _ => profile.remotePort.toString
-      }
-    }
+    def getPortStr (): String = this.getPort().toString
 
 
     // support ssr & v2ray

@@ -300,7 +300,7 @@
   <string name="v_pref_networks">Network</string>
 
 <!--  settings -->
-  <string name="title_pref_sort_method">Sort Method</string>
+  <string name="title_pref_sort_method">Sort By</string>
   <string name="sort_by_default">By Default</string>
   <string name="sort_by_elapsed">By Elapsed</string>
   <string-array name="sort_method_entry">

@@ -175,6 +175,17 @@
         <item>error</item>
     </string-array>
 
+    <string-array name="profile_display_info">
+        <item>server</item>
+        <item>port</item>
+        <item>traffic</item>
+    </string-array>
+
+    <string-array name="default_profiles_display_info">
+        <item>server</item>
+        <item>traffic</item>
+    </string-array>
+
     <string-array name="bypass_private_route">
         <item>1.0.0.0/8</item>
         <item>2.0.0.0/7</item>

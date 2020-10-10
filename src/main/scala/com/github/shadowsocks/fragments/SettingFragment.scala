@@ -9,9 +9,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.preference.{CheckBoxPreference, ListPreference, Preference, PreferenceFragment, PreferenceManager}
 import android.support.v7.app.AlertDialog
+import android.text.InputType
 import android.util.Log
+import android.view.View
 import android.webkit.{WebView, WebViewClient}
 import android.widget.EditText
+import android.view.ViewGroup.{LayoutParams, MarginLayoutParams}
 import com.github.shadowsocks.{BuildConfig, R, SettingActivity, Shadowsocks}
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.ShadowsocksApplication.app
@@ -24,14 +27,15 @@ import scala.collection.mutable
 
 class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeListener {
 //  lazy val sortMethod = findPreference(Key.SORT_METHOD).asInstanceOf[DropDownPreference]
-  lazy val pingMethod = findPreference(Key.PING_METHOD).asInstanceOf[DropDownPreference]
+  lazy val pingMethod = findPreference(Key.PING_METHOD).asInstanceOf[ListPreference]
   lazy val hideServer = findPreference(Key.HIDE_SERVER).asInstanceOf[CheckBoxPreference]
-//  lazy val fullTestBg = findPreference(Key.FULL_TEST_BG).asInstanceOf[CheckBoxPreference]
+  lazy val enableLocalHTTPProxy = findPreference(Key.ENABLE_LOCAL_HTTP_PROXY).asInstanceOf[CheckBoxPreference]
   lazy val autoUpdate = findPreference(Key.AUTO_UPDATE_SUBSCRIPTION).asInstanceOf[CheckBoxPreference]
   lazy val autoTestConnectivity = findPreference(Key.AUTO_TEST_CONNECTIVITY).asInstanceOf[CheckBoxPreference]
-  lazy val ssrDNSNoCache = findPreference(Key.SSR_DNS_NOCAHCE).asInstanceOf[DropDownPreference]
+  lazy val ssrDNSNoCache = findPreference(Key.SSR_DNS_NOCAHCE).asInstanceOf[ListPreference]
   lazy val aboutPref = findPreference("about")
   lazy val enableSniffDomain = findPreference(Key.ENABLE_SNIFF_DOMAIN).asInstanceOf[CheckBoxPreference]
+  lazy val logLevel = findPreference(Key.LOG_LEVEL).asInstanceOf[ListPreference]
   lazy val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
   private def activity = getActivity.asInstanceOf[SettingActivity]
 
@@ -44,7 +48,6 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
 //      true
 //    })
 
-    pingMethod.setDropDownWidth(R.dimen.default_dropdown_width)
     pingMethod.setOnPreferenceChangeListener((_, value) => {
       prefs.edit().putString(Key.PING_METHOD, value.asInstanceOf[String]).apply()
       true
@@ -52,6 +55,12 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
 
     hideServer.setOnPreferenceChangeListener((_, value) => {
       prefs.edit().putBoolean(Key.HIDE_SERVER, value.asInstanceOf[Boolean]).apply()
+      true
+    })
+
+    enableLocalHTTPProxy.setOnPreferenceChangeListener((_, value) => {
+      val enabled = value.asInstanceOf[Boolean]
+      prefs.edit().putBoolean(Key.ENABLE_LOCAL_HTTP_PROXY, enabled).apply()
       true
     })
 
@@ -80,11 +89,16 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
       true
     })
 
-    ssrDNSNoCache.setDropDownWidth(R.dimen.default_dropdown_width)
     ssrDNSNoCache.setOnPreferenceChangeListener((_, value) => {
       val nocache = value.asInstanceOf[String]
       prefs.edit().putString(Key.SSR_DNS_NOCAHCE, nocache).apply()
       app.appStateManager.saveDNSNoCache(nocache)
+      true
+    })
+
+    logLevel.setOnPreferenceChangeListener((_, value) => {
+      val level = value.asInstanceOf[String]
+      prefs.edit().putString(Key.LOG_LEVEL, level).apply()
       true
     })
 

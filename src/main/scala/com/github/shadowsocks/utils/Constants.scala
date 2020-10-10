@@ -382,7 +382,9 @@ object Key {
   val SSR_DNS_NOCAHCE = "pref_ssr_dns_nocache1"
   val FULL_TEST_BG = "pref_full_test_bg"
   val ENABLE_SNIFF_DOMAIN = "pref_enable_sniff_domain"
+  val ENABLE_LOCAL_HTTP_PROXY = "enable_local_http_proxy"
   val TEST_ZERO_MS = "pref_only_test_zero_ms"
+  val LOG_LEVEL = "pref_log_level"
 
   // message
   val TEST_PROFILE_IDS = "test_profile_ids"

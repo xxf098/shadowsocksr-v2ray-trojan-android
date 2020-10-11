@@ -86,6 +86,14 @@
     <item>GFW List</item>
     <item>China List</item>
   </string-array>
+  <string-array name="profile_display_info_entry">
+    <item>Server</item>
+    <item>Port</item>
+    <item>Traffic</item>
+  </string-array>
+  <string name="custom_profile_display_info">Custom Profile Display Info</string>
+  <string name="custom_profile_display_info_summary">Custom Display Server, Port and Traffic of Profile</string>
+  <string name="select_profile_display_info">Select Profile Display Info</string>
   <string name="acl_file">ACL File URL</string>
   <string name="aclupdate">ACL Update</string>
   <string name="aclupdate_summary">Update Your ACL file</string>

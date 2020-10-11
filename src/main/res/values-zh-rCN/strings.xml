@@ -166,6 +166,14 @@
     <item>仅代理中国大陆地址</item>
   </string-array>
 
+  <string-array name="profile_display_info_entry">
+    <item>服务器地址</item>
+    <item>端口</item>
+    <item>流量延迟</item>
+  </string-array>
+  <string name="custom_profile_display_info">自定义节点显示信息</string>
+  <string name="custom_profile_display_info_summary">自定义显示服务器地址，端口，流量延迟</string>
+  <string name="select_profile_display_info">选择需要显示的节点信息</string>
   <string name="acl_file">ACL 文件 URL</string>
   <string name="aclupdate">ACL 文件更新</string>
   <string name="aclupdate_summary">更新您本地的 ACL 文件</string>

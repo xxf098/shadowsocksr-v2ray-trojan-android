@@ -26,10 +26,15 @@
             android:title="@string/title_auto_test_connectivity"
             android:defaultValue="true"/>
 
-        <CheckBoxPreference
-            android:key="pref_hide_server"
-            android:summary="@string/summary_pref_hide_server"
-            android:title="@string/title_pref_hide_server" />
+        <MultiSelectListPreference
+            android:dialogTitle="Select Profile Display Info"
+            android:key="pref_select_display_info"
+            android:summary="@string/custom_profile_display_info_summary"
+            android:title="Custom Profile Display Info"
+            android:entries="@array/profile_display_info_entry"
+            android:entryValues="@array/profile_display_info"
+            android:defaultValue="@array/default_profiles_display_info"
+            />
 
     </PreferenceCategory>
 

@@ -376,6 +376,7 @@ object Key {
   val SORT_METHOD_DEFAULT = "default"
   val SORT_METHOD_ELAPSED = "elapsed"
   val HIDE_SERVER = "pref_hide_server"
+  val SELECT_DISPLAY_INFO = "pref_select_display_info"
   val PING_METHOD = "pref_ping_method"
   val AUTO_UPDATE_SUBSCRIPTION = "pref_auto_update_subscription"
   val AUTO_TEST_CONNECTIVITY = "pref_auto_test_connectivity"

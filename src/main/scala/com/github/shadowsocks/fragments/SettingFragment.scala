@@ -7,7 +7,7 @@ import android.content.{Intent, SharedPreferences}
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.net.Uri
 import android.os.Bundle
-import android.preference.{CheckBoxPreference, ListPreference, Preference, PreferenceFragment, PreferenceManager}
+import android.preference.{CheckBoxPreference, ListPreference, Preference, PreferenceFragment, PreferenceManager, MultiSelectListPreference}
 import android.support.v7.app.AlertDialog
 import android.text.InputType
 import android.util.Log
@@ -28,7 +28,7 @@ import scala.collection.mutable
 class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeListener {
 //  lazy val sortMethod = findPreference(Key.SORT_METHOD).asInstanceOf[DropDownPreference]
   lazy val pingMethod = findPreference(Key.PING_METHOD).asInstanceOf[ListPreference]
-  lazy val hideServer = findPreference(Key.HIDE_SERVER).asInstanceOf[CheckBoxPreference]
+  lazy val selectDisplayInfo = findPreference(Key.SELECT_DISPLAY_INFO).asInstanceOf[MultiSelectListPreference]
   lazy val enableLocalHTTPProxy = findPreference(Key.ENABLE_LOCAL_HTTP_PROXY).asInstanceOf[CheckBoxPreference]
   lazy val autoUpdate = findPreference(Key.AUTO_UPDATE_SUBSCRIPTION).asInstanceOf[CheckBoxPreference]
   lazy val autoTestConnectivity = findPreference(Key.AUTO_TEST_CONNECTIVITY).asInstanceOf[CheckBoxPreference]
@@ -53,8 +53,9 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
       true
     })
 
-    hideServer.setOnPreferenceChangeListener((_, value) => {
-      prefs.edit().putBoolean(Key.HIDE_SERVER, value.asInstanceOf[Boolean]).apply()
+    selectDisplayInfo.setOnPreferenceChangeListener((_, value) => {
+      val info = value.asInstanceOf[java.util.Set[String]]
+      prefs.edit().putStringSet(Key.SELECT_DISPLAY_INFO, info).apply()
       true
     })
 

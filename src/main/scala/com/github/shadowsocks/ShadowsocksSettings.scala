@@ -76,7 +76,6 @@ object ShadowsocksSettings {
         case Key.group_name => updateSummaryEditTextPreference(pref, profile.url_group)
         case Key.v_ps => updateSummaryEditTextPreference(pref, profile.v_ps)
         case Key.v_port => updateNumberPickerPreference(pref, Option(profile.v_port).getOrElse("0").toInt)
-        case Key.localPort => updateNumberPickerPreference(pref, profile.localPort)
         case Key.v_aid => updateNumberPickerPreference(pref, Option(profile.v_aid).getOrElse("0").toInt)
         case Key.v_path => updateSummaryEditTextPreference(pref, profile.v_path)
         case Key.v_host => updateSummaryEditTextPreference(pref, profile.v_host)
@@ -110,7 +109,6 @@ object ShadowsocksSettings {
         case Key.group_name => updateSummaryEditTextPreference(pref, profile.url_group)
         case Key.name => updateSummaryEditTextPreference(pref, profile.name)
         case Key.remotePort => updateNumberPickerPreference(pref, profile.t_port)
-        case Key.localPort => updateNumberPickerPreference(pref, profile.localPort)
         case Key.password => updatePasswordEditTextPreference(pref, profile.password)
         case Key.t_verify_certificate => updateSwitchPreference(pref, !profile.t_allowInsecure)
         case Key.route => updateDropDownPreference(pref, profile.route)
@@ -185,10 +183,6 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       profile.url_group = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
     }))
-    categories.foreach(_.findPreference(Key.localPort).setOnPreferenceChangeListener((_, value) => {
-      profile.localPort = value.asInstanceOf[Int]
-      app.profileManager.updateProfile(profile)
-    }))
     List(ssrCategory, trojanCategory).filter(category => category != null).foreach(_.findPreference(Key.name).setOnPreferenceChangeListener((_, value) => {
       profile.name = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
@@ -218,10 +212,10 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       profile.t_port = value.asInstanceOf[Int]
       app.profileManager.updateProfile(profile)
     })
-//    findPreference(Key.localPort).setOnPreferenceChangeListener((_, value) => {
-//      profile.localPort = value.asInstanceOf[Int]
-//      app.profileManager.updateProfile(profile)
-//    })
+    findPreference(Key.localPort).setOnPreferenceChangeListener((_, value) => {
+      profile.localPort = value.asInstanceOf[Int]
+      app.profileManager.updateProfile(profile)
+    })
     findPreference(Key.password).setOnPreferenceChangeListener((_, value) => {
       profile.password = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)

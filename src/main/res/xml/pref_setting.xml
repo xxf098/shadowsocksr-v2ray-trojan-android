@@ -54,14 +54,17 @@
         android:title="@string/v2ray_category"
         android:key="@string/vmessPreferenceGroup">
         <CheckBoxPreference
-            android:key="enable_local_http_proxy"
-            android:summary="Setup HTTP Proxy for Local Network"
-            android:title="HTTP Proxy" />
-        <CheckBoxPreference
             android:key="pref_enable_sniff_domain"
             android:summary="@string/summary_v2ray_sniff_enable"
             android:title="@string/title_v2ray_sniff_enable"
             android:defaultValue="true"/>
+        <com.github.shadowsocks.preferences.NumberPickerPreference
+            android:key="pref_mux_cool"
+            android:persistent="false"
+            android:summary="@string/summary_mux_concurrency"
+            android:title="@string/title_mux"
+            app:max="1024"
+            app:min="0" />
 
         <ListPreference
             android:defaultValue="error"

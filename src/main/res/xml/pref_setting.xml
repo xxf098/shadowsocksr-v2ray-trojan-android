@@ -9,7 +9,7 @@
         android:key="@string/featurePreferenceGroup">
 
         <ListPreference
-            android:defaultValue="default"
+            android:defaultValue="google"
             android:entries="@array/ping_method_entry"
             android:entryValues="@array/ping_method_value"
             android:key="pref_ping_method"

@@ -11,4 +11,8 @@
         android:icon="@drawable/ic_refresh"
         android:alphabeticShortcut="r"
         app:showAsAction="always"/>
+    <item
+        android:id="@+id/action_export_subscription"
+        android:title="@string/action_export"
+        app:showAsAction="never"/>
 </menu>

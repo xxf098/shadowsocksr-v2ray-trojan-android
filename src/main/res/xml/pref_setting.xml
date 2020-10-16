@@ -5,7 +5,7 @@
 
 
     <PreferenceCategory
-            android:title="@string/feature_cat"
+        android:title="@string/feature_cat"
         android:key="@string/featurePreferenceGroup">
 
         <ListPreference

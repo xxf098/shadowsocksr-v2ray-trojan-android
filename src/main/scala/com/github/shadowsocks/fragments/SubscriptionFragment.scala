@@ -93,6 +93,10 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       updateAllSubscriptions()
       true
     }
+    case R.id.action_export_subscription => {
+      exportAllSubscriptions()
+      true
+    }
     case _ => false
   }
 
@@ -169,6 +173,11 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       case Some(name) => configActivity.putStringExtra(Key.SUBSCRIPTION_GROUP_NAME, name)
       case None => configActivity.putStringExtra(Key.SUBSCRIPTION_GROUP_NAME, getString(R.string.allgroups))
     }
+  }
+
+  private[this] def exportAllSubscriptions (): Unit = {
+    val urls = ssrsubAdapter.profiles.map(ssrSub => ssrSub.url).mkString("\n")
+    clipboard.setPrimaryClip(ClipData.newPlainText(null, urls))
   }
 
   // TODO: Future.sequence

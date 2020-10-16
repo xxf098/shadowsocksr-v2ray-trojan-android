@@ -5,19 +5,11 @@
 
 
     <PreferenceCategory
-            android:title="@string/feature_cat"
+        android:title="@string/feature_cat"
         android:key="@string/featurePreferenceGroup">
 
-<!--        <com.github.shadowsocks.preferences.DropDownPreference-->
-<!--            android:defaultValue="default"-->
-<!--            android:entries="@array/sort_method_entry"-->
-<!--            android:entryValues="@array/sort_method_value"-->
-<!--            android:key="pref_sort_method"-->
-<!--            android:summary="%s"-->
-<!--            android:title="@string/title_pref_sort_method" />-->
-
-        <com.github.shadowsocks.preferences.DropDownPreference
-            android:defaultValue="default"
+        <ListPreference
+            android:defaultValue="google"
             android:entries="@array/ping_method_entry"
             android:entryValues="@array/ping_method_value"
             android:key="pref_ping_method"
@@ -34,17 +26,22 @@
             android:title="@string/title_auto_test_connectivity"
             android:defaultValue="true"/>
 
-        <CheckBoxPreference
-            android:key="pref_hide_server"
-            android:summary="@string/summary_pref_hide_server"
-            android:title="@string/title_pref_hide_server" />
+        <MultiSelectListPreference
+            android:dialogTitle="Select Profile Display Info"
+            android:key="pref_select_display_info"
+            android:summary="@string/custom_profile_display_info_summary"
+            android:title="Custom Profile Display Info"
+            android:entries="@array/profile_display_info_entry"
+            android:entryValues="@array/profile_display_info"
+            android:defaultValue="@array/default_profiles_display_info"
+            />
 
     </PreferenceCategory>
 
     <PreferenceCategory
         android:title="@string/ssr_category"
         android:key="@string/ssrPreferenceGroup">
-        <com.github.shadowsocks.preferences.DropDownPreference
+        <ListPreference
             android:defaultValue="on"
             android:entries="@array/switch_entry"
             android:entryValues="@array/switch_value"
@@ -61,6 +58,21 @@
             android:summary="@string/summary_v2ray_sniff_enable"
             android:title="@string/title_v2ray_sniff_enable"
             android:defaultValue="true"/>
+        <com.github.shadowsocks.preferences.NumberPickerPreference
+            android:key="pref_mux_cool"
+            android:persistent="false"
+            android:summary="@string/summary_mux_concurrency"
+            android:title="@string/title_mux"
+            app:max="1024"
+            app:min="0" />
+
+        <ListPreference
+            android:defaultValue="error"
+            android:entries="@array/log_level"
+            android:entryValues="@array/log_level"
+            android:key="pref_log_level"
+            android:summary="%s"
+            android:title="Log Level" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/misc_cat"

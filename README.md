@@ -1,6 +1,6 @@
 ## A ShadowsocksR, V2Ray and Trojan Client for Android
 
-A fully featured [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/), [V2Ray](https://github.com/v2ray/v2ray-core) and [Trojan](https://trojan-gfw.github.io/trojan/protocol) client for Android, written in Scala.
+A fully featured [ShadowsocksR](https://github.com/breakwa11/shadowsocks-rss/), [V2Ray](https://github.com/v2ray/v2ray-core) and [Trojan](https://trojan-gfw.github.io/trojan/protocol) client for Android, written in Scala.
 
  ![build](https://github.com/xxf098/shadowsocksr-v2ray-android/workflows/build/badge.svg?branch=xxf098%2Fmaster&event=push) 
  [![GitHub release](https://img.shields.io/github/release/xxf098/shadowsocksr-v2ray-android)](https://github.com/xxf098/shadowsocksr-v2ray-android/releases) 
@@ -84,7 +84,7 @@ Set proxy for sbt: `File | Settings | Build, Execution, Deployment | Build Tools
 
 Checkout this [link](http://srodrigo.me/setting-up-scala-on-android/)
 * rm -rf ~/.android/sbt/exploded-aars/*
-* In Project Settings -> Modules -> shadowsocksr, change manifest file path
+* In Project Settings -> Modules -> shadowsocksr, change `Structure`, `Generated Sources` file path
 * In Run/Debug Configuration -> Before launch, replace `Gradle-aware Make` with `android:run`
 
 #### BUILD on Mac OS X (with HomeBrew)

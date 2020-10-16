@@ -117,6 +117,7 @@ class V2RayConfigFragment extends Fragment with OnMenuItemClickListener {
         p.v_id = v.getID
         p.v_aid = s"${v.getAid}"
         p.v_security = v.getSecurity
+        p.v_net = v.getNet
         p
       }
     }

@@ -48,7 +48,7 @@ public abstract class Tun2socks
 
     public static native void startTrojanTunFd(final long p0, final VpnService p1, final LogService p2, final QuerySpeed p3, final Trojan p4, final String p5) throws Exception;
 
-    public static native void startV2Ray(final PacketFlow p0, final VpnService p1, final LogService p2, final byte[] p3, final String p4) throws Exception;
+    public static native void startV2Ray(final PacketFlow p0, final VpnService p1, final LogService p2, final QuerySpeed p3, final byte[] p4, final String p5) throws Exception;
 
     public static native void startV2RayWithTunFd(final long p0, final VpnService p1, final LogService p2, final QuerySpeed p3, final Vmess p4, final String p5) throws Exception;
 

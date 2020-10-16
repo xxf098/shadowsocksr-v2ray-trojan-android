@@ -86,6 +86,14 @@
     <item>GFW List</item>
     <item>China List</item>
   </string-array>
+  <string-array name="profile_display_info_entry">
+    <item>Server</item>
+    <item>Port</item>
+    <item>Traffic</item>
+  </string-array>
+  <string name="custom_profile_display_info">Custom Profile Display Info</string>
+  <string name="custom_profile_display_info_summary">Custom Display Server, Port and Traffic of Profile</string>
+  <string name="select_profile_display_info">Select Profile Display Info</string>
   <string name="acl_file">ACL File URL</string>
   <string name="aclupdate">ACL Update</string>
   <string name="aclupdate_summary">Update Your ACL file</string>
@@ -300,7 +308,7 @@
   <string name="v_pref_networks">Network</string>
 
 <!--  settings -->
-  <string name="title_pref_sort_method">Sort Method</string>
+  <string name="title_pref_sort_method">Sort By</string>
   <string name="sort_by_default">By Default</string>
   <string name="sort_by_elapsed">By Elapsed</string>
   <string-array name="sort_method_entry">
@@ -348,6 +356,9 @@
   <string name="title_v2ray_sniff_enable">Enable Sniff Domain</string>
   <string name="summary_v2ray_sniff_enable">Sniff Domain</string>
 
+  <string name="title_mux">Mux</string>
+  <string name="hint_mux">The maximum value is 1024</string>
+  <string name="summary_mux_concurrency"> Maximum number of concurrent connections: %d</string>
 
   <string name="ssr_category">SSR Settings</string>
   <string name="v2ray_category">V2Ray Settings</string>

@@ -93,6 +93,10 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       updateAllSubscriptions()
       true
     }
+    case R.id.action_export_subscription => {
+      exportAllSubscriptions()
+      true
+    }
     case _ => false
   }
 
@@ -171,6 +175,11 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     }
   }
 
+  private[this] def exportAllSubscriptions (): Unit = {
+    val urls = ssrsubAdapter.profiles.map(ssrSub => ssrSub.url).mkString("\n")
+    clipboard.setPrimaryClip(ClipData.newPlainText(null, urls))
+  }
+
   // TODO: Future.sequence
   private[this] def updateAllSubscriptions (): Unit = {
     Utils.ThrowableFuture {
@@ -212,10 +221,10 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     ))
   }
 
-  private def showShareDialog (url: String): Unit = {
+  private def showShareDialog (item: SSRSub): Unit = {
     val image = new ImageView(getActivity)
     image.setLayoutParams(new LinearLayout.LayoutParams(-1, -1))
-    val qrcode = QRCode.from(url)
+    val qrcode = QRCode.from(item.url)
       .withSize(Utils.dpToPx(getActivity, 250), Utils.dpToPx(getActivity, 250))
       .asInstanceOf[QRCode].bitmap()
     image.setImageBitmap(qrcode)
@@ -223,11 +232,11 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       .setCancelable(true)
       .setPositiveButton(R.string.close, null)
       .setNegativeButton(R.string.copy_url, ((_, _) =>
-        clipboard.setPrimaryClip(ClipData.newPlainText(null, url))): DialogInterface.OnClickListener)
+        clipboard.setPrimaryClip(ClipData.newPlainText(null, item.url))): DialogInterface.OnClickListener)
       .setView(image)
       .setTitle(R.string.share)
       .create()
-    dialog.setMessage(getString(R.string.share_message_without_nfc))
+    dialog.setMessage(item.url_group)
     dialog.show()
   }
 
@@ -356,7 +365,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
           }
           case R.id.subscription_menu_edit => edit_subscription()
           case R.id.subscription_menu_delete => showRemoveDialog(viewHolder.getAdapterPosition, viewHolder.item)
-          case R.id.subscription_menu_share_url => showShareDialog(viewHolder.item.url)
+          case R.id.subscription_menu_share_url => showShareDialog(viewHolder.item)
           case _ =>
         }
         subscriptionMenu.dismiss()

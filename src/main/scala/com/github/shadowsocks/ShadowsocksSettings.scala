@@ -176,6 +176,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
 
     ssrCategory = Option(ssrCategory).getOrElse(findPreference(getResources.getString(R.string.ssrPreferenceGroup)).asInstanceOf[PreferenceGroup])
     vmessCategory  = Option(vmessCategory).getOrElse(findPreference(getResources.getString(R.string.vmessPreferenceGroup)).asInstanceOf[PreferenceGroup])
+    v2rayJSONCategory  = Option(v2rayJSONCategory).getOrElse(findPreference(getResources.getString(R.string.v2rayJSONPreferenceGroup)).asInstanceOf[PreferenceGroup])
     trojanCategory  = Option(trojanCategory).getOrElse(findPreference(getResources.getString(R.string.trojanPreferenceGroup)).asInstanceOf[PreferenceGroup])
     val categories = List(ssrCategory, vmessCategory, trojanCategory).filter(category => category != null)
     categories.foreach(_.findPreference(Key.group_name).setOnPreferenceChangeListener((_, value) => {
@@ -319,6 +320,11 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     })
 
     findPreference(Key.v_ps).setOnPreferenceChangeListener((_, value) => {
+      profile.v_ps = value.asInstanceOf[String]
+      profile.name = value.asInstanceOf[String]
+      app.profileManager.updateProfile(profile)
+    })
+    v2rayJSONCategory.findPreference(Key.v_ps).setOnPreferenceChangeListener((_, value) => {
       profile.v_ps = value.asInstanceOf[String]
       profile.name = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)

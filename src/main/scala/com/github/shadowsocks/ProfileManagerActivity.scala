@@ -37,6 +37,7 @@ import net.glxn.qrgen.android.QRCode
 import java.lang.System.currentTimeMillis
 import java.lang.Thread
 import java.text.SimpleDateFormat
+import java.util
 
 import android.util.{Base64, Log}
 import android.content.DialogInterface._
@@ -87,12 +88,12 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     with View.OnClickListener with View.OnKeyListener {
 
     var item: Profile = _
-    var hideServer = false
+    var displayInfo = List(true, false, true)
 //    private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
     // profile name
     private val text1 = itemView.findViewById(android.R.id.text1).asInstanceOf[TextView]
     private val text2 = itemView.findViewById(android.R.id.text2).asInstanceOf[TextView]
-    // trafic
+    // traffic
     private val tvTraffic = itemView.findViewById(R.id.traffic).asInstanceOf[TextView]
     itemView.setOnClickListener(this)
     itemView.setOnKeyListener(this)
@@ -166,13 +167,19 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val tx = item.tx + txTotal
       val rx = item.rx + rxTotal
       val elapsed = if (elapsedInput != -1) elapsedInput else item.elapsed
-      val trafficStatus = if (tx != 0 || rx != 0 || elapsed != 0 || item.url_group != "") {
+      val trafficStatus = if (displayInfo(2) && (tx != 0 || rx != 0 || elapsed != 0 || item.url_group != "")) {
         getString(R.string.stat_profiles,
           TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx), String.valueOf(elapsed), "").trim
       } else ""
       handler.post(() => {
         text1.setText(item.name)
-        text2.setText(if (hideServer) item.url_group else item.getAddr() )
+        val info = (displayInfo(0), displayInfo(1)) match {
+          case (true, true) => s"${item.getAddr()}:${item.getPortStr()}"
+          case (true, false) => s"${item.getAddr()}"
+          case (false, true) => s"${item.getPortStr()}"
+          case (false, false)  => ""
+        }
+        text2.setText(info)
         tvTraffic.setText(trafficStatus)
       })
     }
@@ -209,7 +216,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   // TODO: update adapter
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
     var profiles = new ArrayBuffer[Profile]
-    var hideServer = false
+    var displayInfo = List(true, true, true)
     profiles ++= getProfilesByGroup(currentGroupName)
 
     def onGroupChange(groupName: String): Unit = {
@@ -229,18 +236,24 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     def getItemCount = profiles.length
 
     def onBindViewHolder(vh: ProfileViewHolder, i: Int) = {
-      vh.hideServer = hideServer
+      vh.displayInfo = displayInfo
       vh.bind(profiles(i))
     }
 
     def onCreateViewHolder(vg: ViewGroup, i: Int) ={
       val layoutId = if (Build.VERSION.SDK_INT >= 21) R.layout.layout_profiles_item1 else R.layout.layout_profiles_item
-      hideServer = app.settings.getBoolean(Key.HIDE_SERVER, false)
+      displayInfo = getDisplayInfo()
       new ProfileViewHolder(LayoutInflater.from(vg.getContext).inflate(layoutId, vg, false))
     }
 
+    def getDisplayInfo () = {
+      import collection.JavaConverters.mutableSetAsJavaSetConverter
+      val fields = app.settings.getStringSet(Key.SELECT_DISPLAY_INFO, scala.collection.mutable.Set("server", "port", "traffic").asJava)
+      List(fields.contains("server"), fields.contains("port"), fields.contains("traffic"))
+    }
+
     def resetProfiles (): Unit = {
-      profilesAdapter.hideServer = app.settings.getBoolean(Key.HIDE_SERVER, false)
+      profilesAdapter.displayInfo = getDisplayInfo()
       is_sort = app.settings.getString(Key.SORT_METHOD, Key.SORT_METHOD_DEFAULT) == Key.SORT_METHOD_ELAPSED
       profiles.clear()
       profiles ++= getProfilesByGroup(currentGroupName)

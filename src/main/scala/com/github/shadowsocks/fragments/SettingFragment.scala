@@ -7,31 +7,36 @@ import android.content.{Intent, SharedPreferences}
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.net.Uri
 import android.os.Bundle
-import android.preference.{CheckBoxPreference, ListPreference, Preference, PreferenceFragment, PreferenceManager}
+import android.preference.{CheckBoxPreference, EditTextPreference, ListPreference, MultiSelectListPreference, Preference, PreferenceFragment, PreferenceManager}
 import android.support.v7.app.AlertDialog
+import android.text.InputType
 import android.util.Log
+import android.view.View
 import android.webkit.{WebView, WebViewClient}
 import android.widget.EditText
+import android.view.ViewGroup.{LayoutParams, MarginLayoutParams}
 import com.github.shadowsocks.{BuildConfig, R, SettingActivity, Shadowsocks}
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.ShadowsocksSettings.TAG
-import com.github.shadowsocks.preferences.DropDownPreference
+import com.github.shadowsocks.preferences.{DropDownPreference, NumberPickerPreference}
 import tun2socks.Tun2socks
 
 import scala.collection.mutable
+import scala.util.Try
 
 
 class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeListener {
 //  lazy val sortMethod = findPreference(Key.SORT_METHOD).asInstanceOf[DropDownPreference]
-  lazy val pingMethod = findPreference(Key.PING_METHOD).asInstanceOf[DropDownPreference]
-  lazy val hideServer = findPreference(Key.HIDE_SERVER).asInstanceOf[CheckBoxPreference]
-//  lazy val fullTestBg = findPreference(Key.FULL_TEST_BG).asInstanceOf[CheckBoxPreference]
+  lazy val pingMethod = findPreference(Key.PING_METHOD).asInstanceOf[ListPreference]
+  lazy val selectDisplayInfo = findPreference(Key.SELECT_DISPLAY_INFO).asInstanceOf[MultiSelectListPreference]
   lazy val autoUpdate = findPreference(Key.AUTO_UPDATE_SUBSCRIPTION).asInstanceOf[CheckBoxPreference]
   lazy val autoTestConnectivity = findPreference(Key.AUTO_TEST_CONNECTIVITY).asInstanceOf[CheckBoxPreference]
-  lazy val ssrDNSNoCache = findPreference(Key.SSR_DNS_NOCAHCE).asInstanceOf[DropDownPreference]
+  lazy val ssrDNSNoCache = findPreference(Key.SSR_DNS_NOCAHCE).asInstanceOf[ListPreference]
   lazy val aboutPref = findPreference("about")
   lazy val enableSniffDomain = findPreference(Key.ENABLE_SNIFF_DOMAIN).asInstanceOf[CheckBoxPreference]
+  lazy val logLevel = findPreference(Key.LOG_LEVEL).asInstanceOf[ListPreference]
+  lazy val mux = findPreference(Key.MUX).asInstanceOf[NumberPickerPreference]
   lazy val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
   private def activity = getActivity.asInstanceOf[SettingActivity]
 
@@ -44,14 +49,14 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
 //      true
 //    })
 
-    pingMethod.setDropDownWidth(R.dimen.default_dropdown_width)
     pingMethod.setOnPreferenceChangeListener((_, value) => {
       prefs.edit().putString(Key.PING_METHOD, value.asInstanceOf[String]).apply()
       true
     })
 
-    hideServer.setOnPreferenceChangeListener((_, value) => {
-      prefs.edit().putBoolean(Key.HIDE_SERVER, value.asInstanceOf[Boolean]).apply()
+    selectDisplayInfo.setOnPreferenceChangeListener((_, value) => {
+      val info = value.asInstanceOf[java.util.Set[String]]
+      prefs.edit().putStringSet(Key.SELECT_DISPLAY_INFO, info).apply()
       true
     })
 
@@ -59,6 +64,11 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
 //      prefs.edit().putBoolean(Key.FULL_TEST_BG, value.asInstanceOf[Boolean]).apply()
 //      true
 //    })
+    mux.setValue(prefs.getInt(Key.MUX, 0))
+    mux.setOnPreferenceChangeListener((_, value) => {
+      prefs.edit().putInt(Key.MUX, value.asInstanceOf[Int]).apply()
+      true
+    })
 
     autoUpdate.setOnPreferenceChangeListener((_, value) => {
       val autoUpdateValue = value.asInstanceOf[Boolean]
@@ -80,11 +90,16 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
       true
     })
 
-    ssrDNSNoCache.setDropDownWidth(R.dimen.default_dropdown_width)
     ssrDNSNoCache.setOnPreferenceChangeListener((_, value) => {
       val nocache = value.asInstanceOf[String]
       prefs.edit().putString(Key.SSR_DNS_NOCAHCE, nocache).apply()
       app.appStateManager.saveDNSNoCache(nocache)
+      true
+    })
+
+    logLevel.setOnPreferenceChangeListener((_, value) => {
+      val level = value.asInstanceOf[String]
+      prefs.edit().putString(Key.LOG_LEVEL, level).apply()
       true
     })
 

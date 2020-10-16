@@ -166,6 +166,14 @@
     <item>仅代理中国大陆地址</item>
   </string-array>
 
+  <string-array name="profile_display_info_entry">
+    <item>服务器地址</item>
+    <item>端口</item>
+    <item>流量延迟</item>
+  </string-array>
+  <string name="custom_profile_display_info">自定义节点显示信息</string>
+  <string name="custom_profile_display_info_summary">自定义显示服务器地址，端口，流量延迟</string>
+  <string name="select_profile_display_info">选择需要显示的节点信息</string>
   <string name="acl_file">ACL 文件 URL</string>
   <string name="aclupdate">ACL 文件更新</string>
   <string name="aclupdate_summary">更新您本地的 ACL 文件</string>
@@ -269,7 +277,7 @@
 
   <string name="title_pref_sort_method">排序方式</string>
   <string name="sort_by_default">默认</string>
-  <string name="sort_by_elapsed">延迟</string>
+  <string name="sort_by_elapsed">延时</string>
   <string-array name="sort_method_entry">
     <item>@string/sort_by_default</item>
     <item>@string/sort_by_elapsed</item>
@@ -294,6 +302,10 @@
 
   <string name="title_v2ray_sniff_enable">启用域名探测</string>
   <string name="summary_v2ray_sniff_enable">域名探测</string>
+
+  <string name="title_mux">多路复用</string>
+  <string name="hint_mux">并发连接数最大值1024</string>
+  <string name="summary_mux_concurrency">并发连接数: %d</string>
 
   <string name="ssr_category">SSR设置</string>
   <string name="v2ray_category">V2Ray设置</string>

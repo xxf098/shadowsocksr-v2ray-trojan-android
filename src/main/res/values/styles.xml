@@ -14,6 +14,18 @@
         <item name="colorButtonNormal">@color/material_accent_500</item>
         <item name="colorPrimary">@color/material_accent_500</item>
         <item name="colorPrimaryDark">@color/material_accent_700</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="android:actionModeBackground">@color/material_accent_500</item>
+        <item name="android:actionModeCloseDrawable">@drawable/ic_navigation_close</item>
+        <item name="actionModeStyle">@style/ActionModeStyle</item>
+    </style>
+
+    <style name="ActionModeStyle" parent="@style/Widget.AppCompat.ActionMode">
+        <item name="titleTextStyle">@style/ActionModeTitleTextStyle</item>
+    </style>
+
+    <style name="ActionModeTitleTextStyle" parent="@style/TextAppearance.AppCompat.Widget.ActionMode.Title">
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
     <style name="Theme.Material.DialogBase" parent="Theme.AppCompat.Light.Dialog">

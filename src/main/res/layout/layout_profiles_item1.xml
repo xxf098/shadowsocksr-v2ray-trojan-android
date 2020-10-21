@@ -55,6 +55,20 @@
             android:nextFocusLeft="@+id/container"
             android:padding="7dp"
             app:srcCompat="@drawable/ic_social_share"/>
+
+        <ImageView
+            android:id="@+id/selected"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/share"
+            android:focusable="true"
+            android:nextFocusLeft="@+id/container"
+            android:padding="7dp"
+            app:srcCompat="@drawable/ic_action_done"
+            android:tint="@color/material_accent_700"
+            android:visibility="gone" />
     </LinearLayout>
 
     <RelativeLayout

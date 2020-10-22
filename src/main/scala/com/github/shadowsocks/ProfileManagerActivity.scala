@@ -18,6 +18,7 @@ import android.support.v7.widget.Toolbar.OnMenuItemClickListener
 import android.support.v7.widget._
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
+import android.support.v7.view.ActionMode
 import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.view._
@@ -95,8 +96,16 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     private val text2 = itemView.findViewById(android.R.id.text2).asInstanceOf[TextView]
     // traffic
     private val tvTraffic = itemView.findViewById(R.id.traffic).asInstanceOf[TextView]
+    private val selectedBtn = itemView.findViewById(R.id.selected).asInstanceOf[ImageView]
     itemView.setOnClickListener(this)
     itemView.setOnKeyListener(this)
+    itemView.setOnLongClickListener(view => {
+      if (!multiSelect) {
+        actionMode = Some(view.getContext.asInstanceOf[AppCompatActivity].startSupportActionMode(actionModeCallbacks))
+        this.updateProfileBackground()
+      }
+      true
+    })
 
     {
       val shareBtn = itemView.findViewById(R.id.share).asInstanceOf[ImageView]
@@ -194,11 +203,31 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         itemView.setSelected(false)
         if (selectedItem eq this) selectedItem = null
       }
+      selectedBtn.setVisibility(if (selectedProfileIds.contains(item.id)) View.VISIBLE else View.GONE)
+    }
+
+    def updateProfileBackground (): Unit = {
+      if (selectedProfileIds.contains(item.id)) {
+        selectedProfileIds.remove(item.id)
+        selectedBtn.setVisibility(View.GONE)
+      } else {
+        selectedProfileIds.add(item.id)
+        selectedBtn.setVisibility(View.VISIBLE)
+      }
+      if (selectedProfileIds.isEmpty) {
+        actionMode.foreach(am => am.finish())
+      } else {
+        actionMode.foreach(am => am.setTitle(s"${selectedProfileIds.size}"))
+      }
     }
 
     def onClick(v: View) {
-      app.switchProfile(item.id)
-      finish
+      if (!multiSelect) {
+        app.switchProfile(item.id)
+        finish
+      } else {
+        this.updateProfileBackground()
+      }
     }
 
     def onKey(v: View, keyCode: Int, event: KeyEvent) = if (event.getAction == KeyEvent.ACTION_DOWN) keyCode match {
@@ -457,6 +486,41 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   private final val REQUEST_SETTINGS = 44
   private final val TAG = "ProfileManagerActivity"
   private var currentGroupName: String = _
+  private var multiSelect = false
+  private val selectedProfileIds = scala.collection.mutable.HashSet.empty[Int]
+  private var actionMode: Option[ActionMode] = None
+  private val actionModeCallbacks = new ActionMode.Callback {
+    override def onCreateActionMode(mode: ActionMode, menu: Menu): Boolean = {
+      multiSelect = true
+      mode.getMenuInflater.inflate(R.menu.profile_batch_menu, menu)
+      mode.setTitle("1")
+      true
+    }
+    override def onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean = false
+    override def onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean = {
+      item.getItemId match {
+        case R.id.action_delete_profile => true
+        case R.id.action_export_profile => {
+          val exportData = profilesAdapter.profiles.filter(p => selectedProfileIds.contains(p.id))
+            .map(_.toString())
+            .mkString("\n")
+          clipboard.setPrimaryClip(ClipData.newPlainText(null, exportData))
+          Toast.makeText(ProfileManagerActivity.this, R.string.action_export_msg, Toast.LENGTH_SHORT).show
+          mode.finish()
+          true
+        }
+        case _ => false
+      }
+    }
+    override def onDestroyActionMode(mode: ActionMode): Unit = {
+      multiSelect = false
+      if (selectedProfileIds.nonEmpty) {
+        selectedProfileIds.clear()
+        profilesAdapter.resetProfiles()
+        profilesAdapter.notifyDataSetChanged()
+      }
+    }
+  }
 
 
   def isPortAvailable (port: Int):Boolean = {

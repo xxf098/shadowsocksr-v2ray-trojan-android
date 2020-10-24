@@ -329,6 +329,12 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       notifyItemRemoved(pos)
       updateGroupSpinner(Option(currentGroupName))
     }
+
+    def removeById(id: Int): Unit = {
+      val pos = profiles.indexWhere(_.id == id)
+      if (pos > -1) remove(pos)
+    }
+
     def undo(actions: Iterator[(Int, Profile)]) = for ((index, item) <- actions) {
       profiles.insert(index, item)
       notifyItemInserted(index)
@@ -499,7 +505,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     override def onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean = false
     override def onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean = {
       item.getItemId match {
-        case R.id.action_delete_profile => true
+        case R.id.action_delete_profile => {
+          selectedProfileIds.foreach(profilesAdapter.removeById)
+          true
+        }
         case R.id.action_export_profile => {
           val exportData = profilesAdapter.profiles.filter(p => selectedProfileIds.contains(p.id))
             .map(_.toString())

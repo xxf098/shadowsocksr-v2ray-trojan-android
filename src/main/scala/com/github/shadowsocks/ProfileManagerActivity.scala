@@ -332,7 +332,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
     def removeById(id: Int): Unit = {
       val pos = profiles.indexWhere(_.id == id)
-      if (pos > -1) remove(pos)
+      if (pos > -1) {
+        remove(pos)
+        app.profileManager.delProfile(id)
+      }
     }
 
     def undo(actions: Iterator[(Int, Profile)]) = for ((index, item) <- actions) {
@@ -506,7 +509,17 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     override def onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean = {
       item.getItemId match {
         case R.id.action_delete_profile => {
-          selectedProfileIds.foreach(profilesAdapter.removeById)
+          val dialog = new AlertDialog.Builder(ProfileManagerActivity.this, R.style.Theme_Material_Dialog_Alert)
+            .setTitle(getString(R.string.batch_delete))
+            .setPositiveButton(android.R.string.yes, ((_, _) =>{
+              selectedProfileIds.filter(_ != app.profileId).foreach(profilesAdapter.removeById)
+              finish()
+              startActivity(new Intent(getIntent()))
+            }): DialogInterface.OnClickListener)
+            .setNegativeButton(android.R.string.no, null)
+            .setMessage(getString(R.string.batch_delete_msg, currentGroupName))
+            .create()
+          dialog.show()
           true
         }
         case R.id.action_export_profile => {

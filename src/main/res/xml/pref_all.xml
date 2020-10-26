@@ -96,6 +96,13 @@
             android:title="@string/remote_port"
             app:max="65535"
             app:min="1" />
+        <com.github.shadowsocks.preferences.NumberPickerPreference
+            android:key="localPortNum"
+            android:persistent="false"
+            android:summary="@string/port_summary"
+            android:title="@string/port"
+            app:max="65535"
+            app:min="1025" />
         <Preference
             android:key="v_id"
             android:persistent="false"
@@ -177,6 +184,13 @@
             android:title="@string/remote_port"
             app:max="65535"
             app:min="1" />
+        <com.github.shadowsocks.preferences.NumberPickerPreference
+            android:key="localPortNum"
+            android:persistent="false"
+            android:summary="@string/port_summary"
+            android:title="@string/port"
+            app:max="65535"
+            app:min="1025" />
         <com.github.shadowsocks.preferences.PasswordEditTextPreference
             android:inputType="textPassword"
             android:key="sitekey"

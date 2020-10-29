@@ -176,9 +176,10 @@
   <string name="action_export">Export to Clipboard</string>
   <string name="action_import">Import from Clipboard</string>
   <string name="action_export_more">Export…</string>
-  <string name="action_export_file">Export to File</string>
+  <string name="action_export_file">Export All to File</string>
   <string name="action_export_file_msg">Export to file succeeded</string>
   <string name="action_export_file_err">Export to file failed</string>
+  <string name="action_export_current_to_file">Export Current to File</string>
   <string name="action_import_file">Import from File</string>
   <string name="action_import_qrcode_image">Import from QRCode Image</string>
   <string name="action_import_manually_vmess">Type Manually Vmess</string>

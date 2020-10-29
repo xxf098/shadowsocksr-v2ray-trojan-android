@@ -193,6 +193,7 @@
   <string name="action_export_file">导出至文件</string>
   <string name="action_export_file_msg">导出至文件成功</string>
   <string name="action_export_file_err">导出至文件失败</string>
+  <string name="action_export_current_to_file">导出当前群组至文件</string>
   <string name="action_import_file">从文件导入</string>
   <string name="action_import_qrcode_image">从二维码图片导入</string>
   <string name="action_import_manually_vmess">手动输入Vmess</string>

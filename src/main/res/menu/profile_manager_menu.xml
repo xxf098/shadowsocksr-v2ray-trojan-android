@@ -60,11 +60,6 @@
                 android:title="@string/action_export_file"
                 android:alphabeticShortcut="o"
                 android:numericShortcut="5"/>
-            <item
-                android:id="@+id/action_export_current_to_file"
-                android:title="@string/action_export_current_to_file"
-                android:alphabeticShortcut="o"
-                android:numericShortcut="5"/>
         </menu>
     </item>
     <item android:title="@string/title_pref_sort_method">

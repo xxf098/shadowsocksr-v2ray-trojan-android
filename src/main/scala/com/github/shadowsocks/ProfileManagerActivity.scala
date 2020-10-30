@@ -547,16 +547,16 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   def isPortAvailable (port: Int):Boolean = {
     // Assume no connection is possible.
-    var result = true;
+//    var result = true;
+//
+//    try {
+//      (new Socket("127.0.0.1", port)).close()
+//      result = false;
+//    } catch {
+//      case e: Exception => Unit
+//    }
 
-    try {
-      (new Socket("127.0.0.1", port)).close()
-      result = false;
-    } catch {
-      case e: Exception => Unit
-    }
-
-    return result;
+    return true;
   }
 
   override def onCreate(savedInstanceState: Bundle) {
@@ -778,6 +778,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     }
   }
 
+  /*
   def ssrsubDialog() {
     val prefs = PreferenceManager.getDefaultSharedPreferences(this)
 
@@ -988,6 +989,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       .create()
       .show()
   }
+  */
 
   def updateNfcState() {
     isNfcAvailable = false

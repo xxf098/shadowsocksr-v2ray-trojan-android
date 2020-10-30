@@ -1213,13 +1213,28 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       true
       // startFilesForResult
     case R.id.action_export_file =>
-      val dateFormat = new SimpleDateFormat("yyyyMMddhhmmss")
-      val date = dateFormat.format(new Date())
-      val intent = new Intent(Intent.ACTION_CREATE_DOCUMENT)
-      intent.addCategory(Intent.CATEGORY_OPENABLE)
-      intent.setType("text/plain")
-      intent.putExtra(Intent.EXTRA_TITLE, s"profiles-$date.txt")
-      startActivityForResult(intent, REQUEST_CREATE_DOCUMENT)
+      // TODO: File size
+      val msg = s"Group: ${currentGroupName}\n" + s"Count: ${ProfileManagerActivity.countProfilesByGroup(currentGroupName)}"
+      val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
+        .setTitle(R.string.action_export_file)
+        .setPositiveButton(android.R.string.yes, ((_, _) =>{
+          val dateFormat = new SimpleDateFormat("yyyyMMddhhmmss")
+          val date = dateFormat.format(new Date())
+          val intent = new Intent(Intent.ACTION_CREATE_DOCUMENT)
+          intent.addCategory(Intent.CATEGORY_OPENABLE)
+          intent.setType("text/plain")
+          val fileName = currentGroupName match {
+            case f if f == app.getString(R.string.allgroups) => s"$f-$date.txt"
+            case _ => s"profiles-$date.txt"
+          }
+          intent.putExtra(Intent.EXTRA_TITLE, fileName)
+          startActivityForResult(intent, REQUEST_CREATE_DOCUMENT)
+        }): DialogInterface.OnClickListener)
+        .setNegativeButton(android.R.string.no, null)
+        .setMessage(msg)
+        .create()
+      dialog.show()
+
       true
     case R.id.action_import_file =>
       val intent = new Intent(Intent.ACTION_GET_CONTENT)

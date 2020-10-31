@@ -1215,28 +1215,33 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       true
       // startFilesForResult
     case R.id.action_export_file =>
-      // TODO: File size
-      val msg = s"Group: ${currentGroupName}\n" + s"Count: ${ProfileManagerActivity.countProfilesByGroup(currentGroupName)}"
-      val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
-        .setTitle(R.string.action_export_file)
-        .setPositiveButton(android.R.string.yes, ((_, _) =>{
-          val dateFormat = new SimpleDateFormat("yyyyMMddhhmmss")
-          val date = dateFormat.format(new Date())
-          val intent = new Intent(Intent.ACTION_CREATE_DOCUMENT)
-          intent.addCategory(Intent.CATEGORY_OPENABLE)
-          intent.setType("text/plain")
-          val fileName = currentGroupName match {
-            case f if f == app.getString(R.string.allgroups) => s"$f-$date.txt"
-            case _ => s"profiles-$date.txt"
-          }
-          intent.putExtra(Intent.EXTRA_TITLE, fileName)
-          startActivityForResult(intent, REQUEST_CREATE_DOCUMENT)
-        }): DialogInterface.OnClickListener)
-        .setNegativeButton(android.R.string.no, null)
-        .setMessage(msg)
-        .create()
+      val groupNames = app.profileManager.getGroupNames.map(_.toArray.map(s=> s.asInstanceOf[CharSequence]))
+      if (groupNames.isEmpty) { return true }
+      val checkedItems = groupNames.get.map(s => if (s == currentGroupName) true else false)
+      val builder = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
+      builder.setMultiChoiceItems(groupNames.get, checkedItems, new DialogInterface.OnMultiChoiceClickListener(){
+        override def onClick(dialog: DialogInterface, which: Int, isChecked: Boolean): Unit = {
+            Log.e(TAG, s"index: ${which} isChecked: ${isChecked}")
+        }
+      })
+      builder.setTitle(R.string.action_export_file)
+      builder.setPositiveButton(android.R.string.yes, ((_, _) =>{
+        val dateFormat = new SimpleDateFormat("yyyyMMddhhmmss")
+        val date = dateFormat.format(new Date())
+        val intent = new Intent(Intent.ACTION_CREATE_DOCUMENT)
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        intent.setType("text/plain")
+        val fileName = currentGroupName match {
+          case f if f == app.getString(R.string.allgroups) => s"$f-$date.txt"
+          case _ => s"profiles-$date.txt"
+        }
+        intent.putExtra(Intent.EXTRA_TITLE, fileName)
+        startActivityForResult(intent, REQUEST_CREATE_DOCUMENT)
+      }): DialogInterface.OnClickListener)
+      builder.setNegativeButton(android.R.string.no, null)
+      builder.setNeutralButton(R.string.allgroups, null)
+      val dialog = builder.create()
       dialog.show()
-
       true
     case R.id.action_import_file =>
       val intent = new Intent(Intent.ACTION_GET_CONTENT)

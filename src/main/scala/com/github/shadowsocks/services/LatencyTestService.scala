@@ -228,13 +228,13 @@ class LatencyTestService extends Service {
                 .partition(p => p.isV2Ray || p.isTrojan)
               if (v2rayTrojanProfiles.nonEmpty) { testV2rayJob(v2rayTrojanProfiles) }
               if (ssrProfiles.nonEmpty) { testSSRJob(ssrProfiles) }
+            } catch {
+              case e: Exception => e.printStackTrace()
+            } finally {
               notificationService.cancel(LatencyTestService.NOTIFICATION_ID)
-              // refresh
               bgResultReceiver.send(100, new Bundle())
               stopSelf(startId)
               Looper.loop()
-            } catch {
-              case e: Exception => e.printStackTrace()
             }
           }
         }

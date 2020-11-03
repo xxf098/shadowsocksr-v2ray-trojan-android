@@ -496,6 +496,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   private final val TAG = "ProfileManagerActivity"
   private var currentGroupName: String = _
   private var multiSelect = false
+  private val exportedGroupNames = scala.collection.mutable.Set[CharSequence]()
   private val selectedProfileIds = scala.collection.mutable.HashSet.empty[Int]
   private var actionMode: Option[ActionMode] = None
   private val actionModeCallbacks = new ActionMode.Callback {
@@ -1053,21 +1054,19 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     if (resultCode != Activity.RESULT_OK) return
     requestCode match {
       case REQUEST_CREATE_DOCUMENT => {
+        if (exportedGroupNames.isEmpty) return
         autoClose({
           val filePath = data.getData
           getContentResolver.openOutputStream(filePath)
         })(out => {
-          val profiles = ProfileManagerActivity.getProfilesByGroup(currentGroupName, false)
+          Log.e(TAG, s"exportedGroupNames: ${exportedGroupNames.mkString(", ")}")
+          val profiles = exportedGroupNames.map(name => app.profileManager.getAllProfilesByGroup(name.toString))
+            .filter(_.nonEmpty).map(_.get).reduce(_ ++ _)
+          Log.e(TAG, s"profiles: ${profiles.size}")
+          //          val profiles = ProfileManagerActivity.getProfilesByGroup(currentGroupName, false)
           val buffer = profiles.mkString("\n").getBytes(Charset.forName("UTF-8"))
           out.write(buffer)
           Toast.makeText(this, R.string.action_export_file_msg, Toast.LENGTH_SHORT).show
-//          app.profileManager.getAllProfiles match {
-//            case Some(profiles) =>
-//              val buffer = profiles.mkString("\n").getBytes(Charset.forName("UTF-8"))
-//              out.write(buffer)
-//              Toast.makeText(this, R.string.action_export_file_msg, Toast.LENGTH_SHORT).show
-//            case _ => Toast.makeText(this, R.string.action_export_file_err, Toast.LENGTH_SHORT).show
-//          }
         })
       }
       case REQUEST_IMPORT_PROFILES => {
@@ -1215,17 +1214,24 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       true
       // startFilesForResult
     case R.id.action_export_file =>
-      val groupNames = app.profileManager.getGroupNames.map(_.toArray.map(s=> s.asInstanceOf[CharSequence]))
+      val groupNames = app.profileManager.getGroupNames
+        .map(_.toArray.map(s=> s.asInstanceOf[CharSequence]))
+        .getOrElse(Array())
       if (groupNames.isEmpty) { return true }
-      val checkedItems = groupNames.get.map(s => if (s == currentGroupName) true else false)
+      val checkedItems = groupNames.map(s => if (s == currentGroupName) true else false)
+      exportedGroupNames.add(currentGroupName)
       val builder = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
-      builder.setMultiChoiceItems(groupNames.get, checkedItems, new DialogInterface.OnMultiChoiceClickListener(){
+      builder.setMultiChoiceItems(groupNames, checkedItems, new DialogInterface.OnMultiChoiceClickListener(){
         override def onClick(dialog: DialogInterface, which: Int, isChecked: Boolean): Unit = {
-            Log.e(TAG, s"index: ${which} isChecked: ${isChecked}")
+          isChecked match {
+            case true => exportedGroupNames.add(groupNames(which))
+            case false => exportedGroupNames.remove(groupNames(which))
+          }
         }
       })
       builder.setTitle(R.string.action_export_file)
       builder.setPositiveButton(android.R.string.yes, ((_, _) =>{
+        if (exportedGroupNames.isEmpty) { return }
         val dateFormat = new SimpleDateFormat("yyyyMMddhhmmss")
         val date = dateFormat.format(new Date())
         val intent = new Intent(Intent.ACTION_CREATE_DOCUMENT)
@@ -1233,15 +1239,27 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         intent.setType("text/plain")
         val fileName = currentGroupName match {
           case f if f == app.getString(R.string.allgroups) => s"$f-$date.txt"
-          case _ => s"profiles-$date.txt"
+          case _ => s"Profiles-$date.txt"
         }
         intent.putExtra(Intent.EXTRA_TITLE, fileName)
         startActivityForResult(intent, REQUEST_CREATE_DOCUMENT)
       }): DialogInterface.OnClickListener)
       builder.setNegativeButton(android.R.string.no, null)
-      builder.setNeutralButton(R.string.allgroups, null)
+      builder.setNeutralButton(R.string.allgroups, new OnClickListener {
+        override def onClick(dialog: DialogInterface, which: Int): Unit = { }
+      })
       val dialog = builder.create()
       dialog.show()
+      dialog.getButton(DialogInterface.BUTTON_NEUTRAL)
+        .setOnClickListener(new View.OnClickListener {
+          override def onClick(v: View): Unit = {
+            val listView = dialog.getListView
+            for (i <- groupNames.indices) {
+              exportedGroupNames.add(groupNames(i))
+              listView.setItemChecked(i, true)
+            }
+          }
+        })
       true
     case R.id.action_import_file =>
       val intent = new Intent(Intent.ACTION_GET_CONTENT)

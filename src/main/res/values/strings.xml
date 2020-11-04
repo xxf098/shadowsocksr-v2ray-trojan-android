@@ -228,6 +228,7 @@
   <string name="ping">Ping</string>
   <string name="batch_delete">Batch Delete</string>
   <string name="batch_delete_msg">Delete all profiles in %s</string>
+  <string name="batch_delete_selected_msg">Delete selected profiles in %s</string>
 
   <string name="frontproxy_enable">Enable</string>
   <string name="frontproxy_addr">Address</string>

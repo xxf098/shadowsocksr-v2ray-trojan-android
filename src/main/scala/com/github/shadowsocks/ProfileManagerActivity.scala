@@ -518,7 +518,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               startActivity(new Intent(getIntent()))
             }): DialogInterface.OnClickListener)
             .setNegativeButton(android.R.string.no, null)
-            .setMessage(getString(R.string.batch_delete_msg, currentGroupName))
+            .setMessage(getString(R.string.batch_delete_selected_msg, currentGroupName))
             .create()
           dialog.show()
           true

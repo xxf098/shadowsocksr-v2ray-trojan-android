@@ -62,6 +62,7 @@ import scala.concurrent.duration.{Duration, SECONDS}
 import scala.concurrent.{Await, Future}
 import scala.collection.immutable.HashMap
 
+// support group on switch
 object ProfileManagerActivity {
   // profiles count
   def getProfilesByGroup (groupName: String, is_sort: Boolean): List[Profile] = {
@@ -101,7 +102,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     itemView.setOnKeyListener(this)
     itemView.setOnLongClickListener(view => {
       if (!multiSelect) {
-        actionMode = Some(view.getContext.asInstanceOf[AppCompatActivity].startSupportActionMode(actionModeCallbacks))
+        if (actionMode.isEmpty) {
+          actionMode = Some(view.getContext.asInstanceOf[AppCompatActivity].startSupportActionMode(actionModeCallbacks))
+        }
         this.updateProfileBackground()
       }
       true
@@ -153,13 +156,13 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val pingBtn = itemView.findViewById(R.id.ping_single).asInstanceOf[ImageView]
       pingBtn.setOnClickListener(_ => {
 
-        getWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+//        getWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
         item.pingItem(app.settings.getString(Key.PING_METHOD, "google")).foreach(result => {
             item.elapsed = result.data
             app.profileManager.updateProfile(item)
             this.updateText(0, 0, result.data)
-            runOnUiThread(() => getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON))
+//            runOnUiThread(() => getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON))
             singleTestProgressDialog.dismiss()
             Snackbar.make(findViewById(android.R.id.content), result.msg, Snackbar.LENGTH_LONG).show
           })
@@ -245,7 +248,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   // TODO: update adapter
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
     var profiles = new ArrayBuffer[Profile]
-    var displayInfo = List(true, true, true)
+    var displayInfo = getDisplayInfo()
     profiles ++= getProfilesByGroup(currentGroupName)
 
     def onGroupChange(groupName: String): Unit = {
@@ -271,7 +274,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
     def onCreateViewHolder(vg: ViewGroup, i: Int) ={
       val layoutId = if (Build.VERSION.SDK_INT >= 21) R.layout.layout_profiles_item1 else R.layout.layout_profiles_item
-      displayInfo = getDisplayInfo()
+//      displayInfo = getDisplayInfo()
       new ProfileViewHolder(LayoutInflater.from(vg.getContext).inflate(layoutId, vg, false))
     }
 
@@ -1314,12 +1317,12 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
                   isTesting = false
                   testAsyncJob.interrupt()
-                  runOnUiThread(() => getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON))
+//                  runOnUiThread(() => getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON))
                   finish()
                   startActivity(new Intent(getIntent))
               }
           })
-          getWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+//          getWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
           val testV2rayProfiles = (v2rayProfiles: List[List[Profile]], size: Int) => {
             val pingMethod = app.settings.getString(Key.PING_METHOD, "google")
@@ -1477,7 +1480,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                 testProgressDialog = null
               }
 
-              runOnUiThread(() => getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON))
+//              runOnUiThread(() => getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON))
               finish()
               startActivity(new Intent(Action.SORT))
               Looper.loop()

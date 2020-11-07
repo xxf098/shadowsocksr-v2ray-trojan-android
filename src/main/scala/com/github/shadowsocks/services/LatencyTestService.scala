@@ -73,6 +73,7 @@ class LatencyTestService extends Service {
         val testV2rayProfiles = (v2rayProfiles: List[List[Profile]], size: Int) => {
           val pingMethod = app.settings.getString(Key.PING_METHOD, "google")
           v2rayProfiles.indices.foreach(index => {
+            if (!isTesting) return index
             val profiles = v2rayProfiles(index)
             val futures = profiles.indices.map(i =>{
               val p = profiles(i)
@@ -108,6 +109,7 @@ class LatencyTestService extends Service {
         // connection pool time
         val testSSRProfiles = (ssrProfiles: List[List[Profile]], size: Int, offset: Int) => {
           ssrProfiles.indices.foreach(index => {
+            if (!isTesting) return index
             val profiles: List[Profile] = ssrProfiles(index)
             try {
               val confServer = profiles.indices.map(i => {
@@ -193,6 +195,7 @@ class LatencyTestService extends Service {
 
         val testTCPSSRProfiles = (ssrProfiles: List[List[Profile]], size: Int, offset: Int) => {
           ssrProfiles.indices.foreach(index => {
+            if (!isTesting) return index
             val profiles: List[Profile] = ssrProfiles(index)
             val futures = profiles.map(p => Future {
               val testResult = p.testTCPLatencyThread()
@@ -231,6 +234,7 @@ class LatencyTestService extends Service {
             } catch {
               case e: Exception => e.printStackTrace()
             } finally {
+              isTesting = false
               notificationService.cancel(LatencyTestService.NOTIFICATION_ID)
               bgResultReceiver.send(100, new Bundle())
               stopSelf(startId)
@@ -247,6 +251,7 @@ class LatencyTestService extends Service {
   }
 
   private def stopTest(): Unit = {
+    isTesting = false
     notificationService.cancel(LatencyTestService.NOTIFICATION_ID)
     stopSelf()
   }
@@ -304,6 +309,7 @@ class LatencyTestService extends Service {
   }
 
   private def updateNotification (title: String, testResult: String, max: Int, counter: Int): Unit = {
+    if (!isTesting) return
     val latency = """\d+ms""".r findFirstIn testResult
 //    val formatTitle = title.substring(0, 16) + "  " + latency.getOrElse("0ms")
 //    Log.e(TAG, s"formatTitle: $formatTitle")

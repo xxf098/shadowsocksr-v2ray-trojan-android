@@ -11,12 +11,13 @@ import android.content.{BroadcastReceiver, Context, DialogInterface, Intent, Int
 import android.os.{Bundle, IBinder, Looper, Message, ResultReceiver}
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
+import android.text.TextUtils
 import android.util.Log
 import android.view.WindowManager
 import android.widget.Toast
 import com.github.shadowsocks.{GuardedProcess, ProfileManagerActivity, R}
 import com.github.shadowsocks.ShadowsocksApplication.app
-import com.github.shadowsocks.database.Profile
+import com.github.shadowsocks.database.{Profile, ProfileManager}
 import com.github.shadowsocks.database.VmessAction.profile
 import com.github.shadowsocks.utils.{Action, ConfigUtils, ExeNative, Key, TcpFastOpen, Utils}
 import tun2socks.Tun2socks
@@ -72,12 +73,13 @@ class LatencyTestService extends Service {
         val testV2rayProfiles = (v2rayProfiles: List[List[Profile]], size: Int) => {
           val pingMethod = app.settings.getString(Key.PING_METHOD, "google")
           v2rayProfiles.indices.foreach(index => {
+            if (!isTesting) return index
             val profiles = v2rayProfiles(index)
             val futures = profiles.indices.map(i =>{
               val p = profiles(i)
               Future(p.pingItemThread(pingMethod, 8900L + index * size + i))
                 .map(testResult => {
-                  Log.e(TAG, s"testResult: ${testResult}")
+                  Log.e(TAG, s"testResult: $testResult")
                   counter += 1
                   updateNotification(p.name, testResult, max, counter)
                 })
@@ -87,7 +89,7 @@ class LatencyTestService extends Service {
               case e: Exception => e.printStackTrace()
             }
             sendProfileIds(profiles)
-            Log.e(TAG, s"testResult: ${index}")
+            // Log.e(TAG, s"testResult: $index")
           })
         }
 
@@ -97,8 +99,7 @@ class LatencyTestService extends Service {
           val zeroV2RayProfiles = v2rayProfiles.filter(p => p.elapsed < 1 && p.isV2Ray || p.isTrojan)
           if (zeroV2RayProfiles.nonEmpty && !(zeroV2RayProfiles.size * 1.1 > v2rayProfiles.size && v2rayProfiles.size > 50)) {
             max = v2rayProfiles.size + zeroV2RayProfiles.size
-            val size = if (zeroV2RayProfiles.size < 5 || (zeroV2RayProfiles.size * 5 < v2rayProfiles.size && v2rayProfiles.size < 100)) 1
-            else if (zeroV2RayProfiles.size * 2 > v2rayProfiles.size) 3
+            val size = if (zeroV2RayProfiles.size < 6 || (zeroV2RayProfiles.size * 5 < v2rayProfiles.size && v2rayProfiles.size < 60)) 1
             else 2
             testV2rayProfiles(zeroV2RayProfiles.grouped(size).toList, size)
           }
@@ -108,6 +109,7 @@ class LatencyTestService extends Service {
         // connection pool time
         val testSSRProfiles = (ssrProfiles: List[List[Profile]], size: Int, offset: Int) => {
           ssrProfiles.indices.foreach(index => {
+            if (!isTesting) return index
             val profiles: List[Profile] = ssrProfiles(index)
             try {
               val confServer = profiles.indices.map(i => {
@@ -193,6 +195,7 @@ class LatencyTestService extends Service {
 
         val testTCPSSRProfiles = (ssrProfiles: List[List[Profile]], size: Int, offset: Int) => {
           ssrProfiles.indices.foreach(index => {
+            if (!isTesting) return index
             val profiles: List[Profile] = ssrProfiles(index)
             val futures = profiles.map(p => Future {
               val testResult = p.testTCPLatencyThread()
@@ -204,7 +207,7 @@ class LatencyTestService extends Service {
               case e: Exception => e.printStackTrace()
             }
             sendProfileIds(profiles)
-            Log.e(TAG, s"testResult: ${index}")
+            // Log.e(TAG, s"testResult: $index")
           })
         }
 
@@ -228,13 +231,14 @@ class LatencyTestService extends Service {
                 .partition(p => p.isV2Ray || p.isTrojan)
               if (v2rayTrojanProfiles.nonEmpty) { testV2rayJob(v2rayTrojanProfiles) }
               if (ssrProfiles.nonEmpty) { testSSRJob(ssrProfiles) }
+            } catch {
+              case e: Exception => e.printStackTrace()
+            } finally {
+              isTesting = false
               notificationService.cancel(LatencyTestService.NOTIFICATION_ID)
-              // refresh
               bgResultReceiver.send(100, new Bundle())
               stopSelf(startId)
               Looper.loop()
-            } catch {
-              case e: Exception => e.printStackTrace()
             }
           }
         }
@@ -247,6 +251,7 @@ class LatencyTestService extends Service {
   }
 
   private def stopTest(): Unit = {
+    isTesting = false
     notificationService.cancel(LatencyTestService.NOTIFICATION_ID)
     stopSelf()
   }
@@ -304,6 +309,7 @@ class LatencyTestService extends Service {
   }
 
   private def updateNotification (title: String, testResult: String, max: Int, counter: Int): Unit = {
+    if (!isTesting) return
     val latency = """\d+ms""".r findFirstIn testResult
 //    val formatTitle = title.substring(0, 16) + "  " + latency.getOrElse("0ms")
 //    Log.e(TAG, s"formatTitle: $formatTitle")

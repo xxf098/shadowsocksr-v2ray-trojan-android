@@ -167,7 +167,7 @@ object Parser {
     profile.name = profile.v_ps
     profile.url_group = vmessBean.url_group
     profile.route = Route.BYPASS_LAN_CHN
-    profile.localPort = 10890
+    profile.localPort = 10809
     profile
   }
 
@@ -190,7 +190,7 @@ object Parser {
         profile.url_group = "trojan"
         profile.host = host
         profile.remotePort = port
-        profile.localPort = 10890
+        profile.localPort = 10809
         profile.name = host
         profile.route = Route.BYPASS_LAN_CHN
         profile.password = password

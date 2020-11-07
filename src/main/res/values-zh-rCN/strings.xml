@@ -218,6 +218,7 @@
   <string name="ping">测试延时</string>
   <string name="batch_delete">批量删除</string>
   <string name="batch_delete_msg">删除"%s"所有节点</string>
+  <string name="batch_delete_selected_msg">删除"%s"选中的节点</string>
 
 
   <string name="frontproxy_enable">启用</string>

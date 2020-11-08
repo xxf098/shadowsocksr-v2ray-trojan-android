@@ -606,6 +606,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     val animator = new DefaultItemAnimator
     animator.setSupportsChangeAnimations(false)
     profilesList.setItemAnimator(animator)
+    profilesList.setHasFixedSize(true)
+    profilesList.setItemViewCacheSize(15)
     profilesList.setAdapter(profilesAdapter)
     layoutManager.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {
       case (profile, i) if profile.id == app.profileId => i

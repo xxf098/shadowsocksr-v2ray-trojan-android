@@ -195,6 +195,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       handler.post(() => {
         testProgressDialog.dismiss
         testProgressDialog = null
+        ssrsubAdapter.reset()
         ssrsubAdapter.notifyDataSetChanged()
       })
 //      finish()
@@ -502,6 +503,11 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       val pos = getItemCount
       profiles += item
       notifyItemInserted(pos)
+    }
+
+    def reset(): Unit = {
+      profiles.clear()
+      profiles ++= app.ssrsubManager.getAllSSRSubs.getOrElse(List.empty[SSRSub])
     }
 
     def remove(pos: Int) {

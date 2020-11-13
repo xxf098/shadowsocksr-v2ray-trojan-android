@@ -54,6 +54,7 @@ import tun2socks.Tun2socks
 import scala.language.implicitConversions
 import Profile._
 import android.support.v4.app.NotificationCompat
+import com.github.shadowsocks.database.SSRSub.decodeBase64
 import com.github.shadowsocks.database.VmessAction.profile
 import com.github.shadowsocks.services.{BgResultReceiver, GetResultCallBack, LatencyTestService}
 
@@ -1214,6 +1215,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       if (clipboard.hasPrimaryClip) {
         val link = clipboard.getPrimaryClip.getItemAt(0).getText
         if (createProfilesFromText(link)) return true
+        // support import from base64
+        if (createProfilesFromText(decodeBase64(link.toString))) return true
       }
       Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show
       true

@@ -75,6 +75,7 @@ object VmessAction extends ProfileFunctions {
   override def getElapsed(port: Long = -1): Long = {
     checkBypassAddr()
     val vmess: Vmess = profile
+    if (profile.v_tls == "tls" && TextUtils.isEmpty(profile.v_host) && !Utils.isNumeric(profile.v_add)) { vmess.setHost(profile.v_add) }
     Utils.resolve(profile.v_add, enableIPv6 = false) match {
       case Some(addr) => vmess.setAdd(addr)
       case None => throw new IOException("Host Not Resolved")

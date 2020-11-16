@@ -64,6 +64,7 @@ import android.net.ConnectivityManager
 import android.net.LinkAddress
 import android.net.LinkProperties
 import android.net.Network
+import android.text.TextUtils
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -191,6 +192,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     china_dns_port = dnsConf._4
     // v2ray ipv6 dns query from golib
     if (profile.isV2Ray || profile.isTrojan) {
+      // TODO: serverName
+      if (profile.v_tls == "tls" && TextUtils.isEmpty(profile.v_host) && !Utils.isNumeric(profile.v_add)) { profile.v_host = profile.v_add }
+//      if (profile.v_tls == "tls" && TextUtils.isEmpty(profile.v_host) && !Utils.isNumeric(profile.v_add)) { profile.host = profile.v_add }
       if (profile.isV2Ray) {
         Utils.resolve(profile.v_add, enableIPv6 = profile.ipv6, hostname = dns_address) match {
           case Some(addr) => profile.v_add = addr

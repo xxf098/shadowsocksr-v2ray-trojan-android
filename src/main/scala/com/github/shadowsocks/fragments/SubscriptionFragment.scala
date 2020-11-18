@@ -35,7 +35,7 @@ import net.glxn.qrgen.android.QRCode
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
-// TODO: refactor
+// TODO: update progress
 class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
 
   private final val TAG = "SubscriptionFragment"
@@ -100,6 +100,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     case _ => false
   }
 
+  // TODO: handle special case like "v2ray"
   private[this] def addSubscription(): Unit = {
     showSubscriptionDialog(None) { (responseString, url, groupName, enableAutoSub) => {
       SSRSub.createSSRSub(responseString, url, groupName) match {
@@ -187,7 +188,9 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
         testProgressDialog = ProgressDialog.show(requireContext(), getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true)
       })
       app.ssrsubManager.getAllSSRSubs match {
-        case Some(ssrsubs) => ssrsubs.foreach(updateSingleSubscription)
+        case Some(ssrsubs) => ssrsubs.foreach(ssrsub => {
+          updateSingleSubscription(ssrsub)
+        })
         case _ => configActivity.runOnUiThread(() => {
           Toast.makeText(requireContext(), R.string.action_export_err, Toast.LENGTH_SHORT).show
         })

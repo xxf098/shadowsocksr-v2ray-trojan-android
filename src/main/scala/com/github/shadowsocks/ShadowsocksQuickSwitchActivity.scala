@@ -4,17 +4,24 @@ import android.content.pm.ShortcutManager
 import android.content.res.Resources
 import android.os.{Build, Bundle}
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, RecyclerView, Toolbar}
+import android.support.v7.widget.{AppCompatSpinner, DefaultItemAnimator, LinearLayoutManager, RecyclerView, Toolbar}
+import android.util.Log
 import android.view.{LayoutInflater, View, ViewGroup}
-import android.widget.CheckedTextView
+import android.widget.AdapterView.OnItemSelectedListener
+import android.widget.{AdapterView, ArrayAdapter, CheckedTextView, TextView}
 import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.utils.Utils
+import com.github.shadowsocks.utils.{Key, Utils}
 import com.github.shadowsocks.ShadowsocksApplication.app
+
+import scala.collection.mutable.ArrayBuffer
 
 /**
   * Created by Lucas on 3/10/16.
   */
 class ShadowsocksQuickSwitchActivity extends AppCompatActivity {
+
+  private var currentGroupName: String = _
+  private lazy val profilesAdapter: ProfilesAdapter = new ProfilesAdapter()
 
   private class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view) with View.OnClickListener {
     {
@@ -40,12 +47,17 @@ class ShadowsocksQuickSwitchActivity extends AppCompatActivity {
   }
 
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
-    val profiles = app.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
+    var profiles = ProfileManagerActivity.getProfilesByGroup(currentGroupName, false)
 
     def getItemCount = profiles.length
 
     def onBindViewHolder(vh: ProfileViewHolder, i: Int) = i match {
       case _ => vh.bind(profiles(i))
+    }
+
+    def onGroupChange():Unit = {
+      profiles = ProfileManagerActivity.getProfilesByGroup(currentGroupName, false)
+      notifyDataSetChanged()
     }
 
     private val name = "select_dialog_singlechoice_" + (if (Build.VERSION.SDK_INT >= 21) "material" else "holo")
@@ -54,14 +66,13 @@ class ShadowsocksQuickSwitchActivity extends AppCompatActivity {
       .inflate(Resources.getSystem.getIdentifier(name, "layout", "android"), vg, false))
   }
 
-  private val profilesAdapter = new ProfilesAdapter
-
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.layout_quick_switch)
 
     val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
     toolbar.setTitle(R.string.quick_switch)
+    initSpinner(Some(app.settings.getString(Key.currentGroupName, getString(R.string.allgroups))))
 
     val profilesList = findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
     val lm = new LinearLayoutManager(this)
@@ -72,5 +83,30 @@ class ShadowsocksQuickSwitchActivity extends AppCompatActivity {
       case (profile, i) if profile.id == app.profileId => i
     }.getOrElse(0))
     if (Build.VERSION.SDK_INT >= 25) getSystemService(classOf[ShortcutManager]).reportShortcutUsed("switch")
+  }
+
+  def initSpinner (groupName: Option[String] = None, ignoreGroupName: Option[String] = None ): Unit = {
+    currentGroupName = groupName.getOrElse(getString(R.string.allgroups))
+    val spinner = findViewById(R.id.group_switch_spinner).asInstanceOf[AppCompatSpinner]
+    val spinnerAdapter = new ArrayAdapter[String](this, android.R.layout.simple_spinner_item)
+    val selectIndex = app.profileManager.getGroupNames match {
+      case Some(groupNames) => {
+        val allGroupNames = getString(R.string.allgroups) +: groupNames
+        allGroupNames.filter(_ != ignoreGroupName.orNull).foreach(name => spinnerAdapter.add(name))
+        Math.max(0, allGroupNames.indexOf(currentGroupName))
+      }
+      case None => 0
+    }
+    spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+    spinner.setAdapter(spinnerAdapter)
+    spinner.setSelection(selectIndex)
+    spinner.setOnItemSelectedListener(new OnItemSelectedListener{
+      override def onItemSelected(parent: AdapterView[_], view: View, position: Int, id: Long): Unit = {
+        currentGroupName = parent.getItemAtPosition(position).toString
+        app.editor.putString(Key.currentGroupName, currentGroupName).apply()
+        profilesAdapter.onGroupChange()
+      }
+      override def onNothingSelected(parent: AdapterView[_]): Unit = {}
+    })
   }
 }

@@ -69,7 +69,7 @@ import android.text.TextUtils
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 
-
+// TODO: change vpn config
 class ShadowsocksVpnService extends VpnService with BaseService {
   val TAG = "ShadowsocksVpnService"
   val VPN_MTU = 1500
@@ -195,6 +195,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       // TODO: serverName
       if (profile.v_tls == "tls" && TextUtils.isEmpty(profile.v_host) && !Utils.isNumeric(profile.v_add)) { profile.v_host = profile.v_add }
 //      if (profile.v_tls == "tls" && TextUtils.isEmpty(profile.v_host) && !Utils.isNumeric(profile.v_add)) { profile.host = profile.v_add }
+      // TODO: migrate DNS resolve
       if (profile.isV2Ray) {
         Utils.resolve(profile.v_add, enableIPv6 = profile.ipv6, hostname = dns_address) match {
           case Some(addr) => profile.v_add = addr
@@ -210,6 +211,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       profile.enable_domain_sniff = app.settings.getBoolean(Key.ENABLE_SNIFF_DOMAIN, true)
       v2rayThread = new V2RayVpnThread(this)
       v2rayThread.start()
+      v2rayConnected()
       return
     }
 
@@ -221,7 +223,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     // Resolve the server address
     host_arg = profile.host
-    Utils.resolve(profile.host, enableIPv6 = true, hostname=dns_address) match {
+    Utils.resolve(profile.host, enableIPv6 = profile.ipv6, hostname=dns_address) match {
       case Some(addr) => profile.host = addr
       case None => throw NameNotResolvedException()
     }

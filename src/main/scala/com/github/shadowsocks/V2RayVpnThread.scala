@@ -25,7 +25,7 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
   var pfd: ParcelFileDescriptor = _
   var inputStream: FileInputStream = _
   var outputStream: FileOutputStream = _
-  var buffer = ByteBuffer.allocateDirect(8192)
+  var buffer = ByteBuffer.allocateDirect(2048)
 
   var txTotal: Long = 0 // download
   var rxTotal: Long = 0 // upload
@@ -120,7 +120,7 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
       }
     }
     running = true
-    vpnService.v2rayConnected()
+//    vpnService.v2rayConnected()
     if (flow.isDefined) { handlePackets() }
   }
 

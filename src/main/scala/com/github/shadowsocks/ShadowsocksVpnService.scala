@@ -519,10 +519,21 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       builder.addRoute(china_dns_address, 32)
     else
       builder.addRoute(dns_address, 32)
-    if (Build.VERSION.SDK_INT >= 29) {
+
+    if (Build.VERSION.SDK_INT >= 23) {
       val cm = getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
-      builder.setMetered(cm.isActiveNetworkMetered)
+      val activeNetwork = cm.getActiveNetwork
+      if (activeNetwork != null) {
+        val networks = if (Build.VERSION.SDK_INT == 28 && cm.isActiveNetworkMetered) null
+        else Array(activeNetwork)
+        builder.setUnderlyingNetworks(networks)
+      }
+      if (Build.VERSION.SDK_INT >= 29) {
+        // false
+        builder.setMetered(cm.isActiveNetworkMetered)
+      }
     }
+
     builder
   }
 

@@ -529,8 +529,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         builder.setUnderlyingNetworks(networks)
       }
       if (Build.VERSION.SDK_INT >= 29) {
-        // false
-        builder.setMetered(cm.isActiveNetworkMetered)
+        builder.setMetered(false)
       }
     }
 

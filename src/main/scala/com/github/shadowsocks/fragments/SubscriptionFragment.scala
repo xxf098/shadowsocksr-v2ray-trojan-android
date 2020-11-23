@@ -188,9 +188,12 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
         testProgressDialog = ProgressDialog.show(requireContext(), getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true)
       })
       app.ssrsubManager.getAllSSRSubs match {
-        case Some(ssrsubs) => ssrsubs.foreach(ssrsub => {
+        case Some(ssrsubs) => ssrsubs.zipWithIndex.foreach{case(ssrsub, i) => {
+          configActivity.runOnUiThread(() => {
+            testProgressDialog.setMessage(getString(R.string.ssrsub_update_progres, i: Integer, ssrsubs.size: Integer))
+          })
           updateSingleSubscription(ssrsub)
-        })
+        }}
         case _ => configActivity.runOnUiThread(() => {
           Toast.makeText(requireContext(), R.string.action_export_err, Toast.LENGTH_SHORT).show
         })

@@ -132,6 +132,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
             fab.setBackgroundTintList(greenTint)
             if (state == State.CONNECTING) {
               fabProgressCircle.beginFinalAnimation()
+              fabProgressCircle.postDelayed(hideCircle, 2800)
             } else {
               fabProgressCircle.postDelayed(hideCircle, 1000)
             }

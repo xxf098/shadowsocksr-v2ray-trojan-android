@@ -478,6 +478,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (profile.ipv6) {
       builder.addAddress(PRIVATE_VLAN6.formatLocal(Locale.ENGLISH, "1"), 126)
       builder.addRoute("::", 0)
+      builder.addDnsServer("2001:4860:4860::8888")
+      builder.addDnsServer("2001:4860:4860::8844")
     }
 
     if (Utils.isLollipopOrAbove) {
@@ -521,13 +523,13 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       builder.addRoute(dns_address, 32)
 
     if (Build.VERSION.SDK_INT >= 23) {
-      val cm = getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
-      val activeNetwork = cm.getActiveNetwork
-      if (activeNetwork != null) {
-        val networks = if (Build.VERSION.SDK_INT == 28 && cm.isActiveNetworkMetered) null
-        else Array(activeNetwork)
-        builder.setUnderlyingNetworks(networks)
-      }
+//      val cm = getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
+//      val activeNetwork = cm.getActiveNetwork
+//      if (activeNetwork != null) {
+//        val networks = if (Build.VERSION.SDK_INT == 28 && cm.isActiveNetworkMetered) null
+//        else Array(activeNetwork)
+//        builder.setUnderlyingNetworks(networks)
+//      }
       if (Build.VERSION.SDK_INT >= 29) {
         builder.setMetered(false)
       }

@@ -103,6 +103,9 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     }
     unregisterCallback
     service.stopForeground(true)
+    if (Build.VERSION.SDK_INT >= 26 ) {
+        nm.deleteNotificationChannel(channel)
+    }
     nm.cancel(1)
   }
 }

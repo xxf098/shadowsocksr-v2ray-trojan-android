@@ -73,7 +73,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class ShadowsocksVpnService extends VpnService with BaseService {
   val TAG = "ShadowsocksVpnService"
   val VPN_MTU = 1500
-  val PRIVATE_VLAN = "26.26.26.%s"
+  val PRIVATE_VLAN = "172.19.0.%s"
   val PRIVATE_VLAN6 = "fdfe:dcba:9876::%s"
   var conn: ParcelFileDescriptor = _
   var vpnThread: ShadowsocksVpnThread = _
@@ -468,7 +468,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     builder
       .setSession(profile.name)
       .setMtu(VPN_MTU)
-      .addAddress(PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"), 24)
+      .addAddress(PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"), 30)
 
     if (profile.route == Route.CHINALIST)
       builder.addDnsServer(china_dns_address)
@@ -515,6 +515,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         val addr = cidr.split('/')
         builder.addRoute(addr(0), addr(1).toInt)
       })
+      builder.addRoute(PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "2"), 32)
+      if (profile.ipv6) { builder.addRoute("2000::", 3)  }
     }
 
     if (profile.route == Route.CHINALIST)

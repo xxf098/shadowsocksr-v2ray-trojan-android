@@ -106,33 +106,37 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     stopRunner(true)
   }
 
+  // postdelay
   override def stopRunner(stopService: Boolean, msg: String = null) {
+    try {
+      if (vpnThread != null) {
+        vpnThread.stopThread()
+        vpnThread = null
+      }
 
-    if (vpnThread != null) {
-      vpnThread.stopThread()
-      vpnThread = null
+      if (notification != null) notification.destroy()
+
+      // channge the state
+      changeState(State.STOPPING)
+      // reset VPN
+      killProcesses()
+
+      // close connections
+      if (conn != null) {
+        conn.close()
+        conn = null
+      }
+
+      Option(profile).filter(p => p.isV2Ray || p.isTrojan).flatMap(_ => Option(v2rayThread))
+        .foreach(_ => v2rayThread.stopTun2Socks(stopService))
+
+      super.stopRunner(stopService, msg)
+    } catch {
+      case e: Exception => {
+        Log.e(TAG, e.getMessage)
+        changeState(State.STOPPED)
+      }
     }
-
-    if (notification != null) notification.destroy()
-
-    // channge the state
-    changeState(State.STOPPING)
-
-    app.track(TAG, "stop")
-
-    // reset VPN
-    killProcesses()
-
-    // close connections
-    if (conn != null) {
-      conn.close()
-      conn = null
-    }
-
-    Option(profile).filter(p => p.isV2Ray || p.isTrojan).flatMap(_ => Option(v2rayThread))
-      .foreach(_ => v2rayThread.stopTun2Socks(stopService))
-
-    super.stopRunner(stopService, msg)
   }
 
   def killProcesses() {

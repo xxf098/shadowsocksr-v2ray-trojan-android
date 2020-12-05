@@ -178,7 +178,7 @@ object Utils {
     try {
       val lookup = new Lookup(host, addrType)
       val resolver = new SimpleResolver(hostname)
-      resolver.setTimeout(4)
+      resolver.setTimeout(3)
       lookup.setResolver(resolver)
       val result = lookup.run()
       if (result == null) return None

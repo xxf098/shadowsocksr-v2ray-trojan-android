@@ -118,10 +118,11 @@ object SSRSub {
         subscribes = decodeBase64(scala.io.Source.fromInputStream(in).mkString)
       })
     } else {
-      val resp = response.body().string.replaceAll("=", "")
-          .replaceAll("\\+", "-")
-          .replaceAll("/", "_")
-      subscribes = new String(Base64.decode(resp, Base64.URL_SAFE), "UTF-8")
+//      val resp = response.body().string.replaceAll("=", "")
+//          .replaceAll("\\+", "-")
+//          .replaceAll("/", "_")
+//      subscribes = new String(Base64.decode(resp, Base64.URL_SAFE), "UTF-8")
+      subscribes = decodeBase64(response.body().string)
     }
     subscribes
   }

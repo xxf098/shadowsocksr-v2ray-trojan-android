@@ -64,15 +64,16 @@ import android.net.ConnectivityManager
 import android.net.LinkAddress
 import android.net.LinkProperties
 import android.net.Network
+import android.text.TextUtils
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 
-
+// TODO: change vpn config
 class ShadowsocksVpnService extends VpnService with BaseService {
   val TAG = "ShadowsocksVpnService"
   val VPN_MTU = 1500
-  val PRIVATE_VLAN = "26.26.26.%s"
+  val PRIVATE_VLAN = "172.19.0.%s"
   val PRIVATE_VLAN6 = "fdfe:dcba:9876::%s"
   var conn: ParcelFileDescriptor = _
   var vpnThread: ShadowsocksVpnThread = _
@@ -105,33 +106,37 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     stopRunner(true)
   }
 
+  // postdelay
   override def stopRunner(stopService: Boolean, msg: String = null) {
+    try {
+      if (vpnThread != null) {
+        vpnThread.stopThread()
+        vpnThread = null
+      }
 
-    if (vpnThread != null) {
-      vpnThread.stopThread()
-      vpnThread = null
+      if (notification != null) notification.destroy()
+
+      // channge the state
+      changeState(State.STOPPING)
+      // reset VPN
+      killProcesses()
+
+      // close connections
+      if (conn != null) {
+        conn.close()
+        conn = null
+      }
+
+      Option(profile).filter(p => p.isV2Ray || p.isTrojan).flatMap(_ => Option(v2rayThread))
+        .foreach(_ => v2rayThread.stopTun2Socks(stopService))
+
+      super.stopRunner(stopService, msg)
+    } catch {
+      case e: Exception => {
+        Log.e(TAG, e.getMessage)
+        changeState(State.STOPPED)
+      }
     }
-
-    if (notification != null) notification.destroy()
-
-    // channge the state
-    changeState(State.STOPPING)
-
-    app.track(TAG, "stop")
-
-    // reset VPN
-    killProcesses()
-
-    // close connections
-    if (conn != null) {
-      conn.close()
-      conn = null
-    }
-
-    Option(profile).filter(p => p.isV2Ray || p.isTrojan).flatMap(_ => Option(v2rayThread))
-      .foreach(_ => v2rayThread.stopTun2Socks(stopService))
-
-    super.stopRunner(stopService, msg)
   }
 
   def killProcesses() {
@@ -191,6 +196,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     china_dns_port = dnsConf._4
     // v2ray ipv6 dns query from golib
     if (profile.isV2Ray || profile.isTrojan) {
+      // TODO: serverName
+      if (profile.v_tls == "tls" && TextUtils.isEmpty(profile.v_host) && !Utils.isNumeric(profile.v_add)) { profile.v_host = profile.v_add }
+//      if (profile.v_tls == "tls" && TextUtils.isEmpty(profile.v_host) && !Utils.isNumeric(profile.v_add)) { profile.host = profile.v_add }
+      // TODO: migrate DNS resolve
       if (profile.isV2Ray) {
         Utils.resolve(profile.v_add, enableIPv6 = profile.ipv6, hostname = dns_address) match {
           case Some(addr) => profile.v_add = addr
@@ -206,6 +215,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       profile.enable_domain_sniff = app.settings.getBoolean(Key.ENABLE_SNIFF_DOMAIN, true)
       v2rayThread = new V2RayVpnThread(this)
       v2rayThread.start()
+      v2rayConnected()
       return
     }
 
@@ -217,7 +227,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     // Resolve the server address
     host_arg = profile.host
-    Utils.resolve(profile.host, enableIPv6 = true, hostname=dns_address) match {
+    Utils.resolve(profile.host, enableIPv6 = profile.ipv6, hostname=dns_address) match {
       case Some(addr) => profile.host = addr
       case None => throw NameNotResolvedException()
     }
@@ -462,7 +472,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     builder
       .setSession(profile.name)
       .setMtu(VPN_MTU)
-      .addAddress(PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"), 24)
+      .addAddress(PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"), 30)
 
     if (profile.route == Route.CHINALIST)
       builder.addDnsServer(china_dns_address)
@@ -472,6 +482,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (profile.ipv6) {
       builder.addAddress(PRIVATE_VLAN6.formatLocal(Locale.ENGLISH, "1"), 126)
       builder.addRoute("::", 0)
+      builder.addDnsServer("2001:4860:4860::8888")
+      builder.addDnsServer("2001:4860:4860::8844")
     }
 
     if (Utils.isLollipopOrAbove) {
@@ -507,16 +519,28 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         val addr = cidr.split('/')
         builder.addRoute(addr(0), addr(1).toInt)
       })
+      builder.addRoute(PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "2"), 32)
+      if (profile.ipv6) { builder.addRoute("2000::", 3)  }
     }
 
     if (profile.route == Route.CHINALIST)
       builder.addRoute(china_dns_address, 32)
     else
       builder.addRoute(dns_address, 32)
-    if (Build.VERSION.SDK_INT >= 29) {
-      val cm = getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
-      builder.setMetered(cm.isActiveNetworkMetered)
+
+    if (Build.VERSION.SDK_INT >= 23) {
+//      val cm = getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
+//      val activeNetwork = cm.getActiveNetwork
+//      if (activeNetwork != null) {
+//        val networks = if (Build.VERSION.SDK_INT == 28 && cm.isActiveNetworkMetered) null
+//        else Array(activeNetwork)
+//        builder.setUnderlyingNetworks(networks)
+//      }
+      if (Build.VERSION.SDK_INT >= 29) {
+        builder.setMetered(false)
+      }
     }
+
     builder
   }
 

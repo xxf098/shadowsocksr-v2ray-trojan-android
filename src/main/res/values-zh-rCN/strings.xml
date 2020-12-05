@@ -116,8 +116,8 @@
   <string name="stat_summary">发送: \t%3$s\t↑\t%1$s/s\n接收: \t%4$s\t↓\t%2$s/s</string>
 
   <string name="connection_test_pending">检查网络连接</string>
-  <string name="connection_test_testing">测试中……</string>
-  <string name="connection_test_available">连接有效: 延时 %d 毫秒</string>
+  <string name="connection_test_testing">测试中…</string>
+  <string name="connection_test_available">连接成功: 延时 %d 毫秒</string>
   <string name="connection_test_unavailable">连接失败</string>
   <string name="connection_test_fail">无互联网连接</string>
   <string name="connection_test_error">失败：%s</string>
@@ -135,7 +135,7 @@
   <string name="add_profile_methods_manual_settings">手动设置</string>
   <string name="add_profile_nfc_hint_title">使用 Android Beam (NFC) 来添加配置</string>
   <string name="add_profile_nfc_hint">保持两台设备的屏幕亮起，在另外一台设备上，点击配置文件的分享按钮，将它们靠在一起（背靠背）。\n你也可以扫描 NFC 标签。</string>
-  <string name="add_profile_scanner_permission_required">扫描二维码需要相机权限。</string>
+  <string name="add_profile_scanner_permission_required">扫描二维码需要获得使用相机的权限。</string>
 
   <string name="scan_qrcode_install_title">扫码提示</string>
   <string name="scan_qrcode_install_text">看起来似乎您并没有安装符合 zxing 标准的扫描器，点击“确定”将带领您前往您所安装的应用商店里下载一个，或者您可以直接点击“直接下载”来下载一个 APK 直接安装。</string>
@@ -193,7 +193,7 @@
   <string name="action_export_file">导出至文件</string>
   <string name="action_export_file_msg">导出至文件成功</string>
   <string name="action_export_file_err">导出至文件失败</string>
-  <string name="action_import_file">从文件导入</string>
+  <string name="action_import_file">从文件导入…</string>
   <string name="action_import_qrcode_image">从二维码图片导入</string>
   <string name="action_import_manually_vmess">手动输入Vmess</string>
   <string name="action_add_v2ray_config">从V2Ray JSON导入</string>
@@ -238,6 +238,7 @@
   <string name="ssrsub_error">订阅失败: %s</string>
   <string name="ssrsub_progres">处理中</string>
   <string name="ssrsub_progres_text">请稍候(如果订阅失败，请打开代理后重试)</string>
+  <string name="ssrsub_update_progres">请稍候 %1$d/%2$d(如果订阅失败，请打开代理后重试)</string>
   <string name="ssrsub_toast_start">开始更新订阅。</string>
   <string name="ssrsub_toast_success">成功更新订阅！</string>
   <string name="ssrsub_toast_fail">更新订阅失败！</string>

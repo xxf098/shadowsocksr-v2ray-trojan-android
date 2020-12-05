@@ -248,6 +248,7 @@
   <string name="ssrsub_error">Subscription Error: %s</string>
   <string name="ssrsub_progres">Processing...</string>
   <string name="ssrsub_progres_text">Please wait...</string>
+  <string name="ssrsub_update_progres">Please wait %1$d/%2$d...</string>
   <string name="ssrsub_toast_start">Updating subscriptions...</string>
   <string name="ssrsub_toast_success">Successfully updated subscriptions.</string>
   <string name="ssrsub_toast_fail">Failed to update subscriptions!</string>
@@ -282,7 +283,7 @@
   <!-- status -->
   <string name="sent">Sent:</string>
   <string name="received">Received:</string>
-  <string name="allgroups" translatable="false">All Groups</string>
+  <string name="allgroups">All Groups</string>
   <string name="retry_test">Retry...</string>
 
 <!--  PreferenceScreen-->

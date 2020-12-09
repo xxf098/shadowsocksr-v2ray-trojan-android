@@ -68,6 +68,8 @@ public abstract class Tun2socks
 
     public static native long testVmessLatency(final Vmess p0, final long p1) throws Exception;
 
+    public static native long testVmessLatencyDirect(final Vmess p0) throws Exception;
+
     static {
         Seq.touch();
         _init();

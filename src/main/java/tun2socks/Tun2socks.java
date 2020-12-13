@@ -20,6 +20,10 @@ public abstract class Tun2socks
 
     private static native void _init();
 
+    public static native void batchTestVmessCoreLatency(final String p0, final long p1, final TestLatency p2);
+
+    public static native void batchTestVmessLatency(final String p0, final long p1, final TestLatency p2);
+
     public static native String checkVersion();
 
     public static native Vmess convertJSONToVmess(final byte[] p0) throws Exception;
@@ -69,6 +73,8 @@ public abstract class Tun2socks
     public static native long testVmessLatency(final Vmess p0, final long p1) throws Exception;
 
     public static native long testVmessLatencyDirect(final Vmess p0) throws Exception;
+
+    public static native long testVmessLinkLatencyDirect(final String p0) throws Exception;
 
     static {
         Seq.touch();
@@ -127,6 +133,24 @@ public abstract class Tun2socks
 
         @Override
         public native void updateTraffic(final long p0, final long p1);
+    }
+
+    private static final class proxyTestLatency implements Seq.Proxy, TestLatency
+    {
+        private final int refnum;
+
+        @Override
+        public final int incRefnum() {
+            Seq.incGoRef(this.refnum, this);
+            return this.refnum;
+        }
+
+        proxyTestLatency(final int refnum) {
+            Seq.trackGoRef(this.refnum = refnum, this);
+        }
+
+        @Override
+        public native void updateLatency(final long p0, final long p1);
     }
 
     private static final class proxyVpnService implements Seq.Proxy, VpnService

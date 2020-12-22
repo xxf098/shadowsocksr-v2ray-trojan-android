@@ -175,6 +175,17 @@
         <item>error</item>
     </string-array>
 
+    <string-array name="core_entry">
+        <item>V2Ray Core</item>
+        <item>V2Ray Lite</item>
+    </string-array>
+
+    <string-array name="core_value">
+        <item>core</item>
+        <item>lite</item>
+    </string-array>
+
+
     <string-array name="profile_display_info">
         <item>server</item>
         <item>port</item>

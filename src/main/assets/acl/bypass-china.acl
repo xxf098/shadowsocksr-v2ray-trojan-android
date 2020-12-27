@@ -7625,6 +7625,19 @@
 69.65.19.160
 72.52.81.22
 85.17.73.31
+# services.googleapis.cn IPs$
+180.163.150.34
+180.163.150.162
+180.163.151.34
+180.163.151.162
+203.208.39.0/24
+203.208.40.0/24
+203.208.41.0/24
+203.208.43.0/24
+203.208.50.0/24
+220.181.174.34
+220.181.174.162
+220.181.174.226
 (?:^|\.)030buy\.com$
 (?:^|\.)0rz\.tw$
 (?:^|\.)1-apple\.com\.tw$
@@ -7865,6 +7878,7 @@
 (?:^|\.)amnyemachen\.org$
 (?:^|\.)amoiist\.com$
 (?:^|\.)ampproject\.org$
+(?:^|\.)ampproject\.net$
 (?:^|\.)amtb-taipei\.org$
 (?:^|\.)anchorfree\.com$
 (?:^|\.)ancsconf\.org$
@@ -9541,6 +9555,8 @@
 (?:^|\.)goofind\.com$
 (?:^|\.)google(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?){1,2}$
 (?:^|\.)googleapis(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?){1,2}$
+(?:^|\.)googleapis\.cn$
+(?:^|\.)services\.googleapis\.cn$
 (?:^|\.)googleapps\.com$
 (?:^|\.)googlearth\.com$
 (?:^|\.)googleartproject\.com$

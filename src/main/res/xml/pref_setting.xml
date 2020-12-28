@@ -67,6 +67,14 @@
             app:min="0" />
 
         <ListPreference
+            android:defaultValue="core"
+            android:entries="@array/core_entry"
+            android:entryValues="@array/core_value"
+            android:key="pref_v2ray_core"
+            android:summary="%s"
+            android:title="Switch Core" />
+
+        <ListPreference
             android:defaultValue="error"
             android:entries="@array/log_level"
             android:entryValues="@array/log_level"

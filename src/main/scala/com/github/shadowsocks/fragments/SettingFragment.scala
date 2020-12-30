@@ -36,6 +36,7 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
   lazy val aboutPref = findPreference("about")
   lazy val enableSniffDomain = findPreference(Key.ENABLE_SNIFF_DOMAIN).asInstanceOf[CheckBoxPreference]
   lazy val logLevel = findPreference(Key.LOG_LEVEL).asInstanceOf[ListPreference]
+  lazy val v2rayCore = findPreference(Key.V2RAY_CORE).asInstanceOf[ListPreference]
   lazy val mux = findPreference(Key.MUX).asInstanceOf[NumberPickerPreference]
   lazy val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
   private def activity = getActivity.asInstanceOf[SettingActivity]
@@ -100,6 +101,12 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
     logLevel.setOnPreferenceChangeListener((_, value) => {
       val level = value.asInstanceOf[String]
       prefs.edit().putString(Key.LOG_LEVEL, level).apply()
+      true
+    })
+
+    logLevel.setOnPreferenceChangeListener((_, value) => {
+      val core = value.asInstanceOf[String]
+      prefs.edit().putString(Key.V2RAY_CORE, core).apply()
       true
     })
 

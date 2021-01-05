@@ -266,7 +266,7 @@
   <string name="retry_test">重试...</string>
 
 
-  <string name="delete_zero_latency">仅删除0ms</string>
+  <string name="delete_zero_latency">删除无效节点</string>
 
     <!--  V2Ray -->
   <string name="v_pref_id">用户ID</string>

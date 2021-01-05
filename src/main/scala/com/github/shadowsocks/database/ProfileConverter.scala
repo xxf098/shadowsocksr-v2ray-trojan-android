@@ -80,7 +80,8 @@ object VmessAction extends ProfileFunctions {
       case Some(addr) => vmess.setAdd(addr)
       case None => throw new IOException("Host Not Resolved")
     }
-    Tun2socks.testVmessLatency(vmess, port)
+//    Tun2socks.testVmessLatency(vmess, port)
+    Tun2socks.testVmessLatencyDirect(vmess)
   }
 
   override def isOK(): Boolean = !(TextUtils.isEmpty(profile.v_add) ||

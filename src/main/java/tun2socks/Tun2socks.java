@@ -20,6 +20,12 @@ public abstract class Tun2socks
 
     private static native void _init();
 
+    public static native void batchTestLatency(final String p0, final long p1, final TestLatency p2);
+
+    public static native void batchTestVmessCoreLatency(final String p0, final long p1, final TestLatency p2);
+
+    public static native void batchTestVmessLatency(final String p0, final long p1, final TestLatency p2);
+
     public static native String checkVersion();
 
     public static native Vmess convertJSONToVmess(final byte[] p0) throws Exception;
@@ -50,6 +56,8 @@ public abstract class Tun2socks
 
     public static native void startV2Ray(final PacketFlow p0, final VpnService p1, final LogService p2, final QuerySpeed p3, final byte[] p4, final String p5) throws Exception;
 
+    public static native void startV2RayLiteWithTunFd(final long p0, final VpnService p1, final LogService p2, final QuerySpeed p3, final Vmess p4, final String p5) throws Exception;
+
     public static native void startV2RayWithTunFd(final long p0, final VpnService p1, final LogService p2, final QuerySpeed p3, final Vmess p4, final String p5) throws Exception;
 
     public static native void startV2RayWithVmess(final PacketFlow p0, final VpnService p1, final LogService p2, final Vmess p3, final String p4) throws Exception;
@@ -67,6 +75,10 @@ public abstract class Tun2socks
     public static native long testURLLatency(final String p0) throws Exception;
 
     public static native long testVmessLatency(final Vmess p0, final long p1) throws Exception;
+
+    public static native long testVmessLatencyDirect(final Vmess p0) throws Exception;
+
+    public static native long testVmessLinkLatencyDirect(final String p0) throws Exception;
 
     static {
         Seq.touch();
@@ -125,6 +137,24 @@ public abstract class Tun2socks
 
         @Override
         public native void updateTraffic(final long p0, final long p1);
+    }
+
+    private static final class proxyTestLatency implements Seq.Proxy, TestLatency
+    {
+        private final int refnum;
+
+        @Override
+        public final int incRefnum() {
+            Seq.incGoRef(this.refnum, this);
+            return this.refnum;
+        }
+
+        proxyTestLatency(final int refnum) {
+            Seq.trackGoRef(this.refnum = refnum, this);
+        }
+
+        @Override
+        public native void updateLatency(final long p0, final long p1);
     }
 
     private static final class proxyVpnService implements Seq.Proxy, VpnService

@@ -9,7 +9,7 @@ import android.os.ParcelFileDescriptor
 import android.util.Log
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.utils.{Parser, Route, State, TrafficMonitor, Utils}
+import com.github.shadowsocks.utils.{Key, Parser, Route, State, TrafficMonitor, Utils}
 import tun2socks.{PacketFlow, QuerySpeed, Tun2socks, Vmess, LogService => Tun2socksLogService, VpnService => Tun2socksVpnService}
 import com.google.gson.{GsonBuilder, JsonParser}
 
@@ -93,8 +93,11 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 //      Log.e(TAG, Tun2socks.checkVersion())
       profile match {
         case p if p.isVmess => {
+          app.settings.getString(Key.V2RAY_CORE, "core") match {
+            case "lite" => Tun2socks.startV2RayLiteWithTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)
+            case _ => Tun2socks.startV2RayWithTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)
+          }
 //          Tun2socks.startV2RayWithVmess(flow, service, androidLogService, profile, assetPath)
-          Tun2socks.startV2RayWithTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)
         }
         case p if p.isTrojan => {
 //          Tun2socks.startTrojan(flow, service, androidLogService, profile, assetPath)

@@ -79,6 +79,7 @@ object Profile {
          |"dns": "$dns_address:$dns_port,$china_dns_address:$china_dns_port",
          |"routeMode": $routeMode,
          |"mux": ${app.settings.getInt(Key.MUX, -1)},
+         |"serverName": "${profile.host}",
          |"allowInsecure": true
          |}
 """.stripMargin
@@ -86,13 +87,22 @@ object Profile {
   }
 
   implicit def profileToVmess(profile: Profile): Vmess = {
-    if (!profile.isVmess) {
-      throw new Exception("Not a V2ray Profile")
+    if (!profile.isVmess && !profile.isShadowSocks) {
+      throw new Exception("Not a V2ray or ShadowSocks Profile")
     }
     val v_security = if (TextUtils.isEmpty(profile.v_security)) "auto" else profile.v_security
     val vmessOption = getOption(profile)
         Log.e("Profile", s"v_host: ${profile.v_host}, v_path: ${profile.v_path}, v_tls: ${profile.v_tls}, v_add: ${profile.v_add},v_port: ${profile.v_port}, v_aid: ${profile.v_aid}, " +
       s"v_net: ${profile.v_net}, v_id: ${profile.v_id}, v_type: ${profile.v_type}, v_security: ${profile.v_security}, useIPv6: ${profile.ipv6}" + s"vmessOption: $vmessOption, domainSniff: ${profile.enable_domain_sniff}")
+    if (profile.isShadowSocks) {
+      return Tun2socks.newShadowSocks(
+        profile.v_add,
+        profile.v_port.toLong,
+        profile.v_id,
+        v_security,
+        vmessOption.getBytes(StandardCharsets.UTF_8)
+      )
+    }
     Tun2socks.newVmess(
       profile.v_host,
       profile.v_path,
@@ -415,5 +425,7 @@ class Profile {
   def isV2Ray = isVmess || isV2RayJSON
 
   def isTrojan = this.proxy_protocol == "trojan"
+
+  def isShadowSocks = this.proxy_protocol == "shadowsocks"
 
 }

@@ -173,6 +173,19 @@ object Profile {
         }
     }
 
+    def testDownload(cb: tun2socks.TestLatency ): Future[Result[Long]] = {
+      Future{
+        val link = profile.toString
+        Tun2socks.testLinkDownloadSpeed(link, cb)
+      }.map(SuccessConnect)
+        .recover {
+          case e: Exception => {
+            e.printStackTrace()
+            FailureConnect(e.getMessage)
+          }
+        }
+    }
+
     def pingItemThread: PartialFunction[(String, Long), String] = {
       case ("tcp", _) => this.testTCPLatencyThread()
       case ("google", port) => this.testLatencyThread(port)

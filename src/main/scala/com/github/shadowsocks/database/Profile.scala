@@ -61,7 +61,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Random, Try}
 import ProfileConverter._
 import com.github.shadowsocks.database.VmessAction.profile
-import com.github.shadowsocks.types.{FailureConnect, Result, SuccessConnect}
+import com.github.shadowsocks.types.{FailureConnect, Result, SuccessConnect, SuccessSpeed}
 // automatic from Android without pc
 
 object Profile {
@@ -175,9 +175,8 @@ object Profile {
 
     def testDownload(cb: tun2socks.TestLatency ): Future[Result[Long]] = {
       Future{
-        val link = profile.toString
-        Tun2socks.testLinkDownloadSpeed(link, cb)
-      }.map(SuccessConnect)
+        Tun2socks.testLinkDownloadSpeed(profile.toString, cb)
+      }.map(SuccessSpeed)
         .recover {
           case e: Exception => {
             e.printStackTrace()
@@ -419,6 +418,11 @@ class Profile {
       case _ if isVmess => VmessQRCode(v_v, v_ps, v_add, v_port, v_id, v_aid, v_net, v_type, v_host, v_path, v_tls, url_group).toString
       case _ if isV2RayJSON => "vjson://" + Utils.b64Encode(v_json_config.getBytes(Charset.forName("UTF-8")))
       case _ if isTrojan => s"trojan://$t_password@$t_addr:$t_port?sni=$t_peer#$name"
+      case _ if isShadowSocks => {
+        implicit val flags: Int = Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP
+        val data = s"${v_security}:${v_id}".getBytes(Charset.forName("UTF-8"))
+        s"ss://${Utils.b64Encode(data)}@${v_add}:${v_port}#${name}"
+      }
       case _ => "ssr://" + Utils.b64Encode("%s:%d:%s:%s:%s:%s/?obfsparam=%s&protoparam=%s&remarks=%s&group=%s".formatLocal(Locale.ENGLISH,
         host, remotePort, protocol, method, obfs,
         Utils.b64Encode("%s".formatLocal(Locale.ENGLISH, password).getBytes),

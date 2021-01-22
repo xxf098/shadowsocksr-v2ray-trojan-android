@@ -2,6 +2,7 @@ package com.github.shadowsocks.types
 
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.R
+import com.github.shadowsocks.utils.TrafficMonitor
 
 object Result {
   def apply[A](x: A = null.asInstanceOf[A]): Result[A] = new Result[A] {
@@ -34,4 +35,9 @@ case class SuccessConnect (d: Long) extends Success[Long] {
 case class FailureConnect(errMsg: String) extends Failure[Long] {
   val data: Long = 0L
   val msg: String = app.getString(R.string.connection_test_error, errMsg)
+}
+
+case class SuccessSpeed (d: Long) extends Success[Long] {
+  val data: Long = d
+  val msg: String = app.getString(R.string.speed_test_available, TrafficMonitor.formatTraffic(d))
 }

@@ -25,6 +25,7 @@
   <string name="connection_test_error">Fail to detect internet connection: %s</string>
   <string name="connection_test_fail">Internet Unavailable</string>
   <string name="connection_test_error_status_code">Error code: #%d</string>
+  <string name="speed_test_available">Max Speed: %s/s</string>
 
   <!-- proxy category -->
   <string name="proxy_cat">Server Settings</string>
@@ -299,6 +300,9 @@
   <string name="default_group" translatable="false">Default Group</string>
 
   <string name="delete_zero_latency">Delete 0ms</string>
+
+  <string name="test_latency">Test Latency</string>
+  <string name="test_download">Test Download</string>
 
   <!--  V2Ray -->
   <string name="v_pref_id">ID</string>

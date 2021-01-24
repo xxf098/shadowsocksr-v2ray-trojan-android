@@ -22,7 +22,7 @@ import android.support.v7.view.ActionMode
 import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.view._
-import android.widget.{Adapter, AdapterView, ArrayAdapter, CheckBox, CheckedTextView, CompoundButton, EditText, ImageView, LinearLayout, Switch, TextView, Toast}
+import android.widget.{Adapter, AdapterView, ArrayAdapter, CheckBox, CheckedTextView, CompoundButton, EditText, ImageView, LinearLayout, Switch, PopupMenu, TextView, Toast}
 import android.net.Uri
 import android.support.design.widget.Snackbar
 import com.github.clans.fab.{FloatingActionButton, FloatingActionMenu}
@@ -88,7 +88,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   with View.OnClickListener with CreateNdefMessageCallback {
 
   private final class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view)
-    with View.OnClickListener with View.OnKeyListener {
+    with View.OnClickListener with View.OnKeyListener with PopupMenu.OnMenuItemClickListener  {
 
     var item: Profile = _
     var displayInfo = List(true, false, true)
@@ -157,16 +157,18 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val pingBtn = itemView.findViewById(R.id.ping_single).asInstanceOf[ImageView]
       pingBtn.setOnClickListener(_ => {
 
-//        getWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
-        item.pingItem(app.settings.getString(Key.PING_METHOD, "google")).foreach(result => {
-            item.elapsed = result.data
-            app.profileManager.updateProfile(item)
-            this.updateText(0, 0, result.data)
-//            runOnUiThread(() => getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON))
-            singleTestProgressDialog.dismiss()
-            Snackbar.make(findViewById(android.R.id.content), result.msg, Snackbar.LENGTH_LONG).show
-          })
+          val popup = new PopupMenu(ProfileManagerActivity.this, pingBtn)
+          popup.getMenuInflater.inflate(R.menu.test_profile_popup, popup.getMenu)
+          popup.setOnMenuItemClickListener(this)
+          popup.show()
+//        val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
+//        item.pingItem(app.settings.getString(Key.PING_METHOD, "google")).foreach(result => {
+//            item.elapsed = result.data
+//            app.profileManager.updateProfile(item)
+//            this.updateText(0, 0, result.data)
+//            singleTestProgressDialog.dismiss()
+//            Snackbar.make(findViewById(android.R.id.content), result.msg, Snackbar.LENGTH_LONG).show
+//          })
         // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
       })
       pingBtn.setOnLongClickListener(_ => {
@@ -232,6 +234,41 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       } else {
         this.updateProfileBackground()
       }
+    }
+
+    def onMenuItemClick(menuItem: MenuItem): Boolean = menuItem.getItemId match {
+      case R.id.action_test_latency => {
+        val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
+        item.pingItem(app.settings.getString(Key.PING_METHOD, "google")).foreach(result => {
+          item.elapsed = result.data
+          app.profileManager.updateProfile(item)
+          this.updateText(0, 0, result.data)
+          //            runOnUiThread(() => getWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON))
+          singleTestProgressDialog.dismiss()
+          Snackbar.make(findViewById(android.R.id.content), result.msg, Snackbar.LENGTH_LONG).show
+        })
+        true
+      }
+      case R.id.action_test_download => {
+        val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
+        class TestDownloadUpdate extends tun2socks.TestLatency {
+          var index = 0
+          var max: Long = 0
+          override def updateLatency(l: Long, l1: Long): Unit = {
+            index += 1
+            if (max < l1) { max = l1 }
+            val speed = s"current: ${TrafficMonitor.formatTraffic(l1)}/s\nmax: ${TrafficMonitor.formatTraffic(max)}/s"
+            runOnUiThread(() => singleTestProgressDialog.setMessage(speed))
+            Log.e(TAG, speed)
+          }
+        }
+        item.testDownload(new TestDownloadUpdate()).foreach(result => {
+          singleTestProgressDialog.dismiss()
+          Snackbar.make(findViewById(android.R.id.content), result.msg, Snackbar.LENGTH_LONG).show
+        })
+        true
+      }
+      case _ => false
     }
 
     def onKey(v: View, keyCode: Int, event: KeyEvent) = if (event.getAction == KeyEvent.ACTION_DOWN) keyCode match {
@@ -1140,10 +1177,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   def createProfilesFromText (contents: CharSequence): Boolean = {
     if (TextUtils.isEmpty(contents)) return false
     val profiles_normal = Parser.findAll(contents).toList
+    val profiles_ss = Parser.findAllShadowSocks(contents).toList
     val profiles_ssr = Parser.findAll_ssr(contents).toList
     val profiles_vmess = Parser.findAllVmess(contents).toList
     val profiles_trojan = Parser.findAllTrojan(contents).toList
-    val profiles = profiles_ssr ::: profiles_normal ::: profiles_vmess ::: profiles_trojan
+    val profiles = profiles_ssr ::: profiles_normal ::: profiles_ss ::: profiles_vmess ::: profiles_trojan
     if (profiles.isEmpty) {
 //      finish()
       return false

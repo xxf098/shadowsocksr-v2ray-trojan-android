@@ -348,6 +348,9 @@ class Profile {
   var elapsed: Long = 0
 
   @DatabaseField
+  var download_speed: Long = 0
+
+  @DatabaseField
   val date: java.util.Date = new java.util.Date()
 
   @DatabaseField

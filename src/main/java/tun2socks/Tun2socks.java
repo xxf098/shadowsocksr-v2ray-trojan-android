@@ -70,6 +70,8 @@ public abstract class Tun2socks
 
     public static native long testConfigLatency(final byte[] p0, final String p1) throws Exception;
 
+    public static native long testLinkDownloadSpeed(final String p0, final TestLatency p1) throws Exception;
+
     public static native long testTCPPing(final String p0, final long p1) throws Exception;
 
     public static native long testTrojanLatency(final Trojan p0) throws Exception;

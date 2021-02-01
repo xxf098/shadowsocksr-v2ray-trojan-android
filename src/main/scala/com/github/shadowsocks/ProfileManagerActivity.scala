@@ -184,7 +184,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val elapsed = if (elapsedInput != -1) elapsedInput else item.elapsed
       val trafficStatus = if (displayInfo(2) && (tx != 0 || rx != 0 || elapsed != 0 || item.url_group != "")) {
         getString(R.string.stat_profiles,
-          TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx), String.valueOf(elapsed), "").trim
+          TrafficMonitor.formatTrafficInternal(tx, true),
+          TrafficMonitor.formatTrafficInternal(rx, true),
+          String.valueOf(elapsed),
+          TrafficMonitor.formatTrafficInternal(item.download_speed, true)).trim
       } else ""
       handler.post(() => {
         text1.setText(item.name)
@@ -263,6 +266,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           }
         }
         item.testDownload(new TestDownloadUpdate()).foreach(result => {
+          item.download_speed = result.data
+          app.profileManager.updateProfile(item)
+          this.updateText()
           singleTestProgressDialog.dismiss()
           Snackbar.make(findViewById(android.R.id.content), result.msg, Snackbar.LENGTH_LONG).show
         })

@@ -253,20 +253,21 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         true
       }
       case R.id.action_test_download => {
+        var total: Long  =0
         val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
         class TestDownloadUpdate extends tun2socks.TestLatency {
-          var index = 0
           var max: Long = 0
           override def updateLatency(l: Long, l1: Long): Unit = {
-            index += 1
             if (max < l1) { max = l1 }
-            val speed = s"current: ${TrafficMonitor.formatTraffic(l1)}/s\nmax: ${TrafficMonitor.formatTraffic(max)}/s"
+            total += l1
+            val speed = s"Current: ${TrafficMonitor.formatTraffic(l1)}/s\nMax: ${TrafficMonitor.formatTraffic(max)}/s"
             runOnUiThread(() => singleTestProgressDialog.setMessage(speed))
             Log.e(TAG, speed)
           }
         }
         item.testDownload(new TestDownloadUpdate()).foreach(result => {
           item.download_speed = result.data
+          item.rx += total
           app.profileManager.updateProfile(item)
           this.updateText()
           singleTestProgressDialog.dismiss()

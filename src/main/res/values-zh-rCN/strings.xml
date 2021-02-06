@@ -268,6 +268,9 @@
 
   <string name="delete_zero_latency">删除无效节点</string>
 
+  <string name="test_latency">延时测试</string>
+  <string name="test_download">下载测试</string>
+
     <!--  V2Ray -->
   <string name="v_pref_id">用户ID</string>
   <string name="v_pref_alterid">额外ID</string>

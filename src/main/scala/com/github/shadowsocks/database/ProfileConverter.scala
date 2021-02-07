@@ -80,8 +80,8 @@ object VmessAction extends ProfileFunctions {
       case Some(addr) => vmess.setAdd(addr)
       case None => throw new IOException("Host Not Resolved")
     }
-//    Tun2socks.testVmessLatency(vmess, port)
-    Tun2socks.testVmessLatencyDirect(vmess)
+    Tun2socks.testVmessLatency(vmess, port)
+//    Tun2socks.testVmessLatencyDirect(vmess)
   }
 
   override def isOK(): Boolean = !(TextUtils.isEmpty(profile.v_add) ||
@@ -89,6 +89,23 @@ object VmessAction extends ProfileFunctions {
     TextUtils.isEmpty(profile.v_id) ||
     TextUtils.isEmpty(profile.v_aid) ||
     TextUtils.isEmpty(profile.v_net))
+}
+
+object ShadowSocksAction extends ProfileFunctions {
+  override def getElapsed(port: Long = -1): Long = {
+    checkBypassAddr()
+    val vmess: Vmess = profile
+    Utils.resolve(profile.v_add, enableIPv6 = false) match {
+      case Some(addr) => vmess.setAdd(addr)
+      case None => throw new IOException("Host Not Resolved")
+    }
+    Tun2socks.testVmessLatencyDirect(vmess)
+  }
+
+  override def isOK(): Boolean = !(TextUtils.isEmpty(profile.v_add) ||
+    TextUtils.isEmpty(profile.v_port) ||
+    TextUtils.isEmpty(profile.v_id) ||
+    TextUtils.isEmpty(profile.v_security))
 }
 
 object V2JSONAction extends ProfileFunctions {
@@ -127,9 +144,10 @@ object ProfileConverter {
   implicit def convertProfileToAction (profile: Profile): ProfileFunctions = {
     val profileAction: ProfileFunctions = profile match {
       case p if p.isVmess => VmessAction
+      case p if p.isShadowSocks => ShadowSocksAction
       case p if p.isV2RayJSON => V2JSONAction
       case p if p.isTrojan => TrojanAction
-      case p if !p.isV2Ray && !p.isTrojan => SSRAction
+      case p if !p.isV2Ray && !p.isTrojan && !p.isShadowSocks => SSRAction
       case _ => throw new Exception("Not Supported!")
     }
     profileAction.profile = profile

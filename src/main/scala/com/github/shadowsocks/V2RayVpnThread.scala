@@ -89,8 +89,6 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
     else
       Tun2socks.setLocalDNS(s"${vpnService.dns_address}:${vpnService.dns_port}")
     try {
-//      val config = Parser.getV2rayConfig(profile).orNull
-//      Log.e(TAG, Tun2socks.checkVersion())
       profile match {
         case p if p.isVmess => {
           app.settings.getString(Key.V2RAY_CORE, "core") match {
@@ -98,6 +96,10 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
             case _ => Tun2socks.startV2RayWithTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)
           }
 //          Tun2socks.startV2RayWithVmess(flow, service, androidLogService, profile, assetPath)
+        }
+        case p if p.isShadowSocks => {
+          Log.e("===", "start startV2RayLiteWithTunFd")
+          Tun2socks.startV2RayLiteWithTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)
         }
         case p if p.isTrojan => {
 //          Tun2socks.startTrojan(flow, service, androidLogService, profile, assetPath)

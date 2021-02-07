@@ -2,6 +2,7 @@ package com.github.shadowsocks.services
 
 import java.io.File
 import java.net.Socket
+import java.nio.charset.Charset
 import java.util
 import java.util.Locale
 
@@ -12,7 +13,7 @@ import android.os.{Bundle, IBinder, Looper, Message, ResultReceiver}
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
 import android.text.TextUtils
-import android.util.Log
+import android.util.{Base64, Log}
 import android.view.WindowManager
 import android.widget.Toast
 import com.github.shadowsocks.{GuardedProcess, ProfileManagerActivity, R}
@@ -106,9 +107,14 @@ class LatencyTestService extends Service {
         }
 
         val testV2rayJob1 = (v2rayProfiles: List[Profile]) => {
-          val link = v2rayProfiles.map {
+          val links = v2rayProfiles.map {
             case p if p.isTrojan => s"trojan://${p.t_password}@${p.t_addr}:${p.t_port}?sni=${p.t_peer}"
             case p if p.isVmess => VmessQRCode(p.v_v, "", p.v_add, p.v_port, p.v_id, p.v_aid, p.v_net, p.v_type, p.v_host, p.v_path, p.v_tls, "").toString
+            case p if p.isShadowSocks => {
+              implicit val flags: Int = Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP
+              val data = s"${p.v_security}:${p.v_id}".getBytes(Charset.forName("UTF-8"))
+              s"ss://${Utils.b64Encode(data)}@${p.v_add}:${p.v_port}"
+            }
           }.mkString(",")
           class TestLatencyUpdate extends tun2socks.TestLatency {
             override def updateLatency(l: Long, l1: Long): Unit = {
@@ -120,7 +126,7 @@ class LatencyTestService extends Service {
               updateNotification(p.name, s"${l1}ms", max, counter)
             }
           }
-          Tun2socks.batchTestLatency(link, 10, new TestLatencyUpdate())
+          Tun2socks.batchTestLatency(links, 10, new TestLatencyUpdate())
         }
         // connection pool time
         val testSSRProfiles = (ssrProfiles: List[List[Profile]], size: Int, offset: Int) => {
@@ -244,7 +250,7 @@ class LatencyTestService extends Service {
               Looper.prepare()
               val (v2rayTrojanProfiles, ssrProfiles) = profiles
                 .filter(p => !List("www.google.com", "127.0.0.1", "8.8.8.8", "1.2.3.4", "1.1.1.1").contains(p.host))
-                .partition(p => p.isV2Ray || p.isTrojan)
+                .partition(p => p.isV2Ray || p.isTrojan || p.isShadowSocks)
               max = profiles.size
               if (v2rayTrojanProfiles.nonEmpty) { testV2rayJob1(v2rayTrojanProfiles) }
               if (ssrProfiles.nonEmpty) { testSSRJob(ssrProfiles) }

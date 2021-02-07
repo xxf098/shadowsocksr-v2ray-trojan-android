@@ -61,7 +61,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Random, Try}
 import ProfileConverter._
 import com.github.shadowsocks.database.VmessAction.profile
-import com.github.shadowsocks.types.{FailureConnect, Result, SuccessConnect}
+import com.github.shadowsocks.types.{FailureConnect, Result, SuccessConnect, SuccessSpeed}
 // automatic from Android without pc
 
 object Profile {
@@ -79,6 +79,7 @@ object Profile {
          |"dns": "$dns_address:$dns_port,$china_dns_address:$china_dns_port",
          |"routeMode": $routeMode,
          |"mux": ${app.settings.getInt(Key.MUX, -1)},
+         |"serverName": "${profile.host}",
          |"allowInsecure": true
          |}
 """.stripMargin
@@ -86,13 +87,22 @@ object Profile {
   }
 
   implicit def profileToVmess(profile: Profile): Vmess = {
-    if (!profile.isVmess) {
-      throw new Exception("Not a V2ray Profile")
+    if (!profile.isVmess && !profile.isShadowSocks) {
+      throw new Exception("Not a V2ray or ShadowSocks Profile")
     }
     val v_security = if (TextUtils.isEmpty(profile.v_security)) "auto" else profile.v_security
     val vmessOption = getOption(profile)
         Log.e("Profile", s"v_host: ${profile.v_host}, v_path: ${profile.v_path}, v_tls: ${profile.v_tls}, v_add: ${profile.v_add},v_port: ${profile.v_port}, v_aid: ${profile.v_aid}, " +
       s"v_net: ${profile.v_net}, v_id: ${profile.v_id}, v_type: ${profile.v_type}, v_security: ${profile.v_security}, useIPv6: ${profile.ipv6}" + s"vmessOption: $vmessOption, domainSniff: ${profile.enable_domain_sniff}")
+    if (profile.isShadowSocks) {
+      return Tun2socks.newShadowSocks(
+        profile.v_add,
+        profile.v_port.toLong,
+        profile.v_id,
+        v_security,
+        vmessOption.getBytes(StandardCharsets.UTF_8)
+      )
+    }
     Tun2socks.newVmess(
       profile.v_host,
       profile.v_path,
@@ -155,6 +165,18 @@ object Profile {
         }
         Tun2socks.testTCPPing(profileAddr, profilePort)
       }.map(SuccessConnect)
+        .recover {
+          case e: Exception => {
+            e.printStackTrace()
+            FailureConnect(e.getMessage)
+          }
+        }
+    }
+
+    def testDownload(cb: tun2socks.TestLatency ): Future[Result[Long]] = {
+      Future{
+        Tun2socks.testLinkDownloadSpeed(profile.toString, cb)
+      }.map(SuccessSpeed)
         .recover {
           case e: Exception => {
             e.printStackTrace()
@@ -326,6 +348,9 @@ class Profile {
   var elapsed: Long = 0
 
   @DatabaseField
+  var download_speed: Long = 0
+
+  @DatabaseField
   val date: java.util.Date = new java.util.Date()
 
   @DatabaseField
@@ -396,6 +421,11 @@ class Profile {
       case _ if isVmess => VmessQRCode(v_v, v_ps, v_add, v_port, v_id, v_aid, v_net, v_type, v_host, v_path, v_tls, url_group).toString
       case _ if isV2RayJSON => "vjson://" + Utils.b64Encode(v_json_config.getBytes(Charset.forName("UTF-8")))
       case _ if isTrojan => s"trojan://$t_password@$t_addr:$t_port?sni=$t_peer#$name"
+      case _ if isShadowSocks => {
+        implicit val flags: Int = Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP
+        val data = s"${v_security}:${v_id}".getBytes(Charset.forName("UTF-8"))
+        s"ss://${Utils.b64Encode(data)}@${v_add}:${v_port}#${name}"
+      }
       case _ => "ssr://" + Utils.b64Encode("%s:%d:%s:%s:%s:%s/?obfsparam=%s&protoparam=%s&remarks=%s&group=%s".formatLocal(Locale.ENGLISH,
         host, remotePort, protocol, method, obfs,
         Utils.b64Encode("%s".formatLocal(Locale.ENGLISH, password).getBytes),
@@ -415,5 +445,7 @@ class Profile {
   def isV2Ray = isVmess || isV2RayJSON
 
   def isTrojan = this.proxy_protocol == "trojan"
+
+  def isShadowSocks = this.proxy_protocol == "shadowsocks"
 
 }

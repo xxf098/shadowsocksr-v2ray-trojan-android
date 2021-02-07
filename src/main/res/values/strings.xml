@@ -12,11 +12,11 @@
   <string name="nat_summary">Use NAT mode instead of VPN mode. Requires ROOT permission.</string>
   <string name="stat">Network Traffic</string>
   <string name="stat_summary">Sent: \t\t\t\t\t%3$s\t↑\t%1$s/s\nReceived: \t%4$s\t↓\t%2$s/s</string>
-  <string name="stat_profiles" translatable="false">\n%1$s↑\t%2$s↓\t%3$sms\t%4$s</string>
+  <string name="stat_profiles" translatable="false">\n%1$s↑ %2$s↓ %3$sms %4$s/s</string>
   <string name="traffic_summary">%1$s/s↑\t%2$s/s↓</string>
   <plurals name="bytes" translatable="false">
-    <item quantity="one">Byte</item>
-    <item quantity="other">Bytes</item>
+    <item quantity="one">B</item>
+    <item quantity="other">B</item>
   </plurals>
   <string name="connection_test_pending">Check Connectivity</string>
   <string name="connection_test_testing">Testing…</string>
@@ -25,6 +25,7 @@
   <string name="connection_test_error">Fail to detect internet connection: %s</string>
   <string name="connection_test_fail">Internet Unavailable</string>
   <string name="connection_test_error_status_code">Error code: #%d</string>
+  <string name="speed_test_available">Max Speed: %s/s</string>
 
   <!-- proxy category -->
   <string name="proxy_cat">Server Settings</string>
@@ -300,6 +301,9 @@
 
   <string name="delete_zero_latency">Delete 0ms</string>
 
+  <string name="test_latency">Test Latency</string>
+  <string name="test_download">Test Download</string>
+
   <!--  V2Ray -->
   <string name="v_pref_id">ID</string>
   <string name="v_pref_alterid">AlterID</string>
@@ -313,6 +317,7 @@
   <string name="title_pref_sort_method">Sort By</string>
   <string name="sort_by_default">By Default</string>
   <string name="sort_by_elapsed">By Elapsed</string>
+  <string name="sort_by_download">By Download</string>
   <string-array name="sort_method_entry">
     <item>@string/sort_by_default</item>
     <item>@string/sort_by_elapsed</item>

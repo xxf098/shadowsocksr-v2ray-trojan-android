@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools" package="com.github.shadowsocks"
           android:versionCode="331"
-          android:versionName="3.8.7">
+          android:versionName="3.8.8">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -220,7 +220,7 @@
             android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+<!--                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />-->
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
                 <action android:name="android.intent.action.REBOOT"/>
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />

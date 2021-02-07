@@ -317,6 +317,7 @@
   <string name="title_pref_sort_method">Sort By</string>
   <string name="sort_by_default">By Default</string>
   <string name="sort_by_elapsed">By Elapsed</string>
+  <string name="sort_by_download">By Download</string>
   <string-array name="sort_method_entry">
     <item>@string/sort_by_default</item>
     <item>@string/sort_by_elapsed</item>

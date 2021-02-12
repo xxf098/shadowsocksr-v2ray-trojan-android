@@ -63,9 +63,9 @@ public final class Vmess implements Seq.Proxy
 
     public final native void setSecurity(final String p0);
 
-    public final native Trojan getTrojan();
+    public final native String getProtocol();
 
-    public final native void setTrojan(final Trojan p0);
+    public final native void setProtocol(final String p0);
 
     @Override
     public boolean equals(final Object o) {
@@ -159,14 +159,14 @@ public final class Vmess implements Seq.Proxy
         else if (!security.equals(security2)) {
             return false;
         }
-        final Trojan trojan = this.getTrojan();
-        final Trojan trojan2 = vmess.getTrojan();
-        if (trojan == null) {
-            if (trojan2 != null) {
+        final String protocol = this.getProtocol();
+        final String protocol2 = vmess.getProtocol();
+        if (protocol == null) {
+            if (protocol2 != null) {
                 return false;
             }
         }
-        else if (!trojan.equals(trojan2)) {
+        else if (!protocol.equals(protocol2)) {
             return false;
         }
         return true;
@@ -174,7 +174,7 @@ public final class Vmess implements Seq.Proxy
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[] { this.getHost(), this.getPath(), this.getTLS(), this.getAdd(), this.getPort(), this.getAid(), this.getNet(), this.getID(), this.getType(), this.getSecurity(), this.getTrojan() });
+        return Arrays.hashCode(new Object[] { this.getHost(), this.getPath(), this.getTLS(), this.getAdd(), this.getPort(), this.getAid(), this.getNet(), this.getID(), this.getType(), this.getSecurity(), this.getProtocol() });
     }
 
     @Override
@@ -191,7 +191,7 @@ public final class Vmess implements Seq.Proxy
         sb.append("ID:").append(this.getID()).append(",");
         sb.append("Type:").append(this.getType()).append(",");
         sb.append("Security:").append(this.getSecurity()).append(",");
-        sb.append("Trojan:").append(this.getTrojan()).append(",");
+        sb.append("Protocol:").append(this.getProtocol()).append(",");
         return sb.append("}").toString();
     }
 

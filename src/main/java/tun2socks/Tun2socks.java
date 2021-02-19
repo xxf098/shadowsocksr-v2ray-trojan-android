@@ -26,6 +26,8 @@ public abstract class Tun2socks
 
     public static native void batchTestLatency(final String p0, final long p1, final TestLatency p2);
 
+    public static native void batchTestDownload(final String p0, final long p1, final TestLatency p2);
+
     public static native void batchTestVmessCoreLatency(final String p0, final long p1, final TestLatency p2);
 
     public static native void batchTestVmessLatency(final String p0, final long p1, final TestLatency p2);

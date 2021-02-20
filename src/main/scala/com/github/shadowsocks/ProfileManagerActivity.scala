@@ -54,9 +54,8 @@ import tun2socks.Tun2socks
 import scala.language.implicitConversions
 import Profile._
 import android.support.v4.app.NotificationCompat
-import com.github.shadowsocks.database.SSRSub.decodeBase64
 import com.github.shadowsocks.database.VmessAction.profile
-import com.github.shadowsocks.services.{BgResultReceiver, GetResultCallBack, LatencyTestService}
+import com.github.shadowsocks.services.{BgResultReceiver, GetResultCallBack, LatencyTestService, DownloadTestService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{Duration, SECONDS}
@@ -1261,7 +1260,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         val link = clipboard.getPrimaryClip.getItemAt(0).getText
         if (createProfilesFromText(link)) return true
         // support import from base64
-        if (createProfilesFromText(decodeBase64(link.toString))) return true
+        if (createProfilesFromText(Parser.decodeBase64(link.toString))) return true
       }
       Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show
       true
@@ -1337,6 +1336,13 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 //    }
     case R.id.action_add_v2ray_config =>
       startActivity(new Intent(this, classOf[ConfigActivity]))
+      true
+    case R.id.action_speed_test =>
+      val intent = new Intent(this, classOf[DownloadTestService])
+      intent.putExtra(Key.currentGroupName, currentGroupName)
+      intent.putExtra("BgResultReceiver", bgResultReceiver)
+      intent.putExtra("is_sort", is_sort)
+      startService(intent)
       true
     case R.id.action_full_test =>
 //      if (app.settings.getBoolean(Key.FULL_TEST_BG, false)) {

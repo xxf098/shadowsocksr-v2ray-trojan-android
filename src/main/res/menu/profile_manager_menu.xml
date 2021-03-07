@@ -1,12 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:id="@+id/action_full_test"
-          android:title="@string/action_full_test"
-          android:alphabeticShortcut="f"
-          android:numericShortcut="1"
-          android:icon="@drawable/ic_click_white"
-          app:showAsAction="always"/>
+    <item
+        android:alphabeticShortcut="f"
+        android:icon="@drawable/ic_click_white"
+        android:title="@string/action_full_test"
+        app:showAsAction="always">
+        <menu>
+            <item
+                android:id="@+id/action_full_test"
+                android:title="@string/test_latency"/>
+            <item
+                android:id="@+id/action_speed_test"
+                android:title="@string/test_download"/>
+        </menu>
+    </item>
     <item android:id="@+id/action_sort"
           android:title="@string/action_sort"
           android:alphabeticShortcut="s"

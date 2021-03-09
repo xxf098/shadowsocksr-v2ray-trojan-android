@@ -86,7 +86,7 @@ Set proxy for sbt: `File | Settings | Build, Execution, Deployment | Build Tools
 
 Checkout this [link](http://srodrigo.me/setting-up-scala-on-android/)
 * rm -rf ~/.android/sbt/exploded-aars/*
-* In Project Settings -> Modules -> shadowsocksr, change `Structure`, `Generated Sources` file path
+* In Project Settings -> Modules -> shadowsocksr-v2ray-trojan-android, change `Structure`, `Generated Sources` to correct file path
 * In Run/Debug Configuration -> Before launch, replace `Gradle-aware Make` with `android:run`
 
 #### BUILD on Mac OS X (with HomeBrew)
@@ -120,7 +120,7 @@ Checkout this [link](http://srodrigo.me/setting-up-scala-on-android/)
 * pdnsd: [GPLv3](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/pdnsd/COPYING)
 * libev: [GPLv2](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/libev/LICENSE)
 * libevent: [BSD](https://github.com/shadowsocks/libevent/blob/master/LICENSE)
-* v2ray-core: [BSD](https://github.com/v2ray/v2ray-core/blob/master/LICENSE)
+* v2ray-core: [BSD](https://github.com/v2fly/v2ray-core/blob/master/LICENSE)
 * go-tun2socks: [BSD](https://github.com/eycorsican/go-tun2socks/blob/master/LICENSE)
 
 ### LICENSE

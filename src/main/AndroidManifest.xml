@@ -213,6 +213,11 @@
             android:exported="false">
         </service>
 
+        <service
+            android:name="com.github.shadowsocks.services.DownloadTestService"
+            android:exported="false">
+        </service>
+
         <receiver android:name="com.github.shadowsocks.BootReceiver"
             android:process=":bg"
             android:permission="android.permission.BIND_JOB_SERVICE"

@@ -389,6 +389,7 @@ object Key {
   val LOG_LEVEL = "pref_log_level"
   val MUX = "pref_mux_cool"
   val V2RAY_CORE = "pref_v2ray_core"
+  val TEST_CONCURRENCY = "pref_test_concurrency"
 
   // message
   val TEST_PROFILE_IDS = "test_profile_ids"

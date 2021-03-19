@@ -26,7 +26,7 @@ public abstract class Tun2socks
 
     public static native void batchTestLatency(final String p0, final long p1, final TestLatency p2);
 
-    public static native void batchTestDownload(final String p0, final long p1, final TestLatency p2);
+    public static native void batchTestDownload(final String p0, final long p1, final TestDownload p2);
 
     public static native void batchTestVmessCoreLatency(final String p0, final long p1, final TestLatency p2);
 
@@ -152,6 +152,27 @@ public abstract class Tun2socks
         proxyQuerySpeed(final int refnum) {
             Seq.trackGoRef(this.refnum = refnum, this);
         }
+
+        @Override
+        public native void updateTraffic(final long p0, final long p1);
+    }
+
+    private static final class proxyTestDownload implements Seq.Proxy, TestDownload
+    {
+        private final int refnum;
+
+        @Override
+        public final int incRefnum() {
+            Seq.incGoRef(this.refnum, this);
+            return this.refnum;
+        }
+
+        proxyTestDownload(final int refnum) {
+            Seq.trackGoRef(this.refnum = refnum, this);
+        }
+
+        @Override
+        public native void updateSpeed(final long p0, final long p1);
 
         @Override
         public native void updateTraffic(final long p0, final long p1);

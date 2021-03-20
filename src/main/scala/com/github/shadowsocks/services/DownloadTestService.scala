@@ -27,6 +27,7 @@ class DownloadTestService extends Service {
   private var builder: NotificationCompat.Builder = _
   private var counter = 0
   private var max = 0
+  private var totalTraffic = 0L
   private var stopReceiverRegistered = false
   private lazy val stopReceiver: BroadcastReceiver = (context: Context, intent: Intent) => {
     Toast.makeText(context, R.string.stopping, Toast.LENGTH_SHORT).show()
@@ -74,8 +75,8 @@ class DownloadTestService extends Service {
                 Utils.b64Encode("%s".formatLocal(Locale.ENGLISH, p.protocol_param).getBytes)).getBytes)
             }
           }.mkString(",")
-          class TestLatencyUpdate extends tun2socks.TestLatency {
-            override def updateLatency(l: Long, l1: Long): Unit = {
+          class TestDownloadUpdate extends tun2socks.TestDownload {
+            override def updateSpeed(l: Long, l1: Long): Unit = {
               val p = v2rayProfiles(l.toInt)
               p.download_speed = l1
               app.profileManager.updateProfile(p)
@@ -84,8 +85,15 @@ class DownloadTestService extends Service {
               counter = counter + 1
               updateNotification(p.name, speed, max, counter)
             }
+
+            override def updateTraffic(l: Long, l1: Long): Unit = {
+              totalTraffic += l1
+              val traffic = TrafficMonitor.formatTrafficInternal(totalTraffic)
+              Log.e(TAG, s"traffic: $traffic")
+              updateTrafficInfo(traffic)
+            }
           }
-          Tun2socks.batchTestDownload(links, 2, new TestLatencyUpdate())
+          Tun2socks.batchTestDownload(links, 2, new TestDownloadUpdate())
         }
 
         testJob = new Thread {
@@ -132,6 +140,7 @@ class DownloadTestService extends Service {
 
   private def showNotification (max: Int): Unit = {
     builder = new NotificationCompat.Builder(this, "service-test")
+      .setSubText("0 B")
       .setColor(ContextCompat.getColor(this, R.color.material_accent_500))
       .setPriority(NotificationCompat.PRIORITY_LOW)
       .setCategory(NotificationCompat.CATEGORY_PROGRESS)
@@ -157,6 +166,12 @@ class DownloadTestService extends Service {
     builder.setContentTitle(title.substring(0, length))
       .setContentText(speed)
       .setProgress(max, counter, false)
+    notificationService.notify(LatencyTestService.NOTIFICATION_ID, builder.build())
+  }
+
+  private def updateTrafficInfo (traffic: String): Unit = {
+    if (!isTesting) return
+    builder.setSubText(traffic)
     notificationService.notify(LatencyTestService.NOTIFICATION_ID, builder.build())
   }
 }

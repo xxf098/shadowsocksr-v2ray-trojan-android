@@ -58,7 +58,7 @@ object Parser {
   private val pattern_ssr = "(?i)ssr://([A-Za-z0-9_=-]+)".r
   private val decodedPattern_ssr = "(?i)^((.+):(\\d+?):(.*):(.+):(.*):([^/]+))".r
   private val decodedPattern_ssr_obfsparam = "(?i)[?&]obfsparam=([A-Za-z0-9_=-]*)".r
-  private val decodedPattern_ssr_remarks = "(?i)[?&]remarks=([A-Za-z0-9_=-]*)".r
+  private val decodedPattern_ssr_remarks = "(?i)[?&]remarks=([A-Za-z0-9_/+=-]*)".r
   private val decodedPattern_ssr_protocolparam = "(?i)[?&]protoparam=([A-Za-z0-9_=-]*)".r
   private val decodedPattern_ssr_groupparam = "(?i)[?&]group=([A-Za-z0-9_=-]*)".r
 
@@ -67,6 +67,12 @@ object Parser {
   private val pattern_trojan_query = "(?i)allowInsecure=([01])&(peer|sni)=(.+?)#(.+)?".r
   private val pattern_shadwosocks = "(?i)(ss://(.+?)@(.+?):(\\d{2,5})([\\?#].*)?)".r
 
+  def decodeBase64 (data: String): String = {
+    val resp = data.replaceAll("=", "")
+      .replaceAll("\\+", "-")
+      .replaceAll("/", "_")
+    new String(Base64.decode(resp, Base64.URL_SAFE | Base64.NO_PADDING), "UTF-8")
+  }
 
   def findAll(data: CharSequence) = pattern.findAllMatchIn(if (data == null) "" else data).map(m => try
     decodedPattern.findFirstMatchIn(new String(Base64.decode(m.group(1), Base64.NO_PADDING), "UTF-8")) match {
@@ -118,7 +124,7 @@ object Parser {
 
             decodedPattern_ssr_remarks.findFirstMatchIn(uri) match {
               case Some(param) =>
-                profile.name = new String(Base64.decode(param.group(1).replaceAll("=", ""), Base64.URL_SAFE), "UTF-8")
+                profile.name = decodeBase64(param.group(1))
               case _ => profile.name = ss.group(2).toLowerCase
             }
 

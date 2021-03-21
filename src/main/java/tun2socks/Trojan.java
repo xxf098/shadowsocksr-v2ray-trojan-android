@@ -13,11 +13,11 @@ public final class Trojan implements Seq.Proxy
         return this.refnum;
     }
 
-    public Trojan(final String s, final long n, final String s2, final String s3, final boolean b) {
-        Seq.trackGoRef(this.refnum = __NewTrojan(s, n, s2, s3, b), this);
+    public Trojan(final String s, final long n, final String s2, final String s3, final boolean b, final byte[] array) {
+        Seq.trackGoRef(this.refnum = __NewTrojan(s, n, s2, s3, b, array), this);
     }
 
-    private static native int __NewTrojan(final String p0, final long p1, final String p2, final String p3, final boolean p4);
+    private static native int __NewTrojan(final String p0, final long p1, final String p2, final String p3, final boolean p4, final byte[] p5);
 
     Trojan(final int refnum) {
         Seq.trackGoRef(this.refnum = refnum, this);

@@ -17,11 +17,11 @@ A fully featured [ShadowsocksR](https://github.com/breakwa11/shadowsocks-rss/), 
     export PATH=$PATH:$JAVA_HOME/bin
     java -version
 ```
-* SBT 0.13.8
+* SBT [0.13.8](https://www.scala-sbt.org/download.html)
 * Android SDK
-  - Build Tools 29+
+  - Build Tools 30+
   - Android Support Repository and Google Repository (see `build.sbt` for version)
-* Android NDK r20b+
+* Android NDK r21e+
 
 ### BUILD with Android Studio
 
@@ -29,16 +29,18 @@ A fully featured [ShadowsocksR](https://github.com/breakwa11/shadowsocks-rss/), 
 
 * Download [Android Studio](https://developer.android.com/studio)
 * Download [Android NDK r20b](https://developer.android.com/ndk/downloads/older_releases)
+* Install [Scala](https://plugins.jetbrains.com/plugin/1347-scala) plugin for IntelliJ IDEA
 * Set proxy for Android Studio: `File | Settings | Appearance & Behavior | System Settings | HTTP Proxy`   
 Set proxy for sbt: `File | Settings | Build, Execution, Deployment | Build Tools | sbt`, in `VM parameters` input:
 
-        -Dhttp.proxyHost=127.0.0.1
-        -Dhttp.proxyPort=8080
+
         -Dhttps.proxyHost=127.0.0.1
         -Dhttps.proxyPort=8080
+        -Dhttp.proxyHost=127.0.0.1
+        -Dhttp.proxyPort=8080
         
 * Set environment variable `ANDROID_HOME` to `/path/to/Android/Sdk`
-* Set environment variable `ANDROID_NDK_HOME` to `/path/to/Android/android-ndk-r20b`
+* Set environment variable `ANDROID_NDK_HOME` to `/path/to/Android/android-ndk-r21e`
 * Create your key following the instructions at https://developer.android.com/studio/publish/app-signing.html
 * Put your key in ~/.keystore or any other place
 * Create `local.properties` from `local.properties.example` with your own key information
@@ -52,7 +54,7 @@ Set proxy for sbt: `File | Settings | Build, Execution, Deployment | Build Tools
 * Invoke the building like this
 
 ```bash
-    export https_proxy=http://127.0.0.1:8080
+    export https_proxy=http://127.0.0.1:8080 # !important
     export ANDROID_HOME=/path/to/Android/Sdk
     export ANDROID_NDK_HOME=/path/to/Android/android-ndk-r20b
     # install and update all git submodule
@@ -84,7 +86,7 @@ Set proxy for sbt: `File | Settings | Build, Execution, Deployment | Build Tools
 
 Checkout this [link](http://srodrigo.me/setting-up-scala-on-android/)
 * rm -rf ~/.android/sbt/exploded-aars/*
-* In Project Settings -> Modules -> shadowsocksr, change `Structure`, `Generated Sources` file path
+* In Project Settings -> Modules -> shadowsocksr-v2ray-trojan-android, change `Structure`, `Generated Sources` to correct file path
 * In Run/Debug Configuration -> Before launch, replace `Gradle-aware Make` with `android:run`
 
 #### BUILD on Mac OS X (with HomeBrew)
@@ -118,7 +120,7 @@ Checkout this [link](http://srodrigo.me/setting-up-scala-on-android/)
 * pdnsd: [GPLv3](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/pdnsd/COPYING)
 * libev: [GPLv2](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/libev/LICENSE)
 * libevent: [BSD](https://github.com/shadowsocks/libevent/blob/master/LICENSE)
-* v2ray-core: [BSD](https://github.com/v2ray/v2ray-core/blob/master/LICENSE)
+* v2ray-core: [BSD](https://github.com/v2fly/v2ray-core/blob/master/LICENSE)
 * go-tun2socks: [BSD](https://github.com/eycorsican/go-tun2socks/blob/master/LICENSE)
 
 ### LICENSE

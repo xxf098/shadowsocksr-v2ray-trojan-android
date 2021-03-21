@@ -93,6 +93,7 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
         case p if p.isVmess => {
           app.settings.getString(Key.V2RAY_CORE, "core") match {
             case "lite" => Tun2socks.startV2RayLiteWithTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)
+            case "xray" => Tun2socks.startXRayWithTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)
             case _ => Tun2socks.startV2RayWithTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)
           }
 //          Tun2socks.startV2RayWithVmess(flow, service, androidLogService, profile, assetPath)

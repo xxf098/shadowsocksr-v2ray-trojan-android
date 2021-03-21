@@ -312,6 +312,9 @@
   <string name="hint_mux">并发连接数最大值1024</string>
   <string name="summary_mux_concurrency">并发连接数: %d</string>
 
+  <string name="title_test_concurrency">下载测试最大并发</string>
+  <string name="summary_test_concurrency">最大并发数: %d</string>
+
   <string name="ssr_category">SSR设置</string>
   <string name="v2ray_category">V2Ray设置</string>
 

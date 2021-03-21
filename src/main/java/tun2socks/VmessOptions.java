@@ -43,6 +43,18 @@ public final class VmessOptions implements Seq.Proxy
 
     public final native void setDNS(final String p0);
 
+    public final native boolean getAllowInsecure();
+
+    public final native void setAllowInsecure(final boolean p0);
+
+    public final native long getMux();
+
+    public final native void setMux(final long p0);
+
+    public final native long getLocalPort();
+
+    public final native void setLocalPort(final long p0);
+
     @Override
     public boolean equals(final Object o) {
         if (o == null || !(o instanceof VmessOptions)) {
@@ -78,12 +90,12 @@ public final class VmessOptions implements Seq.Proxy
         else if (!dns.equals(dns2)) {
             return false;
         }
-        return true;
+        return this.getAllowInsecure() == vmessOptions.getAllowInsecure() && this.getMux() == vmessOptions.getMux() && this.getLocalPort() == vmessOptions.getLocalPort();
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[] { this.getUseIPv6(), this.getLoglevel(), this.getRouteMode(), this.getEnableSniffing(), this.getDNS() });
+        return Arrays.hashCode(new Object[] { this.getUseIPv6(), this.getLoglevel(), this.getRouteMode(), this.getEnableSniffing(), this.getDNS(), this.getAllowInsecure(), this.getMux(), this.getLocalPort() });
     }
 
     @Override
@@ -95,6 +107,9 @@ public final class VmessOptions implements Seq.Proxy
         sb.append("RouteMode:").append(this.getRouteMode()).append(",");
         sb.append("EnableSniffing:").append(this.getEnableSniffing()).append(",");
         sb.append("DNS:").append(this.getDNS()).append(",");
+        sb.append("AllowInsecure:").append(this.getAllowInsecure()).append(",");
+        sb.append("Mux:").append(this.getMux()).append(",");
+        sb.append("LocalPort:").append(this.getLocalPort()).append(",");
         return sb.append("}").toString();
     }
 

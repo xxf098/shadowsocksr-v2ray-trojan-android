@@ -126,7 +126,7 @@ class LatencyTestService extends Service {
               updateNotification(p.name, s"${l1}ms", max, counter)
             }
           }
-          Tun2socks.batchTestLatency(links, 10, new TestLatencyUpdate())
+          Tun2socks.batchTestLatency(links, 5, new TestLatencyUpdate())
         }
         // connection pool time
         val testSSRProfiles = (ssrProfiles: List[List[Profile]], size: Int, offset: Int) => {

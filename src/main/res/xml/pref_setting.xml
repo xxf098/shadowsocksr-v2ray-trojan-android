@@ -36,6 +36,14 @@
             android:defaultValue="@array/default_profiles_display_info"
             />
 
+        <com.github.shadowsocks.preferences.NumberPickerPreference
+            android:key="pref_test_concurrency"
+            android:persistent="false"
+            android:summary="@string/summary_test_concurrency"
+            android:title="@string/title_test_concurrency"
+            app:max="30"
+            app:min="1" />
+
     </PreferenceCategory>
 
     <PreferenceCategory

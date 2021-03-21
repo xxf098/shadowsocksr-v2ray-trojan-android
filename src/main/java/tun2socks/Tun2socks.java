@@ -8,8 +8,12 @@ public abstract class Tun2socks
     public static final long AddrTypeIPv4 = 1L;
     public static final long AddrTypeIPv6 = 4L;
     public static final long AuthMethodNotRequired = 0L;
+    public static final String SHADOWSOCKS = "shadowsocks";
     public static final long SocksCmdConnect = 1L;
     public static final long StatusSucceeded = 0L;
+    public static final String TROJAN = "trojan";
+    public static final String VLESS = "vless";
+    public static final String VMESS = "vmess";
     public static final long Version5 = 5L;
 
     private Tun2socks() {
@@ -22,11 +26,15 @@ public abstract class Tun2socks
 
     public static native void batchTestLatency(final String p0, final long p1, final TestLatency p2);
 
+    public static native void batchTestDownload(final String p0, final long p1, final TestDownload p2);
+
     public static native void batchTestVmessCoreLatency(final String p0, final long p1, final TestLatency p2);
 
     public static native void batchTestVmessLatency(final String p0, final long p1, final TestLatency p2);
 
     public static native String checkVersion();
+
+    public static native String checkXVersion();
 
     public static native Vmess convertJSONToVmess(final byte[] p0) throws Exception;
 
@@ -38,11 +46,13 @@ public abstract class Tun2socks
 
     public static native void inputPacket(final byte[] p0);
 
-    public static native Vmess newShadowSocks(final String p0, final long p1, final String p3, final String p4, final byte[] p5);
+    public static native Vmess newShadowSocks(final String p0, final long p1, final String p2, final String p3, final byte[] p4);
 
     public static native Trojan newTrojan(final String p0, final long p1, final String p2, final String p3, final boolean p4, final byte[] p5);
 
     public static native Vmess newVmess(final String p0, final String p1, final String p2, final String p3, final long p4, final long p5, final String p6, final String p7, final String p8, final String p9, final byte[] p10);
+
+    public static native long queryLiteStats(final String p0, final String p1);
 
     public static native long queryOutboundStats(final String p0, final String p1);
 
@@ -62,7 +72,11 @@ public abstract class Tun2socks
 
     public static native void startV2RayWithTunFd(final long p0, final VpnService p1, final LogService p2, final QuerySpeed p3, final Vmess p4, final String p5) throws Exception;
 
+    public static native void startXRayWithTunFd(final long p0, final VpnService p1, final LogService p2, final QuerySpeed p3, final Vmess p4, final String p5) throws Exception;
+
     public static native void startV2RayWithVmess(final PacketFlow p0, final VpnService p1, final LogService p2, final Vmess p3, final String p4) throws Exception;
+
+    public static native void startXRay(final PacketFlow p0, final VpnService p1, final LogService p2, final QuerySpeed p3, final byte[] p4, final String p5) throws Exception;
 
     public static native void stopV2Ray();
 
@@ -138,6 +152,27 @@ public abstract class Tun2socks
         proxyQuerySpeed(final int refnum) {
             Seq.trackGoRef(this.refnum = refnum, this);
         }
+
+        @Override
+        public native void updateTraffic(final long p0, final long p1);
+    }
+
+    private static final class proxyTestDownload implements Seq.Proxy, TestDownload
+    {
+        private final int refnum;
+
+        @Override
+        public final int incRefnum() {
+            Seq.incGoRef(this.refnum, this);
+            return this.refnum;
+        }
+
+        proxyTestDownload(final int refnum) {
+            Seq.trackGoRef(this.refnum = refnum, this);
+        }
+
+        @Override
+        public native void updateSpeed(final long p0, final long p1);
 
         @Override
         public native void updateTraffic(final long p0, final long p1);

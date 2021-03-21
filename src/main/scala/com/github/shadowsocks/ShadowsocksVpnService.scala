@@ -201,13 +201,13 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 //      if (profile.v_tls == "tls" && TextUtils.isEmpty(profile.v_host) && !Utils.isNumeric(profile.v_add)) { profile.host = profile.v_add }
       // TODO: migrate DNS resolve
       if (profile.isV2Ray || profile.isShadowSocks) {
-        Utils.resolve(profile.v_add, enableIPv6 = profile.ipv6, hostname = dns_address) match {
+        Utils.resolve(profile.v_add, enableIPv6 = profile.ipv6, hostname = china_dns_address) match {
           case Some(addr) => profile.v_add = addr
           case None => throw NameNotResolvedException()
         }
       }
       if (profile.isTrojan) {
-        Utils.resolve(profile.t_addr, enableIPv6 = profile.ipv6, hostname=dns_address) match {
+        Utils.resolve(profile.t_addr, enableIPv6 = profile.ipv6, hostname=china_dns_address) match {
           case Some(addr) => profile.t_addr = addr
           case None => throw NameNotResolvedException()
         }
@@ -227,7 +227,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     // Resolve the server address
     host_arg = profile.host
-    Utils.resolve(profile.host, enableIPv6 = profile.ipv6, hostname=dns_address) match {
+    Utils.resolve(profile.host, enableIPv6 = profile.ipv6, hostname=china_dns_address) match {
       case Some(addr) => profile.host = addr
       case None => throw NameNotResolvedException()
     }

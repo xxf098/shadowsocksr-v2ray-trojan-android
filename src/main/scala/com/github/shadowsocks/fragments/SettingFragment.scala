@@ -38,6 +38,7 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
   lazy val logLevel = findPreference(Key.LOG_LEVEL).asInstanceOf[ListPreference]
   lazy val v2rayCore = findPreference(Key.V2RAY_CORE).asInstanceOf[ListPreference]
   lazy val mux = findPreference(Key.MUX).asInstanceOf[NumberPickerPreference]
+  lazy val testConcurrency = findPreference(Key.TEST_CONCURRENCY).asInstanceOf[NumberPickerPreference]
   lazy val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
   private def activity = getActivity.asInstanceOf[SettingActivity]
 
@@ -68,6 +69,12 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
     mux.setValue(prefs.getInt(Key.MUX, 0))
     mux.setOnPreferenceChangeListener((_, value) => {
       prefs.edit().putInt(Key.MUX, value.asInstanceOf[Int]).apply()
+      true
+    })
+
+    testConcurrency.setValue(prefs.getInt(Key.TEST_CONCURRENCY, 2))
+    testConcurrency.setOnPreferenceChangeListener((_, value) => {
+      prefs.edit().putInt(Key.TEST_CONCURRENCY, value.asInstanceOf[Int]).apply()
       true
     })
 
@@ -104,7 +111,7 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
       true
     })
 
-    logLevel.setOnPreferenceChangeListener((_, value) => {
+    v2rayCore.setOnPreferenceChangeListener((_, value) => {
       val core = value.asInstanceOf[String]
       prefs.edit().putString(Key.V2RAY_CORE, core).apply()
       true
@@ -115,7 +122,7 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
       true
     })
 
-    aboutPref.setSummary(s"v${BuildConfig.VERSION_NAME} (v2ray-core: v${Tun2socks.checkVersion()})")
+    aboutPref.setSummary(s"SSRRAY: v${BuildConfig.VERSION_NAME}\nv2ray-core: v${Tun2socks.checkVersion()}; xray-core: v${Tun2socks.checkXVersion()}")
     aboutPref.setOnPreferenceClickListener(_ => {
       val web = new WebView(activity)
       web.loadUrl("file:///android_asset/pages/about.html")

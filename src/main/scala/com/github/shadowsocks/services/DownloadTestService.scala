@@ -93,7 +93,8 @@ class DownloadTestService extends Service {
               updateTrafficInfo(traffic)
             }
           }
-          Tun2socks.batchTestDownload(links, 2, new TestDownloadUpdate())
+          val concurrency = app.settings.getInt(Key.TEST_CONCURRENCY, 2)
+          Tun2socks.batchTestDownload(links, concurrency, new TestDownloadUpdate())
         }
 
         testJob = new Thread {

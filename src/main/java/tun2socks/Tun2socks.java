@@ -58,6 +58,8 @@ public abstract class Tun2socks
 
     public static native long queryStats(final String p0);
 
+    public static native String resolve(final String p0, final boolean p1, final String p2) throws Exception;
+
     public static native void setLocalDNS(final String p0);
 
     public static native boolean setNonblock(final long p0, final boolean p1);

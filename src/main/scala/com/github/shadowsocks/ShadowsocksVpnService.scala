@@ -489,8 +489,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (profile.ipv6) {
       builder.addAddress(PRIVATE_VLAN6.formatLocal(Locale.ENGLISH, "1"), 126)
       builder.addRoute("::", 0)
-      builder.addDnsServer("2001:4860:4860::8888")
-      builder.addDnsServer("2001:4860:4860::8844")
+      builder.addDnsServer(InetAddress.getByName("2400:3200::1"))
+      builder.addDnsServer(InetAddress.getByName("2001:4860:4860::8888"))
     }
 
     if (Utils.isLollipopOrAbove) {

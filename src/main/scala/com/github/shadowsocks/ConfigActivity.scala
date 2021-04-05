@@ -17,7 +17,7 @@ import com.github.shadowsocks.utils.Parser.TAG
 import com.github.shadowsocks.utils.{ConfigUtils, Key, Parser}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.fragments.{SubscriptionFragment, V2RayConfigFragment}
+import com.github.shadowsocks.fragments.{SubscriptionFragment, V2RayConfigFragment, RouteRuleFragment}
 import com.google.gson.{Gson, GsonBuilder, JsonParser}
 import go.Seq
 import org.json.JSONObject
@@ -74,6 +74,7 @@ class ConfigActivity extends AppCompatActivity{
         v2rayConfigFragment.setArguments(bundle)
         displayFragment(v2rayConfigFragment)
       }
+      case Some(Key.FRAGMENT_ROUTE_RULE) => displayFragment(new RouteRuleFragment())
       case Some(Key.FRAGMENT_SUBSCRIPTION) => displayFragment(new SubscriptionFragment())
       case _ =>
     }

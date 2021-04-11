@@ -22,7 +22,7 @@ import android.support.v7.view.ActionMode
 import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.view._
-import android.widget.{Adapter, AdapterView, ArrayAdapter, CheckBox, CheckedTextView, CompoundButton, EditText, ImageView, LinearLayout, Switch, PopupMenu, TextView, Toast}
+import android.widget.{Adapter, AdapterView, ArrayAdapter, CheckBox, CheckedTextView, CompoundButton, EditText, ImageView, LinearLayout, PopupMenu, Switch, TextView, Toast}
 import android.net.Uri
 import android.support.design.widget.Snackbar
 import com.github.clans.fab.{FloatingActionButton, FloatingActionMenu}
@@ -54,8 +54,11 @@ import tun2socks.Tun2socks
 import scala.language.implicitConversions
 import Profile._
 import android.support.v4.app.NotificationCompat
+import com.github.mikephil.charting.charts.{LineChart}
+import com.github.mikephil.charting.data.{Entry, LineDataSet, LineData}
+import com.github.mikephil.charting.formatter.{ValueFormatter}
 import com.github.shadowsocks.database.VmessAction.profile
-import com.github.shadowsocks.services.{BgResultReceiver, GetResultCallBack, LatencyTestService, DownloadTestService}
+import com.github.shadowsocks.services.{BgResultReceiver, DownloadTestService, GetResultCallBack, LatencyTestService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{Duration, SECONDS}
@@ -252,15 +255,67 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         true
       }
       case R.id.action_test_download => {
+        val viewGroup : ViewGroup = findViewById(android.R.id.content)
+        val dialogView = LayoutInflater.from(ProfileManagerActivity.this).inflate(R.layout.layout_download_dialog, viewGroup, false)
+        val chart = dialogView.findViewById(R.id.chart).asInstanceOf[LineChart]
+        chart.setTouchEnabled(false)
+        chart.getDescription.setEnabled(false)
+        // set grid
+        chart.getAxisLeft.setEnabled(false)
+        chart.getAxisLeft.setAxisMinimum(0)
+        chart.getAxisRight.setEnabled(false)
+        chart.getXAxis.setEnabled(false)
+        chart.getLegend.setEnabled(false)
+//        chart.setDrawGridBackground(false)
+        val entries = new util.ArrayList[Entry]()
+        for (i <- 1 to 14) {
+          entries.add(new Entry(i,0))
+        }
+        val dataset = new LineDataSet(entries, "Label")
+//        dataset.setMode(LineDataSet.Mode.CUBIC_BEZIER)
+//        dataset.setCubicIntensity(0f)
+        dataset.setDrawCircles(false)
+        dataset.setDrawFilled(true)
+        dataset.setCircleRadius(4)
+        val linedata = new LineData(dataset)
+        linedata.setValueFormatter(new ValueFormatter {
+          override def getPointLabel(entry: Entry): String = {
+            if ( entry.getX.toInt % 2 == 1 || entry.getY < 1) { "" }
+            else { TrafficMonitor.formatTrafficInternal(entry.getY.toLong, true) }
+          }
+        })
+        chart.setData(linedata)
+        chart.invalidate()
+        val builder = new AlertDialog.Builder(ProfileManagerActivity.this)
+        builder.setView(dialogView)
+        val alertDialog = builder.create()
+        alertDialog.show()
         var total: Long  =0
-        val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
+        val updateData = (speed: Long) => {
+          val set1 =  chart.getData().getDataSetByIndex(0).asInstanceOf[LineDataSet]
+          val values = set1.getValues
+          var i = 1
+          while (i< 14 ) {
+            if (values.get(i).getY < 1) {
+              values.get(i).setY(speed)
+              i = 14
+            }
+            i += 1
+          }
+          set1.setValues(values)
+          set1.notifyDataSetChanged()
+          chart.getData.notifyDataChanged()
+          chart.notifyDataSetChanged()
+          chart.invalidate()
+        }
+//        val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
         class TestDownloadUpdate extends tun2socks.TestLatency {
           var max: Long = 0
           override def updateLatency(l: Long, l1: Long): Unit = {
             if (max < l1) { max = l1 }
             total += l1
             val speed = s"Current: ${TrafficMonitor.formatTraffic(l1)}/s\nMax: ${TrafficMonitor.formatTraffic(max)}/s"
-            runOnUiThread(() => singleTestProgressDialog.setMessage(speed))
+            runOnUiThread(() => updateData(l1))
             Log.e(TAG, speed)
           }
         }
@@ -269,7 +324,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           item.rx += total
           app.profileManager.updateProfile(item)
           this.updateText()
-          singleTestProgressDialog.dismiss()
+//          singleTestProgressDialog.dismiss()
+          alertDialog.dismiss()
           Snackbar.make(findViewById(android.R.id.content), result.msg, Snackbar.LENGTH_LONG).show
         })
         true

@@ -41,6 +41,7 @@ typedResources := false
 resConfigs := Seq("ja", "ru", "zh-rCN", "zh-rTW")
 
 resolvers += "Google" at "https://maven.google.com/"
+resolvers += "jitpack" at "https://jitpack.io"
 resolvers += Resolver.jcenterRepo
 
 libraryDependencies ++=
@@ -64,6 +65,7 @@ libraryDependencies ++=
   "me.dm7.barcodescanner" % "zxing" % "1.9.8" ::
   "net.glxn.qrgen" % "android" % "2.0" ::
   "com.squareup.okhttp3" % "okhttp" % "4.4.1" ::
+  "com.github.PhilJay" % "MPAndroidChart" % "v3.1.0" ::
   "com.google.code.gson" % "gson" % "2.8.6" ::
 Nil
 

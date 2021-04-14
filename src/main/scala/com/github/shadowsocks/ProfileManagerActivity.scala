@@ -68,13 +68,15 @@ import scala.collection.immutable.HashMap
 // support group on switch
 object ProfileManagerActivity {
   // profiles count
-  def getProfilesByGroup (groupName: String, is_sort: Boolean): List[Profile] = {
+  def getProfilesByGroup (groupName: String, is_sort: Boolean, is_sort_download: Boolean): List[Profile] = {
     val allGroup = app.getString(R.string.allgroups)
-    return {(groupName, is_sort) match {
-      case (`allGroup`, true) => app.profileManager.getAllProfilesByElapsed
-      case (`allGroup`, false) => app.profileManager.getAllProfiles
-      case (_, true) => app.profileManager.getAllProfilesByGroupOrderByElapse(groupName)
-      case (_, false) => app.profileManager.getAllProfilesByGroup(groupName)
+    return {(groupName, is_sort, is_sort_download) match {
+      case (`allGroup`, true, _) => app.profileManager.getAllProfilesByElapsed
+      case (`allGroup`, _, true) => app.profileManager.getAllProfilesByDownload
+      case (`allGroup`, false, false) => app.profileManager.getAllProfiles
+      case (_, true, _) => app.profileManager.getAllProfilesByGroupOrderByElapse(groupName)
+      case (_, _, true) => app.profileManager.getAllProfilesByGroupOrderByDownload(groupName)
+      case (_, false, false) => app.profileManager.getAllProfilesByGroup(groupName)
     }}.getOrElse(List.empty[Profile])
   }
 
@@ -359,7 +361,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
     def getProfilesByGroup (groupName: String): List[Profile] = {
       val undoProfileIds = getUndoProfileIds
-      ProfileManagerActivity.getProfilesByGroup(groupName, is_sort)
+      ProfileManagerActivity.getProfilesByGroup(groupName, is_sort, is_sort_download)
         .filter(p => !undoProfileIds.contains(p.id))
     }
 
@@ -386,7 +388,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
     def resetProfiles (): Unit = {
       profilesAdapter.displayInfo = getDisplayInfo()
-      is_sort = app.settings.getString(Key.SORT_METHOD, Key.SORT_METHOD_DEFAULT) == Key.SORT_METHOD_ELAPSED
+      val sortMethod = app.settings.getString(Key.SORT_METHOD, Key.SORT_METHOD_DEFAULT)
+      is_sort = sortMethod == Key.SORT_METHOD_ELAPSED
+      is_sort_download = sortMethod == Key.SORT_METHOD_DOWNLOAD
       profiles.clear()
       profiles ++= getProfilesByGroup(currentGroupName)
     }
@@ -591,6 +595,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   private val REQUEST_QRCODE = 1
   private var is_sort: Boolean = false
+  private var is_sort_download: Boolean = false
   private final val REQUEST_CREATE_DOCUMENT = 40
   private final val REQUEST_IMPORT_PROFILES = 41
   private final val REQUEST_IMPORT_QRCODE_IMAGE = 42
@@ -667,12 +672,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     super.onCreate(savedInstanceState)
 
     val action = getIntent().getAction()
-    if (action != null && action.equals(Action.SCAN)) {
-       qrcodeScan()
-    }
-
-    if (action != null && action.equals(Action.SORT)) {
-       is_sort = true
+    action match {
+      case Action.SCAN => qrcodeScan()
+      case Action.SORT => is_sort = true
+      case Action.SORT_DOWNLOAD => is_sort_download = true
+      case _ =>
     }
 
 //    getWindow.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
@@ -691,7 +695,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     toolbar.inflateMenu(R.menu.profile_manager_menu)
     toolbar.setOnMenuItemClickListener(this)
     val sortMethod = app.settings.getString(Key.SORT_METHOD, Key.SORT_METHOD_DEFAULT)
-    val menuId = if (sortMethod == Key.SORT_METHOD_ELAPSED) R.id.action_sort_by_latency else R.id.action_sort_by_default
+    val menuId = sortMethod match {
+      case Key.SORT_METHOD_ELAPSED => R.id.action_sort_by_latency
+      case Key.SORT_METHOD_DOWNLOAD => R.id.action_sort_by_download
+      case _ => R.id.action_sort_by_default
+    }
     toolbar.getMenu.findItem(menuId).setChecked(true)
 
     initFab()
@@ -1302,7 +1310,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
     case R.id.action_export =>
-      val profiles = ProfileManagerActivity.getProfilesByGroup(currentGroupName, is_sort)
+      val profiles = ProfileManagerActivity.getProfilesByGroup(currentGroupName, is_sort, is_sort_download)
       clipboard.setPrimaryClip(ClipData.newPlainText(null, profiles.mkString("\n")))
       Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show
 //      app.profileManager.getAllProfiles match {
@@ -1614,7 +1622,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
         .setTitle(getString(R.string.batch_delete))
         .setPositiveButton(android.R.string.yes, ((_, _) =>{
-          ProfileManagerActivity.getProfilesByGroup(currentGroupName, false)
+          ProfileManagerActivity.getProfilesByGroup(currentGroupName, false, false)
             .filter(_.id != app.profileId)
             .foreach(profile => app.profileManager.delProfile(profile.id))
           finish()
@@ -1622,7 +1630,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         }): DialogInterface.OnClickListener)
         .setNegativeButton(android.R.string.no, null)
         .setNeutralButton(R.string.delete_zero_latency,  ((_, _) => {
-          ProfileManagerActivity.getProfilesByGroup(currentGroupName, false)
+          ProfileManagerActivity.getProfilesByGroup(currentGroupName, false, false)
             .filter(p => p.elapsed < 1 && p.id != app.profileId )
             .foreach(profile => app.profileManager.delProfile(profile.id))
           finish()
@@ -1649,6 +1657,16 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       item.setChecked(true)
       app.settings.edit().putString(Key.SORT_METHOD, Key.SORT_METHOD_ELAPSED).apply()
       is_sort = true
+      is_sort_download = false
+      profilesAdapter.resetProfiles()
+      profilesAdapter.notifyDataSetChanged()
+      true
+    }
+    case R.id.action_sort_by_download => {
+      item.setChecked(true)
+      app.settings.edit().putString(Key.SORT_METHOD, Key.SORT_METHOD_DOWNLOAD).apply()
+      is_sort = false
+      is_sort_download = true
       profilesAdapter.resetProfiles()
       profilesAdapter.notifyDataSetChanged()
       true

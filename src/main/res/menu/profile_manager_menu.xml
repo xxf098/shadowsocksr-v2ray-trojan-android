@@ -80,6 +80,9 @@
                 <item
                     android:id="@+id/action_sort_by_latency"
                     android:title="@string/sort_by_elapsed" />
+                <item
+                    android:id="@+id/action_sort_by_download"
+                    android:title="@string/sort_by_download" />
             </group>
         </menu>
     </item>

@@ -399,8 +399,8 @@ class ProfileManager(dbHelper: DBHelper) {
   def getAllProfilesByDownload: Option[List[Profile]] = {
     try {
       import scala.collection.JavaConversions._
-      Option(dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.orderBy("download_speed", true).where().not().eq("download_speed", 0).prepare).toList
-        ++ dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.orderBy("download_speed", true).where().eq("download_speed", 0).prepare).toList)
+      Option(dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.orderBy("download_speed", false).where().not().eq("download_speed", 0).prepare).toList
+        ++ dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.orderBy("download_speed", false).where().eq("download_speed", 0).prepare).toList)
     } catch {
       case ex: Exception =>
         Log.e(TAG, "getAllProfiles", ex)
@@ -425,8 +425,8 @@ class ProfileManager(dbHelper: DBHelper) {
   def getAllProfilesByGroupOrderByDownload(group: String): Option[List[Profile]] = {
     try {
       import scala.collection.JavaConversions._
-      Option(dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.orderBy("download_speed", true).where().eq("url_group", group).and().not().eq("download_speed", 0).prepare).toList
-        ++ dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.orderBy("download_speed", true).where().eq("url_group", group).and().eq("download_speed", 0).prepare).toList)
+      Option(dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.orderBy("download_speed", false).where().eq("url_group", group).and().not().eq("download_speed", 0).prepare).toList
+        ++ dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.orderBy("download_speed", false).where().eq("url_group", group).and().eq("download_speed", 0).prepare).toList)
     } catch {
       case ex: Exception =>
         Log.e(TAG, "getAllProfiles", ex)

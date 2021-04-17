@@ -190,6 +190,7 @@
   <string name="action_export_err">导出至剪贴板失败</string>
   <string name="action_import_msg">导入成功</string>
   <string name="action_import_err">导入失败</string>
+  <string name="action_export_more">导出…</string>
   <string name="action_export_file">导出至文件</string>
   <string name="action_export_file_msg">导出至文件成功</string>
   <string name="action_export_file_err">导出至文件失败</string>

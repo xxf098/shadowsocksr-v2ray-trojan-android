@@ -260,6 +260,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         val viewGroup : ViewGroup = findViewById(android.R.id.content)
         val dialogView = LayoutInflater.from(ProfileManagerActivity.this).inflate(R.layout.layout_download_dialog, viewGroup, false)
         val chart = dialogView.findViewById(R.id.chart).asInstanceOf[LineChart]
+        val tvMaxSpeed = dialogView.findViewById(R.id.tv_max_speed).asInstanceOf[TextView]
         chart.setTouchEnabled(false)
         chart.getDescription.setEnabled(false)
         // set grid
@@ -293,7 +294,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         val alertDialog = builder.create()
         alertDialog.show()
         var total: Long  =0
-        val updateData = (speed: Long) => {
+        val updateData = (speed: Long, maxSpeed: Long) => {
+          tvMaxSpeed.setText(s"${TrafficMonitor.formatTraffic(maxSpeed)}/s")
           val set1 =  chart.getData().getDataSetByIndex(0).asInstanceOf[LineDataSet]
           val values = set1.getValues
           var i = 1
@@ -317,7 +319,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             if (max < l1) { max = l1 }
             total += l1
             val speed = s"Current: ${TrafficMonitor.formatTraffic(l1)}/s\nMax: ${TrafficMonitor.formatTraffic(max)}/s"
-            runOnUiThread(() => updateData(l1))
+            runOnUiThread(() => updateData(l1, max))
             Log.e(TAG, speed)
           }
         }

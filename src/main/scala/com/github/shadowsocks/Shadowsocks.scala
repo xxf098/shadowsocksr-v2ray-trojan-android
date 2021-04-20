@@ -353,8 +353,12 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     title.getLayoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
     title.setOnClickListener(_ => {
       val intent = new Intent(this, classOf[ProfileManagerActivity])
-      if (app.settings.getString(Key.SORT_METHOD, "default") == "elapsed") {
+      val sortMethod = app.settings.getString(Key.SORT_METHOD, "default")
+      if (sortMethod == Key.SORT_METHOD_ELAPSED) {
         intent.setAction(Action.SORT)
+      }
+      if (sortMethod == Key.SORT_METHOD_DOWNLOAD) {
+        intent.setAction(Action.SORT_DOWNLOAD)
       }
       startActivity(intent)
     })

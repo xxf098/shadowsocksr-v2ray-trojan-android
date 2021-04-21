@@ -410,6 +410,7 @@ object Action {
   val QUICK_SWITCH = "com.xxf098.ssrray.QUICK_SWITCH"
   val SCAN = "com.xxf098.ssrray.intent.action.SCAN"
   val SORT = "com.xxf098.ssrray.intent.action.SORT"
+  val SORT_DOWNLOAD = "com.xxf098.ssrray.intent.action.SORT_DOWNLOAD"
   val STOP_TEST = "com.xxf098.ssrray.STOP_TEST"
 }
 

@@ -54,9 +54,12 @@ import tun2socks.Tun2socks
 import scala.language.implicitConversions
 import Profile._
 import android.support.v4.app.NotificationCompat
-import com.github.mikephil.charting.charts.{LineChart}
-import com.github.mikephil.charting.data.{Entry, LineDataSet, LineData}
-import com.github.mikephil.charting.formatter.{ValueFormatter}
+import android.support.v4.content.ContextCompat
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.LimitLine
+import com.github.mikephil.charting.components.LimitLine.LimitLabelPosition
+import com.github.mikephil.charting.data.{Entry, LineData, LineDataSet}
+import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.shadowsocks.database.VmessAction.profile
 import com.github.shadowsocks.services.{BgResultReceiver, DownloadTestService, GetResultCallBack, LatencyTestService}
 
@@ -279,6 +282,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 //        dataset.setCubicIntensity(0f)
         dataset.setDrawCircles(false)
         dataset.setDrawFilled(true)
+        dataset.setColor(ContextCompat.getColor(ProfileManagerActivity.this, R.color.material_accent_700))
+        dataset.setFillColor(ContextCompat.getColor(ProfileManagerActivity.this, R.color.material_accent_500))
         dataset.setCircleRadius(4)
         val linedata = new LineData(dataset)
         linedata.setValueFormatter(new ValueFormatter {

@@ -263,7 +263,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         val viewGroup : ViewGroup = findViewById(android.R.id.content)
         val dialogView = LayoutInflater.from(ProfileManagerActivity.this).inflate(R.layout.layout_download_dialog, viewGroup, false)
         val chart = dialogView.findViewById(R.id.chart).asInstanceOf[LineChart]
-        val tvMaxSpeed = dialogView.findViewById(R.id.tv_max_speed).asInstanceOf[TextView]
+        val tvMaxSpeed = dialogView.findViewById(R.id.tv_max_avg_speed).asInstanceOf[TextView]
         chart.setTouchEnabled(false)
         chart.getDescription.setEnabled(false)
         // set grid
@@ -300,17 +300,23 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         alertDialog.show()
         var total: Long  =0
         val updateData = (speed: Long, maxSpeed: Long) => {
-          tvMaxSpeed.setText(s"${TrafficMonitor.formatTraffic(maxSpeed)}/s")
           val set1 =  chart.getData().getDataSetByIndex(0).asInstanceOf[LineDataSet]
           val values = set1.getValues
           var i = 1
-          while (i< 14 ) {
-            if (values.get(i).getY < 1) {
+          var total = 0L
+          var continue = true
+          while (i< 14 && continue) {
+            val y = values.get(i).getY
+            if (y < 1) {
               values.get(i).setY(speed)
-              i = 14
+              total += speed
+              continue = false
             }
+            total += y.toLong
             i += 1
           }
+          val avgSpeed = total / (i-1)
+          tvMaxSpeed.setText(app.getString(R.string.speed_max_avg, TrafficMonitor.formatTraffic(maxSpeed), TrafficMonitor.formatTraffic(avgSpeed)))
           set1.setValues(values)
           set1.notifyDataSetChanged()
           chart.getData.notifyDataChanged()

@@ -3,8 +3,8 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
     <TextView
-        android:id="@+id/tv_max_speed"
-        android:text="Max Speed: 0 B/s"
+        android:id="@+id/tv_max_avg_speed"
+        android:text="Max: 0 B/s, Avg: 0 B/s"
         android:textSize="14sp"
         android:textColor="@android:color/black"
         android:layout_gravity="right"

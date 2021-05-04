@@ -50,7 +50,7 @@ class DownloadTestService extends Service {
     val currentGroupName = intent.getStringExtra(Key.currentGroupName)
     val isSort = intent.getBooleanExtra("is_sort", false)
     bgResultReceiver = intent.getParcelableExtra("BgResultReceiver")
-    val testProfiles = Option(ProfileManagerActivity.getProfilesByGroup(currentGroupName, isSort))
+    val testProfiles = Option(ProfileManagerActivity.getProfilesByGroup(currentGroupName, isSort, false))
     testProfiles match {
       //      app.profileManager.getAllProfiles match {
       case Some(profiles) =>
@@ -93,7 +93,8 @@ class DownloadTestService extends Service {
               updateTrafficInfo(traffic)
             }
           }
-          Tun2socks.batchTestDownload(links, 2, new TestDownloadUpdate())
+          val concurrency = app.settings.getInt(Key.TEST_CONCURRENCY, 2)
+          Tun2socks.batchTestDownload(links, concurrency, new TestDownloadUpdate())
         }
 
         testJob = new Thread {

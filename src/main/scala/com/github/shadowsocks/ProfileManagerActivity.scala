@@ -22,7 +22,7 @@ import android.support.v7.view.ActionMode
 import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.view._
-import android.widget.{Adapter, AdapterView, ArrayAdapter, CheckBox, CheckedTextView, CompoundButton, EditText, ImageView, LinearLayout, Switch, PopupMenu, TextView, Toast}
+import android.widget.{Adapter, AdapterView, ArrayAdapter, CheckBox, CheckedTextView, CompoundButton, EditText, ImageView, LinearLayout, PopupMenu, Switch, TextView, Toast}
 import android.net.Uri
 import android.support.design.widget.Snackbar
 import com.github.clans.fab.{FloatingActionButton, FloatingActionMenu}
@@ -54,8 +54,14 @@ import tun2socks.Tun2socks
 import scala.language.implicitConversions
 import Profile._
 import android.support.v4.app.NotificationCompat
+import android.support.v4.content.ContextCompat
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.LimitLine
+import com.github.mikephil.charting.components.LimitLine.LimitLabelPosition
+import com.github.mikephil.charting.data.{Entry, LineData, LineDataSet}
+import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.shadowsocks.database.VmessAction.profile
-import com.github.shadowsocks.services.{BgResultReceiver, GetResultCallBack, LatencyTestService, DownloadTestService}
+import com.github.shadowsocks.services.{BgResultReceiver, DownloadTestService, GetResultCallBack, LatencyTestService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{Duration, SECONDS}
@@ -65,13 +71,15 @@ import scala.collection.immutable.HashMap
 // support group on switch
 object ProfileManagerActivity {
   // profiles count
-  def getProfilesByGroup (groupName: String, is_sort: Boolean): List[Profile] = {
+  def getProfilesByGroup (groupName: String, is_sort: Boolean, is_sort_download: Boolean): List[Profile] = {
     val allGroup = app.getString(R.string.allgroups)
-    return {(groupName, is_sort) match {
-      case (`allGroup`, true) => app.profileManager.getAllProfilesByElapsed
-      case (`allGroup`, false) => app.profileManager.getAllProfiles
-      case (_, true) => app.profileManager.getAllProfilesByGroupOrderByElapse(groupName)
-      case (_, false) => app.profileManager.getAllProfilesByGroup(groupName)
+    return {(groupName, is_sort, is_sort_download) match {
+      case (`allGroup`, true, _) => app.profileManager.getAllProfilesByElapsed
+      case (`allGroup`, _, true) => app.profileManager.getAllProfilesByDownload
+      case (`allGroup`, false, false) => app.profileManager.getAllProfiles
+      case (_, true, _) => app.profileManager.getAllProfilesByGroupOrderByElapse(groupName)
+      case (_, _, true) => app.profileManager.getAllProfilesByGroupOrderByDownload(groupName)
+      case (_, false, false) => app.profileManager.getAllProfilesByGroup(groupName)
     }}.getOrElse(List.empty[Profile])
   }
 
@@ -252,15 +260,77 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         true
       }
       case R.id.action_test_download => {
+        val viewGroup : ViewGroup = findViewById(android.R.id.content)
+        val dialogView = LayoutInflater.from(ProfileManagerActivity.this).inflate(R.layout.layout_download_dialog, viewGroup, false)
+        val chart = dialogView.findViewById(R.id.chart).asInstanceOf[LineChart]
+        val tvMaxSpeed = dialogView.findViewById(R.id.tv_max_avg_speed).asInstanceOf[TextView]
+        chart.setTouchEnabled(false)
+        chart.getDescription.setEnabled(false)
+        // set grid
+        chart.getAxisLeft.setEnabled(false)
+        chart.getAxisLeft.setAxisMinimum(0)
+        chart.getAxisRight.setEnabled(false)
+        chart.getXAxis.setEnabled(false)
+        chart.getLegend.setEnabled(false)
+//        chart.setDrawGridBackground(false)
+        val entries = new util.ArrayList[Entry]()
+        for (i <- 1 to 14) {
+          entries.add(new Entry(i,0))
+        }
+        val dataset = new LineDataSet(entries, "Label")
+//        dataset.setMode(LineDataSet.Mode.CUBIC_BEZIER)
+//        dataset.setCubicIntensity(0f)
+        dataset.setDrawCircles(false)
+        dataset.setDrawFilled(true)
+        dataset.setColor(ContextCompat.getColor(ProfileManagerActivity.this, R.color.material_accent_700))
+        dataset.setFillColor(ContextCompat.getColor(ProfileManagerActivity.this, R.color.material_accent_500))
+        dataset.setCircleRadius(4)
+        val linedata = new LineData(dataset)
+        linedata.setValueFormatter(new ValueFormatter {
+          override def getPointLabel(entry: Entry): String = {
+            if ( entry.getX.toInt % 2 == 1 || entry.getY < 1) { "" }
+            else { TrafficMonitor.formatTrafficInternal(entry.getY.toLong, true) }
+          }
+        })
+        chart.setData(linedata)
+        chart.invalidate()
+        val builder = new AlertDialog.Builder(ProfileManagerActivity.this)
+        builder.setView(dialogView)
+        val alertDialog = builder.create()
+        alertDialog.show()
         var total: Long  =0
-        val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
+        val updateData = (speed: Long, maxSpeed: Long) => {
+          val set1 =  chart.getData().getDataSetByIndex(0).asInstanceOf[LineDataSet]
+          val values = set1.getValues
+          var i = 1
+          var total = 0L
+          var continue = true
+          while (i< 14 && continue) {
+            val y = values.get(i).getY
+            if (y < 1) {
+              values.get(i).setY(speed)
+              total += speed
+              continue = false
+            }
+            total += y.toLong
+            i += 1
+          }
+          val avgSpeed = total / (i-1)
+          tvMaxSpeed.setText(app.getString(R.string.speed_max_avg, TrafficMonitor.formatTraffic(maxSpeed), TrafficMonitor.formatTraffic(avgSpeed)))
+          set1.setValues(values)
+          set1.notifyDataSetChanged()
+          chart.getData.notifyDataChanged()
+          chart.notifyDataSetChanged()
+          chart.invalidate()
+        }
+//        val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
         class TestDownloadUpdate extends tun2socks.TestLatency {
           var max: Long = 0
           override def updateLatency(l: Long, l1: Long): Unit = {
             if (max < l1) { max = l1 }
             total += l1
             val speed = s"Current: ${TrafficMonitor.formatTraffic(l1)}/s\nMax: ${TrafficMonitor.formatTraffic(max)}/s"
-            runOnUiThread(() => singleTestProgressDialog.setMessage(speed))
+            runOnUiThread(() => updateData(l1, max))
             Log.e(TAG, speed)
           }
         }
@@ -269,7 +339,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           item.rx += total
           app.profileManager.updateProfile(item)
           this.updateText()
-          singleTestProgressDialog.dismiss()
+//          singleTestProgressDialog.dismiss()
+          alertDialog.dismiss()
           Snackbar.make(findViewById(android.R.id.content), result.msg, Snackbar.LENGTH_LONG).show
         })
         true
@@ -303,7 +374,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
     def getProfilesByGroup (groupName: String): List[Profile] = {
       val undoProfileIds = getUndoProfileIds
-      ProfileManagerActivity.getProfilesByGroup(groupName, is_sort)
+      ProfileManagerActivity.getProfilesByGroup(groupName, is_sort, is_sort_download)
         .filter(p => !undoProfileIds.contains(p.id))
     }
 
@@ -330,7 +401,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
     def resetProfiles (): Unit = {
       profilesAdapter.displayInfo = getDisplayInfo()
-      is_sort = app.settings.getString(Key.SORT_METHOD, Key.SORT_METHOD_DEFAULT) == Key.SORT_METHOD_ELAPSED
+      val sortMethod = app.settings.getString(Key.SORT_METHOD, Key.SORT_METHOD_DEFAULT)
+      is_sort = sortMethod == Key.SORT_METHOD_ELAPSED
+      is_sort_download = sortMethod == Key.SORT_METHOD_DOWNLOAD
       profiles.clear()
       profiles ++= getProfilesByGroup(currentGroupName)
     }
@@ -535,6 +608,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   private val REQUEST_QRCODE = 1
   private var is_sort: Boolean = false
+  private var is_sort_download: Boolean = false
   private final val REQUEST_CREATE_DOCUMENT = 40
   private final val REQUEST_IMPORT_PROFILES = 41
   private final val REQUEST_IMPORT_QRCODE_IMAGE = 42
@@ -611,12 +685,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     super.onCreate(savedInstanceState)
 
     val action = getIntent().getAction()
-    if (action != null && action.equals(Action.SCAN)) {
-       qrcodeScan()
-    }
-
-    if (action != null && action.equals(Action.SORT)) {
-       is_sort = true
+    action match {
+      case Action.SCAN => qrcodeScan()
+      case Action.SORT => is_sort = true
+      case Action.SORT_DOWNLOAD => is_sort_download = true
+      case _ =>
     }
 
 //    getWindow.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
@@ -635,7 +708,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     toolbar.inflateMenu(R.menu.profile_manager_menu)
     toolbar.setOnMenuItemClickListener(this)
     val sortMethod = app.settings.getString(Key.SORT_METHOD, Key.SORT_METHOD_DEFAULT)
-    val menuId = if (sortMethod == Key.SORT_METHOD_ELAPSED) R.id.action_sort_by_latency else R.id.action_sort_by_default
+    val menuId = sortMethod match {
+      case Key.SORT_METHOD_ELAPSED => R.id.action_sort_by_latency
+      case Key.SORT_METHOD_DOWNLOAD => R.id.action_sort_by_download
+      case _ => R.id.action_sort_by_default
+    }
     toolbar.getMenu.findItem(menuId).setChecked(true)
 
     initFab()
@@ -1123,7 +1200,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           val lines = scala.io.Source.fromInputStream(in).mkString
           val profiles_ssr = Parser.findAll_ssr(lines).toList
           val profiles_v2ray = Parser.findAllVmess(lines).toList
-          val profiles = profiles_ssr ::: profiles_v2ray
+          val profiles_trojan = Parser.findAllTrojan(lines).toList
+          val profiles = profiles_ssr ::: profiles_v2ray ::: profiles_trojan
           profiles.foreach(app.profileManager.createProfile)
         })
       }
@@ -1245,7 +1323,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
     case R.id.action_export =>
-      val profiles = ProfileManagerActivity.getProfilesByGroup(currentGroupName, is_sort)
+      val profiles = ProfileManagerActivity.getProfilesByGroup(currentGroupName, is_sort, is_sort_download)
       clipboard.setPrimaryClip(ClipData.newPlainText(null, profiles.mkString("\n")))
       Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show
 //      app.profileManager.getAllProfiles match {
@@ -1557,7 +1635,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
         .setTitle(getString(R.string.batch_delete))
         .setPositiveButton(android.R.string.yes, ((_, _) =>{
-          ProfileManagerActivity.getProfilesByGroup(currentGroupName, false)
+          ProfileManagerActivity.getProfilesByGroup(currentGroupName, false, false)
             .filter(_.id != app.profileId)
             .foreach(profile => app.profileManager.delProfile(profile.id))
           finish()
@@ -1565,7 +1643,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         }): DialogInterface.OnClickListener)
         .setNegativeButton(android.R.string.no, null)
         .setNeutralButton(R.string.delete_zero_latency,  ((_, _) => {
-          ProfileManagerActivity.getProfilesByGroup(currentGroupName, false)
+          ProfileManagerActivity.getProfilesByGroup(currentGroupName, false, false)
             .filter(p => p.elapsed < 1 && p.id != app.profileId )
             .foreach(profile => app.profileManager.delProfile(profile.id))
           finish()
@@ -1592,6 +1670,16 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       item.setChecked(true)
       app.settings.edit().putString(Key.SORT_METHOD, Key.SORT_METHOD_ELAPSED).apply()
       is_sort = true
+      is_sort_download = false
+      profilesAdapter.resetProfiles()
+      profilesAdapter.notifyDataSetChanged()
+      true
+    }
+    case R.id.action_sort_by_download => {
+      item.setChecked(true)
+      app.settings.edit().putString(Key.SORT_METHOD, Key.SORT_METHOD_DOWNLOAD).apply()
+      is_sort = false
+      is_sort_download = true
       profilesAdapter.resetProfiles()
       profilesAdapter.notifyDataSetChanged()
       true

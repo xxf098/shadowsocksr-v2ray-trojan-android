@@ -424,7 +424,7 @@ class Profile {
       case _ if isShadowSocks => {
         implicit val flags: Int = Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP
         val data = s"${v_security}:${v_id}".getBytes(Charset.forName("UTF-8"))
-        s"ss://${Utils.b64Encode(data)}@${v_add}:${v_port}#${name}"
+        s"ss://${Utils.b64Encode(data)}@${v_add}:${v_port}#${URLEncoder.encode(name, StandardCharsets.UTF_8.toString())}"
       }
       case _ => "ssr://" + Utils.b64Encode("%s:%d:%s:%s:%s:%s/?obfsparam=%s&protoparam=%s&remarks=%s&group=%s".formatLocal(Locale.ENGLISH,
         host, remotePort, protocol, method, obfs,

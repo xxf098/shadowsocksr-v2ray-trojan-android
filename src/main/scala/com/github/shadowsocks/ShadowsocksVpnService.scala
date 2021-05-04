@@ -68,6 +68,10 @@ import android.text.TextUtils
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
+import tun2socks.Tun2socks
+
+import scala.util.{Failure, Success, Try}
+
 
 // TODO: change vpn config
 class ShadowsocksVpnService extends VpnService with BaseService {
@@ -199,12 +203,15 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       // TODO: serverName
       if (profile.v_tls == "tls" && TextUtils.isEmpty(profile.v_host) && !Utils.isNumeric(profile.v_add)) { profile.v_host = profile.v_add }
 //      if (profile.v_tls == "tls" && TextUtils.isEmpty(profile.v_host) && !Utils.isNumeric(profile.v_add)) { profile.host = profile.v_add }
-      // TODO: migrate DNS resolve
       if (profile.isV2Ray || profile.isShadowSocks) {
-        Utils.resolve(profile.v_add, enableIPv6 = profile.ipv6, hostname = china_dns_address) match {
-          case Some(addr) => profile.v_add = addr
-          case None => throw NameNotResolvedException()
+        Try(Tun2socks.resolve(profile.v_add, profile.ipv6, s"$china_dns_address:$china_dns_port")) match {
+          case Failure(exception) => throw NameNotResolvedException()
+          case Success(addr) => profile.v_add = addr
         }
+//        Utils.resolve(profile.v_add, enableIPv6 = profile.ipv6, hostname = china_dns_address) match {
+//          case Some(addr) => profile.v_add = addr
+//          case None => throw NameNotResolvedException()
+//        }
       }
       if (profile.isTrojan) {
         Utils.resolve(profile.t_addr, enableIPv6 = profile.ipv6, hostname=china_dns_address) match {
@@ -482,8 +489,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (profile.ipv6) {
       builder.addAddress(PRIVATE_VLAN6.formatLocal(Locale.ENGLISH, "1"), 126)
       builder.addRoute("::", 0)
-      builder.addDnsServer("2001:4860:4860::8888")
-      builder.addDnsServer("2001:4860:4860::8844")
+      builder.addDnsServer(InetAddress.getByName("2400:3200::1"))
+      builder.addDnsServer(InetAddress.getByName("2001:4860:4860::8888"))
     }
 
     if (Utils.isLollipopOrAbove) {

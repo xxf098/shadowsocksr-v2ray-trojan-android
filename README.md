@@ -59,6 +59,7 @@ Set proxy for sbt: `File | Settings | Build, Execution, Deployment | Build Tools
     export ANDROID_NDK_HOME=/path/to/Android/android-ndk-r20b
     # install and update all git submodule
     git submodule update --init
+    # cd ./src/main/jni/shadowsocks-libev && git checkout Akkariiin/master
     # Build the App and fix the problems as the error messages indicated
     sbt native-build clean android:package-release
     # run app

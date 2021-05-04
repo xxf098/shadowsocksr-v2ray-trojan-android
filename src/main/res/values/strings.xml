@@ -26,6 +26,7 @@
   <string name="connection_test_fail">Internet Unavailable</string>
   <string name="connection_test_error_status_code">Error code: #%d</string>
   <string name="speed_test_available">Max Speed: %s/s</string>
+  <string name="speed_max_avg">Max: %1$s/s, Avg: %2$s/s</string>
 
   <!-- proxy category -->
   <string name="proxy_cat">Server Settings</string>

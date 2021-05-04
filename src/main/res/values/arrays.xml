@@ -121,6 +121,7 @@
         <item>chacha20-poly1305</item>
         <item>auto</item>
         <item>none</item>
+        <item>zero</item>
     </string-array>
 
     <string-array name="v2ray_security_value">
@@ -128,6 +129,7 @@
         <item>chacha20-poly1305</item>
         <item>auto</item>
         <item>none</item>
+        <item>zero</item>
     </string-array>
 
     <string-array name="networks" translatable="false">

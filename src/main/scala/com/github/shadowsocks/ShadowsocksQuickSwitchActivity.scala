@@ -47,7 +47,7 @@ class ShadowsocksQuickSwitchActivity extends AppCompatActivity {
   }
 
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
-    var profiles = ProfileManagerActivity.getProfilesByGroup(currentGroupName, false)
+    var profiles = ProfileManagerActivity.getProfilesByGroup(currentGroupName, false, false)
 
     def getItemCount = profiles.length
 
@@ -56,7 +56,7 @@ class ShadowsocksQuickSwitchActivity extends AppCompatActivity {
     }
 
     def onGroupChange():Unit = {
-      profiles = ProfileManagerActivity.getProfilesByGroup(currentGroupName, false)
+      profiles = ProfileManagerActivity.getProfilesByGroup(currentGroupName, false, false)
       notifyDataSetChanged()
     }
 

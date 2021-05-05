@@ -39,6 +39,14 @@
     </EditText>
 
     <CheckBox
+        android:id="@+id/cb_expire_on"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Expire On: Unknown"
+        android:layout_marginTop="8dp"
+        android:checked="false"/>
+
+    <CheckBox
         android:id="@+id/cb_enable_auto_update_subscription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

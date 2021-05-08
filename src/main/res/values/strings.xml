@@ -162,7 +162,7 @@
   <string name="ignore_battery_optimization">Request ignore battery optimizations</string>
   <string name="ignore_battery_optimization_summary">Click to request trigger Ignore the battery optimization, to avoid background hiccups caused by hibernation when off screen, will increase the battery consumption, may not be triggered properly on some devices.</string>
   <string name="about">About</string>
-  <string name="about_title">ShadowsocksR Ray %s</string>
+  <string name="about_title">SSRRAY %s</string>
   <string name="share">Share</string>
   <string name="share_message">Scan QR code or use Android Beam (NFC)</string>
   <string name="share_message_without_nfc">Scan QR code</string>
@@ -270,6 +270,7 @@
   <string name="update_subscription">Refresh servers from subscription</string>
   <string name="subscription_url">Subscription URL</string>
   <string name="use_default_group_name">Use Default Group Name</string>
+  <string name="ssrsub_expire_on">Expire on: %s</string>
 
   <string name="scan_qrcode_install_title">Scanner installation</string>
   <string name="scan_qrcode_install_text">It seems that \'zxing scanner\' is not currently installed. You may click the \'ok\' button below to install it from Play Store, or \'Install Manually\' to manually download the apk and installed it.</string>

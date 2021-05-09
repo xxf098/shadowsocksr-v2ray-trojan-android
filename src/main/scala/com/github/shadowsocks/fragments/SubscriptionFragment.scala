@@ -3,10 +3,10 @@ package com.github.shadowsocks.fragments
 import java.io.IOException
 import java.net.URL
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.{Calendar, Date}
 import java.util.concurrent.TimeUnit
 
-import android.app.ProgressDialog
+import android.app.{DatePickerDialog, ProgressDialog}
 import android.content.{ClipData, ClipboardManager, Context, DialogInterface, Intent}
 import android.os.{Bundle, Handler}
 import android.preference.PreferenceManager
@@ -22,7 +22,7 @@ import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.util.Log
 import android.view.{Gravity, KeyEvent, LayoutInflater, MenuItem, View, ViewGroup}
-import android.widget.{CheckBox, CompoundButton, EditText, ImageView, LinearLayout, PopupMenu, Switch, TextView, Toast}
+import android.widget.{CheckBox, CompoundButton, DatePicker, EditText, ImageView, LinearLayout, PopupMenu, Switch, TextView, Toast}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.{Profile, SSRSub}
 import com.github.shadowsocks.utils.{Key, Parser, Utils}
@@ -123,6 +123,23 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     val etAddUrl = view.findViewById(R.id.et_subscription_url).asInstanceOf[EditText]
     val etGroupName = view.findViewById(R.id.et_group_name).asInstanceOf[EditText]
     val cbEnableAutoSub = view.findViewById(R.id.cb_enable_auto_update_subscription).asInstanceOf[CheckBox]
+    val cbExpireOn = view.findViewById(R.id.cb_expire_on).asInstanceOf[CheckBox]
+    cbExpireOn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener {
+      override def onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean): Unit = {
+        if (!isChecked) return
+        val c = Calendar.getInstance()
+        val mYear = c.get(Calendar.YEAR)
+        val mMonth = c.get(Calendar.MONTH)
+        val mDay = c.get(Calendar.DAY_OF_MONTH)
+        val datePickerDialog = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener {
+          override def onDateSet(view: DatePicker, year: Int, month: Int, dayOfMonth: Int): Unit = {
+            val expire = getString(R.string.ssrsub_expire_on, s"${year}/${month+1}/${dayOfMonth}")
+            cbExpireOn.setText(expire)
+          }
+        }, mYear, mMonth, mDay)
+        datePickerDialog.show()
+      }
+    })
     var title = getString(R.string.ssrsub_add)
     ssrSub match {
       case Some(sub) => {

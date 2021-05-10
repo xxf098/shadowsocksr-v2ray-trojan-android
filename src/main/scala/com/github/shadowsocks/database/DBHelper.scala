@@ -65,7 +65,7 @@ object DBHelper {
 }
 
 class DBHelper(val context: Context)
-  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 36) {
+  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 37) {
   import DBHelper._
 
   lazy val profileDao: Dao[Profile, Int] = getDao(classOf[Profile])
@@ -217,6 +217,9 @@ class DBHelper(val context: Context)
         }
         if (oldVersion < 36) {
           ssrsubDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN download_speed LONG DEFAULT 0;")
+        }
+        if (oldVersion < 37) {
+          ssrsubDao.executeRawNoArgs("ALTER TABLE `ssrsub` ADD COLUMN expire_on VARCHAR DEFAULT '';")
         }
       } catch {
         case ex: Exception =>

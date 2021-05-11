@@ -241,4 +241,7 @@ class SSRSub {
 
   @DatabaseField
   var enable_auto_update: Boolean = true
+
+  @DatabaseField
+  var expire_on: String = ""
 }

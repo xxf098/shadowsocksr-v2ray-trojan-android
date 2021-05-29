@@ -60,6 +60,7 @@ import com.github.mikephil.charting.components.LimitLine
 import com.github.mikephil.charting.components.LimitLine.LimitLabelPosition
 import com.github.mikephil.charting.data.{Entry, LineData, LineDataSet}
 import com.github.mikephil.charting.formatter.ValueFormatter
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import com.github.shadowsocks.database.VmessAction.profile
 import com.github.shadowsocks.services.{BgResultReceiver, DownloadTestService, GetResultCallBack, LatencyTestService}
 
@@ -273,23 +274,41 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         chart.getXAxis.setEnabled(false)
         chart.getLegend.setEnabled(false)
 //        chart.setDrawGridBackground(false)
-        val entries = new util.ArrayList[Entry]()
+        val avgEntries = new util.ArrayList[Entry]()
+        val maxEntries = new util.ArrayList[Entry]()
         for (i <- 1 to 14) {
-          entries.add(new Entry(i,0))
+          avgEntries.add(new Entry(i,0, 0))
+          maxEntries.add(new Entry(i,0, 1))
         }
-        val dataset = new LineDataSet(entries, "Label")
-//        dataset.setMode(LineDataSet.Mode.CUBIC_BEZIER)
-//        dataset.setCubicIntensity(0f)
-        dataset.setDrawCircles(false)
-        dataset.setDrawFilled(true)
-        dataset.setColor(ContextCompat.getColor(ProfileManagerActivity.this, R.color.material_accent_700))
-        dataset.setFillColor(ContextCompat.getColor(ProfileManagerActivity.this, R.color.material_accent_500))
-        dataset.setCircleRadius(4)
-        val linedata = new LineData(dataset)
+        val datasets = new util.ArrayList[ILineDataSet]()
+        val entries = List(avgEntries, maxEntries)
+        for ((entry, i) <- entries.zipWithIndex) {
+          val dataset = new LineDataSet(entry, s"Label${i}")
+          dataset.setDrawCircles(false)
+          // max
+          if (i == 1) {
+            dataset.setDrawFilled(true)
+            dataset.setColor(ContextCompat.getColor(ProfileManagerActivity.this, R.color.material_accent_700))
+            dataset.setFillColor(ContextCompat.getColor(ProfileManagerActivity.this, R.color.material_accent_500))
+          } else {
+            dataset.setDrawFilled(false)
+          }
+          dataset.setCircleRadius(4)
+          datasets.add(dataset)
+        }
+        val linedata = new LineData(datasets)
         linedata.setValueFormatter(new ValueFormatter {
           override def getPointLabel(entry: Entry): String = {
-            if ( entry.getX.toInt % 2 == 1 || entry.getY < 1) { "" }
-            else { TrafficMonitor.formatTrafficInternal(entry.getY.toLong, true) }
+            val entryData = entry.getData.asInstanceOf[Integer]
+            if (entryData == 0) {
+              // avg
+              if ( entry.getX.toInt % 3 != 0 || entry.getY < 1) { "" }
+              else { TrafficMonitor.formatTrafficInternal(entry.getY.toLong, true) }
+            } else {
+              // max
+              if ( entry.getX.toInt % 2 == 1 || entry.getY < 1) { "" }
+              else { TrafficMonitor.formatTrafficInternal(entry.getY.toLong, true) }
+            }
           }
         })
         chart.setData(linedata)
@@ -300,15 +319,17 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         alertDialog.show()
         var total: Long  =0
         val updateData = (speed: Long, maxSpeed: Long) => {
-          val set1 =  chart.getData().getDataSetByIndex(0).asInstanceOf[LineDataSet]
-          val values = set1.getValues
+          val avgSet =  chart.getData().getDataSetByIndex(0).asInstanceOf[LineDataSet]
+          val maxSet =  chart.getData().getDataSetByIndex(1).asInstanceOf[LineDataSet]
+          val maxValues = maxSet.getValues
+          val avgValues = avgSet.getValues
           var i = 1
           var total = 0L
           var continue = true
           while (i< 14 && continue) {
-            val y = values.get(i).getY
+            val y = maxValues.get(i).getY
             if (y < 1) {
-              values.get(i).setY(speed)
+              maxValues.get(i).setY(speed)
               total += speed
               continue = false
             }
@@ -316,9 +337,12 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             i += 1
           }
           val avgSpeed = total / (i-1)
+          avgValues.get(i-1).setY(avgSpeed)
           tvMaxSpeed.setText(app.getString(R.string.speed_max_avg, TrafficMonitor.formatTraffic(maxSpeed), TrafficMonitor.formatTraffic(avgSpeed)))
-          set1.setValues(values)
-          set1.notifyDataSetChanged()
+          maxSet.setValues(maxValues)
+          maxSet.notifyDataSetChanged()
+          avgSet.setValues(avgValues)
+          avgSet.notifyDataSetChanged()
           chart.getData.notifyDataChanged()
           chart.notifyDataSetChanged()
           chart.invalidate()

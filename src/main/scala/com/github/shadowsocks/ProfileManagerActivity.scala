@@ -291,6 +291,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             dataset.setColor(ContextCompat.getColor(ProfileManagerActivity.this, R.color.material_accent_700))
             dataset.setFillColor(ContextCompat.getColor(ProfileManagerActivity.this, R.color.material_accent_500))
           } else {
+            dataset.setColor(ContextCompat.getColor(ProfileManagerActivity.this, android.R.color.holo_blue_bright))
             dataset.setDrawFilled(false)
           }
           dataset.setCircleRadius(4)
@@ -302,8 +303,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             val entryData = entry.getData.asInstanceOf[Integer]
             if (entryData == 0) {
               // avg
-              if ( entry.getX.toInt % 3 != 0 || entry.getY < 1) { "" }
-              else { TrafficMonitor.formatTrafficInternal(entry.getY.toLong, true) }
+              ""
+//              if ( entry.getX.toInt % 4 != 1 || entry.getY < 1) { "" }
+//              else { TrafficMonitor.formatTrafficInternal(entry.getY.toLong, true) }
             } else {
               // max
               if ( entry.getX.toInt % 2 == 1 || entry.getY < 1) { "" }

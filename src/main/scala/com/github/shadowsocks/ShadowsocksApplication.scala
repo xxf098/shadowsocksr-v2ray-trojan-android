@@ -130,6 +130,8 @@ class ShadowsocksApplication extends Application {
 
   def getV2rayAssetsPath (): String = getApplicationInfo.dataDir + "/files/"
 
+  def getFontAssetsPath (): String = getApplicationInfo.dataDir + "/files/WenQuanYiMicroHei-01.ttf"
+
   private def checkChineseLocale(locale: Locale): Locale = if (locale.getLanguage == "zh") locale.getCountry match {
     case "CN" | "TW" => null // already supported
     case _ => locale.getScript match { // fallback to the corresponding script

@@ -80,7 +80,7 @@
             android:entryValues="@array/core_value"
             android:key="pref_v2ray_core"
             android:summary="%s"
-            android:title="Switch Core" />
+            android:title="@string/switch_core" />
 
         <ListPreference
             android:defaultValue="error"

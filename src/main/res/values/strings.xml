@@ -375,6 +375,8 @@
   <string name="ssr_category">SSR Settings</string>
   <string name="v2ray_category">V2Ray Settings</string>
 
+  <string name="switch_core">Switch Core</string>
+
 
   <plurals name="format_minutes">
     <item quantity="one">%d minute</item>

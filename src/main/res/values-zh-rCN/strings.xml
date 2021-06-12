@@ -321,6 +321,8 @@
   <string name="ssr_category">SSR设置</string>
   <string name="v2ray_category">V2Ray设置</string>
 
+  <string name="switch_core">切换内核</string>
+
   <plurals name="format_minutes">
     <item quantity="other">%d 分钟</item>
   </plurals>

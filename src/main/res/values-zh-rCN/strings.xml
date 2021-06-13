@@ -63,6 +63,7 @@
   <string name="loading">正在加载……</string>
 
   <string name="service_test_working">正在测试节点…</string>
+  <string name="view_test_result">查看测试结果</string>
 
   <string name="dr">去重添加</string>
 

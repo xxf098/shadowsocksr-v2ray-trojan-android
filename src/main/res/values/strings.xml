@@ -139,6 +139,7 @@
   <string name="service_nat" translatable="false">Nat Service</string>
   <string name="service_test" translatable="false">Latency Test Service</string>
   <string name="service_test_working">Testing Profiles…</string>
+  <string name="view_test_result">View Test Result</string>
 
 
     <!-- alert category -->

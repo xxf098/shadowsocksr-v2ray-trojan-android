@@ -238,6 +238,16 @@
             </intent-filter>
         </receiver>
 
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.xxf098.ssrray.fileprovider"
+            android:grantUriPermissions="true"
+            android:exported="false">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/fileprovider_paths" />
+        </provider>
+
         <!-- android-job components -->
         <service android:name="com.evernote.android.job.v21.PlatformJobService"
                  android:process=":bg"/>

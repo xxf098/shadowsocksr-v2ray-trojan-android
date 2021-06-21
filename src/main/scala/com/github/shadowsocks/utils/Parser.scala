@@ -47,6 +47,7 @@ import android.util.{Base64, Log}
 import com.github.shadowsocks.database.{DnsBean, InSettingsBean, InboundBean, LogBean, MuxBean, OutSettingsBean, OutboundBean, Profile, RoutingBean, RulesBean, StreamSettingsBean, TlssettingsBean, UsersBean, V2rayConfig, VmessBean, VmessQRCode, VnextBean, WsHeaderBean, WssettingsBean}
 import com.google.gson.{Gson, GsonBuilder}
 import android.net.Uri
+import scala.util.{Failure, Success, Try}
 
 import scala.collection.JavaConverters._
 
@@ -71,7 +72,11 @@ object Parser {
     val resp = data.replaceAll("=", "")
       .replaceAll("\\+", "-")
       .replaceAll("/", "_")
-    new String(Base64.decode(resp, Base64.URL_SAFE | Base64.NO_PADDING), "UTF-8")
+    val decodeData = Try(Base64.decode(resp, Base64.URL_SAFE | Base64.NO_PADDING)) match {
+      case Failure(exception) => "".getBytes
+      case Success(value) => value
+    }
+    new String(decodeData, "UTF-8")
   }
 
   def findAll(data: CharSequence) = pattern.findAllMatchIn(if (data == null) "" else data).map(m => try

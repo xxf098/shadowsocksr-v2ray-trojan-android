@@ -205,7 +205,12 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 //      if (profile.v_tls == "tls" && TextUtils.isEmpty(profile.v_host) && !Utils.isNumeric(profile.v_add)) { profile.host = profile.v_add }
       if (profile.isV2Ray || profile.isShadowSocks) {
         Try(Tun2socks.resolve(profile.v_add, profile.ipv6, s"$china_dns_address:$china_dns_port")) match {
-          case Failure(exception) => throw NameNotResolvedException()
+          case Failure(exception) => {
+            Try(Tun2socks.resolve(profile.v_add, profile.ipv6, s"$dns_address:$dns_port")) match {
+              case Failure(exception) => throw NameNotResolvedException()
+              case Success(addr) => profile.v_add = addr
+            }
+          }
           case Success(addr) => profile.v_add = addr
         }
 //        Utils.resolve(profile.v_add, enableIPv6 = profile.ipv6, hostname = china_dns_address) match {

@@ -24,7 +24,7 @@ public abstract class Tun2socks
 
     private static native void _init();
 
-    public static native void batchRenderTestDownload(final String p0, final long p1, final String p2, final String p3, final TestDownload p4) throws Exception;
+    public static native void batchRenderTestDownload(final String p0, final long p1, final String p2, final String p3, final String p4, final String p5, final TestDownload p6) throws Exception;
 
     public static native void batchTestDownload(final String p0, final long p1, final TestDownload p2) throws Exception;
 

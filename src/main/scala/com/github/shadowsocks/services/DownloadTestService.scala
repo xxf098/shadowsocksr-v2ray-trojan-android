@@ -110,7 +110,8 @@ class DownloadTestService extends Service {
           val pngPath = getExternalFilesDir(Environment.DIRECTORY_PICTURES).getAbsolutePath + s"/litespeedtest_$date.png"
           val fontPath = app.getFontAssetsPath()
 //          Tun2socks.batchTestDownload(links, concurrency, new TestDownloadUpdate())
-          Tun2socks.batchRenderTestDownload(links, concurrency, fontPath, pngPath, new TestDownloadUpdate())
+          val groupName = v2rayProfiles.head.url_group
+          Tun2socks.batchRenderTestDownload(links, concurrency, fontPath, pngPath, "en", groupName, new TestDownloadUpdate())
           val countDownLatch = new CountDownLatch(1)
           MediaScannerConnection.scanFile(this, Array(pngPath), null, new MediaScannerConnection.OnScanCompletedListener {
             override def onScanCompleted(path: String, uri: Uri): Unit = {

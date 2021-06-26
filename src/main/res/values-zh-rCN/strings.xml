@@ -63,6 +63,7 @@
   <string name="loading">正在加载……</string>
 
   <string name="service_test_working">正在测试节点…</string>
+  <string name="view_test_result">查看测试结果</string>
 
   <string name="dr">去重添加</string>
 
@@ -259,6 +260,7 @@
   <string name="update_subscription">"更新订阅"</string>
   <string name="subscription_url">订阅地址</string>
   <string name="use_default_group_name">使用默认群组名</string>
+  <string name="ssrsub_expire_on">到期时间: %s</string>
 
   <!-- status -->
   <string name="sent">发送:</string>
@@ -319,6 +321,8 @@
 
   <string name="ssr_category">SSR设置</string>
   <string name="v2ray_category">V2Ray设置</string>
+
+  <string name="switch_core">切换内核</string>
 
   <plurals name="format_minutes">
     <item quantity="other">%d 分钟</item>

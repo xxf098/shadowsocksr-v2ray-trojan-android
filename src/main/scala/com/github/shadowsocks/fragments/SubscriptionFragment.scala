@@ -3,11 +3,12 @@ package com.github.shadowsocks.fragments
 import java.io.IOException
 import java.net.URL
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.{Calendar, Date}
 import java.util.concurrent.TimeUnit
 
-import android.app.ProgressDialog
+import android.app.{DatePickerDialog, ProgressDialog}
 import android.content.{ClipData, ClipboardManager, Context, DialogInterface, Intent}
+import android.graphics.Typeface
 import android.os.{Bundle, Handler}
 import android.preference.PreferenceManager
 import android.support.design.widget.{BottomSheetBehavior, BottomSheetDialog}
@@ -22,7 +23,7 @@ import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.util.Log
 import android.view.{Gravity, KeyEvent, LayoutInflater, MenuItem, View, ViewGroup}
-import android.widget.{CheckBox, CompoundButton, EditText, ImageView, LinearLayout, PopupMenu, Switch, TextView, Toast}
+import android.widget.{CheckBox, CompoundButton, DatePicker, EditText, ImageView, LinearLayout, PopupMenu, Switch, TextView, Toast}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.{Profile, SSRSub}
 import com.github.shadowsocks.utils.{Key, Parser, Utils}
@@ -33,12 +34,14 @@ import android.webkit.URLUtil
 import net.glxn.qrgen.android.QRCode
 
 import scala.collection.mutable.ArrayBuffer
+import scala.util.matching.Regex
 import scala.util.{Failure, Success, Try}
 
 // TODO: update progress
 class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
 
   private final val TAG = "SubscriptionFragment"
+  private val datePattern: Regex = "\\d{4}/\\d{2}/\\d{2}".r
   private val handler = new Handler
   private lazy val ssrsubAdapter = new SSRSubAdapter
   private var testProgressDialog: ProgressDialog = _
@@ -102,10 +105,11 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
 
   // TODO: handle special case like "v2ray"
   private[this] def addSubscription(): Unit = {
-    showSubscriptionDialog(None) { (responseString, url, groupName, enableAutoSub) => {
+    showSubscriptionDialog(None) { (responseString, url, groupName, enableAutoSub, expireOn) => {
       SSRSub.createSSRSub(responseString, url, groupName) match {
         case Some(ssrsub) => {
           ssrsub.enable_auto_update = enableAutoSub
+          ssrsub.expire_on = expireOn
           handler.post(() => app.ssrsubManager.createSSRSub(ssrsub))
 //          addProfilesFromSubscription(ssrsub, responseString)
           ssrsub.addProfiles(responseString, url)
@@ -117,12 +121,37 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     }
   }
 
-  private  def showSubscriptionDialog (ssrSub: Option[SSRSub])(responseHandler: (String, String, String, Boolean) => Unit): Unit = {
+  private  def showSubscriptionDialog (ssrSub: Option[SSRSub])(responseHandler: (String, String, String, Boolean, String) => Unit): Unit = {
     val context = getActivity
     val view = View.inflate(context, R.layout.layout_ssr_sub_add, null)
     val etAddUrl = view.findViewById(R.id.et_subscription_url).asInstanceOf[EditText]
     val etGroupName = view.findViewById(R.id.et_group_name).asInstanceOf[EditText]
     val cbEnableAutoSub = view.findViewById(R.id.cb_enable_auto_update_subscription).asInstanceOf[CheckBox]
+    val cbExpireOn = view.findViewById(R.id.cb_expire_on).asInstanceOf[CheckBox]
+    cbExpireOn.setOnClickListener(new View.OnClickListener {
+      override def onClick(v: View): Unit = {
+        val isChecked = cbExpireOn.isChecked
+        if (!isChecked) {
+          val expire = getString(R.string.ssrsub_expire_on, "Unknown")
+          cbExpireOn.setText(expire)
+          return
+        }
+        val c = Calendar.getInstance()
+        val dateStr = datePattern.findFirstIn(cbExpireOn.getText).getOrElse(cbExpireOn.getText)
+        val t = Try(new SimpleDateFormat("yyyy/MM/dd").parse(dateStr.toString))
+        if (t.isSuccess) {
+          c.setTime(t.get)
+        }
+        val (mYear, mMonth, mDay) = (c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH))
+        val datePickerDialog = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener {
+          override def onDateSet(view: DatePicker, year: Int, month: Int, dayOfMonth: Int): Unit = {
+            val expire = getString(R.string.ssrsub_expire_on, f"${year}/${month+1}%02d/${dayOfMonth}%02d")
+            cbExpireOn.setText(expire)
+          }
+        }, mYear, mMonth, mDay)
+        datePickerDialog.show()
+      }
+    })
     var title = getString(R.string.ssrsub_add)
     ssrSub match {
       case Some(sub) => {
@@ -130,6 +159,14 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
         etGroupName.setText(sub.url_group)
         cbEnableAutoSub.setChecked(sub.enable_auto_update)
         title = getString(R.string.ssrsub_edit)
+        datePattern.findFirstIn(sub.expire_on) match {
+          case Some(x) => {
+            cbExpireOn.setText(sub.expire_on)
+            cbExpireOn.setChecked(true)
+          }
+          case None => cbExpireOn.setChecked(false)
+        }
+
       }
       case None =>
     }
@@ -139,13 +176,14 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
         val url = etAddUrl.getText.toString
         val groupName = etGroupName.getText.toString
         val autoSubEnabled = cbEnableAutoSub.isChecked
+        val expireOn = cbExpireOn.getText.toString
         if(URLUtil.isHttpsUrl(url) || URLUtil.isHttpUrl(url)) {
           ssrSub match {
-            case Some(x) if x.url == url => responseHandler(null, url, groupName, autoSubEnabled)
+            case Some(x) if x.url == url => responseHandler(null, url, groupName, autoSubEnabled, expireOn)
             case _ => Utils.ThrowableFuture {
               handler.post(() => testProgressDialog = ProgressDialog.show(context, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true))
               SSRSub.getSubscriptionResponse(url).flatMap(responseString => Try{
-                responseHandler(responseString, url, groupName, autoSubEnabled)
+                responseHandler(responseString, url, groupName, autoSubEnabled, expireOn)
                 None
               }).recover{
                 case e: Exception => {
@@ -390,6 +428,14 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
       }
       handler.post(() => {
         text1.setText(this.item.url_group)
+        val expireOn = datePattern.findFirstIn(this.item.expire_on).getOrElse(this.item.expire_on)
+        val t = Try(new SimpleDateFormat("yyyy/MM/dd").parse(expireOn))
+        if (t.isSuccess && t.get.compareTo(new Date()) < 0) {
+          text1.setTextAppearance(android.R.style.TextAppearance_Medium)
+        } else {
+//          text1.setTextAppearance(android.R.style.TextAppearance_Medium)
+          text1.setTypeface(text1.getTypeface, Typeface.BOLD)
+        }
         tvUpdateDate.setText(formatUpdateAt(this.item.updated_at))
         if (!TextUtils.isEmpty(builder)) {
           text2.setText(builder)
@@ -459,14 +505,15 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
     }
 
     def edit_subscription(): Unit = {
-      showSubscriptionDialog(Some(item)) { (responseString, url, groupName, enableAutoSub) => {
+      showSubscriptionDialog(Some(item)) { (responseString, url, groupName, enableAutoSub, expireOn) => {
         Log.e(TAG, s"enableAutoSub: $enableAutoSub")
         (url, groupName) match {
           case t if t._1 == item.url &&
-            (t._2 != item.url_group || enableAutoSub != item.enable_auto_update) => {
+            (t._2 != item.url_group || enableAutoSub != item.enable_auto_update || expireOn != item.expire_on) => {
             Utils.ThrowableFuture {
               this.item.url_group = groupName
               this.item.enable_auto_update = enableAutoSub
+              this.item.expire_on = expireOn
               app.ssrsubManager.updateSSRSub(item)
               app.profileManager.updateGroupName(groupName, item.id)
               updateText(false)
@@ -477,6 +524,7 @@ class SubscriptionFragment extends Fragment with OnMenuItemClickListener {
             item.url = url
             item.url_group = groupName
             item.enable_auto_update = enableAutoSub
+            item.expire_on = expireOn
             app.ssrsubManager.updateSSRSub(item)
             item.addProfiles(responseString, url)
 //            addProfilesFromSubscription(item, responseString)

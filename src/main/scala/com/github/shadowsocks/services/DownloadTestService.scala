@@ -100,7 +100,7 @@ class DownloadTestService extends Service {
             override def updateTraffic(l: Long, l1: Long): Unit = {
               totalTraffic += l1
               val traffic = TrafficMonitor.formatTrafficInternal(totalTraffic)
-              Log.e(TAG, s"traffic: $traffic")
+//              Log.e(TAG, s"traffic: $traffic")
               updateTrafficInfo(traffic)
             }
           }
@@ -111,7 +111,8 @@ class DownloadTestService extends Service {
           val fontPath = app.getFontAssetsPath()
 //          Tun2socks.batchTestDownload(links, concurrency, new TestDownloadUpdate())
           val groupName = v2rayProfiles.head.url_group
-          Tun2socks.batchRenderTestDownload(links, concurrency, fontPath, pngPath, "en", groupName, new TestDownloadUpdate())
+          val language = if (Locale.getDefault.getCountry == "CN") "cn" else "en"
+          Tun2socks.batchRenderTestDownload(links, concurrency, fontPath, pngPath, language, groupName, new TestDownloadUpdate())
           val countDownLatch = new CountDownLatch(1)
           MediaScannerConnection.scanFile(this, Array(pngPath), null, new MediaScannerConnection.OnScanCompletedListener {
             override def onScanCompleted(path: String, uri: Uri): Unit = {

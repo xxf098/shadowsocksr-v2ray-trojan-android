@@ -47,7 +47,7 @@ import java.util.Locale
 import android.util.{Base64, Log}
 import com.google.gson.GsonBuilder
 import com.j256.ormlite.field.{DataType, DatabaseField}
-import tun2socks.{Trojan, Tun2socks, Vmess}
+import tun2socks.{Trojan, Tun2socks, Vmess, Shadowsocks}
 
 import scala.language.implicitConversions
 import Profile._
@@ -95,7 +95,7 @@ object Profile {
         Log.e("Profile", s"v_host: ${profile.v_host}, v_path: ${profile.v_path}, v_tls: ${profile.v_tls}, v_add: ${profile.v_add},v_port: ${profile.v_port}, v_aid: ${profile.v_aid}, " +
       s"v_net: ${profile.v_net}, v_id: ${profile.v_id}, v_type: ${profile.v_type}, v_security: ${profile.v_security}, useIPv6: ${profile.ipv6}" + s"vmessOption: $vmessOption, domainSniff: ${profile.enable_domain_sniff}")
     if (profile.isShadowSocks) {
-      return Tun2socks.newShadowSocks(
+      return Tun2socks.newLiteShadowSocks(
         profile.v_add,
         profile.v_port.toLong,
         profile.v_id,
@@ -131,6 +131,23 @@ object Profile {
       profile.t_peer,
       profile.t_allowInsecure, // SkipCertVerify
       trojanOption.getBytes(StandardCharsets.UTF_8)
+    )
+  }
+
+  implicit def profileToShadowsocks(profile: Profile): Shadowsocks = {
+    if (!profile.isShadowSocks) {
+      throw new Exception("Not a Shadowsocks Profile")
+    }
+    val shadowsocksOption = getOption(profile)
+    Log.e("Profile", s"v_host: ${profile.v_host}, v_path: ${profile.v_path}, v_tls: ${profile.v_tls}, v_add: ${profile.v_add},v_port: ${profile.v_port}, v_aid: ${profile.v_aid}, " +
+      s"v_net: ${profile.v_net}, v_id: ${profile.v_id}, v_type: ${profile.v_type}, v_security: ${profile.v_security}, useIPv6: ${profile.ipv6}" + s"vmessOption: $shadowsocksOption, domainSniff: ${profile.enable_domain_sniff}")
+    Log.e("Profile", s"Shadowsocks: ${profile.v_add}, ${profile.v_port}, ${profile.v_id}, ${profile.v_security}")
+    Tun2socks.newShadowSocks(
+      profile.v_add,
+      profile.v_port.toLong,
+      profile.v_id,
+      profile.v_security,
+      shadowsocksOption.getBytes(StandardCharsets.UTF_8)
     )
   }
 

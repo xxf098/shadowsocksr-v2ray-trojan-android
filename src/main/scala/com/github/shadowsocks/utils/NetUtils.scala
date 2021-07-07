@@ -2,7 +2,7 @@ package com.github.shadowsocks.utils
 
 import java.io.IOException
 import java.lang.System.currentTimeMillis
-import java.net.{HttpURLConnection, Inet4Address, InetAddress, Socket, URL}
+import java.net.{HttpURLConnection, Inet4Address, InetAddress, InetSocketAddress, Proxy, Socket, URL}
 import java.util
 import java.util.concurrent.TimeUnit
 
@@ -93,6 +93,7 @@ object NetUtils {
       }
     }
     // single client
+//    val proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", 1080))
     val client = new OkHttpClient.Builder()
       .connectTimeout(timeout, TimeUnit.SECONDS)
       .writeTimeout(timeout, TimeUnit.SECONDS)
@@ -100,6 +101,7 @@ object NetUtils {
       .retryOnConnectionFailure(false)
       .connectionPool(new ConnectionPool(16, 3, TimeUnit.MINUTES))
       .dns(dns)
+//      .proxy(proxy)
       .build()
     val request = new Request.Builder().url(url).build()
     client.newCall(request).execute().body().close()

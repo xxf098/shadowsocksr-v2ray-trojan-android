@@ -52,10 +52,15 @@ object ExeNative {
   val REDSOCKS = "libredsocks.so"
   val PDNSD = "libpdnsd.so"
   val SS_LOCAL = "libss-local.so"
+  val SHADOWSOCKS_LOCAL = "libsslocal.so"
 //  val SS_TUNNEL = "ss-tunnel"
   val TUN2SOCKS = "libtun2socks.so"
   val PROXYCHAINS = "libproxychains4.so"
 //  val KCPTUN = "kcptun"
+
+  def getLocalBin(isShadowSocks: Boolean): String = {
+    if (isShadowSocks) SHADOWSOCKS_LOCAL else SS_LOCAL
+  }
 }
 
 object ConfigUtils {
@@ -67,6 +72,7 @@ object ConfigUtils {
   }
 
   val SHADOWSOCKS = "{\"server\": \"%s\", \"server_port\": %d, \"local_port\": %d, \"password\": \"%s\", \"method\":\"%s\", \"timeout\": %d, \"protocol\": \"%s\", \"obfs\": \"%s\", \"obfs_param\": \"%s\", \"protocol_param\": \"%s\"}"
+  val SHADOWSOCKS_LOCAL = "{\"server\": \"%s\", \"server_port\": %d, \"password\": \"%s\", \"method\":\"%s\", \"dns\":\"udp://223.5.5.5:53\", \"locals\":[{\"local_address\":\"127.0.0.1\",\"local_port\":1080,\"local_udp_address\":\"127.0.0.1\",\"local_udp_port\":1080,\"mode\":\"tcp_and_udp\"}, {\"local_address\":\"127.0.0.1\",\"local_port\":1143,\"local_udp_address\":\"127.0.0.1\",\"local_udp_port\":1143,\"mode\":\"tcp_and_udp\"}]}"
   val SHADOWSOCKSR_TEST_SERVER = "{\"id\": \"%s\", \"server\": \"%s\", \"server_port\": %d, \"local_port\": %d, \"password\": \"%s\", \"method\":\"%s\", \"protocol\": \"%s\", \"protocol_param\": \"%s\", \"obfs\": \"%s\", \"obfs_param\": \"%s\", \"group\": \"ssr\", \"enable\": true}"
   val SHADOWSOCKSR_TEST_CONF = "{\"conf_ver\": 2, \"servers\": [%s], \"timeout\": %d, \"nameserver\":\"223.5.5.5\", \"tunnel_address\": \"%s\", \"ipv6_first\": false}"
   val REDSOCKS = "base {\n" +

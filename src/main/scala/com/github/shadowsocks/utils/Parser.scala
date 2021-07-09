@@ -253,16 +253,17 @@ object Parser {
           profile.url_group = "ss"
           profile.host = host
           profile.remotePort = port
-          profile.localPort = 1089
+          profile.localPort = 1080
           profile.name = host
           profile.route = Route.BYPASS_LAN_CHN
           profile.password = password
+          profile.method = passwordMethod(0)
           // get profile name
           val splits = m.group(1).split("#")
           if (splits.length > 1) {
             profile.name = URLDecoder.decode(splits.last, "UTF-8")
           }
-          Log.e(TAG, s"${profile.v_add}:${profile.v_port} ${profile.v_security}:${profile.v_id}")
+          Log.e(TAG, s"${profile.host}:${profile.remotePort} ${profile.method}:${profile.password}")
           Some(profile)
         }
       } else {

@@ -131,7 +131,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         conn = null
       }
 
-      Option(profile).filter(p => p.isV2Ray || p.isTrojan || p.isShadowSocks).flatMap(_ => Option(v2rayThread))
+      Option(profile).filter(p => p.isV2Ray || p.isTrojan ).flatMap(_ => Option(v2rayThread))
         .foreach(_ => v2rayThread.stopTun2Socks(stopService))
 
       super.stopRunner(stopService, msg)
@@ -199,11 +199,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     china_dns_address = dnsConf._3
     china_dns_port = dnsConf._4
     // v2ray ipv6 dns query from golib
-    if (profile.isV2Ray || profile.isTrojan || profile.isShadowSocks) {
+    if (profile.isV2Ray || profile.isTrojan) {
       // TODO: serverName
       if (profile.v_tls == "tls" && TextUtils.isEmpty(profile.v_host) && !Utils.isNumeric(profile.v_add)) { profile.v_host = profile.v_add }
 //      if (profile.v_tls == "tls" && TextUtils.isEmpty(profile.v_host) && !Utils.isNumeric(profile.v_add)) { profile.host = profile.v_add }
-      if (profile.isV2Ray || profile.isShadowSocks) {
+      if (profile.isV2Ray) {
         Utils.resolve(profile.v_add, enableIPv6 = profile.ipv6, hostname = china_dns_address) match {
           case Some(addr) => profile.v_add = addr
           case None => {
@@ -256,6 +256,14 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     val fd = startVpn()
     if (!sendFd(fd)) throw new Exception("sendFd failed")
 
+    if (profile.isShadowSocks) {
+      startSSDaemon()
+      if (!profile.udpdns) {
+        startDnsDaemon()
+      }
+      return
+    }
+
     startShadowsocksDaemon()
 
     if (profile.udpdns) {
@@ -282,7 +290,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     //Os.setenv("LD_PRELOAD", getApplicationInfo.dataDir + "/lib/libproxychains4.so", true)
     //Os.setenv("PROXYCHAINS_CONF_FILE", getApplicationInfo.dataDir + "/proxychains.conf", true)
 
-    var cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.SS_LOCAL), "-V", "-U"
+    var cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.getLocalBin(profile.isShadowSocks)), "-V", "-U"
       , "-b", "127.0.0.1"
       , "-t", "600"
       , "--host", host_arg
@@ -303,6 +311,51 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     //Os.setenv("LD_PRELOAD", old_ld, true)
   }
 
+  def startSSDaemon(): Unit = {
+
+    val conf = ConfigUtils
+      .SHADOWSOCKS_LOCAL.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, ConfigUtils.EscapedJson(profile.password), profile.method)
+    Log.e(TAG, conf)
+    Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-vpn.conf"))(p => {
+      p.println(conf)
+    })
+
+    //val old_ld = Os.getenv("LD_PRELOAD")
+
+    //Os.setenv("LD_PRELOAD", getApplicationInfo.dataDir + "/lib/libproxychains4.so", true)
+    //Os.setenv("PROXYCHAINS_CONF_FILE", getApplicationInfo.dataDir + "/proxychains.conf", true)
+    val protectPath = getApplicationInfo.dataDir + "/protect_path"
+    val statPath = getApplicationInfo.dataDir + "/stat_path"
+    val cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.getLocalBin(true))
+      , "-c", getApplicationInfo.dataDir + "/ss-local-vpn.conf"
+      , "--protect_path", protectPath
+      , "--stat-path", statPath
+      , "--vpn"
+      , "-vvvvv") // logging
+
+//    if (profile.udpdns) cmd += "-u"
+
+    if (profile.route != Route.ALL) {
+      cmd += "--acl"
+      cmd += getApplicationInfo.dataDir + '/' + profile.route + ".acl"
+    }
+
+//    if (TcpFastOpen.sendEnabled) cmd += "--tcp-fast-open"
+
+    if (proxychains_enable) {
+      cmd prepend "LD_PRELOAD=" + Utils.getAbsPath(ExeNative.PROXYCHAINS)
+      cmd prepend "PROXYCHAINS_CONF_FILE=" + getApplicationInfo.dataDir + "/proxychains.conf"
+      cmd prepend "PROXYCHAINS_PROTECT_FD_PREFIX=" + getApplicationInfo.dataDir
+      cmd prepend "env"
+    }
+
+    Log.e(TAG, cmd.mkString(" "))
+    if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
+
+    sslocalProcess = new GuardedProcess(cmd).start()
+
+  }
+
   def startShadowsocksDaemon() {
 
     val conf = ConfigUtils
@@ -317,7 +370,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     //Os.setenv("LD_PRELOAD", getApplicationInfo.dataDir + "/lib/libproxychains4.so", true)
     //Os.setenv("PROXYCHAINS_CONF_FILE", getApplicationInfo.dataDir + "/proxychains.conf", true)
 
-    val cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.SS_LOCAL), "-V", "-x"
+    val cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.getLocalBin(profile.isShadowSocks)), "-V", "-x"
       , "-b", "127.0.0.1"
       , "-t", "600"
       , "--host", host_arg
@@ -360,7 +413,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     //Os.setenv("LD_PRELOAD", getApplicationInfo.dataDir + "/lib/libproxychains4.so", true)
     //Os.setenv("PROXYCHAINS_CONF_FILE", getApplicationInfo.dataDir + "/proxychains.conf", true)
 
-    val cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.SS_LOCAL)
+    val cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.getLocalBin(profile.isShadowSocks))
       , "-V"
       , "-u"
       , "-t", "60"

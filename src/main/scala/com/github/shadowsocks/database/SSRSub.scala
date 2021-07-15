@@ -43,6 +43,7 @@ import java.net.{HttpURLConnection, URL, URLEncoder}
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
+import android.nfc.Tag
 import android.os.Build
 import android.text.TextUtils
 import android.util.{Base64, Log}
@@ -77,7 +78,12 @@ object SSRSub {
     if (code == 200) {
       val result = getResponseString(response)
       response.body().close()
-      result
+      Log.e("===", result)
+      val httpPattern = "https?://.+?".r
+      httpPattern.findFirstIn(result) match {
+        case Some(url) => getSubscriptionResponse(url).getOrElse(s"fail to get Subscription ${url}")
+        case None => result
+      }
     } else {
       response.body().close()
       throw new Exception(app.getString(R.string.ssrsub_error, code: Integer))

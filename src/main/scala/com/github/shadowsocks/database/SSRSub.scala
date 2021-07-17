@@ -47,9 +47,10 @@ import android.nfc.Tag
 import android.os.Build
 import android.text.TextUtils
 import android.util.{Base64, Log}
+import android.webkit.URLUtil
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.CloseUtils.autoClose
-import com.github.shadowsocks.utils.{Parser, Utils}
+import com.github.shadowsocks.utils.{NetUtils, Parser, Utils}
 import com.j256.ormlite.field.{DataType, DatabaseField}
 import okhttp3.{ConnectionPool, OkHttpClient, Request}
 import com.github.shadowsocks.R
@@ -78,12 +79,9 @@ object SSRSub {
     if (code == 200) {
       val result = getResponseString(response)
       response.body().close()
-      Log.e("===", result)
-      val httpPattern = "https?://.+?".r
-      httpPattern.findFirstIn(result) match {
-        case Some(url) => getSubscriptionResponse(url).getOrElse(s"fail to get Subscription ${url}")
-        case None => result
-      }
+      if  (URLUtil.isHttpsUrl(result) || URLUtil.isHttpUrl(result)) {
+        getSubscriptionResponse(result).getOrElse(s"fail to get Subscription ${result}")
+      } else { result }
     } else {
       response.body().close()
       throw new Exception(app.getString(R.string.ssrsub_error, code: Integer))
@@ -110,6 +108,7 @@ object SSRSub {
   }
 
   def decodeBase64 (data: String): String = {
+    if (URLUtil.isHttpsUrl(data) || URLUtil.isHttpUrl(data)) { return data }
     val resp = data.replaceAll("=", "")
       .replaceAll("\\+", "-")
       .replaceAll("/", "_")

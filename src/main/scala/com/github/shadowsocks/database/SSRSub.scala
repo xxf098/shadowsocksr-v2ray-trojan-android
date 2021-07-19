@@ -146,6 +146,7 @@ object SSRSub {
     } else {
       var profiles = Parser.findAllVmess(responseString).toList
       profiles = if (profiles.nonEmpty) profiles else Parser.findAllTrojan(responseString).toList
+      profiles = if (profiles.nonEmpty) profiles else Parser.findAllShadowSocks(responseString).toList
       if (profiles.nonEmpty) {
         val ssrsub = new SSRSub {
           url = requestURL

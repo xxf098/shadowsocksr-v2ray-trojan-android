@@ -306,6 +306,7 @@
 
   <string name="test_latency">Test Latency</string>
   <string name="test_download">Test Download</string>
+  <string name="test_both">Test Both</string>
 
   <!--  V2Ray -->
   <string name="v_pref_id">ID</string>

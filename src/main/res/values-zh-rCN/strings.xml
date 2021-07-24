@@ -273,6 +273,7 @@
 
   <string name="test_latency">延时测试</string>
   <string name="test_download">下载测试</string>
+  <string name="test_both">延时下载测试</string>
 
     <!--  V2Ray -->
   <string name="v_pref_id">用户ID</string>

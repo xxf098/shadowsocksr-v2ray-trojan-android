@@ -1449,6 +1449,14 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       intent.putExtra("is_sort", is_sort)
       startService(intent)
       true
+    case R.id.action_both_test =>
+      val intent = new Intent(this, classOf[DownloadTestService])
+      intent.putExtra(Key.currentGroupName, currentGroupName)
+      intent.putExtra("BgResultReceiver", bgResultReceiver)
+      intent.putExtra("is_sort", is_sort)
+      intent.putExtra("is_test_both", true)
+      startService(intent)
+      true
     case R.id.action_full_test =>
 //      if (app.settings.getBoolean(Key.FULL_TEST_BG, false)) {
       if (1 == 1) {

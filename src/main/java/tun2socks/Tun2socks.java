@@ -176,7 +176,7 @@ public abstract class Tun2socks
         }
 
         @Override
-        public native void updateSpeed(final long p0, final long p1);
+        public native void updateSpeed(final long p0, final long p1, final long p2);
 
         @Override
         public native void updateTraffic(final long p0, final long p1);

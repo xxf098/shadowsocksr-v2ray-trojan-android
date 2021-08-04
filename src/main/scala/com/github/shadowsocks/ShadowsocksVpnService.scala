@@ -328,7 +328,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     val statPath = getApplicationInfo.dataDir + "/stat_path"
     val cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.getLocalBin(true))
       , "-c", getApplicationInfo.dataDir + "/ss-local-vpn.conf"
-      , "--protect_path", protectPath
+      , "--protect_path", protectPath  // change this path
       , "--stat-path", statPath
       , "--vpn"
       , "-vvvvv") // logging

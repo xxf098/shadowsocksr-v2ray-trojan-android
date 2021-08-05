@@ -67,6 +67,8 @@ object Parser {
   private val pattern_trojan = "(?i)(trojan://(.+?)@(.+?):(\\d{2,5})([\\?#].*)?)".r
   private val pattern_trojan_query = "(?i)allowInsecure=([01])&(peer|sni)=(.+?)#(.+)?".r
   private val pattern_shadwosocks = "(?i)(ss://(.+?)@(.+?):(\\d{2,5})/?([\\?#].*)?)".r
+  private val pattern_shadwosocks1 = "(?i)(ss://([A-Za-z0-9_/+=-]+)([\\?#].*)?)".r
+
 
   def decodeBase64 (data: String): String = {
     val resp = data.replaceAll("=", "")

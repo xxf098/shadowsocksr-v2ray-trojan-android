@@ -5,7 +5,7 @@ import java.nio.charset.Charset
 import java.text.SimpleDateFormat
 import java.util.concurrent.{CountDownLatch, TimeUnit}
 
-import android.app.{NotificationManager, PendingIntent, Service}
+import android.app.{NotificationManager, PendingIntent, Service, Notification}
 import android.content.{BroadcastReceiver, Context, Intent, IntentFilter}
 import android.os.{Build, Bundle, Environment, IBinder, Looper, ResultReceiver}
 import android.support.v4.app.NotificationCompat
@@ -59,6 +59,7 @@ class DownloadTestService extends Service {
     // TODO: test options
     val currentGroupName = intent.getStringExtra(Key.currentGroupName)
     val isSort = intent.getBooleanExtra("is_sort", false)
+    val isTestBoth = intent.getBooleanExtra("is_test_both", false)
     bgResultReceiver = intent.getParcelableExtra("BgResultReceiver")
     val testProfiles = Option(ProfileManagerActivity.getProfilesByGroup(currentGroupName, isSort, false))
     testProfiles match {
@@ -87,14 +88,16 @@ class DownloadTestService extends Service {
           }.mkString(",")
           class TestDownloadUpdate extends tun2socks.TestDownload {
             // index, speed
-            override def updateSpeed(l: Long, l1: Long): Unit = {
+            override def updateSpeed(l: Long, l1: Long, elapse: Long): Unit = {
               val p = v2rayProfiles(l.toInt)
               p.download_speed = l1
+              if (isTestBoth) {  p.elapsed = elapse }
               app.profileManager.updateProfile(p)
               val speed = TrafficMonitor.formatTrafficInternal(l1, true)
               Log.e(TAG, s"ps: ${p.name} index: ${l}, server: ${p.v_add} download_speed: ${speed}")
               counter = counter + 1
-              updateNotification(p.name, speed, max, counter)
+              val contextText = if (isTestBoth) s"$speed/${elapse}ms" else speed;
+              updateNotification(p.name, contextText, max, counter, isTestBoth)
             }
 
             override def updateTraffic(l: Long, l1: Long): Unit = {
@@ -221,11 +224,12 @@ class DownloadTestService extends Service {
     intent
   }
 
-  private def updateNotification (title: String, speed: String, max: Int, counter: Int): Unit = {
+  private def updateNotification (title: String, speed: String, max: Int, counter: Int, isTestBoth: Boolean): Unit = {
     if (!isTesting) return
     //    val formatTitle = title.substring(0, 16) + "  " + latency.getOrElse("0ms")
     //    Log.e(TAG, s"formatTitle: $formatTitle")
-    val length = math.min(title.length, 20)
+    val max_length = if (isTestBoth) 15 else 20
+    val length = math.min(title.length, max_length)
     builder.setContentTitle(title.substring(0, length))
       .setContentText(speed)
       .setProgress(max, counter, false)

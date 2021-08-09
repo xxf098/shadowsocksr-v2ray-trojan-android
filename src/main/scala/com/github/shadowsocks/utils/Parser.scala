@@ -66,7 +66,9 @@ object Parser {
   private val pattern_vmess = "(?i)(vmess://[A-Za-z0-9_/+=-]+)".r
   private val pattern_trojan = "(?i)(trojan://(.+?)@(.+?):(\\d{2,5})([\\?#].*)?)".r
   private val pattern_trojan_query = "(?i)allowInsecure=([01])&(peer|sni)=(.+?)#(.+)?".r
-  private val pattern_shadwosocks = "(?i)(ss://(.+?)@(.+?):(\\d{2,5})([\\?#].*)?)".r
+  private val pattern_shadwosocks = "(?i)(ss://(.+?)@(.+?):(\\d{2,5})/?([\\?#].*)?)".r
+  private val pattern_shadwosocks1 = "(?i)(ss://([A-Za-z0-9_/+=-]+)([\\?#].*)?)".r
+
 
   def decodeBase64 (data: String): String = {
     val resp = data.replaceAll("=", "")
@@ -232,13 +234,13 @@ object Parser {
   def findAllShadowSocks(data: CharSequence) = pattern_shadwosocks
     .findAllMatchIn(if (data == null) "" else data)
     .flatMap(m => try {
-      //      Log.e(TAG, m.group(1))
-      val trojanUri = Uri.parse(m.group(1))
-      if (trojanUri.getScheme == "ss") {
+//      Log.e(TAG, m.group(1))
+      val shadowsocksUri = Uri.parse(m.group(1))
+      if (shadowsocksUri.getScheme == "ss") {
         val profile = new Profile
-        val host = trojanUri.getHost
-        val port = trojanUri.getPort
-        val uri = new String(Base64.decode(trojanUri.getUserInfo.replaceAll("=", ""), Base64.URL_SAFE), "UTF-8")
+        val host = shadowsocksUri.getHost
+        val port = shadowsocksUri.getPort
+        val uri = new String(Base64.decode(shadowsocksUri.getUserInfo.replaceAll("=", ""), Base64.URL_SAFE), "UTF-8")
         val passwordMethod = uri.split(":")
         if (passwordMethod.size < 2) {
           None
@@ -253,16 +255,17 @@ object Parser {
           profile.url_group = "ss"
           profile.host = host
           profile.remotePort = port
-          profile.localPort = 1089
+          profile.localPort = 1080
           profile.name = host
           profile.route = Route.BYPASS_LAN_CHN
           profile.password = password
+          profile.method = passwordMethod(0)
           // get profile name
           val splits = m.group(1).split("#")
           if (splits.length > 1) {
             profile.name = URLDecoder.decode(splits.last, "UTF-8")
           }
-          Log.e(TAG, s"${profile.v_add}:${profile.v_port} ${profile.v_security}:${profile.v_id}")
+          Log.e(TAG, s"${profile.host}:${profile.remotePort} ${profile.method}:${profile.password}")
           Some(profile)
         }
       } else {

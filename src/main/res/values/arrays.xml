@@ -18,6 +18,8 @@
         <item>aes-128-ctr</item>
         <item>aes-192-ctr</item>
         <item>aes-256-ctr</item>
+        <item>aes-128-gcm</item>
+        <item>aes-256-gcm</item>
         <item>bf-cfb</item>
         <item>camellia-128-cfb</item>
         <item>camellia-192-cfb</item>
@@ -25,6 +27,8 @@
         <item>salsa20</item>
         <item>chacha20</item>
         <item>chacha20-ietf</item>
+        <item>chacha20-ietf-poly1305</item>
+        <item>xchacha20-ietf-poly1305</item>
     </string-array>
 
     <string-array name="enc_method_value">
@@ -39,6 +43,8 @@
         <item>aes-128-ctr</item>
         <item>aes-192-ctr</item>
         <item>aes-256-ctr</item>
+        <item>aes-128-gcm</item>
+        <item>aes-256-gcm</item>
         <item>bf-cfb</item>
         <item>camellia-128-cfb</item>
         <item>camellia-192-cfb</item>
@@ -46,6 +52,8 @@
         <item>salsa20</item>
         <item>chacha20</item>
         <item>chacha20-ietf</item>
+        <item>chacha20-ietf-poly1305</item>
+        <item>xchacha20-ietf-poly1305</item>
     </string-array>
 
 

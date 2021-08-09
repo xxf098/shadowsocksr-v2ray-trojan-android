@@ -13,6 +13,9 @@
             <item
                 android:id="@+id/action_speed_test"
                 android:title="@string/test_download"/>
+            <item
+                android:id="@+id/action_both_test"
+                android:title="@string/test_both"/>
         </menu>
     </item>
     <item android:id="@+id/action_sort"

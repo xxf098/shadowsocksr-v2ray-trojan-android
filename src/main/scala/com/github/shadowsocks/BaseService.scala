@@ -188,7 +188,7 @@ trait BaseService extends Service {
     if (Build.VERSION.SDK_INT >= 26) ContextCompat.startForegroundService(this, new Intent(this, getClass))
     else startService(new Intent(this, getClass))
     TrafficMonitor.reset()
-    trafficMonitorThread = new TrafficMonitorThread(getApplicationContext)
+    trafficMonitorThread = new TrafficMonitorThread(getApplicationContext, profile.isShadowSocks)
     trafficMonitorThread.start()
 
     if (!closeReceiverRegistered) {

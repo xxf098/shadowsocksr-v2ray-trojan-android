@@ -46,7 +46,9 @@ public abstract class Tun2socks
 
     public static native void inputPacket(final byte[] p0);
 
-    public static native Vmess newShadowSocks(final String p0, final long p1, final String p2, final String p3, final byte[] p4);
+    public static native Vmess newLiteShadowSocks(final String p0, final long p1, final String p2, final String p3, final byte[] p4);
+
+    public static native Shadowsocks newShadowSocks(final String p0, final long p1, final String p2, final String p3, final byte[] p4);
 
     public static native Trojan newTrojan(final String p0, final long p1, final String p2, final String p3, final boolean p4, final byte[] p5);
 
@@ -63,6 +65,8 @@ public abstract class Tun2socks
     public static native void setLocalDNS(final String p0);
 
     public static native boolean setNonblock(final long p0, final boolean p1);
+
+    public static native void startShadowsocksTunFd(final long p0, final VpnService p1, final LogService p2, final QuerySpeed p3, final Shadowsocks p4, final String p5) throws Exception;
 
     public static native void startTrojan(final PacketFlow p0, final VpnService p1, final LogService p2, final Trojan p3, final String p4) throws Exception;
 
@@ -172,7 +176,7 @@ public abstract class Tun2socks
         }
 
         @Override
-        public native void updateSpeed(final long p0, final long p1);
+        public native void updateSpeed(final long p0, final long p1, final long p2);
 
         @Override
         public native void updateTraffic(final long p0, final long p1);

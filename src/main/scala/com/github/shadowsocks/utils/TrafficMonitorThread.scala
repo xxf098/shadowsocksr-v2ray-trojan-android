@@ -49,7 +49,7 @@ import android.util.Log
 import com.github.shadowsocks.ShadowsocksApplication.app
 
 // support v2ray
-class TrafficMonitorThread(context: Context) extends Thread {
+class TrafficMonitorThread(context: Context, isShadowsocks: Boolean) extends Thread {
 
   val TAG = "TrafficMonitorThread"
   lazy val PATH = context.getApplicationInfo.dataDir + "/stat_path"
@@ -103,7 +103,8 @@ class TrafficMonitorThread(context: Context) extends Thread {
             val stat = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN)
             TrafficMonitor.update(stat.getLong(0), stat.getLong(8))
 
-            output.write(0)
+            if (!isShadowsocks) output.write(0)
+//            output.write(0)
 
             input.close()
             output.close()
@@ -125,7 +126,7 @@ class TrafficMonitorThread(context: Context) extends Thread {
       } catch {
         case e: IOException =>
           Log.e(TAG, "Error when accept socket", e)
-          app.track(e)
+//          app.track(e)
           return
       }
     }

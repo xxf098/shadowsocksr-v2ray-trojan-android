@@ -43,12 +43,14 @@ import java.net.{HttpURLConnection, URL, URLEncoder}
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
+import android.nfc.Tag
 import android.os.Build
 import android.text.TextUtils
 import android.util.{Base64, Log}
+import android.webkit.URLUtil
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.CloseUtils.autoClose
-import com.github.shadowsocks.utils.{Parser, Utils}
+import com.github.shadowsocks.utils.{NetUtils, Parser, Utils}
 import com.j256.ormlite.field.{DataType, DatabaseField}
 import okhttp3.{ConnectionPool, OkHttpClient, Request}
 import com.github.shadowsocks.R
@@ -77,7 +79,9 @@ object SSRSub {
     if (code == 200) {
       val result = getResponseString(response)
       response.body().close()
-      result
+      if  (URLUtil.isHttpsUrl(result) || URLUtil.isHttpUrl(result)) {
+        getSubscriptionResponse(result).getOrElse(s"fail to get Subscription ${result}")
+      } else { result }
     } else {
       response.body().close()
       throw new Exception(app.getString(R.string.ssrsub_error, code: Integer))
@@ -104,6 +108,7 @@ object SSRSub {
   }
 
   def decodeBase64 (data: String): String = {
+    if (URLUtil.isHttpsUrl(data) || URLUtil.isHttpUrl(data)) { return data }
     val resp = data.replaceAll("=", "")
       .replaceAll("\\+", "-")
       .replaceAll("/", "_")
@@ -141,6 +146,7 @@ object SSRSub {
     } else {
       var profiles = Parser.findAllVmess(responseString).toList
       profiles = if (profiles.nonEmpty) profiles else Parser.findAllTrojan(responseString).toList
+      profiles = if (profiles.nonEmpty) profiles else Parser.findAllShadowSocks(responseString).toList
       if (profiles.nonEmpty) {
         val ssrsub = new SSRSub {
           url = requestURL
@@ -178,7 +184,7 @@ object SSRSub {
         case url if url.indexOf("sub=1") > 0 => findAllSSR(responseString)
         case url if url.indexOf("sub=3") > 0 => Parser.findAllVmess(responseString)
         case url if url.indexOf("mu=5") > 0 => Parser.findAllTrojan(responseString)
-        case _ => findAllSSR(responseString) ++ Parser.findAllVmess(responseString) ++ Parser.findAllTrojan(responseString)
+        case _ => findAllSSR(responseString) ++ Parser.findAllVmess(responseString) ++ Parser.findAllTrojan(responseString) ++ Parser.findAllShadowSocks(responseString)
       }
 //      if (responseString.indexOf("MAX=") == 0) {
 //        limit_num = responseString.split("\\n")(0).split("MAX=")(1).replaceAll("\\D+","").toInt

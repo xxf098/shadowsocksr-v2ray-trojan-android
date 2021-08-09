@@ -1225,9 +1225,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         autoClose(getContentResolver.openInputStream(data.getData))(in => {
           val lines = scala.io.Source.fromInputStream(in).mkString
           val profiles_ssr = Parser.findAll_ssr(lines).toList
+          val profiles_ss = Parser.findAllShadowSocks(lines).toList
           val profiles_v2ray = Parser.findAllVmess(lines).toList
           val profiles_trojan = Parser.findAllTrojan(lines).toList
-          val profiles = profiles_ssr ::: profiles_v2ray ::: profiles_trojan
+          val profiles = profiles_ssr ::: profiles_v2ray ::: profiles_trojan ::: profiles_ss
           profiles.foreach(app.profileManager.createProfile)
         })
       }
@@ -1446,6 +1447,14 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       intent.putExtra(Key.currentGroupName, currentGroupName)
       intent.putExtra("BgResultReceiver", bgResultReceiver)
       intent.putExtra("is_sort", is_sort)
+      startService(intent)
+      true
+    case R.id.action_both_test =>
+      val intent = new Intent(this, classOf[DownloadTestService])
+      intent.putExtra(Key.currentGroupName, currentGroupName)
+      intent.putExtra("BgResultReceiver", bgResultReceiver)
+      intent.putExtra("is_sort", is_sort)
+      intent.putExtra("is_test_both", true)
       startService(intent)
       true
     case R.id.action_full_test =>

@@ -123,6 +123,7 @@
   <string name="connection_test_fail">无互联网连接</string>
   <string name="connection_test_error">失败：%s</string>
   <string name="connection_test_error_status_code">状态码无效（#%d）</string>
+  <string name="speed_max_avg">最大: %1$s/s, 平均: %2$s/s</string>
 
   <!-- profile -->
   <string name="profile_manager_dialog">配置文件</string>

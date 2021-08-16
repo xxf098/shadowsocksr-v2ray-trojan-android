@@ -296,6 +296,7 @@
   <string name="vmessPreferenceGroup" translatable="false">vmessPreferenceGroup</string>
   <string name="trojanPreferenceGroup" translatable="false">trojanPreferenceGroup</string>
   <string name="ssrPreferenceGroup" translatable="false">ssrPreferenceGroup</string>
+  <string name="ssPreferenceGroup" translatable="false">ssPreferenceGroup</string>
   <string name="featurePreferenceGroup" translatable="false">featurePreferenceGroup</string>
   <string name="miscPreferenceGroup" translatable="false">miscPreferenceGroup</string>
 

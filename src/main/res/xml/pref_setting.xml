@@ -44,11 +44,6 @@
             app:max="30"
             app:min="1" />
 
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:title="@string/ssr_category"
-        android:key="@string/ssrPreferenceGroup">
         <ListPreference
             android:defaultValue="on"
             android:entries="@array/switch_entry"
@@ -56,7 +51,20 @@
             android:key="pref_ssr_dns_nocache1"
             android:summary="%s"
             android:title="@string/title_ssr_dns_nocache" />
+
     </PreferenceCategory>
+
+<!--    <PreferenceCategory-->
+<!--        android:title="@string/ssr_category"-->
+<!--        android:key="@string/ssrPreferenceGroup">-->
+<!--        <ListPreference-->
+<!--            android:defaultValue="on"-->
+<!--            android:entries="@array/switch_entry"-->
+<!--            android:entryValues="@array/switch_value"-->
+<!--            android:key="pref_ssr_dns_nocache1"-->
+<!--            android:summary="%s"-->
+<!--            android:title="@string/title_ssr_dns_nocache" />-->
+<!--    </PreferenceCategory>-->
 
     <PreferenceCategory
         android:title="@string/v2ray_category"

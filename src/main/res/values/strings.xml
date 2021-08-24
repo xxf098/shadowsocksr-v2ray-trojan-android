@@ -363,7 +363,7 @@
   <string name="title_auto_test_connectivity">Auto Test</string>
   <string name="summary_auto_test_connectivity">Auto Test Connectivity on Start VPN</string>
 
-  <string name="title_ssr_dns_nocache">SSR DNS Cache</string>
+  <string name="title_ssr_dns_nocache">DNS Cache</string>
 
   <string name="title_v2ray_sniff_enable">Enable Sniff Domain</string>
   <string name="summary_v2ray_sniff_enable">Sniff Domain</string>

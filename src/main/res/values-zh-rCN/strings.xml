@@ -309,7 +309,7 @@
   <string name="title_auto_test_connectivity">自动测试</string>
   <string name="summary_auto_test_connectivity">启动VPN后自动测试网络连接</string>
 
-  <string name="title_ssr_dns_nocache">SSR DNS缓存</string>
+  <string name="title_ssr_dns_nocache">DNS缓存</string>
 
   <string name="title_v2ray_sniff_enable">启用域名探测</string>
   <string name="summary_v2ray_sniff_enable">域名探测</string>

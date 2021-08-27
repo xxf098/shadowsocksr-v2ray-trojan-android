@@ -336,8 +336,9 @@ class LatencyTestService extends Service {
     val latency = """\d+ms""".r findFirstIn testResult
 //    val formatTitle = title.substring(0, 16) + "  " + latency.getOrElse("0ms")
 //    Log.e(TAG, s"formatTitle: $formatTitle")
-    val length = math.min(title.length, 20)
-    builder.setContentTitle(title.substring(0, length))
+    val l = title.map(c => if (c.toInt < 128) 0.5 else 1.0 ).sum
+    val length = math.min(math.max(l, 22), title.length)
+    builder.setContentTitle(title.substring(0, length.toInt))
       .setContentText(latency.getOrElse("0ms"))
       .setProgress(max, counter, false)
     notificationService.notify(LatencyTestService.NOTIFICATION_ID, builder.build())

@@ -70,6 +70,7 @@ object Profile {
     val routeMode = math.max(Route.ALL_ROUTES.indexOf(profile.route), 0)
     val (dns_address, dns_port, china_dns_address, china_dns_port) =  profile.getDNSConf()
     val logLevel = app.settings.getString(Key.LOG_LEVEL, "error")
+    val disableDNSCache = if (app.settings.getString(Key.SSR_DNS_NOCAHCE, "on") == "off") true else false
     val vmessOption =
       s"""
          |{
@@ -78,6 +79,7 @@ object Profile {
          |"enableSniffing": ${profile.enable_domain_sniff},
          |"dns": "$dns_address:$dns_port,$china_dns_address:$china_dns_port",
          |"routeMode": $routeMode,
+         |"disableDNSCache": $disableDNSCache,
          |"mux": ${app.settings.getInt(Key.MUX, -1)},
          |"serverName": "${profile.host}",
          |"allowInsecure": true
@@ -190,7 +192,7 @@ object Profile {
         }
     }
 
-    def testDownload(cb: tun2socks.TestLatency ): Future[Result[Long]] = {
+    def testDownload(cb: tun2socks.TestLatencyStop ): Future[Result[Long]] = {
       Future{
         Tun2socks.testLinkDownloadSpeed(profile.toString, cb)
       }.map(SuccessSpeed)

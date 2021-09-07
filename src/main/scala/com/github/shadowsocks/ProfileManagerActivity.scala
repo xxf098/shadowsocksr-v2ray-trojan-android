@@ -315,9 +315,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         })
         chart.setData(linedata)
         chart.invalidate()
+        var dialogDismiss = false;
         val builder = new AlertDialog.Builder(ProfileManagerActivity.this)
         builder.setView(dialogView)
         val alertDialog = builder.create()
+        alertDialog.setOnDismissListener(_ => dialogDismiss = true )
         alertDialog.show()
         var total: Long  =0
         val updateData = (speed: Long, maxSpeed: Long) => {
@@ -350,14 +352,15 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           chart.invalidate()
         }
 //        val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
-        class TestDownloadUpdate extends tun2socks.TestLatency {
+        class TestDownloadUpdate extends tun2socks.TestLatencyStop {
           var max: Long = 0
-          override def updateLatency(l: Long, l1: Long): Unit = {
+          override def updateLatency(l: Long, l1: Long): Boolean = {
             if (max < l1) { max = l1 }
             total += l1
             val speed = s"Current: ${TrafficMonitor.formatTraffic(l1)}/s\nMax: ${TrafficMonitor.formatTraffic(max)}/s"
             runOnUiThread(() => updateData(l1, max))
             Log.e(TAG, speed)
+            dialogDismiss
           }
         }
         item.testDownload(new TestDownloadUpdate()).foreach(result => {

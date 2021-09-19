@@ -388,7 +388,7 @@ object Key {
   val PING_METHOD = "pref_ping_method"
   val AUTO_UPDATE_SUBSCRIPTION = "pref_auto_update_subscription"
   val AUTO_TEST_CONNECTIVITY = "pref_auto_test_connectivity"
-  val SSR_DNS_NOCAHCE = "pref_ssr_dns_nocache1"
+  val SSR_DNS_NOCAHCE = "pref_ssr_dns_nocache1" // wrong name
   val FULL_TEST_BG = "pref_full_test_bg"
   val ENABLE_SNIFF_DOMAIN = "pref_enable_sniff_domain"
   val ENABLE_LOCAL_HTTP_PROXY = "enable_local_http_proxy"

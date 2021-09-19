@@ -90,7 +90,7 @@ public abstract class Tun2socks
 
     public static native long testConfigLatency(final byte[] p0, final String p1) throws Exception;
 
-    public static native long testLinkDownloadSpeed(final String p0, final TestLatency p1) throws Exception;
+    public static native long testLinkDownloadSpeed(final String p0, final TestLatencyStop p1) throws Exception;
 
     public static native long testTCPPing(final String p0, final long p1) throws Exception;
 
@@ -198,6 +198,24 @@ public abstract class Tun2socks
 
         @Override
         public native void updateLatency(final long p0, final long p1);
+    }
+
+    private static final class proxyTestLatencyStop implements Seq.Proxy, TestLatencyStop
+    {
+        private final int refnum;
+
+        @Override
+        public final int incRefnum() {
+            Seq.incGoRef(this.refnum, this);
+            return this.refnum;
+        }
+
+        proxyTestLatencyStop(final int refnum) {
+            Seq.trackGoRef(this.refnum = refnum, this);
+        }
+
+        @Override
+        public native boolean updateLatency(final long p0, final long p1);
     }
 
     private static final class proxyVpnService implements Seq.Proxy, VpnService

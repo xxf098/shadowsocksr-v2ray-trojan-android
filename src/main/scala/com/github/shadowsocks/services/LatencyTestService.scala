@@ -340,6 +340,7 @@ class LatencyTestService extends Service {
     val length = math.min(math.max(l, 22), title.length)
     builder.setContentTitle(title.substring(0, length.toInt))
       .setContentText(latency.getOrElse("0ms"))
+      .setSubText(s"${counter}/${max}")
       .setProgress(max, counter, false)
     notificationService.notify(LatencyTestService.NOTIFICATION_ID, builder.build())
   }

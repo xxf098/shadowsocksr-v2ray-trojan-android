@@ -320,6 +320,7 @@ class LatencyTestService extends Service {
       .setSmallIcon(R.drawable.ic_click_white)
       .setAutoCancel(false)
       .setOngoing(true)
+      .setShowWhen(false)
       .setContentTitle(getString(R.string.service_test_working))
       .setProgress(max, 0, false)
     val stopAction = new NotificationCompat.Action.Builder(

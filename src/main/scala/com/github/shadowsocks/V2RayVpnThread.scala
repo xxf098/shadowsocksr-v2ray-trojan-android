@@ -91,7 +91,7 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
     try {
       profile match {
         case p if p.isVmess => {
-          app.settings.getString(Key.V2RAY_CORE, "core") match {
+          app.settings.getString(Key.V2RAY_CORE, "xray") match {
             case "lite" => Tun2socks.startV2RayLiteWithTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)
             case "xray" => Tun2socks.startXRayWithTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)
             case _ => Tun2socks.startV2RayWithTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)
@@ -116,7 +116,10 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
           inputStream = new FileInputStream(pfd.getFileDescriptor)
           outputStream = new FileOutputStream(pfd.getFileDescriptor)
           flow = Some(new Flow(outputStream))
-          Tun2socks.startV2Ray(flow.get, service, androidLogService, querySpeedService, config.getBytes(StandardCharsets.UTF_8), assetPath)
+          app.settings.getString(Key.V2RAY_CORE, "core") match {
+            case "xray" => Tun2socks.startXRay(flow.get, service, androidLogService, querySpeedService, config.getBytes(StandardCharsets.UTF_8), assetPath)
+            case _ => Tun2socks.startV2Ray(flow.get, service, androidLogService, querySpeedService, config.getBytes(StandardCharsets.UTF_8), assetPath)
+          }
         }
         case _ => throw new Exception("Not Support!")
       }

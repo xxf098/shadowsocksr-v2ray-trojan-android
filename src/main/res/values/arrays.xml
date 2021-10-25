@@ -186,14 +186,14 @@
     </string-array>
 
     <string-array name="core_entry">
-        <item>V2Ray Core</item>
         <item>XRay Core</item>
+        <item>V2Ray Core</item>
         <item>V2Ray Lite</item>
     </string-array>
 
     <string-array name="core_value">
-        <item>core</item>
         <item>xray</item>
+        <item>core</item>
         <item>lite</item>
     </string-array>
 

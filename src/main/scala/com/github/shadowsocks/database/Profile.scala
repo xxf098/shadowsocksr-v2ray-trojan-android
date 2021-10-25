@@ -376,7 +376,7 @@ class Profile {
   var userOrder: Long = _
 
   @DatabaseField
-  var proxy_protocol: String = "ssr" // ssr vmess v2ray_json trojan
+  var proxy_protocol: String = "ssr" // ssr vmess v2ray_json trojan vless
 
   @DatabaseField
   var v_v: String = "2"
@@ -427,7 +427,7 @@ class Profile {
   var t_password:String = ""
 
   @DatabaseField
-  var t_allowInsecure: Boolean = true // skip verify
+  var t_allowInsecure: Boolean = false // verify
 
   @DatabaseField
   var t_peer: String = ""
@@ -439,7 +439,7 @@ class Profile {
     this match {
       case _ if isVmess => VmessQRCode(v_v, v_ps, v_add, v_port, v_id, v_aid, v_net, v_type, v_host, v_path, v_tls, url_group).toString
       case _ if isV2RayJSON => "vjson://" + Utils.b64Encode(v_json_config.getBytes(Charset.forName("UTF-8")))
-      case _ if isTrojan => s"trojan://$t_password@$t_addr:$t_port?sni=$t_peer#$name"
+      case _ if isTrojan => s"trojan://$t_password@$t_addr:$t_port?sni=$t_peer&allowInsecure=${if(t_allowInsecure) 1 else 0}#$name"
       case _ if isShadowSocks => {
         implicit val flags: Int = Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP
         val data = s"${v_security}:${v_id}".getBytes(Charset.forName("UTF-8"))
@@ -464,6 +464,8 @@ class Profile {
   def isV2Ray = isVmess || isV2RayJSON
 
   def isTrojan = this.proxy_protocol == "trojan"
+
+  def isVless = this.proxy_protocol == "vless"
 
   def isShadowSocks = this.proxy_protocol == "shadowsocks"
 

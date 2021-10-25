@@ -208,11 +208,16 @@ object Parser {
         profile.name = host
         profile.route = Route.BYPASS_LAN_CHN
         profile.password = password
+        profile.t_allowInsecure = false
         // sni
         var sni = trojanUri.getQueryParameter("sni")
         sni = if (TextUtils.isEmpty(sni)) { trojanUri.getQueryParameter("peer") } else sni
         if (!TextUtils.isEmpty(sni) && sni != profile.t_peer) {
           profile.t_peer = sni
+          profile.t_allowInsecure = true
+        }
+        // allowInsecure
+        if (trojanUri.getQueryParameter("allowInsecure") == "1") {
           profile.t_allowInsecure = true
         }
         // get profile name
@@ -277,7 +282,7 @@ object Parser {
         None
     })
 
-  // single link
+  // single link findVless
   def findVmess (vmessLink: String): Option[VmessBean] = {
     if (vmessLink == null ||
       TextUtils.isEmpty(vmessLink) ||

@@ -108,7 +108,7 @@ class LatencyTestService extends Service {
 
         val testV2rayJob1 = (v2rayProfiles: List[Profile]) => {
           val links = v2rayProfiles.map {
-            case p if p.isTrojan => s"trojan://${p.t_password}@${p.t_addr}:${p.t_port}?sni=${p.t_peer}"
+            case p if p.isTrojan => s"trojan://${p.t_password}@${p.t_addr}:${p.t_port}?sni=${p.t_peer}&allowInsecure=${if(p.t_allowInsecure) 1 else 0}"
             case p if p.isVmess => VmessQRCode(p.v_v, "", p.v_add, p.v_port, p.v_id, p.v_aid, p.v_net, p.v_type, p.v_host, p.v_path, p.v_tls, "").toString
             case p if p.isShadowSocks => {
               implicit val flags: Int = Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP
@@ -320,6 +320,7 @@ class LatencyTestService extends Service {
       .setSmallIcon(R.drawable.ic_click_white)
       .setAutoCancel(false)
       .setOngoing(true)
+      .setShowWhen(false)
       .setContentTitle(getString(R.string.service_test_working))
       .setProgress(max, 0, false)
     val stopAction = new NotificationCompat.Action.Builder(
@@ -340,6 +341,7 @@ class LatencyTestService extends Service {
     val length = math.min(math.max(l, 22), title.length)
     builder.setContentTitle(title.substring(0, length.toInt))
       .setContentText(latency.getOrElse("0ms"))
+      .setSubText(s"${counter}/${max}")
       .setProgress(max, counter, false)
     notificationService.notify(LatencyTestService.NOTIFICATION_ID, builder.build())
   }

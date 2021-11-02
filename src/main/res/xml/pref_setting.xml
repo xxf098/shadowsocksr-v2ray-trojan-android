@@ -83,7 +83,7 @@
             app:min="0" />
 
         <ListPreference
-            android:defaultValue="core"
+            android:defaultValue="xray"
             android:entries="@array/core_entry"
             android:entryValues="@array/core_value"
             android:key="pref_v2ray_core"

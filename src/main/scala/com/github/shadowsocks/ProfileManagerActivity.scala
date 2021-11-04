@@ -1670,24 +1670,41 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       startActivity(intent)
       true
     case R.id.action_batch_delete => {
+      // TODO: custom
+      var choice = 0
       val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
         .setTitle(getString(R.string.batch_delete))
+        .setSingleChoiceItems(R.array.batch_delete_choices, 0, new OnClickListener {
+          override def onClick(dialog: DialogInterface, which: Int): Unit = {
+              choice = which
+          }
+        })
         .setPositiveButton(android.R.string.yes, ((_, _) =>{
-          ProfileManagerActivity.getProfilesByGroup(currentGroupName, false, false)
-            .filter(_.id != app.profileId)
-            .foreach(profile => app.profileManager.delProfile(profile.id))
+          if (choice == 0) {
+            ProfileManagerActivity.getProfilesByGroup(currentGroupName, false, false)
+              .filter(_.id != app.profileId)
+              .foreach(profile => app.profileManager.delProfile(profile.id))
+          }
+          if (choice == 1) {
+              ProfileManagerActivity.getProfilesByGroup(currentGroupName, false, false)
+                .filter(p => p.elapsed < 1 && p.id != app.profileId )
+                .foreach(profile => app.profileManager.delProfile(profile.id))
+          }
+          if (choice>=2 && choice<=5) {
+            val elapsed = choice match {
+              case 2 => 200
+              case 3 => 300
+              case 4 => 500
+              case 5 => 1000
+            }
+            ProfileManagerActivity.getProfilesByGroup(currentGroupName, false, false)
+              .filter(p => (p.elapsed > elapsed || p.elapsed < 1) && p.id != app.profileId )
+              .foreach(profile => app.profileManager.delProfile(profile.id))
+          }
           finish()
           startActivity(new Intent(getIntent()))
         }): DialogInterface.OnClickListener)
         .setNegativeButton(android.R.string.no, null)
-        .setNeutralButton(R.string.delete_zero_latency,  ((_, _) => {
-          ProfileManagerActivity.getProfilesByGroup(currentGroupName, false, false)
-            .filter(p => p.elapsed < 1 && p.id != app.profileId )
-            .foreach(profile => app.profileManager.delProfile(profile.id))
-          finish()
-          startActivity(new Intent(getIntent()))
-        }): DialogInterface.OnClickListener)
-        .setMessage(getString(R.string.batch_delete_msg, currentGroupName))
         .create()
       dialog.show()
       true

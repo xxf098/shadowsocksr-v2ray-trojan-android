@@ -93,6 +93,14 @@
     <item>Port</item>
     <item>Traffic</item>
   </string-array>
+  <string-array name="batch_delete_choices">
+    <item>All</item>
+    <item>= 0ms</item>
+    <item>> 200ms</item>
+    <item>> 300ms</item>
+    <item>> 500ms</item>
+    <item>> 1000ms</item>
+  </string-array>
   <string name="custom_profile_display_info">Custom Profile Display Info</string>
   <string name="custom_profile_display_info_summary">Custom Display Server, Port and Traffic of Profile</string>
   <string name="select_profile_display_info">Select Profile Display Info</string>

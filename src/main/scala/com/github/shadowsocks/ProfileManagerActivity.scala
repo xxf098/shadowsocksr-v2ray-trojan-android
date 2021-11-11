@@ -22,7 +22,7 @@ import android.support.v7.view.ActionMode
 import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.view._
-import android.widget.{Adapter, AdapterView, ArrayAdapter, CheckBox, CheckedTextView, CompoundButton, EditText, ImageView, LinearLayout, PopupMenu, Switch, TextView, Toast}
+import android.widget.{Adapter, AdapterView, ArrayAdapter, CheckBox, CheckedTextView, CompoundButton, EditText, ImageView, LinearLayout, PopupMenu, SeekBar, Switch, TextView, Toast}
 import android.net.Uri
 import android.support.design.widget.Snackbar
 import com.github.clans.fab.{FloatingActionButton, FloatingActionMenu}
@@ -1670,35 +1670,39 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       startActivity(intent)
       true
     case R.id.action_batch_delete => {
-      // TODO: custom
-      var choice = 0
+      // TODO: save lib version zero count
+      val currentGroupProfiles = ProfileManagerActivity.getProfilesByGroup(currentGroupName, false, false)
+      val view = View.inflate(this, R.layout.layout_batch_delete_picker, null)
+      val tvLatency = view.findViewById(R.id.tv_batch_delete_latency).asInstanceOf[TextView]
+      tvLatency.setText(getString(R.string.batch_delete_selected_all_elapsed_msg, currentGroupProfiles.count(_.id != app.profileId): Integer))
+      val sbDelete = view.findViewById(R.id.sb_batch_delete).asInstanceOf[SeekBar]
+      var elapsed = 1500
+      sbDelete.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener {
+        override def onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean): Unit = {
+            elapsed = progress
+            val text = progress match {
+              case 0 => getString(R.string.batch_delete_selected_zero_elapsed_msg, currentGroupProfiles.count(p => p.elapsed < 1 && p.id != app.profileId): Integer)
+              case 1500 => getString(R.string.batch_delete_selected_all_elapsed_msg, currentGroupProfiles.count(_.id != app.profileId): Integer)
+              case _ @ p => getString(R.string.batch_delete_selected_elapsed_msg, p: Integer, currentGroupProfiles.count(p => (p.elapsed > elapsed || p.elapsed < 1) && p.id != app.profileId): Integer)
+            }
+            tvLatency.setText(text)
+        }
+        override def onStartTrackingTouch(seekBar: SeekBar): Unit = {}
+
+        override def onStopTrackingTouch(seekBar: SeekBar): Unit = {}
+      })
       val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
         .setTitle(getString(R.string.batch_delete))
-        .setSingleChoiceItems(R.array.batch_delete_choices, 0, new OnClickListener {
-          override def onClick(dialog: DialogInterface, which: Int): Unit = {
-              choice = which
-          }
-        })
+        .setView(view)
         .setPositiveButton(android.R.string.yes, ((_, _) =>{
-          if (choice == 0) {
-            ProfileManagerActivity.getProfilesByGroup(currentGroupName, false, false)
-              .filter(_.id != app.profileId)
+          if (elapsed == 1500) {
+            currentGroupProfiles.filter(_.id != app.profileId)
               .foreach(profile => app.profileManager.delProfile(profile.id))
-          }
-          if (choice == 1) {
-              ProfileManagerActivity.getProfilesByGroup(currentGroupName, false, false)
-                .filter(p => p.elapsed < 1 && p.id != app.profileId )
+          } else if (elapsed == 0) {
+            currentGroupProfiles.filter(p => p.elapsed < 1 && p.id != app.profileId)
                 .foreach(profile => app.profileManager.delProfile(profile.id))
-          }
-          if (choice>=2 && choice<=5) {
-            val elapsed = choice match {
-              case 2 => 200
-              case 3 => 300
-              case 4 => 500
-              case 5 => 1000
-            }
-            ProfileManagerActivity.getProfilesByGroup(currentGroupName, false, false)
-              .filter(p => (p.elapsed > elapsed || p.elapsed < 1) && p.id != app.profileId )
+          } else {
+            currentGroupProfiles.filter(p => (p.elapsed > elapsed || p.elapsed < 1) && p.id != app.profileId )
               .foreach(profile => app.profileManager.delProfile(profile.id))
           }
           finish()

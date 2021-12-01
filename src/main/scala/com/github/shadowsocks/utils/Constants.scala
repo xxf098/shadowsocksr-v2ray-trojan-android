@@ -400,6 +400,13 @@ object Key {
 
   // message
   val TEST_PROFILE_IDS = "test_profile_ids"
+
+  // aead
+  val AES_128_GCM = "aes-128-gcm"
+  val AES_192_GCM = "aes-192-gcm"
+  val AES_256_GCM = "aes-256-gcm" // use xray
+  val CHACHA20_IETF_POLY1305 = "chacha20-ietf-poly1305"
+  val XCHACHA20_IETF_POLY1305 = "xchacha20-ietf-poly1305"
 }
 
 object State {

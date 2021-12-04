@@ -499,8 +499,10 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   }
 
   private[this] def updateTitle (toolbar: Toolbar): Unit = {
+    val isXray = app.settings.getString(Key.V2RAY_CORE, "core") == "xray";
     val title = app.currentProfile.map {
-      case p if p.isV2Ray => "V2Ray"
+      case p if p.isV2Ray && isXray => "XRay"
+      case p if p.isV2Ray && !isXray => "V2Ray"
       case p if p.isTrojan => "Trojan"
       case p if p.isShadowSocks => "Shadowsocks"
       case _ => "shadowsocks R"

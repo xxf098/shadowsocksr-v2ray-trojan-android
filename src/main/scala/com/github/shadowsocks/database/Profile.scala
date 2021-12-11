@@ -469,4 +469,9 @@ class Profile {
 
   def isShadowSocks = this.proxy_protocol == "shadowsocks"
 
+  def isV2RayShadowSocks = isShadowSocks && (this.v_security == Key.AES_128_GCM || this.v_security == Key.AES_256_GCM)
+
+  // shadowSocks aead
+  def isAEAD = isV2RayShadowSocks || this.v_security == Key.AES_192_GCM || this.v_security == Key.CHACHA20_IETF_POLY1305 || this.v_security == Key.XCHACHA20_IETF_POLY1305
+
 }

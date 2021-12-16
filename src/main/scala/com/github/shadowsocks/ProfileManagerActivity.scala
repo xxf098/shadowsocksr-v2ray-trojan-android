@@ -142,7 +142,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           .setView(image)
           .setTitle(R.string.share)
           .create()
-        if (!isNfcAvailable) dialog.setMessage(getString(R.string.share_message_without_nfc))
+//        if (!isNfcAvailable) dialog.setMessage(getString(R.string.share_message_without_nfc))
+        if (!isNfcAvailable) dialog.setMessage(item.name)
         else if (!isNfcBeamEnabled) {
           dialog.setMessage(getString(R.string.share_message_nfc_disabled))
           dialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.turn_on_nfc),

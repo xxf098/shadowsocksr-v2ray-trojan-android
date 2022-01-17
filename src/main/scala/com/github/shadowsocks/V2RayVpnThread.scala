@@ -101,7 +101,7 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
         case p if p.isShadowSocks => {
           Log.e("===", "start startShadowsocksTunFd")
 //          Tun2socks.startV2RayLiteWithTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)
-          Tun2socks.startShadowsocksTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)
+          Tun2socks.startXShadowsocksTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)
         }
         case p if p.isTrojan => {
 //          Tun2socks.startTrojan(flow, service, androidLogService, profile, assetPath)

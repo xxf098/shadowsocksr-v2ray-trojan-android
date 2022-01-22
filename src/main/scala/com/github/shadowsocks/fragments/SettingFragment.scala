@@ -1,6 +1,6 @@
 package com.github.shadowsocks.fragments
 
-import java.io.{BufferedReader, InputStreamReader}
+import java.io.{BufferedReader, File, InputStreamReader}
 import java.util.Locale
 
 import android.content.{Intent, SharedPreferences}
@@ -13,10 +13,10 @@ import android.text.InputType
 import android.util.Log
 import android.view.View
 import android.webkit.{WebView, WebViewClient}
-import android.widget.EditText
+import android.widget.{EditText, Toast}
 import android.view.ViewGroup.{LayoutParams, MarginLayoutParams}
-import com.github.shadowsocks.{BuildConfig, R, SettingActivity, Shadowsocks}
-import com.github.shadowsocks.utils.Key
+import com.github.shadowsocks.{BuildConfig, R, SettingActivity, Shadowsocks, V2rayDat}
+import com.github.shadowsocks.utils.{Key, Utils}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.ShadowsocksSettings.TAG
 import com.github.shadowsocks.preferences.{DropDownPreference, NumberPickerPreference}
@@ -34,6 +34,7 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
   lazy val autoTestConnectivity = findPreference(Key.AUTO_TEST_CONNECTIVITY).asInstanceOf[CheckBoxPreference]
   lazy val ssrDNSNoCache = findPreference(Key.SSR_DNS_NOCAHCE).asInstanceOf[ListPreference]
   lazy val aboutPref = findPreference("about")
+  lazy val updateV2RayDatPref = findPreference("update_v2ray_rules_dat")
   lazy val enableSniffDomain = findPreference(Key.ENABLE_SNIFF_DOMAIN).asInstanceOf[CheckBoxPreference]
   lazy val logLevel = findPreference(Key.LOG_LEVEL).asInstanceOf[ListPreference]
   lazy val v2rayCore = findPreference(Key.V2RAY_CORE).asInstanceOf[ListPreference]
@@ -119,6 +120,46 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
 
     findPreference("ignore_battery_optimization").setOnPreferenceClickListener((preference: Preference) => {
       activity.ignoreBatteryOptimization()
+      true
+    })
+
+    updateV2RayDatPref.setOnPreferenceClickListener(_ => {
+      Toast.makeText(activity, "checking for new updates", Toast.LENGTH_SHORT).show()
+      Utils.ThrowableFuture(try {
+        val linkSumIP = "https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat.sha256sum"
+        val linkSumSite = "https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat.sha256sum"
+        val checksumIP = V2rayDat.getChecksumResponse(linkSumIP).get
+        Log.e("pref", checksumIP)
+        if (checksumIP.length< 64) { return true }
+        val checksumSite = V2rayDat.getChecksumResponse(linkSumSite).get
+        Log.e("pref", checksumSite)
+        if (checksumIP.length< 64) { return true }
+        // compare checksum
+
+        // download file
+        val linkIP = "https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat"
+        val linkSite = "https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat"
+        val dataDir = activity.getApplicationInfo.dataDir + "/files/";
+        val oldIpPath = s"${dataDir}geoip.dat"
+        val ipPath = s"${dataDir}geoip_${checksumIP.substring(0, 64)}.dat"
+        val sitePath = s"${dataDir}geosite_${checksumSite.substring(0, 64)}.dat"
+        val oldSitePath = s"${dataDir}geosite.dat"
+        V2rayDat.downloadDatFile(linkIP,ipPath)
+        Log.e("==", s"${ipPath}")
+        V2rayDat.downloadDatFile(linkSite, sitePath)
+        Log.e("==", s"${sitePath}")
+        val paths = Tun2socks.updateV2RayDat()
+        Log.e("paths", paths)
+        // rename
+        V2rayDat.renameDatFile(ipPath, oldIpPath)
+        V2rayDat.renameDatFile(sitePath, oldSitePath)
+        val paths1 = Tun2socks.updateV2RayDat()
+        Log.e("paths", paths1)
+      } catch {
+        case e: Exception => {
+          e.printStackTrace()
+        }
+      })
       true
     })
 

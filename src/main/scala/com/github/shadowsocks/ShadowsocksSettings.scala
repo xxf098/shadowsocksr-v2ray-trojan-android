@@ -222,6 +222,11 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       profile.password = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
     })
+    trojanCategory.findPreference(Key.password).setOnPreferenceChangeListener((_, value) => {
+      profile.password = value.asInstanceOf[String]
+      if (profile.isTrojan) { profile.t_password = profile.password }
+      app.profileManager.updateProfile(profile)
+    })
     findPreference(Key.method).setOnPreferenceChangeListener((_, value) => {
       profile.method = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)

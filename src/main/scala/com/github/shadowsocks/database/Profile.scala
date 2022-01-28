@@ -47,7 +47,7 @@ import java.util.Locale
 import android.util.{Base64, Log}
 import com.google.gson.GsonBuilder
 import com.j256.ormlite.field.{DataType, DatabaseField}
-import tun2socks.{Trojan, Tun2socks, Vmess, Shadowsocks}
+import tun2socks.{Shadowsocks, Trojan, Tun2socks, Vmess}
 
 import scala.language.implicitConversions
 import Profile._
@@ -60,6 +60,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Random, Try}
 import ProfileConverter._
+import android.net.Uri
 import com.github.shadowsocks.database.VmessAction.profile
 import com.github.shadowsocks.types.{FailureConnect, Result, SuccessConnect, SuccessSpeed}
 // automatic from Android without pc
@@ -439,11 +440,11 @@ class Profile {
     this match {
       case _ if isVmess => VmessQRCode(v_v, v_ps, v_add, v_port, v_id, v_aid, v_net, v_type, v_host, v_path, v_tls, url_group).toString
       case _ if isV2RayJSON => "vjson://" + Utils.b64Encode(v_json_config.getBytes(Charset.forName("UTF-8")))
-      case _ if isTrojan => s"trojan://$t_password@$t_addr:$t_port?sni=$t_peer&allowInsecure=${if(t_allowInsecure) 1 else 0}#$name"
+      case _ if isTrojan => s"trojan://$t_password@$t_addr:$t_port?sni=$t_peer&allowInsecure=${if(t_allowInsecure) 1 else 0}#${Uri.encode(name)}"
       case _ if isShadowSocks => {
         implicit val flags: Int = Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP
         val data = s"${v_security}:${v_id}".getBytes(Charset.forName("UTF-8"))
-        s"ss://${Utils.b64Encode(data)}@${v_add}:${v_port}#${URLEncoder.encode(name, StandardCharsets.UTF_8.toString())}"
+        s"ss://${Utils.b64Encode(data)}@${v_add}:${v_port}#${Uri.encode(name)}"
       }
       case _ => "ssr://" + Utils.b64Encode("%s:%d:%s:%s:%s:%s/?obfsparam=%s&protoparam=%s&remarks=%s&group=%s".formatLocal(Locale.ENGLISH,
         host, remotePort, protocol, method, obfs,

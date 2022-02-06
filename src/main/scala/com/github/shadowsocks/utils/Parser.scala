@@ -93,6 +93,23 @@ object Parser {
           profile.host = profile.name
           profile.remotePort = ss.group(6).toInt
           if (m.group(2) != null) profile.name = URLDecoder.decode(m.group(3), "utf-8")
+          if (m.group(0) != null && m.group(0).startsWith("ss://")) {
+            profile.proxy_protocol = "shadowsocks"
+            val de = new String(Base64.decode(m.group(1), Base64.NO_PADDING), "UTF-8")
+            val link = Uri.parse(s"ss://${de}")
+            profile.url_group = "ss"
+            profile.host = link.getHost
+            profile.v_add = profile.host
+            profile.remotePort = link.getPort
+            profile.v_port = s"${profile.remotePort}"
+            val userInfo = link.getUserInfo.split(":", 2)
+            if (userInfo.length > 1) {
+              profile.method = userInfo(0)
+              profile.password = userInfo(1)
+              profile.v_security = profile.method
+              profile.v_id = profile.password
+            }
+          }
           profile
         } else {
           null

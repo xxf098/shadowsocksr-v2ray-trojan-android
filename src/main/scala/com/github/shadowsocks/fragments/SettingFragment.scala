@@ -3,10 +3,11 @@ package com.github.shadowsocks.fragments
 import java.io.{BufferedReader, File, InputStreamReader}
 import java.util.Locale
 
+import android.app.ProgressDialog
 import android.content.{Intent, SharedPreferences}
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.net.Uri
-import android.os.Bundle
+import android.os.{Bundle, Handler}
 import android.preference.{CheckBoxPreference, EditTextPreference, ListPreference, MultiSelectListPreference, Preference, PreferenceFragment, PreferenceManager}
 import android.support.v7.app.AlertDialog
 import android.text.InputType
@@ -42,6 +43,8 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
   lazy val testConcurrency = findPreference(Key.TEST_CONCURRENCY).asInstanceOf[NumberPickerPreference]
   lazy val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
   private def activity = getActivity.asInstanceOf[SettingActivity]
+  private var updateProgressDialog: ProgressDialog = _
+  private val handler = new Handler
 
   override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
@@ -126,8 +129,10 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
     updateV2RayDatPref.setOnPreferenceClickListener(_ => {
       Toast.makeText(activity, "checking for new updates", Toast.LENGTH_SHORT).show()
       Utils.ThrowableFuture(try {
+        handler.post(() => updateProgressDialog = ProgressDialog.show(activity, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true))
         val linkSumIP = "https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat.sha256sum"
         val linkSumSite = "https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat.sha256sum"
+        updateProgressDialog.setMessage("Getting checksum")
         val checksumIP = V2rayDat.getChecksumResponse(linkSumIP).get
         Log.e("pref", checksumIP)
         if (checksumIP.length< 64) { return true }
@@ -144,6 +149,7 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
         val ipPath = s"${dataDir}geoip_${checksumIP.substring(0, 64)}.dat"
         val sitePath = s"${dataDir}geosite_${checksumSite.substring(0, 64)}.dat"
         val oldSitePath = s"${dataDir}geosite.dat"
+        updateProgressDialog.setMessage("Downloading dat files")
         V2rayDat.downloadDatFile(linkIP,ipPath)
         Log.e("==", s"${ipPath}")
         V2rayDat.downloadDatFile(linkSite, sitePath)
@@ -155,15 +161,18 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
         V2rayDat.renameDatFile(sitePath, oldSitePath)
         val paths1 = Tun2socks.updateV2RayDat()
         Log.e("paths", paths1)
+        Toast.makeText(activity, "Update success", Toast.LENGTH_SHORT).show()
       } catch {
         case e: Exception => {
           e.printStackTrace()
         }
+      } finally {
+        handler.post(() => updateProgressDialog.dismiss())
       })
       true
     })
 
-    aboutPref.setSummary(s"SSRRAY: v${BuildConfig.VERSION_NAME}\nv2ray-core: v${Tun2socks.checkVersion()}; xray-core: v${Tun2socks.checkXVersion()}")
+    aboutPref.setSummary(s"SSRRAY: v${BuildConfig.VERSION_NAME}\nxray-core: v${Tun2socks.checkXVersion()}; v2ray-core: v${Tun2socks.checkVersion()}")
     aboutPref.setOnPreferenceClickListener(_ => {
       val web = new WebView(activity)
       web.loadUrl("file:///android_asset/pages/about.html")

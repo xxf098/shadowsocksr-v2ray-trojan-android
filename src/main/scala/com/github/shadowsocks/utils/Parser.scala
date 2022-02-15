@@ -64,7 +64,8 @@ object Parser {
   private val decodedPattern_ssr_groupparam = "(?i)[?&]group=([A-Za-z0-9_=-]*)".r
 
   private val pattern_vmess = "(?i)(vmess://[A-Za-z0-9_/+=-]+)".r
-  private val pattern_trojan = "(?i)(trojan://(.+?)@(.+?):(\\d{2,5})([\\?#].*)?)".r
+  private val pattern_trojan = "(?i)(trojan://(.+?)@(.+?):(\\d{2,5})/?([\\?#].*)?)".r
+  private val pattern_vless = "(?i)(vless://(.+?)@(.+?):(\\d{2,5})([\\?#].*)?)".r
   private val pattern_trojan_query = "(?i)allowInsecure=([01])&(peer|sni)=(.+?)#(.+)?".r
   private val pattern_shadwosocks = "(?i)(ss://(.+?)@(.+?):(\\d{2,5})/?([\\?#].*)?)".r
   private val pattern_shadwosocks1 = "(?i)(ss://([A-Za-z0-9_/+=-]+)([\\?#].*)?)".r

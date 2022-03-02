@@ -76,6 +76,7 @@
   <string name="ignore_battery_optimization_summary">点击来请求触发忽略电池优化，可避免息屏休眠导致的后台断流，会增加电池消耗，在部分设备上可能无法正常触发。</string>
   <string name="about">关于</string>
   <string name="about_title">ShadowsocksR %s</string>
+  <string name="update_v2ray_rules_dat">更新V2Ray路由规则文件</string>
   <string name="flush_dnscache">刷新 DNS 缓存</string>
   <string name="flush_dnscache_summary">只需在 NAT 模式下使用</string>
   <string name="flush_dnscache_summary_root">只需在 NAT 模式下使用，需要 ROOT 权限</string>
@@ -233,6 +234,8 @@
   <string name="batch_delete_selected_msg">删除"%s"选中的节点</string>
   <string name="batch_delete_selected_elapsed_msg">大于%1$dms, %2$d个节点</string>
   <string name="batch_delete_selected_zero_elapsed_msg">等于0ms, %d个节点</string>
+  <string name="batch_delete_selected_speed_msg">小于%1$s/s, %2$d个节点</string>
+  <string name="batch_delete_selected_zero_speed_msg">等于0B/s, %d个节点</string>
   <string name="batch_delete_selected_all_elapsed_msg">全部, %d个节点</string>
 
 

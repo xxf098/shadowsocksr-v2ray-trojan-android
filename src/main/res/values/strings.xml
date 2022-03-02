@@ -172,7 +172,7 @@
   <string name="ignore_battery_optimization_summary">Click to request trigger Ignore the battery optimization, to avoid background hiccups caused by hibernation when off screen, will increase the battery consumption, may not be triggered properly on some devices.</string>
   <string name="about">About</string>
   <string name="about_title">SSRRAY %s</string>
-  <string name="check_update">Check Update</string>
+  <string name="update_v2ray_rules_dat">Update V2Ray Rules Dat File</string>
   <string name="share">Share</string>
   <string name="share_message">Scan QR code or use Android Beam (NFC)</string>
   <string name="share_message_without_nfc">Scan QR code</string>
@@ -243,6 +243,8 @@
   <string name="batch_delete_selected_msg">Delete selected profiles in %s</string>
   <string name="batch_delete_selected_elapsed_msg">> %1$dms, %2$d profiles</string>
   <string name="batch_delete_selected_zero_elapsed_msg">= 0ms, %d profiles</string>
+  <string name="batch_delete_selected_speed_msg">&lt; %1$s/s, %2$d profiles</string>
+  <string name="batch_delete_selected_zero_speed_msg">= 0B/s, %d profiles</string>
   <string name="batch_delete_selected_all_elapsed_msg">All, %d profiles</string>
 
   <string name="frontproxy_enable">Enable</string>
@@ -284,6 +286,7 @@
   <string name="subscription_url">Subscription URL</string>
   <string name="use_default_group_name">Use Default Group Name</string>
   <string name="ssrsub_expire_on">Expire on: %s</string>
+  <string name="check_subscriptions">Check Subscriptions</string>
 
   <string name="scan_qrcode_install_title">Scanner installation</string>
   <string name="scan_qrcode_install_text">It seems that \'zxing scanner\' is not currently installed. You may click the \'ok\' button below to install it from Play Store, or \'Install Manually\' to manually download the apk and installed it.</string>

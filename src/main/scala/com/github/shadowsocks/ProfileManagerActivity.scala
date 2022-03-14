@@ -22,7 +22,7 @@ import android.support.v7.view.ActionMode
 import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.view._
-import android.widget.{Adapter, AdapterView, ArrayAdapter, CheckBox, CheckedTextView, CompoundButton, EditText, ImageView, LinearLayout, PopupMenu, SeekBar, Switch, TextView, Toast}
+import android.widget.{Adapter, AdapterView, ArrayAdapter, CheckBox, CheckedTextView, CompoundButton, EditText, ImageView, LinearLayout, PopupMenu, RadioGroup, SeekBar, Switch, TextView, Toast}
 import android.net.Uri
 import android.support.design.widget.Snackbar
 import com.github.clans.fab.{FloatingActionButton, FloatingActionMenu}
@@ -1677,14 +1677,33 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val tvLatency = view.findViewById(R.id.tv_batch_delete_latency).asInstanceOf[TextView]
       tvLatency.setText(getString(R.string.batch_delete_selected_all_elapsed_msg, currentGroupProfiles.count(_.id != app.profileId): Integer))
       val sbDelete = view.findViewById(R.id.sb_batch_delete).asInstanceOf[SeekBar]
+      val rgDelete = view.findViewById(R.id.rg_batch_delete).asInstanceOf[RadioGroup]
       var elapsed = 1500
+      var deleteType = 0 // 0: elapse 1: speed
+      rgDelete.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener {
+        override def onCheckedChanged(group: RadioGroup, checkedId: Int): Unit = {
+          if (checkedId == R.id.rb_elapse) { deleteType = 0 }
+          if (checkedId == R.id.rb_download_speed) { deleteType = 1 }
+          sbDelete.setProgress(1500)
+          val text = getString(R.string.batch_delete_selected_all_elapsed_msg, currentGroupProfiles.count(_.id != app.profileId): Integer)
+          tvLatency.setText(text)
+        }
+      })
       sbDelete.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener {
         override def onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean): Unit = {
             elapsed = progress
-            val text = progress match {
-              case 0 => getString(R.string.batch_delete_selected_zero_elapsed_msg, currentGroupProfiles.count(p => p.elapsed < 1 && p.id != app.profileId): Integer)
-              case 1500 => getString(R.string.batch_delete_selected_all_elapsed_msg, currentGroupProfiles.count(_.id != app.profileId): Integer)
-              case _ @ p => getString(R.string.batch_delete_selected_elapsed_msg, p: Integer, currentGroupProfiles.count(p => (p.elapsed > elapsed || p.elapsed < 1) && p.id != app.profileId): Integer)
+            val text = if (deleteType==0) {
+              progress match {
+                case 0 => getString(R.string.batch_delete_selected_zero_elapsed_msg, currentGroupProfiles.count(p => p.elapsed < 1 && p.id != app.profileId): Integer)
+                case 1500 => getString(R.string.batch_delete_selected_all_elapsed_msg, currentGroupProfiles.count(_.id != app.profileId): Integer)
+                case _ @ p => getString(R.string.batch_delete_selected_elapsed_msg, p: Integer, currentGroupProfiles.count(p => (p.elapsed > elapsed || p.elapsed < 1) && p.id != app.profileId): Integer)
+              }
+            } else {
+              progress match {
+                case 0 => getString(R.string.batch_delete_selected_zero_speed_msg, currentGroupProfiles.count(p => p.download_speed < 1 && p.id != app.profileId): Integer)
+                case 1500 => getString(R.string.batch_delete_selected_all_elapsed_msg, currentGroupProfiles.count(_.id != app.profileId): Integer)
+                case _ @ p => getString(R.string.batch_delete_selected_speed_msg, TrafficMonitor.formatTrafficInternal(p * 1024 * 2, true), currentGroupProfiles.count(p => (p.download_speed < elapsed * 1024 * 2 ) && p.id != app.profileId): Integer)
+              }
             }
             tvLatency.setText(text)
         }
@@ -1700,11 +1719,21 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             currentGroupProfiles.filter(_.id != app.profileId)
               .foreach(profile => app.profileManager.delProfile(profile.id))
           } else if (elapsed == 0) {
-            currentGroupProfiles.filter(p => p.elapsed < 1 && p.id != app.profileId)
+            if (deleteType == 0) {
+              currentGroupProfiles.filter(p => p.elapsed < 1 && p.id != app.profileId)
                 .foreach(profile => app.profileManager.delProfile(profile.id))
+            } else {
+              currentGroupProfiles.filter(p => p.download_speed < 1 && p.id != app.profileId)
+                .foreach(profile => app.profileManager.delProfile(profile.id))
+            }
           } else {
-            currentGroupProfiles.filter(p => (p.elapsed > elapsed || p.elapsed < 1) && p.id != app.profileId )
-              .foreach(profile => app.profileManager.delProfile(profile.id))
+            if (deleteType == 0) {
+              currentGroupProfiles.filter(p => (p.elapsed > elapsed || p.elapsed < 1) && p.id != app.profileId )
+                .foreach(profile => app.profileManager.delProfile(profile.id))
+            } else {
+              currentGroupProfiles.filter(p => (p.download_speed < elapsed * 1024 * 2) && p.id != app.profileId )
+                .foreach(profile => app.profileManager.delProfile(profile.id))
+            }
           }
           finish()
           startActivity(new Intent(getIntent()))

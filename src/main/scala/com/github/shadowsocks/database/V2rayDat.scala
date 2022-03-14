@@ -85,4 +85,21 @@ object V2rayDat {
       throw new Exception(app.getString(R.string.ssrsub_error, code: Integer))
     }
   }
+
+  def renameDatFile(checksumPath: String, originPath: String): Try[Unit] = Try {
+    if (Build.VERSION.SDK_INT < 21) {
+      throw new Exception("not support")
+    }
+    val originFile = new File(originPath)
+    val deleteFile = new File(s"${originPath}.delete")
+    if (originFile.exists()) {
+      originFile.renameTo(deleteFile)
+    }
+    val checksumPathFile = new File(checksumPath)
+    if (checksumPathFile.exists()) {
+      checksumPathFile.renameTo(originFile)
+    }
+    deleteFile.delete()
+  }
+
 }

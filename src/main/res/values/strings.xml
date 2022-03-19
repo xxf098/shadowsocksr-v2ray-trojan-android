@@ -239,7 +239,6 @@
   <string name="action_sort">Auto sort by latency</string>
   <string name="ping">Ping</string>
   <string name="batch_delete">Batch Delete</string>
-  <string name="batch_delete_msg">Delete all profiles in %s</string>
   <string name="batch_delete_selected_msg">Delete selected profiles in %s</string>
   <string name="batch_delete_selected_elapsed_msg">> %1$dms, %2$d profiles</string>
   <string name="batch_delete_selected_zero_elapsed_msg">= 0ms, %d profiles</string>

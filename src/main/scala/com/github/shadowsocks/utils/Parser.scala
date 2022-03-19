@@ -313,11 +313,16 @@ object Parser {
     result = new String(Base64.decode(result, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP), "UTF-8")
 //    Log.e(TAG, result)
     val vmessQRCode = new Gson().fromJson(result, classOf[VmessQRCode])
+    vmessQRCode2VmessBean(vmessQRCode)
+  }
+
+  def vmessQRCode2VmessBean (vmessQRCode: VmessQRCode): Option[VmessBean] = {
     if (TextUtils.isEmpty(vmessQRCode.add) ||
-    TextUtils.isEmpty(vmessQRCode.port) ||
-    TextUtils.isEmpty(vmessQRCode.id) ||
-    TextUtils.isEmpty(vmessQRCode.aid) ||
-    TextUtils.isEmpty(vmessQRCode.net)) return None
+        TextUtils.isEmpty(vmessQRCode.port) ||
+        TextUtils.isEmpty(vmessQRCode.id) ||
+        TextUtils.isEmpty(vmessQRCode.aid) ||
+        TextUtils.isEmpty(vmessQRCode.net)) return None
+
     val vmess = VmessBean()
     vmess.configType = EConfigType.Vmess
     vmess.security = "auto"

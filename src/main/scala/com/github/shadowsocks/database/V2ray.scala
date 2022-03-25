@@ -19,6 +19,8 @@ case class VmessQRCode(v: String,
                        host: String,
                        path: String,
                        tls: String,
+                       security: String,
+                       scy: String,
                        url_group: String
                       ) {
   override def toString: String = {

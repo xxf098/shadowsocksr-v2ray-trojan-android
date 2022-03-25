@@ -71,7 +71,7 @@ class DownloadTestService extends Service {
         val testDownloadJob = (v2rayProfiles: List[Profile]) => {
           val links = v2rayProfiles.map {
             case p if p.isTrojan => s"trojan://${p.t_password}@${p.t_addr}:${p.t_port}?sni=${p.t_peer}&allowInsecure=${if(p.t_allowInsecure) 1 else 0}"
-            case p if p.isVmess => VmessQRCode(p.v_v, p.name, p.v_add, p.v_port, p.v_id, p.v_aid, p.v_net, p.v_type, p.v_host, p.v_path, p.v_tls, "").toString
+            case p if p.isVmess => VmessQRCode(p.v_v, p.name, p.v_add, p.v_port, p.v_id, p.v_aid, p.v_net, p.v_type, p.v_host, p.v_path, p.v_tls, p.v_security,null,"").toString
             case p if p.isShadowSocks => {
               implicit val flags: Int = Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP
               val data = s"${p.v_security}:${p.v_id}".getBytes(Charset.forName("UTF-8"))

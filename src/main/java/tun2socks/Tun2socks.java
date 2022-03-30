@@ -84,6 +84,8 @@ public abstract class Tun2socks
 
     public static native void startXRayWithTunFd(final long p0, final VpnService p1, final LogService p2, final QuerySpeed p3, final Vmess p4, final String p5) throws Exception;
 
+    public static native void startXShadowsocksTunFd(final long p0, final VpnService p1, final LogService p2, final QuerySpeed p3, final Shadowsocks p4, final String p5) throws Exception;
+
     public static native void stopV2Ray();
 
     public static native void testConfig(final String p0, final String p1) throws Exception;
@@ -101,6 +103,8 @@ public abstract class Tun2socks
     public static native long testVmessLatency(final Vmess p0, final long p1) throws Exception;
 
     public static native long testVmessLatencyDirect(final Vmess p0) throws Exception;
+
+    public static native String updateV2RayDat() throws Exception;
 
     static {
         Seq.touch();

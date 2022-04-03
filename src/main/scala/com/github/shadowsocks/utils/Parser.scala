@@ -56,12 +56,12 @@ object Parser {
   private val pattern = "(?i)ss://([A-Za-z0-9+-/=_]+)(#(.+))?".r
   private val decodedPattern = "(?i)^((.+?)(-auth)??:(.*)@(.+?):(\\d+?))$".r
 
-  private val pattern_ssr = "(?i)ssr://([A-Za-z0-9_=-]+)".r
+  private val pattern_ssr = "(?i)ssr://([A-Za-z0-9_/=-]+)".r
   private val decodedPattern_ssr = "(?i)^((.+):(\\d+?):(.*):(.+):(.*):([^/]+))".r
-  private val decodedPattern_ssr_obfsparam = "(?i)[?&]obfsparam=([A-Za-z0-9_=-]*)".r
-  private val decodedPattern_ssr_remarks = "(?i)[?&]remarks=([A-Za-z0-9_/+=-]*)".r
-  private val decodedPattern_ssr_protocolparam = "(?i)[?&]protoparam=([A-Za-z0-9_=-]*)".r
-  private val decodedPattern_ssr_groupparam = "(?i)[?&]group=([A-Za-z0-9_=-]*)".r
+  private val decodedPattern_ssr_obfsparam = "(?i)[?&]obfsparam=([A-Za-z0-9%_/=-]*)".r
+  private val decodedPattern_ssr_remarks = "(?i)[?&]remarks=([A-Za-z0-9%_/+=-]*)".r
+  private val decodedPattern_ssr_protocolparam = "(?i)[?&]protoparam=([A-Za-z0-9_/=-]*)".r
+  private val decodedPattern_ssr_groupparam = "(?i)[?&]group=([A-Za-z0-9_/=-]*)".r
 
   private val pattern_vmess = "(?i)(vmess://[A-Za-z0-9_/+=-]+([?#]\\S+)?)".r
   private val pattern_trojan = "(?i)(trojan://(\\S+?)@(\\S+?):(\\d{2,5})/?([\\?#].*)?)".r
@@ -124,7 +124,7 @@ object Parser {
     }).filter(_ != null)
 
   def findAll_ssr(data: CharSequence) = pattern_ssr.findAllMatchIn(if (data == null) "" else data).map(m => try{
-    val uri = new String(Base64.decode(m.group(1).replaceAll("=", ""), Base64.URL_SAFE), "UTF-8")
+    val uri = decodeBase64(m.group(1).replaceAll("=", ""))
     decodedPattern_ssr.findFirstMatchIn(uri) match {
           case Some(ss) =>
             val profile = new Profile
@@ -137,7 +137,7 @@ object Parser {
 
             decodedPattern_ssr_obfsparam.findFirstMatchIn(uri) match {
               case Some(param) =>
-                profile.obfs_param = new String(Base64.decode(param.group(1).replaceAll("=", ""), Base64.URL_SAFE), "UTF-8")
+                profile.obfs_param = new String(Base64.decode(Uri.decode(param.group(1)).replaceAll("=", ""), Base64.URL_SAFE), "UTF-8")
               case _ => null
             }
 
@@ -149,7 +149,7 @@ object Parser {
 
             decodedPattern_ssr_remarks.findFirstMatchIn(uri) match {
               case Some(param) =>
-                profile.name = decodeBase64(param.group(1))
+                profile.name = decodeBase64(Uri.decode(param.group(1)).replaceAll("=", ""))
               case _ => profile.name = ss.group(2).toLowerCase
             }
 

@@ -172,7 +172,12 @@ object Parser {
   def findAllVmess(data: CharSequence) = pattern_vmess
     .findAllMatchIn(if (data == null) "" else data)
     .flatMap(m => try {
-      findVmess(m.group(1).replaceAll("=", ""))
+      val g = m.group(1)
+      val group = if (g.indexOf("?") > 0) {
+        val splits = g.split("\\?", 2)
+        s"${splits(0).replaceAll("=", "")}?${splits(1)}"
+      } else { g.replaceAll("=", "") }
+      findVmess(group)
     } catch {
       case ex: Exception =>
         Log.e(TAG, "parser error: " + m.source, ex) // Ignore
@@ -306,7 +311,7 @@ object Parser {
       TextUtils.isEmpty(vmessLink) ||
     !vmessLink.startsWith("vmess://")) return None
     val indexSplit = vmessLink.indexOf("?")
-    if (indexSplit > 0) return None
+    if (indexSplit > 0) return findShadowrocketVmess(vmessLink)
     var result = vmessLink.replace("vmess://", "")
         .replace("+", "-")
         .replace("/", "_")
@@ -314,6 +319,45 @@ object Parser {
 //    Log.e(TAG, result)
     val vmessQRCode = new Gson().fromJson(result, classOf[VmessQRCode])
     vmessQRCode2VmessBean(vmessQRCode)
+  }
+
+  def findShadowrocketVmess (link: String): Option[VmessBean] = {
+    val url = Uri.parse(link)
+
+    val vmess = VmessBean()
+    vmess.configType = EConfigType.Vmess
+    vmess.security = "auto"
+    vmess.network = "tcp"
+    vmess.configVersion = 2
+
+    val b64 = url.getHost
+    val s = new String(Base64.decode(b64, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP), "UTF-8")
+    val mhp = s.split(":", 3)
+    if (mhp.length != 3) {
+      return None
+    }
+    vmess.security = mhp(0)
+    vmess.port = mhp(2).toInt
+    val idAddr = mhp(1).split("@", 2)
+    if (idAddr.length != 2 ) {
+      return None
+    }
+    vmess.id = idAddr(0)
+    vmess.address = idAddr(1)
+    vmess.alterId = 0
+
+    vmess.remarks = Option(url.getQueryParameter("remarks")).getOrElse("")
+    vmess.path = Option(url.getQueryParameter("path")).getOrElse("")
+    vmess.streamSecurity = if (Option(url.getQueryParameter("tls")).getOrElse("") == "1") "tls" else ""
+    vmess.alterId = Option(url.getQueryParameter("alterId")).getOrElse("0").toInt
+    val obfs = Option(url.getQueryParameter("obfs")).getOrElse("none")
+    if (obfs == "websocket") { vmess.network = "ws" }
+    else if (obfs == "none" ) {
+      vmess.network = "tcp"
+      vmess.headerType = "none"
+    }
+    vmess.requestHost =Option(url.getQueryParameter("obfsParam")).getOrElse("")
+    Some(vmess)
   }
 
   def vmessQRCode2VmessBean (vmessQRCode: VmessQRCode): Option[VmessBean] = {
@@ -325,7 +369,7 @@ object Parser {
 
     val vmess = VmessBean()
     vmess.configType = EConfigType.Vmess
-    vmess.security = "auto"
+//    vmess.security = "auto"
     vmess.network = "tcp"
 
     vmess.configVersion = Option(vmessQRCode.v).getOrElse("2").toInt
@@ -340,6 +384,7 @@ object Parser {
     vmess.path = Option(vmessQRCode.path).getOrElse("")
     vmess.streamSecurity = Option(vmessQRCode.tls).getOrElse("")
     vmess.subid = ""
+    vmess.security = Option(vmessQRCode.security).getOrElse(Option(vmessQRCode.scy).getOrElse("auto"))
     vmess.url_group = if (TextUtils.isEmpty(vmessQRCode.url_group)) vmess.url_group else vmessQRCode.url_group
     Some(vmess)
   }

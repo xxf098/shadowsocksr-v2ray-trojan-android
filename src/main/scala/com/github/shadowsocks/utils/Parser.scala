@@ -208,6 +208,32 @@ object Parser {
     profile
   }
 
+  def findAllVless(data: CharSequence) = pattern_vless
+    .findAllMatchIn(if (data == null) "" else data)
+    .flatMap(m => try {
+      val vlessUri = Uri.parse(m.group(1))
+      if (vlessUri.getScheme == "vless") {
+        val profile = new Profile
+        val host = vlessUri.getHost
+        val port = vlessUri.getPort
+        val password = vlessUri.getUserInfo
+        profile.t_password = password
+        profile.t_addr = host
+        profile.t_port = port
+        profile.proxy_protocol = "vless"
+        profile.name = host
+        val splits = m.group(1).split("#")
+        if (splits.length > 1) {
+          profile.name = URLDecoder.decode(splits.last, "UTF-8")
+        }
+        Some(1)
+      } else {
+        None
+      }
+    }catch {
+      case ex: Exception =>None
+    })
+
   def findAllTrojan(data: CharSequence) = pattern_trojan
     .findAllMatchIn(if (data == null) "" else data)
     .flatMap(m => try {

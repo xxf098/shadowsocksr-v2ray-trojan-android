@@ -65,7 +65,7 @@ object DBHelper {
 }
 
 class DBHelper(val context: Context)
-  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 37) {
+  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 38) {
   import DBHelper._
 
   lazy val profileDao: Dao[Profile, Int] = getDao(classOf[Profile])
@@ -220,6 +220,10 @@ class DBHelper(val context: Context)
         }
         if (oldVersion < 37) {
           ssrsubDao.executeRawNoArgs("ALTER TABLE `ssrsub` ADD COLUMN expire_on VARCHAR DEFAULT '';")
+        }
+        if (oldVersion < 38) {
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN v_encryption VARCHAR DEFAULT 'none';")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN v_flow VARCHAR DEFAULT '';")
         }
       } catch {
         case ex: Exception =>

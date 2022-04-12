@@ -47,7 +47,7 @@ import java.util.Locale
 import android.util.{Base64, Log}
 import com.google.gson.GsonBuilder
 import com.j256.ormlite.field.{DataType, DatabaseField}
-import tun2socks.{Shadowsocks, Trojan, Tun2socks, Vmess}
+import tun2socks.{Shadowsocks, Trojan, Tun2socks, Vmess, Vless}
 
 import scala.language.implicitConversions
 import Profile._
@@ -70,7 +70,7 @@ object Profile {
   def getOption (profile: Profile): String = {
     val routeMode = math.max(Route.ALL_ROUTES.indexOf(profile.route), 0)
     val (dns_address, dns_port, china_dns_address, china_dns_port) =  profile.getDNSConf()
-    val logLevel = app.settings.getString(Key.LOG_LEVEL, "error")
+    val logLevel = app.settings.getString(Key.LOG_LEVEL, "debug")
     val disableDNSCache = if (app.settings.getString(Key.SSR_DNS_NOCAHCE, "on") == "off") true else false
     val vmessOption =
       s"""
@@ -89,6 +89,7 @@ object Profile {
     vmessOption
   }
 
+  // convert to tun2socks type
   implicit def profileToVmess(profile: Profile): Vmess = {
     if (!profile.isVmess && !profile.isShadowSocks) {
       throw new Exception("Not a V2ray or ShadowSocks Profile")
@@ -121,7 +122,29 @@ object Profile {
     )
   }
 
-  implicit def profileToTrojan(profile: Profile): Trojan = {
+  implicit def profileToVless(profile: Profile): Vless = {
+    if (!profile.isVless) {
+      throw new Exception("Not a Vless Profile")
+    }
+    val v_security = if (TextUtils.isEmpty(profile.v_security)) "auto" else profile.v_security
+    val vmessOption = getOption(profile)
+    Log.e("Profile", s"v_tls: ${profile.v_tls}, v_add: ${profile.v_add},v_port: ${profile.v_port}, encryption: ${profile.v_encryption}, flow: ${profile.v_flow}" +
+      s"v_net: ${profile.v_net}, v_id: ${profile.v_id}, v_type: ${profile.v_type}, v_security: ${v_security}, useIPv6: ${profile.ipv6}" + s"vmessOption: $vmessOption, domainSniff: ${profile.enable_domain_sniff}")
+    Tun2socks.newVless(
+        profile.v_add,
+        profile.v_port.toLong,
+        profile.v_id,
+        profile.v_tls,
+        profile.v_type,
+        profile.v_encryption,
+        profile.v_net,
+        profile.v_flow,
+        profile.v_security,
+        vmessOption.getBytes(StandardCharsets.UTF_8)
+      )
+  }
+
+    implicit def profileToTrojan(profile: Profile): Trojan = {
     if (!profile.isTrojan) {
       throw new Exception("Not a Trojan Profile")
     }
@@ -419,6 +442,12 @@ class Profile {
   var v_security: String = ""
 
   @DatabaseField
+  var v_encryption: String = ""  // vless.vnext.user
+
+  @DatabaseField
+  var v_flow: String = "" // vless.vnext.user
+
+  @DatabaseField
   var t_addr: String = ""
 
   @DatabaseField
@@ -428,7 +457,7 @@ class Profile {
   var t_password:String = ""
 
   @DatabaseField
-  var t_allowInsecure: Boolean = false // verify
+  var t_allowInsecure: Boolean = false // verify  TODO: check is numeric
 
   @DatabaseField
   var t_peer: String = ""
@@ -441,6 +470,7 @@ class Profile {
       case _ if isVmess => VmessQRCode(v_v, v_ps, v_add, v_port, v_id, v_aid, v_net, v_type, v_host, v_path, v_tls, v_security, null, url_group).toString
       case _ if isV2RayJSON => "vjson://" + Utils.b64Encode(v_json_config.getBytes(Charset.forName("UTF-8")))
       case _ if isTrojan => s"trojan://$t_password@$t_addr:$t_port?sni=$t_peer&allowInsecure=${if(t_allowInsecure) 1 else 0}#${Uri.encode(name)}"
+      case _ if isVless => s"vless://$v_id@$v_add:$v_port?security=$v_tls&encryption=$v_security&headerType=$v_type&type=$v_net#${Uri.encode(name)}"
       case _ if isShadowSocks => {
         implicit val flags: Int = Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP
         val data = s"${v_security}:${v_id}".getBytes(Charset.forName("UTF-8"))

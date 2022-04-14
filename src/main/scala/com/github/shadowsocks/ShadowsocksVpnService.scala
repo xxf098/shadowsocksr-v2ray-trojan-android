@@ -131,7 +131,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         conn = null
       }
 
-      Option(profile).filter(p => p.isV2Ray || p.isTrojan || p.isV2RayShadowSocks).flatMap(_ => Option(v2rayThread))
+      Option(profile).filter(p => p.isV2Ray || p.isTrojan || p.isV2RayShadowSocks || p.isVless).flatMap(_ => Option(v2rayThread))
         .foreach(_ => v2rayThread.stopTun2Socks(stopService))
 
       super.stopRunner(stopService, msg)
@@ -198,12 +198,12 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     dns_port = dnsConf._2
     china_dns_address = dnsConf._3
     china_dns_port = dnsConf._4
-    // v2ray ipv6 dns query from golib
-    if (profile.isV2Ray || profile.isTrojan || profile.isV2RayShadowSocks) {
-      // TODO: serverName
+    // v2ray ipv6 dns query
+    if (profile.isV2Ray || profile.isTrojan || profile.isV2RayShadowSocks || profile.isVless) {
+      // FIXME: serverName
       if (profile.v_tls == "tls" && TextUtils.isEmpty(profile.v_host) && !Utils.isNumeric(profile.v_add)) { profile.v_host = profile.v_add }
 //      if (profile.v_tls == "tls" && TextUtils.isEmpty(profile.v_host) && !Utils.isNumeric(profile.v_add)) { profile.host = profile.v_add }
-      if (profile.isV2Ray || profile.isV2RayShadowSocks) {
+      if (profile.isV2Ray || profile.isV2RayShadowSocks || profile.isVless) {
         Utils.resolve(profile.v_add, enableIPv6 = profile.ipv6, hostname = china_dns_address) match {
           case Some(addr) => profile.v_add = addr
           case None => {

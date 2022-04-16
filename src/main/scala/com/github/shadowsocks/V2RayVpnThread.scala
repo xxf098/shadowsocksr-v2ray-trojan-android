@@ -98,6 +98,10 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
           }
 //          Tun2socks.startV2RayWithVmess(flow, service, androidLogService, profile, assetPath)
         }
+        case p if p.isVless => {
+          Log.e("===", "start startVlessTunFd")
+          Tun2socks.startXVlessTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)
+        }
         case p if p.isShadowSocks => {
           Log.e("===", "start startShadowsocksTunFd")
 //          Tun2socks.startV2RayLiteWithTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)

@@ -244,10 +244,20 @@ object Parser {
         if (!TextUtils.isEmpty(headerType)) {
           profile.v_type = headerType;
         }
-        // type: tcp, http
+        // type: tcp, http, ws
         val networkType = vlessUri.getQueryParameter("type")
         if (!TextUtils.isEmpty(networkType)) {
           profile.v_net = networkType;
+        }
+        // path
+        val path = vlessUri.getQueryParameter("path")
+        if (!TextUtils.isEmpty(path)) {
+          profile.v_path = path
+        }
+        // ws host
+        val wsHost = vlessUri.getQueryParameter("host")
+        if (!TextUtils.isEmpty(wsHost)) {
+          profile.v_host = wsHost
         }
         val splits = m.group(1).split("#")
         if (splits.length > 1) {

@@ -185,6 +185,7 @@ object Parser {
     })
     .map(convertVmessBeanToProfile)
 
+  // TODO: v_host t_peer
   private def convertVmessBeanToProfile (vmessBean: VmessBean): Profile = {
     val profile = new Profile
     profile.proxy_protocol = "vmess"
@@ -220,13 +221,48 @@ object Parser {
         profile.t_password = password
         profile.t_addr = host
         profile.t_port = port
+        // vmess
+        profile.v_id = password
+        profile.v_add = host
+        profile.v_port = s"$port"
         profile.proxy_protocol = "vless"
         profile.name = host
+        profile.v_ps = host
+        profile.v_aid = "0"
+        // security tls
+        val security = vlessUri.getQueryParameter("security")
+        if (!TextUtils.isEmpty(security)) {
+          profile.v_tls = security;
+        }
+        // encryption
+        val encryption = vlessUri.getQueryParameter("encryption")
+        if (!TextUtils.isEmpty(encryption)) {
+          profile.v_encryption = encryption;
+        }
+        // headerType
+        val headerType = vlessUri.getQueryParameter("headerType")
+        if (!TextUtils.isEmpty(headerType)) {
+          profile.v_type = headerType;
+        }
+        // type: tcp, http
+        val networkType = vlessUri.getQueryParameter("type")
+        if (!TextUtils.isEmpty(networkType)) {
+          profile.v_net = networkType;
+        }
         val splits = m.group(1).split("#")
         if (splits.length > 1) {
           profile.name = URLDecoder.decode(splits.last, "UTF-8")
+          profile.v_ps = profile.name
         }
-        Some(1)
+        // setup common
+        profile.url_group = "vless"
+        profile.host = host
+        profile.remotePort = port
+        profile.localPort = 10809
+        profile.route = Route.BYPASS_LAN_CHN
+        profile.password = password
+        profile.t_allowInsecure = true
+        Some(profile)
       } else {
         None
       }

@@ -234,6 +234,11 @@ object Parser {
         if (!TextUtils.isEmpty(security)) {
           profile.v_tls = security;
         }
+        // sni
+        val sni = vlessUri.getQueryParameter("sni")
+        if (!TextUtils.isEmpty(sni)) {
+          profile.t_peer = sni;
+        }
         // encryption
         val encryption = vlessUri.getQueryParameter("encryption")
         if (!TextUtils.isEmpty(encryption)) {
@@ -252,7 +257,7 @@ object Parser {
         // path
         val path = vlessUri.getQueryParameter("path")
         if (!TextUtils.isEmpty(path)) {
-          profile.v_path = path
+          profile.v_path = Uri.decode(path)
         }
         // ws host
         val wsHost = vlessUri.getQueryParameter("host")

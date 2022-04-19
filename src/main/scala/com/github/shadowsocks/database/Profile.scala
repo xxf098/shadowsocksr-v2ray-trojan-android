@@ -129,6 +129,7 @@ object Profile {
     val v_security = if (TextUtils.isEmpty(profile.v_security)) "auto" else profile.v_security
     val vmessOption = getOption(profile)
     Log.e("Profile", s"v_tls: ${profile.v_tls}, v_add: ${profile.v_add},v_port: ${profile.v_port}, encryption: ${profile.v_encryption}, flow: ${profile.v_flow}" +
+      s"v_path: ${profile.v_path}, v_host: ${profile.v_host} t_peer: ${profile.t_peer}" +
       s"v_net: ${profile.v_net}, v_id: ${profile.v_id}, v_type: ${profile.v_type}, v_security: ${v_security}, useIPv6: ${profile.ipv6}" + s"vmessOption: $vmessOption, domainSniff: ${profile.enable_domain_sniff}")
     Tun2socks.newVless(
         profile.v_add,
@@ -140,6 +141,9 @@ object Profile {
         profile.v_net,
         profile.v_flow,
         profile.v_security,
+        profile.v_path,
+        profile.v_host,
+        profile.t_peer,
         vmessOption.getBytes(StandardCharsets.UTF_8)
       )
   }

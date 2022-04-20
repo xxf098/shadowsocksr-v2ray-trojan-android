@@ -441,13 +441,12 @@ object Parser {
     if (TextUtils.isEmpty(vmessQRCode.add) ||
         TextUtils.isEmpty(vmessQRCode.port) ||
         TextUtils.isEmpty(vmessQRCode.id) ||
-        TextUtils.isEmpty(vmessQRCode.aid) ||
-        TextUtils.isEmpty(vmessQRCode.net)) return None
+        TextUtils.isEmpty(vmessQRCode.aid)) return None
 
     val vmess = VmessBean()
     vmess.configType = EConfigType.Vmess
 //    vmess.security = "auto"
-    vmess.network = "tcp"
+//    vmess.network = "tcp"
 
     vmess.configVersion = Option(vmessQRCode.v).getOrElse("2").toInt
     vmess.remarks = Option(vmessQRCode.ps).getOrElse(vmessQRCode.add)
@@ -455,7 +454,7 @@ object Parser {
     vmess.port = vmessQRCode.port.toInt
     vmess.id = vmessQRCode.id
     vmess.alterId = vmessQRCode.aid.toInt
-    vmess.network = vmessQRCode.net
+    vmess.network = Option(vmessQRCode.net).getOrElse("tcp")
     vmess.headerType = Option(vmessQRCode.`type`).getOrElse("none")
     vmess.requestHost = Option(vmessQRCode.host).getOrElse("")
     vmess.path = Option(vmessQRCode.path).getOrElse("")

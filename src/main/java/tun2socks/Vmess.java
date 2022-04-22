@@ -63,6 +63,18 @@ public final class Vmess implements Seq.Proxy
 
     public final native void setSecurity(final String p0);
 
+    public final native String getEncryption();
+
+    public final native void setEncryption(final String p0);
+
+    public final native String getFlow();
+
+    public final native void setFlow(final String p0);
+
+    public final native String getSNI();
+
+    public final native void setSNI(final String p0);
+
     public final native String getProtocol();
 
     public final native void setProtocol(final String p0);
@@ -159,6 +171,36 @@ public final class Vmess implements Seq.Proxy
         else if (!security.equals(security2)) {
             return false;
         }
+        final String encryption = this.getEncryption();
+        final String encryption2 = vmess.getEncryption();
+        if (encryption == null) {
+            if (encryption2 != null) {
+                return false;
+            }
+        }
+        else if (!encryption.equals(encryption2)) {
+            return false;
+        }
+        final String flow = this.getFlow();
+        final String flow2 = vmess.getFlow();
+        if (flow == null) {
+            if (flow2 != null) {
+                return false;
+            }
+        }
+        else if (!flow.equals(flow2)) {
+            return false;
+        }
+        final String sni = this.getSNI();
+        final String sni2 = vmess.getSNI();
+        if (sni == null) {
+            if (sni2 != null) {
+                return false;
+            }
+        }
+        else if (!sni.equals(sni2)) {
+            return false;
+        }
         final String protocol = this.getProtocol();
         final String protocol2 = vmess.getProtocol();
         if (protocol == null) {
@@ -174,7 +216,7 @@ public final class Vmess implements Seq.Proxy
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[] { this.getHost(), this.getPath(), this.getTLS(), this.getAdd(), this.getPort(), this.getAid(), this.getNet(), this.getID(), this.getType(), this.getSecurity(), this.getProtocol() });
+        return Arrays.hashCode(new Object[] { this.getHost(), this.getPath(), this.getTLS(), this.getAdd(), this.getPort(), this.getAid(), this.getNet(), this.getID(), this.getType(), this.getSecurity(), this.getEncryption(), this.getFlow(), this.getSNI(), this.getProtocol() });
     }
 
     @Override
@@ -191,6 +233,9 @@ public final class Vmess implements Seq.Proxy
         sb.append("ID:").append(this.getID()).append(",");
         sb.append("Type:").append(this.getType()).append(",");
         sb.append("Security:").append(this.getSecurity()).append(",");
+        sb.append("Encryption:").append(this.getEncryption()).append(",");
+        sb.append("Flow:").append(this.getFlow()).append(",");
+        sb.append("SNI:").append(this.getSNI()).append(",");
         sb.append("Protocol:").append(this.getProtocol()).append(",");
         return sb.append("}").toString();
     }

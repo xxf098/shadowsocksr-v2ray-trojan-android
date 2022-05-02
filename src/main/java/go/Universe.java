@@ -15,7 +15,7 @@ public abstract class Universe
         _init();
     }
 
-    private static final class proxyerror extends Exception implements Seq.Proxy, Error
+    private static final class proxyerror extends Exception implements Seq.Proxy, error
     {
         private final int refnum;
 

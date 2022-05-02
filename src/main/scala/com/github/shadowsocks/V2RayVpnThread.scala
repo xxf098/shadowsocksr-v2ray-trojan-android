@@ -98,6 +98,10 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
           }
 //          Tun2socks.startV2RayWithVmess(flow, service, androidLogService, profile, assetPath)
         }
+        case p if p.isVless => {
+          Log.e("===", "start startVlessTunFd")
+          Tun2socks.startXVlessTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)
+        }
         case p if p.isShadowSocks => {
           Log.e("===", "start startShadowsocksTunFd")
 //          Tun2socks.startV2RayLiteWithTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)
@@ -105,7 +109,10 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
         }
         case p if p.isTrojan => {
 //          Tun2socks.startTrojan(flow, service, androidLogService, profile, assetPath)
-          Tun2socks.startTrojanTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)
+          app.settings.getString(Key.V2RAY_CORE, "xray") match {
+            case "xray" => Tun2socks.startXTrojanTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)
+            case _ =>  Tun2socks.startTrojanTunFd(pfd.getFd.toLong, service, androidLogService, querySpeedService, profile, assetPath)
+          }
         }
         case p if p.isV2RayJSON => {
           val config = if (profile.v_json_config.contains("trojan")) {

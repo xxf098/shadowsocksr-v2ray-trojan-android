@@ -230,7 +230,6 @@
   <string name="action_sort">基于延时自动排序</string>
   <string name="ping">测试延时</string>
   <string name="batch_delete">批量删除</string>
-  <string name="batch_delete_msg">删除"%s"所有节点</string>
   <string name="batch_delete_selected_msg">删除"%s"选中的节点</string>
   <string name="batch_delete_selected_elapsed_msg">大于%1$dms, %2$d个节点</string>
   <string name="batch_delete_selected_zero_elapsed_msg">等于0ms, %d个节点</string>

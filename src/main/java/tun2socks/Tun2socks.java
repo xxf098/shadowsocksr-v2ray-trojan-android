@@ -54,6 +54,8 @@ public abstract class Tun2socks
 
     public static native Vmess newVmess(final String p0, final String p1, final String p2, final String p3, final long p4, final long p5, final String p6, final String p7, final String p8, final String p9, final byte[] p10);
 
+    public static native Vless newVless(final String p0, final long p1, final String p2, final String p3, final String p4, final String p5, final String p6, final String p7, final String p8, final String p9, final String p10, final String p11, final byte[] p12);
+
     public static native long queryOutboundStats(final String p0, final String p1);
 
     public static native long queryOutboundXStats(final String p0, final String p1);
@@ -84,6 +86,12 @@ public abstract class Tun2socks
 
     public static native void startXRayWithTunFd(final long p0, final VpnService p1, final LogService p2, final QuerySpeed p3, final Vmess p4, final String p5) throws Exception;
 
+    public static native void startXShadowsocksTunFd(final long p0, final VpnService p1, final LogService p2, final QuerySpeed p3, final Shadowsocks p4, final String p5) throws Exception;
+
+    public static native void startXTrojanTunFd(final long p0, final VpnService p1, final LogService p2, final QuerySpeed p3, final Trojan p4, final String p5) throws Exception;
+
+    public static native void startXVlessTunFd(final long p0, final VpnService p1, final LogService p2, final QuerySpeed p3, final Vless p4, final String p5) throws Exception;
+
     public static native void stopV2Ray();
 
     public static native void testConfig(final String p0, final String p1) throws Exception;
@@ -101,6 +109,8 @@ public abstract class Tun2socks
     public static native long testVmessLatency(final Vmess p0, final long p1) throws Exception;
 
     public static native long testVmessLatencyDirect(final Vmess p0) throws Exception;
+
+    public static native String updateV2RayDat() throws Exception;
 
     static {
         Seq.touch();

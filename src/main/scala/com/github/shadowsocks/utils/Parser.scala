@@ -56,18 +56,18 @@ object Parser {
   private val pattern = "(?i)ss://([A-Za-z0-9+-/=_]+)(#(.+))?".r
   private val decodedPattern = "(?i)^((.+?)(-auth)??:(.*)@(.+?):(\\d+?))$".r
 
-  private val pattern_ssr = "(?i)ssr://([A-Za-z0-9_=-]+)".r
+  private val pattern_ssr = "(?i)ssr://([A-Za-z0-9_/=-]+)".r
   private val decodedPattern_ssr = "(?i)^((.+):(\\d+?):(.*):(.+):(.*):([^/]+))".r
-  private val decodedPattern_ssr_obfsparam = "(?i)[?&]obfsparam=([A-Za-z0-9_=-]*)".r
-  private val decodedPattern_ssr_remarks = "(?i)[?&]remarks=([A-Za-z0-9_/+=-]*)".r
-  private val decodedPattern_ssr_protocolparam = "(?i)[?&]protoparam=([A-Za-z0-9_=-]*)".r
-  private val decodedPattern_ssr_groupparam = "(?i)[?&]group=([A-Za-z0-9_=-]*)".r
+  private val decodedPattern_ssr_obfsparam = "(?i)[?&]obfsparam=([A-Za-z0-9%_/=-]*)".r
+  private val decodedPattern_ssr_remarks = "(?i)[?&]remarks=([A-Za-z0-9%_/+=-]*)".r
+  private val decodedPattern_ssr_protocolparam = "(?i)[?&]protoparam=([A-Za-z0-9_/=-]*)".r
+  private val decodedPattern_ssr_groupparam = "(?i)[?&]group=([A-Za-z0-9_/=-]*)".r
 
-  private val pattern_vmess = "(?i)(vmess://[A-Za-z0-9_/+=-]+)".r
-  private val pattern_trojan = "(?i)(trojan://(.+?)@(.+?):(\\d{2,5})/?([\\?#].*)?)".r
-  private val pattern_vless = "(?i)(vless://(.+?)@(.+?):(\\d{2,5})([\\?#].*)?)".r
+  private val pattern_vmess = "(?i)(vmess://[A-Za-z0-9_/+=-]+([?#]\\S+)?)".r
+  private val pattern_trojan = "(?i)(trojan://(\\S+?)@(\\S+?):(\\d{2,5})/?([\\?#].*)?)".r
+  private val pattern_vless = "(?i)(vless://(\\S+?)@(\\S+?):(\\d{2,5})([\\?#].*)?)".r
   private val pattern_trojan_query = "(?i)allowInsecure=([01])&(peer|sni)=(.+?)#(.+)?".r
-  private val pattern_shadwosocks = "(?i)(ss://(.+?)@(.+?):(\\d{2,5})/?([\\?#].*)?)".r
+  private val pattern_shadwosocks = "(?i)(ss://(\\S+?)@(\\S+?):(\\d{2,5})/?([\\?#].*)?)".r
   private val pattern_shadwosocks1 = "(?i)(ss://([A-Za-z0-9_/+=-]+)([\\?#].*)?)".r
 
 
@@ -124,7 +124,7 @@ object Parser {
     }).filter(_ != null)
 
   def findAll_ssr(data: CharSequence) = pattern_ssr.findAllMatchIn(if (data == null) "" else data).map(m => try{
-    val uri = new String(Base64.decode(m.group(1).replaceAll("=", ""), Base64.URL_SAFE), "UTF-8")
+    val uri = decodeBase64(m.group(1).replaceAll("=", ""))
     decodedPattern_ssr.findFirstMatchIn(uri) match {
           case Some(ss) =>
             val profile = new Profile
@@ -137,7 +137,7 @@ object Parser {
 
             decodedPattern_ssr_obfsparam.findFirstMatchIn(uri) match {
               case Some(param) =>
-                profile.obfs_param = new String(Base64.decode(param.group(1).replaceAll("=", ""), Base64.URL_SAFE), "UTF-8")
+                profile.obfs_param = new String(Base64.decode(Uri.decode(param.group(1)).replaceAll("=", ""), Base64.URL_SAFE), "UTF-8")
               case _ => null
             }
 
@@ -149,7 +149,7 @@ object Parser {
 
             decodedPattern_ssr_remarks.findFirstMatchIn(uri) match {
               case Some(param) =>
-                profile.name = decodeBase64(param.group(1))
+                profile.name = decodeBase64(Uri.decode(param.group(1)).replaceAll("=", ""))
               case _ => profile.name = ss.group(2).toLowerCase
             }
 
@@ -172,7 +172,12 @@ object Parser {
   def findAllVmess(data: CharSequence) = pattern_vmess
     .findAllMatchIn(if (data == null) "" else data)
     .flatMap(m => try {
-      findVmess(m.group(1).replaceAll("=", ""))
+      val g = m.group(1)
+      val group = if (g.indexOf("?") > 0) {
+        val splits = g.split("\\?", 2)
+        s"${splits(0).replaceAll("=", "")}?${splits(1)}"
+      } else { g.replaceAll("=", "") }
+      findVmess(group)
     } catch {
       case ex: Exception =>
         Log.e(TAG, "parser error: " + m.source, ex) // Ignore
@@ -180,6 +185,7 @@ object Parser {
     })
     .map(convertVmessBeanToProfile)
 
+  // TODO: v_host t_peer
   private def convertVmessBeanToProfile (vmessBean: VmessBean): Profile = {
     val profile = new Profile
     profile.proxy_protocol = "vmess"
@@ -202,6 +208,82 @@ object Parser {
     profile.localPort = 10809
     profile
   }
+
+  def findAllVless(data: CharSequence) = pattern_vless
+    .findAllMatchIn(if (data == null) "" else data)
+    .flatMap(m => try {
+      val vlessUri = Uri.parse(m.group(1))
+      if (vlessUri.getScheme == "vless") {
+        val profile = new Profile
+        val host = vlessUri.getHost
+        val port = vlessUri.getPort
+        val password = vlessUri.getUserInfo
+        profile.t_password = password
+        profile.t_addr = host
+        profile.t_port = port
+        // vmess
+        profile.v_id = password
+        profile.v_add = host
+        profile.v_port = s"$port"
+        profile.proxy_protocol = "vless"
+        profile.name = host
+        profile.v_ps = host
+        profile.v_aid = "0"
+        // security tls
+        val security = vlessUri.getQueryParameter("security")
+        if (!TextUtils.isEmpty(security)) {
+          profile.v_tls = security;
+        }
+        // sni
+        val sni = vlessUri.getQueryParameter("sni")
+        if (!TextUtils.isEmpty(sni)) {
+          profile.t_peer = sni;
+        }
+        // encryption
+        val encryption = vlessUri.getQueryParameter("encryption")
+        if (!TextUtils.isEmpty(encryption)) {
+          profile.v_encryption = encryption;
+        }
+        // headerType
+        val headerType = vlessUri.getQueryParameter("headerType")
+        if (!TextUtils.isEmpty(headerType)) {
+          profile.v_type = headerType;
+        }
+        // type: tcp, http, ws
+        val networkType = vlessUri.getQueryParameter("type")
+        if (!TextUtils.isEmpty(networkType)) {
+          profile.v_net = networkType;
+        }
+        // path
+        val path = vlessUri.getQueryParameter("path")
+        if (!TextUtils.isEmpty(path)) {
+          profile.v_path = Uri.decode(path)
+        }
+        // ws host
+        val wsHost = vlessUri.getQueryParameter("host")
+        if (!TextUtils.isEmpty(wsHost)) {
+          profile.v_host = wsHost
+        }
+        val splits = m.group(1).split("#")
+        if (splits.length > 1) {
+          profile.name = URLDecoder.decode(splits.last, "UTF-8")
+          profile.v_ps = profile.name
+        }
+        // setup common
+        profile.url_group = "vless"
+        profile.host = host
+        profile.remotePort = port
+        profile.localPort = 10809
+        profile.route = Route.BYPASS_LAN_CHN
+        profile.password = password
+        profile.t_allowInsecure = true
+        Some(profile)
+      } else {
+        None
+      }
+    }catch {
+      case ex: Exception =>None
+    })
 
   def findAllTrojan(data: CharSequence) = pattern_trojan
     .findAllMatchIn(if (data == null) "" else data)
@@ -306,22 +388,65 @@ object Parser {
       TextUtils.isEmpty(vmessLink) ||
     !vmessLink.startsWith("vmess://")) return None
     val indexSplit = vmessLink.indexOf("?")
-    if (indexSplit > 0) return None
+    if (indexSplit > 0) return findShadowrocketVmess(vmessLink)
     var result = vmessLink.replace("vmess://", "")
         .replace("+", "-")
         .replace("/", "_")
     result = new String(Base64.decode(result, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP), "UTF-8")
 //    Log.e(TAG, result)
     val vmessQRCode = new Gson().fromJson(result, classOf[VmessQRCode])
-    if (TextUtils.isEmpty(vmessQRCode.add) ||
-    TextUtils.isEmpty(vmessQRCode.port) ||
-    TextUtils.isEmpty(vmessQRCode.id) ||
-    TextUtils.isEmpty(vmessQRCode.aid) ||
-    TextUtils.isEmpty(vmessQRCode.net)) return None
+    vmessQRCode2VmessBean(vmessQRCode)
+  }
+
+  def findShadowrocketVmess (link: String): Option[VmessBean] = {
+    val url = Uri.parse(link)
+
     val vmess = VmessBean()
     vmess.configType = EConfigType.Vmess
     vmess.security = "auto"
     vmess.network = "tcp"
+    vmess.configVersion = 2
+
+    val b64 = url.getHost
+    val s = new String(Base64.decode(b64, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP), "UTF-8")
+    val mhp = s.split(":", 3)
+    if (mhp.length != 3) {
+      return None
+    }
+    vmess.security = mhp(0)
+    vmess.port = mhp(2).toInt
+    val idAddr = mhp(1).split("@", 2)
+    if (idAddr.length != 2 ) {
+      return None
+    }
+    vmess.id = idAddr(0)
+    vmess.address = idAddr(1)
+    vmess.alterId = 0
+
+    vmess.remarks = Option(url.getQueryParameter("remarks")).getOrElse("")
+    vmess.path = Option(url.getQueryParameter("path")).getOrElse("")
+    vmess.streamSecurity = if (Option(url.getQueryParameter("tls")).getOrElse("") == "1") "tls" else ""
+    vmess.alterId = Option(url.getQueryParameter("alterId")).getOrElse("0").toInt
+    val obfs = Option(url.getQueryParameter("obfs")).getOrElse("none")
+    if (obfs == "websocket") { vmess.network = "ws" }
+    else if (obfs == "none" ) {
+      vmess.network = "tcp"
+      vmess.headerType = "none"
+    }
+    vmess.requestHost =Option(url.getQueryParameter("obfsParam")).getOrElse("")
+    Some(vmess)
+  }
+
+  def vmessQRCode2VmessBean (vmessQRCode: VmessQRCode): Option[VmessBean] = {
+    if (TextUtils.isEmpty(vmessQRCode.add) ||
+        TextUtils.isEmpty(vmessQRCode.port) ||
+        TextUtils.isEmpty(vmessQRCode.id) ||
+        TextUtils.isEmpty(vmessQRCode.aid)) return None
+
+    val vmess = VmessBean()
+    vmess.configType = EConfigType.Vmess
+//    vmess.security = "auto"
+//    vmess.network = "tcp"
 
     vmess.configVersion = Option(vmessQRCode.v).getOrElse("2").toInt
     vmess.remarks = Option(vmessQRCode.ps).getOrElse(vmessQRCode.add)
@@ -329,12 +454,13 @@ object Parser {
     vmess.port = vmessQRCode.port.toInt
     vmess.id = vmessQRCode.id
     vmess.alterId = vmessQRCode.aid.toInt
-    vmess.network = vmessQRCode.net
+    vmess.network = Option(vmessQRCode.net).getOrElse("tcp")
     vmess.headerType = Option(vmessQRCode.`type`).getOrElse("none")
     vmess.requestHost = Option(vmessQRCode.host).getOrElse("")
     vmess.path = Option(vmessQRCode.path).getOrElse("")
     vmess.streamSecurity = Option(vmessQRCode.tls).getOrElse("")
     vmess.subid = ""
+    vmess.security = Option(vmessQRCode.security).getOrElse(Option(vmessQRCode.scy).getOrElse("auto"))
     vmess.url_group = if (TextUtils.isEmpty(vmessQRCode.url_group)) vmess.url_group else vmessQRCode.url_group
     Some(vmess)
   }

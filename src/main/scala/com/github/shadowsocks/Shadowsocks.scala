@@ -503,6 +503,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     val title = app.currentProfile.map {
       case p if p.isV2Ray && isXray => "XRay"
       case p if p.isV2Ray && !isXray => "V2Ray"
+      case p if p.isVless => "VLess"
       case p if p.isTrojan => "Trojan"
       case p if p.isShadowSocks => "Shadowsocks"
       case _ => "shadowsocks R"

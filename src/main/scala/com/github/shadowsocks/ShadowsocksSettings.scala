@@ -69,7 +69,8 @@ object ShadowsocksSettings {
 
   def updatePreference(pref: Preference, name: String, profile: Profile) {
 //    val isPerAppProxyEnabled = app.appStateManager.getAppState().map(_.per_app_proxy_enable).getOrElse(false)
-    if (profile.isVmess) {
+    // FIXME:
+    if (profile.isVmess || profile.isVless) {
       val v_security = if (TextUtils.isEmpty(profile.v_security)) "auto" else profile.v_security
       val v_allowInsecure = if (profile.t_allowInsecure) "true" else "false"
       name match {
@@ -77,7 +78,7 @@ object ShadowsocksSettings {
         case Key.v_ps => updateSummaryEditTextPreference(pref, profile.v_ps)
         case Key.v_port => updateNumberPickerPreference(pref, Option(profile.v_port).getOrElse("0").toInt)
 //        case Key.localPort => updateNumberPickerPreference(pref, profile.localPort)
-        case Key.v_aid => updateNumberPickerPreference(pref, Option(profile.v_aid).getOrElse("0").toInt)
+        case Key.v_aid => updateNumberPickerPreference(pref, Option(profile.v_aid).filter(aid => !TextUtils.isEmpty(aid)).getOrElse("0").toInt)
         case Key.v_path => updateSummaryEditTextPreference(pref, profile.v_path)
         case Key.v_host => updateSummaryEditTextPreference(pref, profile.v_host)
         case Key.v_security => updateDropDownPreference(pref, v_security)
@@ -727,8 +728,10 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     featureCategory = Option(featureCategory).getOrElse(findPreference(getResources.getString(R.string.featurePreferenceGroup)).asInstanceOf[PreferenceGroup])
     miscCategory  = Option(miscCategory).getOrElse(findPreference(getResources.getString(R.string.miscPreferenceGroup)).asInstanceOf[PreferenceGroup])
     screen.removeAll()
+    // TODO: vless
     profile match {
       case p if p.isVmess => screen.addPreference(vmessCategory)
+      case p if p.isVless => screen.addPreference(vmessCategory)
       case p if p.isV2RayJSON => screen.addPreference(v2rayJSONCategory)
       case p if p.isTrojan => screen.addPreference(trojanCategory)
       case _ => screen.addPreference(ssrCategory)

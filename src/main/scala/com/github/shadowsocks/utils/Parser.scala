@@ -336,16 +336,26 @@ object Parser {
         None
     })
 
-  def findAllShadowSocks(data: CharSequence) = pattern_shadwosocks
-    .findAllMatchIn(if (data == null) "" else data)
+  def findAllShadowSocks(data: CharSequence) = (pattern_shadwosocks.findAllMatchIn(if (data == null) "" else data) ++
+      pattern_shadwosocks1.findAllMatchIn(if (data == null) "" else data) )
     .flatMap(m => try {
 //      Log.e(TAG, m.group(1))
-      val shadowsocksUri = Uri.parse(m.group(1))
+      var shadowsocksUri = Uri.parse(m.group(1))
+      if (shadowsocksUri.getScheme == "ss" && !shadowsocksUri.getHost.contains(".")) {
+        try {
+          val info = new String(Base64.decode(shadowsocksUri.getHost.replaceAll("=", ""), Base64.URL_SAFE), "UTF-8")
+          val url = s"ss://${info}#${shadowsocksUri.getEncodedFragment}"
+          shadowsocksUri = Uri.parse(url)
+        } catch {
+          case ex: Exception => { }
+        }
+      }
       if (shadowsocksUri.getScheme == "ss") {
         val profile = new Profile
         val host = shadowsocksUri.getHost
         val port = shadowsocksUri.getPort
-        val uri = new String(Base64.decode(shadowsocksUri.getUserInfo.replaceAll("=", ""), Base64.URL_SAFE), "UTF-8")
+        val uri = if (shadowsocksUri.getUserInfo.contains(":")) { shadowsocksUri.getUserInfo }
+            else { new String(Base64.decode(shadowsocksUri.getUserInfo.replaceAll("=", ""), Base64.URL_SAFE), "UTF-8") }
         val passwordMethod = uri.split(":")
         if (passwordMethod.size < 2) {
           None

@@ -82,7 +82,7 @@ object NetUtils {
     val dns = new Dns {
       override def lookup(s: String): util.List[InetAddress] = {
         val address = if (!Utils.isNumeric(s)) {
-          Utils.resolve(s, enableIPv6 = false, hostname="223.5.5.5") match {
+          Utils.resolve(s, enableIPv6 = false, hostname="1.1.1.1") match {
             case Some(addr) => InetAddress.getByName(addr)
             case None => throw new IOException(s"Name Not Resolved: $s")
           }
@@ -99,7 +99,7 @@ object NetUtils {
       .writeTimeout(timeout, TimeUnit.SECONDS)
       .readTimeout(timeout, TimeUnit.SECONDS)
       .retryOnConnectionFailure(false)
-      .connectionPool(new ConnectionPool(16, 3, TimeUnit.MINUTES))
+//      .connectionPool(new ConnectionPool(16, 3, TimeUnit.MINUTES))
       .dns(dns)
 //      .proxy(proxy)
       .build()

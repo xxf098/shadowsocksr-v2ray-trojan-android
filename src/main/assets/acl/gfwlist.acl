@@ -1,11 +1,7 @@
-#
-# GFW list from https://github.com/gfwlist/gfwlist/blob/master/gfwlist.txt
-#
-
 [bypass_all]
 
 [proxy_list]
-# Telegram IPs$
+# Telegram IPs
 91.108.4.0/22
 91.108.8.0/21
 91.108.16.0/21
@@ -2727,6 +2723,7 @@
 (?:^|\.)linear-abematv\.akamaized\.net$
 (?:^|\.)linglingfa\.com$
 (?:^|\.)lingvodics\.com$
+(?:^|\.)linkedin\.com$
 (?:^|\.)link-o-rama\.com$
 (?:^|\.)linkideo\.com$
 (?:^|\.)linkuswell\.com$
@@ -3702,7 +3699,6 @@
 (?:^|\.)raremovie\.net$
 (?:^|\.)rawgit\.com$
 (?:^|\.)rawgithub\.com$
-(?:^|\.)raw\.githubusercontent\.com$
 (?:^|\.)razyboard\.com$
 (?:^|\.)rcam\.target\.com$
 (?:^|\.)rcinet\.ca$

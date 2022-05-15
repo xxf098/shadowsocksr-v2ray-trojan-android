@@ -89,6 +89,7 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
     else
       Tun2socks.setLocalDNS(s"${vpnService.dns_address}:${vpnService.dns_port}")
     try {
+      vpnService.v2rayConnected()
       profile match {
         case p if p.isVmess => {
           app.settings.getString(Key.V2RAY_CORE, "xray") match {

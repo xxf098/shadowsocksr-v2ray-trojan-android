@@ -223,7 +223,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       profile.enable_domain_sniff = app.settings.getBoolean(Key.ENABLE_SNIFF_DOMAIN, true)
       v2rayThread = new V2RayVpnThread(this)
       v2rayThread.start()
-      v2rayConnected()
+//      v2rayConnected()
       return
     }
 
@@ -373,6 +373,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     val cmd = ArrayBuffer[String](Utils.getAbsPath(ExeNative.getLocalBin(profile.isShadowSocks)), "-V", "-x"
       , "-b", "127.0.0.1"
       , "-t", "600"
+//      , "-v" // use no filters, search shadowsocksr to see all result
       , "--host", host_arg
       , "-P", getApplicationInfo.dataDir
       , "-c", getApplicationInfo.dataDir + "/ss-local-vpn.conf")

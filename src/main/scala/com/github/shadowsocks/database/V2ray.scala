@@ -6,6 +6,7 @@ import java.util.UUID
 
 import android.util.Base64
 import com.google.gson.GsonBuilder
+import com.google.gson.annotations.SerializedName
 
 
 case class VmessQRCode(v: String,
@@ -21,7 +22,8 @@ case class VmessQRCode(v: String,
                        tls: String,
                        security: String,
                        scy: String,
-                       url_group: String
+                       url_group: String,
+                       @(SerializedName @scala.annotation.meta.field)("skip-cert-verify") skipCertVerify: Boolean
                       ) {
   override def toString: String = {
     val vmessJson = new GsonBuilder().setPrettyPrinting().create().toJson(this)
@@ -47,13 +49,14 @@ case class VmessBean(
                       var configVersion: Int,
                       var testResult: String,
                       var subid: String,
-                      var url_group: String
+                      var url_group: String,
+                      var allowInsecure: Boolean
                     )
 
 object VmessBean {
   def apply(): VmessBean = {
     val guid = UUID.randomUUID().toString.replace("-", "")
-    VmessBean(guid, "v2ray.com", 10086, "id", 64, "aes-128-cfb", "tcp", "def", "", "", "", "", 1, 2, "", "", "v2ray")
+    VmessBean(guid, "v2ray.com", 10086, "id", 64, "aes-128-cfb", "tcp", "def", "", "", "", "", 1, 2, "", "", "v2ray", true)
   }
 }
 

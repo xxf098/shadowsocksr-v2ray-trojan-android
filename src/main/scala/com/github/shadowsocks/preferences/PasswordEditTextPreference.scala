@@ -40,6 +40,7 @@
 package com.github.shadowsocks.preferences
 
 import android.content.Context
+import android.os.Build
 import android.preference.EditTextPreference
 import android.util.{AttributeSet, Log}
 import android.view.View
@@ -55,7 +56,9 @@ class PasswordEditTextPreference(context: Context, attrs: AttributeSet, defStyle
   def this(context: Context, attrs: AttributeSet) = {
     this(context, attrs, android.R.attr.editTextPreferenceStyle)
     mDefaultSummary = getSummary
-    setDialogLayoutResource(R.layout.preference_dialog_password)
+    if (isAndroid11()) {
+        setDialogLayoutResource(R.layout.preference_dialog_password)
+    }
   }
 
   override def setText(text: String) {
@@ -65,13 +68,17 @@ class PasswordEditTextPreference(context: Context, attrs: AttributeSet, defStyle
   }
 
   override def onAddEditTextToDialogView(dialogView: View, editText: EditText): Unit = {
-    etPassword = dialogView.findViewById(android.R.id.edit).asInstanceOf[EditText]
-    if (etPassword != null) { etPassword.setText(txtPassword) }
+    if (isAndroid11()) {
+      etPassword = dialogView.findViewById(android.R.id.edit).asInstanceOf[EditText]
+      if (etPassword != null) { etPassword.setText(txtPassword) }
+    }
     super.onAddEditTextToDialogView(dialogView, editText)
   }
 
   override def onDialogClosed(positiveResult: Boolean): Unit = {
-    Option(getEditText).foreach(_.setText(etPassword.getText))
+    if (isAndroid11()) {
+      Option(getEditText).foreach(_.setText(etPassword.getText))
+    }
     super.onDialogClosed(positiveResult)
   }
 
@@ -81,6 +88,10 @@ class PasswordEditTextPreference(context: Context, attrs: AttributeSet, defStyle
     } else {
       super.setSummary("********")
     }
+  }
+
+  def isAndroid11(): Boolean = {
+    Build.VERSION.SDK_INT < 31
   }
 
   private var mDefaultSummary: CharSequence = getSummary

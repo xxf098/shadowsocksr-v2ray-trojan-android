@@ -201,6 +201,7 @@ object Parser {
     profile.v_path = vmessBean.path
     profile.v_tls = vmessBean.streamSecurity
     profile.v_security = vmessBean.security
+    profile.t_allowInsecure = vmessBean.allowInsecure
     // common
     profile.name = profile.v_ps
     profile.url_group = vmessBean.url_group
@@ -472,6 +473,7 @@ object Parser {
     vmess.subid = ""
     vmess.security = Option(vmessQRCode.security).getOrElse(Option(vmessQRCode.scy).getOrElse("auto"))
     vmess.url_group = if (TextUtils.isEmpty(vmessQRCode.url_group)) vmess.url_group else vmessQRCode.url_group
+    vmess.allowInsecure = vmessQRCode.skipCertVerify
     Some(vmess)
   }
 

@@ -80,6 +80,7 @@ object VmessAction extends ProfileFunctions {
       case Some(addr) => vmess.setAdd(addr)
       case None => throw new IOException("Host Not Resolved")
     }
+    // TODO: dns timeout
     Tun2socks.testVmessLatency(vmess, port)
 //    Tun2socks.testVmessLatencyDirect(vmess)
   }

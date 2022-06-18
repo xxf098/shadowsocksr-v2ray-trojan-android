@@ -1232,7 +1232,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           val profiles_ss = Parser.findAllShadowSocks(lines).toList
           val profiles_v2ray = Parser.findAllVmess(lines).toList
           val profiles_trojan = Parser.findAllTrojan(lines).toList
-          val profiles = profiles_ssr ::: profiles_v2ray ::: profiles_trojan ::: profiles_ss
+          val profiles_vless = Parser.findAllVless(lines).toList
+          val profiles = profiles_ssr ::: profiles_v2ray ::: profiles_trojan ::: profiles_ss ::: profiles_vless
           profiles.foreach(app.profileManager.createProfile)
         })
       }
@@ -1289,6 +1290,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     }
   }
 
+  // TODO: refactor
   def createProfilesFromText (contents: CharSequence): Boolean = {
     if (TextUtils.isEmpty(contents)) return false
     val profiles_normal = Parser.findAll(contents).toList
@@ -1296,7 +1298,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     val profiles_ssr = Parser.findAll_ssr(contents).toList
     val profiles_vmess = Parser.findAllVmess(contents).toList
     val profiles_trojan = Parser.findAllTrojan(contents).toList
-    val profiles = profiles_ssr ::: profiles_normal ::: profiles_ss ::: profiles_vmess ::: profiles_trojan
+    val profiles_vless = Parser.findAllVless(contents).toList
+    val profiles = profiles_ssr ::: profiles_normal ::: profiles_ss ::: profiles_vmess ::: profiles_trojan ::: profiles_vless
     if (profiles.isEmpty) {
 //      finish()
       return false

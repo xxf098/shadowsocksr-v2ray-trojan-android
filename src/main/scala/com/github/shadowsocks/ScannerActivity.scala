@@ -92,11 +92,12 @@ class ScannerActivity extends AppCompatActivity with ZXingScannerView.ResultHand
     val uri = rawResult.getText
     if (!TextUtils.isEmpty(uri))
     {
-//      Parser.findAll(uri).foreach(app.profileManager.createProfile)
+      Parser.findAll(uri).foreach(app.profileManager.createProfile)
       Parser.findAllShadowSocks(uri).foreach(app.profileManager.createProfile)
       Parser.findAll_ssr(uri).foreach(app.profileManager.createProfile)
       Parser.findAllVmess(uri).foreach(app.profileManager.createProfile)
       Parser.findAllTrojan(uri).foreach(app.profileManager.createProfile)
+      Parser.findAllVless(uri).foreach(app.profileManager.createProfile)
       if (android.util.Patterns.WEB_URL.matcher(uri).find()) {
         clipboard.setPrimaryClip(ClipData.newPlainText(null, uri))
       }

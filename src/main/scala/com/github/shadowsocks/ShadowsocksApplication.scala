@@ -289,6 +289,7 @@ class ShadowsocksApplication extends Application {
     crashRecovery() // ensure executables are killed before writing to them
     copyAssets(System.getABI)
     copyAssets("acl")
+//    /data/data/com.xxf098.ssrray/files/geoip.dat
     val assetPath = getApplicationInfo.dataDir + "/files/"
     copyAssets("dat", assetPath)
 //    Shell.SH.run(EXECUTABLES.map("chmod 755 " + getApplicationInfo.dataDir + '/' + _))

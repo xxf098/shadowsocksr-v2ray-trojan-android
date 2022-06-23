@@ -165,7 +165,7 @@ object Parser {
     }
     catch {
       case ex: Exception =>
-        Log.e(TAG, "parser error: " + m.source, ex)// Ignore
+        Log.e(TAG, "parser ssr error: " + m.source, ex)// Ignore
         null
     }).filter(_ != null)
 
@@ -180,7 +180,7 @@ object Parser {
       findVmess(group)
     } catch {
       case ex: Exception =>
-        Log.e(TAG, "parser error: " + m.source, ex) // Ignore
+        Log.e(TAG, "parser vmess error: " + m.source, ex) // Ignore
         None
     })
     .map(convertVmessBeanToProfile)
@@ -333,7 +333,7 @@ object Parser {
       }
     } catch {
       case ex: Exception =>
-        Log.e(TAG, "parser error: " + m.source, ex) // Ignore
+        Log.e(TAG, "parser trojan error: " + m.source, ex) // Ignore
         None
     })
 
@@ -351,7 +351,7 @@ object Parser {
           case ex: Exception => { }
         }
       }
-      if (shadowsocksUri.getScheme == "ss") {
+      if (shadowsocksUri.getScheme == "ss" && shadowsocksUri.getUserInfo != null) {
         val profile = new Profile
         val host = shadowsocksUri.getHost
         val port = shadowsocksUri.getPort
@@ -389,7 +389,7 @@ object Parser {
       }
     } catch {
       case ex: Exception =>
-        Log.e(TAG, "parser error: " + m.source, ex) // Ignore
+        Log.e(TAG, "parser ss error: " + m.source, ex) // Ignore
         None
     })
 

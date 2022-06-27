@@ -184,7 +184,7 @@ object SSRSub {
         case url if url.indexOf("sub=1") > 0 => findAllSSR(responseString)
         case url if url.indexOf("sub=3") > 0 => Parser.findAllVmess(responseString)
         case url if url.indexOf("mu=5") > 0 => Parser.findAllTrojan(responseString)
-        case _ => findAllSSR(responseString) ++ Parser.findAllVmess(responseString) ++ Parser.findAllTrojan(responseString) ++ Parser.findAllShadowSocks(responseString)
+        case _ => Parser.findAllVmess(responseString) ++ Parser.findAllTrojan(responseString) ++ findAllSSR(responseString) ++ Parser.findAllShadowSocks(responseString)
       }
 //      if (responseString.indexOf("MAX=") == 0) {
 //        limit_num = responseString.split("\\n")(0).split("MAX=")(1).replaceAll("\\D+","").toInt

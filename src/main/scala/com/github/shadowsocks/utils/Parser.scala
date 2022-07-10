@@ -85,7 +85,7 @@ object Parser {
   def findAll(data: CharSequence) = pattern.findAllMatchIn(if (data == null) "" else data).map(m => try
     decodedPattern.findFirstMatchIn(new String(Base64.decode(m.group(1), Base64.NO_PADDING), "UTF-8")) match {
       case Some(ss)=>
-        if (!data.toString.startsWith("vmess://")) {
+        if (!data.toString.startsWith("vmess://") && !data.toString.startsWith("vless://")) {
           val profile = new Profile
           profile.method = ss.group(2).toLowerCase
           if (ss.group(3) != null) profile.protocol = "verify_sha1"

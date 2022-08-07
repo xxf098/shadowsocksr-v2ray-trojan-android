@@ -159,6 +159,8 @@ object Parser {
               case _ => null
             }
 
+            profile.proxy_protocol = "ssr"
+
             profile
           case _ => null
         }
@@ -351,7 +353,7 @@ object Parser {
           case ex: Exception => { }
         }
       }
-      if (shadowsocksUri.getScheme == "ss" && shadowsocksUri.getUserInfo != null) {
+      if (shadowsocksUri.getScheme == "ss" && shadowsocksUri.getUserInfo != null && !Option(shadowsocksUri.getQuery).exists(s => s.contains("headerType="))) {
         val profile = new Profile
         val host = shadowsocksUri.getHost
         val port = shadowsocksUri.getPort
@@ -448,6 +450,10 @@ object Parser {
     Some(vmess)
   }
 
+  def checkCipher(cipher: String): Option[String] = {
+    if (cipher == "auto" || cipher == "none" || cipher == "aes-128-gcm" || cipher == "chacha20-poly1305") { Some(cipher) } else { None }
+  }
+
   def vmessQRCode2VmessBean (vmessQRCode: VmessQRCode): Option[VmessBean] = {
     if (TextUtils.isEmpty(vmessQRCode.add) ||
         TextUtils.isEmpty(vmessQRCode.port) ||
@@ -471,7 +477,7 @@ object Parser {
     vmess.path = Option(vmessQRCode.path).getOrElse("")
     vmess.streamSecurity = Option(vmessQRCode.tls).getOrElse("")
     vmess.subid = ""
-    vmess.security = Option(vmessQRCode.security).getOrElse(Option(vmessQRCode.scy).getOrElse("auto"))
+    vmess.security = checkCipher(vmessQRCode.security).getOrElse(checkCipher(vmessQRCode.scy).getOrElse("auto"))
     vmess.url_group = if (TextUtils.isEmpty(vmessQRCode.url_group)) vmess.url_group else vmessQRCode.url_group
     vmess.allowInsecure = vmessQRCode.skipCertVerify
     Some(vmess)

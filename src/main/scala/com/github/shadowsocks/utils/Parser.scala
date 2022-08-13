@@ -47,8 +47,9 @@ import android.util.{Base64, Log}
 import com.github.shadowsocks.database.{DnsBean, InSettingsBean, InboundBean, LogBean, MuxBean, OutSettingsBean, OutboundBean, Profile, RoutingBean, RulesBean, StreamSettingsBean, TlssettingsBean, UsersBean, V2rayConfig, VmessBean, VmessQRCode, VnextBean, WsHeaderBean, WssettingsBean}
 import com.google.gson.{Gson, GsonBuilder}
 import android.net.Uri
-import scala.util.{Failure, Success, Try}
+import tun2socks.Tun2socks
 
+import scala.util.{Failure, Success, Try}
 import scala.collection.JavaConverters._
 
 object Parser {
@@ -360,7 +361,7 @@ object Parser {
         val uri = if (shadowsocksUri.getUserInfo.contains(":")) { shadowsocksUri.getUserInfo }
             else { new String(Base64.decode(shadowsocksUri.getUserInfo.replaceAll("=", ""), Base64.URL_SAFE), "UTF-8") }
         val passwordMethod = uri.split(":")
-        if (passwordMethod.size < 2) {
+        if (passwordMethod.size < 2 || port < 0) {
           None
         } else {
           val password = passwordMethod(1)

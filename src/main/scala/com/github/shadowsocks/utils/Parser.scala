@@ -396,6 +396,11 @@ object Parser {
         None
     })
 
+  def findAllClash(clashData: String) = {
+    val data = clashData.split("\n").takeWhile(s => !s.contains("proxy-groups:")).mkString("\n")
+    Try(Tun2socks.parseClash(data)).toOption
+  }
+
   // single link findVless
   def findVmess (vmessLink: String): Option[VmessBean] = {
     if (vmessLink == null ||

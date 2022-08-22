@@ -405,7 +405,7 @@ class Profile {
   var userOrder: Long = _
 
   @DatabaseField
-  var proxy_protocol: String = "ssr" // ssr vmess v2ray_json trojan vless
+  var proxy_protocol: String = "ssr" // ssr shadowsocks vmess v2ray_json trojan vless
 
   @DatabaseField
   var v_v: String = "2"
@@ -472,7 +472,7 @@ class Profile {
   override def toString(): String = {
     implicit val flags: Int = Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP
     this match {
-      case _ if isVmess => VmessQRCode(v_v, v_ps, v_add, v_port, v_id, v_aid, v_net, v_type, v_host, v_path, v_tls, v_security, null, url_group, t_allowInsecure).toString
+      case _ if isVmess => VmessQRCode(v_v, v_ps, v_add, v_port, v_id, v_aid, v_net, v_type, v_host, v_path, v_tls, v_security, null, v_security, url_group, t_allowInsecure).toString
       case _ if isV2RayJSON => "vjson://" + Utils.b64Encode(v_json_config.getBytes(Charset.forName("UTF-8")))
       case _ if isTrojan => s"trojan://$t_password@$t_addr:$t_port?sni=$t_peer&allowInsecure=${if(t_allowInsecure) 1 else 0}#${Uri.encode(name)}"
       case _ if isVless => s"vless://$v_id@$v_add:$v_port?security=$v_tls&encryption=$v_security&headerType=$v_type&type=$v_net#${Uri.encode(name)}"
@@ -504,6 +504,8 @@ class Profile {
   def isVless = this.proxy_protocol == "vless"
 
   def isShadowSocks = this.proxy_protocol == "shadowsocks"
+
+  def isSSR = this.proxy_protocol == "ssr"
 
   def isV2RayShadowSocks = isShadowSocks && this.v_security == Key.AES_256_GCM
 

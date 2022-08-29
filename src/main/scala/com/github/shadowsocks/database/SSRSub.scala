@@ -54,6 +54,7 @@ import com.github.shadowsocks.utils.{NetUtils, Parser, Utils}
 import com.j256.ormlite.field.{DataType, DatabaseField}
 import okhttp3.{ConnectionPool, OkHttpClient, Request}
 import com.github.shadowsocks.R
+import tun2socks.Tun2socks
 
 import scala.util.Try
 
@@ -109,6 +110,10 @@ object SSRSub {
 
   def decodeBase64 (data: String): String = {
     if (URLUtil.isHttpsUrl(data) || URLUtil.isHttpUrl(data)) { return data }
+    // none base64 data
+    if (data.substring(0, data.length.min(1024)).indexOf(":") > 0) {
+      return data
+    }
     val resp = data.replaceAll("=", "")
       .replaceAll("\\+", "-")
       .replaceAll("/", "_")
@@ -144,10 +149,12 @@ object SSRSub {
       }
       return Some(ssrsub)
     } else {
-      var profiles = Parser.findAllVmess(responseString).toList
-      profiles = if (profiles.nonEmpty) profiles else Parser.findAllTrojan(responseString).toList
-      profiles = if (profiles.nonEmpty) profiles else Parser.findAllShadowSocks(responseString).toList
-      if (profiles.nonEmpty) {
+      // FIXME: peek only
+      var hasNext = Parser.findAllVmess(responseString).hasNext ||
+          Parser.findAllTrojan(responseString).hasNext ||
+          Parser.findAllShadowSocks(responseString).hasNext ||
+          Parser.findAllClash(responseString).isDefined
+      if (hasNext) {
         val ssrsub = new SSRSub {
           url = requestURL
           updated_at = Utils.today
@@ -180,11 +187,20 @@ object SSRSub {
         }
         profiles_ssr
       }
+
+      var links = responseString;
+      if (!subUrl.endsWith(".txt") &&
+          (subUrl.endsWith(".yaml") ||
+          subUrl.endsWith(".yml") ||
+          subUrl.indexOf("clash=") > 0 ||
+          responseString.substring(0, responseString.length.min(1024)).indexOf("proxies:") >= 0 )) {
+        Parser.findAllClash(responseString).foreach(v => links = v.trim)
+      }
       val profiles = subUrl match {
-        case url if url.indexOf("sub=1") > 0 => findAllSSR(responseString)
-        case url if url.indexOf("sub=3") > 0 => Parser.findAllVmess(responseString) ++ Parser.findAllTrojan(responseString) ++ Parser.findAllVless(responseString)
-        case url if url.indexOf("mu=5") > 0 => Parser.findAllTrojan(responseString)
-        case _ => Parser.findAllVmess(responseString) ++ Parser.findAllTrojan(responseString) ++ Parser.findAllVless(responseString) ++ findAllSSR(responseString) ++ Parser.findAllShadowSocks(responseString)
+        case url if url.indexOf("sub=1") > 0 => findAllSSR(links)
+        case url if url.indexOf("sub=3") > 0 => Parser.findAllVmess(links) ++ Parser.findAllTrojan(links) ++ Parser.findAllVless(links)
+        case url if url.indexOf("mu=5") > 0 => Parser.findAllTrojan(links)
+        case _ => Parser.findAllVmess(responseString) ++ Parser.findAllTrojan(links) ++ Parser.findAllVless(links) ++ findAllSSR(links) ++ Parser.findAllShadowSocks(links)
       }
 //      if (responseString.indexOf("MAX=") == 0) {
 //        limit_num = responseString.split("\\n")(0).split("MAX=")(1).replaceAll("\\D+","").toInt

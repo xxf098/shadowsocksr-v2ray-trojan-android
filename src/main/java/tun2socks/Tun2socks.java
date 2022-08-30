@@ -58,6 +58,8 @@ public abstract class Tun2socks
 
     public static native String parseClash(final String p0) throws Exception;
 
+    public static native String peekClash(String var0, long var1) throws Exception;
+
     public static native long queryOutboundStats(final String p0, final String p1);
 
     public static native long queryOutboundXStats(final String p0, final String p1);

@@ -22,6 +22,7 @@ case class VmessQRCode(v: String,
                        tls: String,
                        security: String,
                        scy: String,
+                       encryption: String,  // 加密方式 auto none
                        url_group: String,
                        @(SerializedName @scala.annotation.meta.field)("skip-cert-verify") skipCertVerify: Boolean
                       ) {

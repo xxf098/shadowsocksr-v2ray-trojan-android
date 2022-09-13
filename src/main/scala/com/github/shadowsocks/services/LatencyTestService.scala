@@ -109,7 +109,8 @@ class LatencyTestService extends Service {
         val testV2rayJob1 = (v2rayProfiles: List[Profile]) => {
           val links = v2rayProfiles.map {
             case p if p.isTrojan => s"trojan://${p.t_password}@${p.t_addr}:${p.t_port}?sni=${p.t_peer}&allowInsecure=${if(p.t_allowInsecure) 1 else 0}"
-            case p if p.isVmess => VmessQRCode(p.v_v, "", p.v_add, p.v_port, p.v_id, p.v_aid, p.v_net, p.v_type, p.v_host, p.v_path, p.v_tls, p.v_security,null,"", p.t_allowInsecure).toString
+            case p if p.isVmess => VmessQRCode(p.v_v, "", p.v_add, p.v_port, p.v_id, p.v_aid, p.v_net, p.v_type, p.v_host, p.v_path, p.v_tls, p.v_security,null,p.v_security,"", p.t_allowInsecure).toString
+            case p if p.isVless => s"vless://${p.v_id}@${p.v_add}:${p.v_port}?security=${p.v_tls}&encryption=${p.v_security}&headerType=${p.v_type}&type=${p.v_net}"
             case p if p.isShadowSocks => {
               implicit val flags: Int = Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP
               val data = s"${p.v_security}:${p.v_id}".getBytes(Charset.forName("UTF-8"))
@@ -234,11 +235,12 @@ class LatencyTestService extends Service {
         }
 
         val testSSRJob = (ssrProfiles: List[Profile]) => {
-          max = profiles.size * 3 / 2
+//          max = profiles.size * 3 / 2
           val pingMethod = app.settings.getString(Key.PING_METHOD, "google")
           val pingFunc = if (pingMethod == "google") testSSRProfiles else testTCPSSRProfiles
           pingFunc(ssrProfiles.grouped(4).toList, 4, ssrProfiles.size)
-          val zeroSSRProfiles = ssrProfiles.filter(p => p.elapsed == 0 && !p.isV2Ray)
+          val zeroSSRProfiles = ssrProfiles.filter(p => p.elapsed == 0 && p.isSSR)
+          // ping again
           if (zeroSSRProfiles.nonEmpty) {
             max = profiles.size + zeroSSRProfiles.size
             pingFunc(zeroSSRProfiles.grouped(2).toList, 2, ssrProfiles.size)
@@ -250,7 +252,7 @@ class LatencyTestService extends Service {
               Looper.prepare()
               val (v2rayTrojanProfiles, ssrProfiles) = profiles
                 .filter(p => !List("www.google.com", "127.0.0.1", "8.8.8.8", "1.2.3.4", "1.1.1.1").contains(p.host))
-                .partition(p => p.isV2Ray || p.isTrojan || p.isShadowSocks)
+                .partition(p => p.isV2Ray || p.isTrojan || p.isShadowSocks || p.isVless)
               max = profiles.size
               if (v2rayTrojanProfiles.nonEmpty) { testV2rayJob1(v2rayTrojanProfiles) }
               if (ssrProfiles.nonEmpty) { testSSRJob(ssrProfiles) }

@@ -47,8 +47,9 @@ import android.util.{Base64, Log}
 import com.github.shadowsocks.database.{DnsBean, InSettingsBean, InboundBean, LogBean, MuxBean, OutSettingsBean, OutboundBean, Profile, RoutingBean, RulesBean, StreamSettingsBean, TlssettingsBean, UsersBean, V2rayConfig, VmessBean, VmessQRCode, VnextBean, WsHeaderBean, WssettingsBean}
 import com.google.gson.{Gson, GsonBuilder}
 import android.net.Uri
-import scala.util.{Failure, Success, Try}
+import tun2socks.Tun2socks
 
+import scala.util.{Failure, Success, Try}
 import scala.collection.JavaConverters._
 
 object Parser {
@@ -85,7 +86,7 @@ object Parser {
   def findAll(data: CharSequence) = pattern.findAllMatchIn(if (data == null) "" else data).map(m => try
     decodedPattern.findFirstMatchIn(new String(Base64.decode(m.group(1), Base64.NO_PADDING), "UTF-8")) match {
       case Some(ss)=>
-        if (!data.toString.startsWith("vmess://")) {
+        if (!data.toString.startsWith("vmess://") && !data.toString.startsWith("vless://")) {
           val profile = new Profile
           profile.method = ss.group(2).toLowerCase
           if (ss.group(3) != null) profile.protocol = "verify_sha1"
@@ -159,13 +160,15 @@ object Parser {
               case _ => null
             }
 
+            profile.proxy_protocol = "ssr"
+
             profile
           case _ => null
         }
     }
     catch {
       case ex: Exception =>
-        Log.e(TAG, "parser error: " + m.source, ex)// Ignore
+        Log.e(TAG, "parser ssr error: " + m.source, ex)// Ignore
         null
     }).filter(_ != null)
 
@@ -180,7 +183,7 @@ object Parser {
       findVmess(group)
     } catch {
       case ex: Exception =>
-        Log.e(TAG, "parser error: " + m.source, ex) // Ignore
+        Log.e(TAG, "parser vmess error: " + m.source, ex) // Ignore
         None
     })
     .map(convertVmessBeanToProfile)
@@ -333,7 +336,7 @@ object Parser {
       }
     } catch {
       case ex: Exception =>
-        Log.e(TAG, "parser error: " + m.source, ex) // Ignore
+        Log.e(TAG, "parser trojan error: " + m.source, ex) // Ignore
         None
     })
 
@@ -351,14 +354,14 @@ object Parser {
           case ex: Exception => { }
         }
       }
-      if (shadowsocksUri.getScheme == "ss") {
+      if (shadowsocksUri.getScheme == "ss" && shadowsocksUri.getUserInfo != null && !Option(shadowsocksUri.getQuery).exists(s => s.contains("headerType="))) {
         val profile = new Profile
         val host = shadowsocksUri.getHost
         val port = shadowsocksUri.getPort
         val uri = if (shadowsocksUri.getUserInfo.contains(":")) { shadowsocksUri.getUserInfo }
             else { new String(Base64.decode(shadowsocksUri.getUserInfo.replaceAll("=", ""), Base64.URL_SAFE), "UTF-8") }
         val passwordMethod = uri.split(":")
-        if (passwordMethod.size < 2) {
+        if (passwordMethod.size < 2 || port < 0) {
           None
         } else {
           val password = passwordMethod(1)
@@ -389,9 +392,19 @@ object Parser {
       }
     } catch {
       case ex: Exception =>
-        Log.e(TAG, "parser error: " + m.source, ex) // Ignore
+        Log.e(TAG, "parser ss error: " + m.source, ex) // Ignore
         None
     })
+
+  def findAllClash(clashData: String) = {
+    val data = clashData.split("\n").takeWhile(s => !s.contains("proxy-groups:")).mkString("\n")
+    Try(Tun2socks.parseClash(data)).toOption.flatMap(s => if (s.length> 0) Some(s) else None)
+  }
+
+  def peekClash(clashData: String) = {
+    val data = clashData.split("\n").takeWhile(s => !s.contains("proxy-groups:")).mkString("\n")
+    Try(Tun2socks.peekClash(data, 1)).toOption.flatMap(s => if (s.length> 0) Some(s) else None)
+  }
 
   // single link findVless
   def findVmess (vmessLink: String): Option[VmessBean] = {
@@ -448,6 +461,10 @@ object Parser {
     Some(vmess)
   }
 
+  def checkCipher(cipher: String): Option[String] = {
+    if (cipher == "auto" || cipher == "none" || cipher == "aes-128-gcm" || cipher == "chacha20-poly1305") { Some(cipher) } else { None }
+  }
+
   def vmessQRCode2VmessBean (vmessQRCode: VmessQRCode): Option[VmessBean] = {
     if (TextUtils.isEmpty(vmessQRCode.add) ||
         TextUtils.isEmpty(vmessQRCode.port) ||
@@ -471,7 +488,7 @@ object Parser {
     vmess.path = Option(vmessQRCode.path).getOrElse("")
     vmess.streamSecurity = Option(vmessQRCode.tls).getOrElse("")
     vmess.subid = ""
-    vmess.security = Option(vmessQRCode.security).getOrElse(Option(vmessQRCode.scy).getOrElse("auto"))
+    vmess.security = checkCipher(vmessQRCode.security).getOrElse(checkCipher(vmessQRCode.scy).getOrElse("auto"))
     vmess.url_group = if (TextUtils.isEmpty(vmessQRCode.url_group)) vmess.url_group else vmessQRCode.url_group
     vmess.allowInsecure = vmessQRCode.skipCertVerify
     Some(vmess)

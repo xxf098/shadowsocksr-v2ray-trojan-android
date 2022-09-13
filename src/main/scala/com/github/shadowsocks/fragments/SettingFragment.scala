@@ -172,7 +172,7 @@ class SettingFragment extends PreferenceFragment with OnSharedPreferenceChangeLi
       true
     })
 
-    aboutPref.setSummary(s"SSRRAY: v${BuildConfig.VERSION_NAME}\nxray-core: v${Tun2socks.checkXVersion()}; v2ray-core: v${Tun2socks.checkVersion()}")
+    aboutPref.setSummary(s"SSRRAY: v${BuildConfig.VERSION_NAME}; xray-core: v${Tun2socks.checkXVersion()}")
     aboutPref.setOnPreferenceClickListener(_ => {
       val web = new WebView(activity)
       web.loadUrl("file:///android_asset/pages/about.html")

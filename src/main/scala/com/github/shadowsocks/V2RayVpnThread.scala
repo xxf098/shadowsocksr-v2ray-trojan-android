@@ -163,7 +163,11 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
   }
 
   def stopTun2Socks (stopService: Boolean = true): Unit = {
-    Tun2socks.stopV2Ray()
+    try {
+      Tun2socks.stopV2Ray()
+    } catch {
+      case e: Exception => Log.e(TAG, e.getMessage)
+    }
     running = false
     if (pfd != null) {
       pfd.close()

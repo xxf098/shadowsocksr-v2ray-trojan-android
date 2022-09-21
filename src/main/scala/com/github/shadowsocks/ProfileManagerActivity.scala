@@ -1430,7 +1430,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       intent.setType("text/plain")
       intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true)
       intent.addCategory(Intent.CATEGORY_OPENABLE)
-      startActivityForResult(Intent.createChooser(intent, "SSR"), REQUEST_IMPORT_PROFILES)
+      startActivityForResult(Intent.createChooser(intent, "SSRRAY"), REQUEST_IMPORT_PROFILES)
       true
     case R.id.action_import_qrcode_image =>
       val intent = new Intent(Intent.ACTION_GET_CONTENT)
@@ -1440,7 +1440,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       intent.putExtra(Intent.EXTRA_MIME_TYPES, "image/jpeg")
       intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true)
       intent.addCategory(Intent.CATEGORY_OPENABLE)
-      startActivityForResult(Intent.createChooser(intent, "SSR"), REQUEST_IMPORT_QRCODE_IMAGE)
+      startActivityForResult(Intent.createChooser(intent, "SSRRAY"), REQUEST_IMPORT_QRCODE_IMAGE)
       true
 //    case R.id.action_import_manually_vmess => {
 //      startActivity(new Intent(this, classOf[NewProfileActivity]))

@@ -1371,8 +1371,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       if (clipboard.hasPrimaryClip) {
         val link = clipboard.getPrimaryClip.getItemAt(0).getText
         if (createProfilesFromText(link)) return true
-        // support import from base64
+        // import from base64
         if (createProfilesFromText(Parser.decodeBase64(link.toString))) return true
+        // import from clash
+        val clashLinks = Parser.findAllClash(link.toString)
+        if (clashLinks.isDefined && createProfilesFromText(clashLinks.get.trim)) return true
       }
       Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show
       true

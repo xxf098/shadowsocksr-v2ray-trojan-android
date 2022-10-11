@@ -149,11 +149,10 @@ object SSRSub {
       }
       return Some(ssrsub)
     } else {
-      // FIXME: peek only
       var hasNext = Parser.findAllVmess(responseString).hasNext ||
           Parser.findAllTrojan(responseString).hasNext ||
           Parser.findAllShadowSocks(responseString).hasNext ||
-          Parser.findAllClash(responseString).isDefined
+          Parser.peekClash(responseString).isDefined
       if (hasNext) {
         val ssrsub = new SSRSub {
           url = requestURL
@@ -193,7 +192,7 @@ object SSRSub {
           (subUrl.endsWith(".yaml") ||
           subUrl.endsWith(".yml") ||
           subUrl.indexOf("clash=") > 0 ||
-          responseString.substring(0, responseString.length.min(1024)).indexOf("proxies:") >= 0 )) {
+          responseString.substring(0, responseString.length.min(1500)).indexOf("proxies:") >= 0 )) {
         Parser.findAllClash(responseString).foreach(v => links = v.trim)
       }
       val profiles = subUrl match {

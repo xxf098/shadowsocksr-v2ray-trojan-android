@@ -481,7 +481,7 @@ object Parser {
     vmess.address = vmessQRCode.add
     vmess.port = vmessQRCode.port.toInt
     vmess.id = vmessQRCode.id
-    vmess.alterId = vmessQRCode.aid.toInt
+    vmess.alterId = if (vmessQRCode.aid.length > 0) {vmessQRCode.aid.toInt} else {0}
     vmess.network = Option(vmessQRCode.net).getOrElse("tcp")
     vmess.headerType = Option(vmessQRCode.`type`).getOrElse("none")
     vmess.requestHost = Option(vmessQRCode.host).getOrElse("")

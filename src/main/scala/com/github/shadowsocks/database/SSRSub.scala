@@ -111,7 +111,7 @@ object SSRSub {
   def decodeBase64 (data: String): String = {
     if (URLUtil.isHttpsUrl(data) || URLUtil.isHttpUrl(data)) { return data }
     // none base64 data
-    if (data.substring(0, data.length.min(1024)).indexOf(":") > 0) {
+    if (data.substring(0, data.length.min(1500)).indexOf(":") > 0) {
       return data
     }
     val resp = data.replaceAll("=", "")
@@ -199,7 +199,7 @@ object SSRSub {
         case url if url.indexOf("sub=1") > 0 => findAllSSR(links)
         case url if url.indexOf("sub=3") > 0 => Parser.findAllVmess(links) ++ Parser.findAllTrojan(links) ++ Parser.findAllVless(links)
         case url if url.indexOf("mu=5") > 0 => Parser.findAllTrojan(links)
-        case _ => Parser.findAllVmess(responseString) ++ Parser.findAllTrojan(links) ++ Parser.findAllVless(links) ++ findAllSSR(links) ++ Parser.findAllShadowSocks(links)
+        case _ => Parser.findAllVmess(links) ++ Parser.findAllTrojan(links) ++ Parser.findAllVless(links) ++ findAllSSR(links) ++ Parser.findAllShadowSocks(links)
       }
 //      if (responseString.indexOf("MAX=") == 0) {
 //        limit_num = responseString.split("\\n")(0).split("MAX=")(1).replaceAll("\\D+","").toInt

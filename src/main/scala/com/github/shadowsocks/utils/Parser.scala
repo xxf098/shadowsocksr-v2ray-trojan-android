@@ -57,19 +57,19 @@ object Parser {
   private val pattern = "(?i)ss://([A-Za-z0-9+-/=_]+)(#(.+))?".r
   private val decodedPattern = "(?i)^((.+?)(-auth)??:(.*)@(.+?):(\\d+?))$".r
 
-  private val pattern_ssr = "(?i)ssr://([A-Za-z0-9_/=-]+)".r
+  private val pattern_ssr = "(?i)ssr://([-A-Za-z0-9_/=]+)".r
   private val decodedPattern_ssr = "(?i)^((.+):(\\d+?):(.*):(.+):(.*):([^/]+))".r
   private val decodedPattern_ssr_obfsparam = "(?i)[?&]obfsparam=([A-Za-z0-9%_/=-]*)".r
   private val decodedPattern_ssr_remarks = "(?i)[?&]remarks=([A-Za-z0-9%_/+=-]*)".r
   private val decodedPattern_ssr_protocolparam = "(?i)[?&]protoparam=([A-Za-z0-9_/=-]*)".r
   private val decodedPattern_ssr_groupparam = "(?i)[?&]group=([A-Za-z0-9_/=-]*)".r
 
-  private val pattern_vmess = "(?i)(vmess://[A-Za-z0-9_/+=-]+([?#]\\S+)?)".r
+  private val pattern_vmess = "(?i)(vmess://[-A-Za-z0-9_/+=]+([?#]\\S+)?)".r
   private val pattern_trojan = "(?i)(trojan://(\\S+?)@(\\S+?):(\\d{2,5})/?([\\?#].*)?)".r
   private val pattern_vless = "(?i)(vless://(\\S+?)@(\\S+?):(\\d{2,5})([\\?#].*)?)".r
   private val pattern_trojan_query = "(?i)allowInsecure=([01])&(peer|sni)=(.+?)#(.+)?".r
   private val pattern_shadwosocks = "(?i)(ss://(\\S+?)@(\\S+?):(\\d{2,5})/?([\\?#].*)?)".r
-  private val pattern_shadwosocks1 = "(?i)(ss://([A-Za-z0-9_/+=-]+)([\\?#].*)?)".r
+  private val pattern_shadwosocks1 = "(?i)(ss://([-A-Za-z0-9_/+=]+)([\\?#].*)?)".r
 
 
   def decodeBase64 (data: String): String = {

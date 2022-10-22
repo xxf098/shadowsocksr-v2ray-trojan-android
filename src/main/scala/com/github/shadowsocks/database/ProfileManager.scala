@@ -448,6 +448,7 @@ class ProfileManager(dbHelper: DBHelper) {
     }
   }
 
+  // find all url_group
   def getGroupNames: Option[List[String]] = {
     try {
       import scala.collection.JavaConversions._

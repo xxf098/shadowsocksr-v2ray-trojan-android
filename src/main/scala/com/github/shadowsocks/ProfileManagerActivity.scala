@@ -53,6 +53,7 @@ import tun2socks.Tun2socks
 
 import scala.language.implicitConversions
 import Profile._
+import android.graphics.Typeface
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
 import com.github.mikephil.charting.charts.LineChart
@@ -601,6 +602,68 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     override def getView(position: Int, convertView: View, parent: ViewGroup): View = getCustomView(position, convertView, parent)
   }
 
+  // groups
+  private final class ProfileGroupViewHolder(val view: View) extends RecyclerView.ViewHolder(view)
+    with View.OnClickListener {
+    var groupName: String = _
+    private val text1 = itemView.findViewById(android.R.id.text1).asInstanceOf[TextView]
+    private val ll = itemView.findViewById(R.id.group_item_layout).asInstanceOf[LinearLayout]
+    itemView.setOnClickListener(this)
+    def bind(groupName: String, currentGroupName: String): Unit = {
+      this.groupName = groupName
+      if (groupName == currentGroupName) {
+        val count = ProfileManagerActivity.countProfilesByGroup(currentGroupName)
+        text1.setText(s"$groupName  $count")
+        text1.setTypeface(null, Typeface.BOLD)
+        ll.setBackgroundResource(R.drawable.background_group_current)
+      } else {
+        val displayGroupName = if (groupName.length < 4) {s" $groupName "} else { groupName }
+        text1.setText(displayGroupName)
+        text1.setTypeface(null, Typeface.NORMAL)
+        ll.setBackgroundResource(R.drawable.background_group)
+      }
+    }
+
+    override def onClick(v: View): Unit = {
+      currentGroupName = this.groupName
+      profilesAdapter.onGroupChange(currentGroupName)
+      profileGroupAdapter.notifyDataSetChanged()
+      app.editor.putString(Key.currentGroupName, currentGroupName).apply()
+    }
+  }
+
+  private final class ProfileGroupAdapter extends RecyclerView.Adapter[ProfileGroupViewHolder]  {
+
+    var groups = new ArrayBuffer[String]
+
+    override def onCreateViewHolder(viewGroup: ViewGroup, i: Int): ProfileGroupViewHolder = {
+      new ProfileGroupViewHolder(LayoutInflater.from(viewGroup.getContext).inflate(R.layout.layout_group_item, viewGroup, false))
+    }
+
+    override def onBindViewHolder(vh: ProfileGroupViewHolder, i: Int): Unit = {
+      vh.bind(groups(i), currentGroupName)
+    }
+
+    override def getItemCount: Int = groups.length
+
+    def initGroupData(groupName: Option[String] = None, ignoreGroupName: Option[String] = None) = {
+      currentGroupName = groupName.getOrElse(app.getString(R.string.allgroups))
+      app.profileManager.getGroupNames match {
+        case Some(groupNames) => {
+          val allGroupNames = app.getString(R.string.allgroups) +: groupNames
+          allGroupNames.filter(_ != ignoreGroupName.orNull).foreach(name => groups += name);
+        }
+        case None => {}
+      };
+    }
+
+    def getCurrentGroupPosition() = {
+      groups.zipWithIndex.collectFirst {
+        case (group, i) if group == currentGroupName => i
+      }.getOrElse(-1)
+    }
+  }
+
   private var selectedItem: ProfileViewHolder = _
   private val handler = new Handler
 
@@ -610,6 +673,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   private lazy val ssrsubAdapter = new SSRSubAdapter
   private var undoManager: UndoSnackbarManager[Profile] = _
   private lazy val groupAdapter = new GroupAdapter(this, R.layout.layout_group_spinner_item)
+  private lazy val profileGroupAdapter= new ProfileGroupAdapter()
 
   private lazy val clipboard = getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
   private lazy val bgResultReceiver = new BgResultReceiver(new Handler(), (code: Int, bundle: Bundle) => {
@@ -748,6 +812,13 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     initFab()
     // get current group name
     initGroupSpinner(Some(app.settings.getString(Key.currentGroupName, getString(R.string.allgroups))))
+    // init group
+    profileGroupAdapter.initGroupData(Some(currentGroupName), None)
+    val groupList = findViewById(R.id.group_list).asInstanceOf[RecyclerView]
+    val groupLayoutManager = new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false)
+    groupList.setLayoutManager(groupLayoutManager)
+    groupList.setAdapter(profileGroupAdapter)
+    groupLayoutManager.scrollToPosition(profileGroupAdapter.getCurrentGroupPosition())
 
     app.profileManager.setProfileAddedListener(profilesAdapter.add)
     val profilesList = findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
@@ -1305,7 +1376,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       return false
     }
     val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
-      .setTitle(R.string.add_profile_dialog)
+      .setTitle(getString(R.string.add_profile_dialog, profiles.length: java.lang.Integer))
       .setPositiveButton(android.R.string.yes, ((_, _) =>
         profiles.foreach(app.profileManager.createProfile)): DialogInterface.OnClickListener)
       .setNeutralButton(R.string.dr, ((_, _) =>

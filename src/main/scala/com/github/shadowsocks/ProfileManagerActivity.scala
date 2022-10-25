@@ -398,7 +398,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     profiles ++= getProfilesByGroup(currentGroupName)
 
     def onGroupChange(groupName: String): Unit = {
-      profiles = new ArrayBuffer[Profile]
+      profiles.clear()
       profiles ++= getProfilesByGroup(groupName)
       notifyDataSetChanged()
     }
@@ -445,7 +445,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       profiles += item
       handler.post(() => {
         if (item.url_group != currentGroupName) initGroupSpinner(Some(item.url_group))
-        else groupAdapter.notifyDataSetChanged()
+        else profileGroupAdapter.notifyDataSetChanged()
         notifyItemInserted(pos)
       })
     }
@@ -472,7 +472,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     private def updateGroupSpinner (bypassGroupName: Option[String] = None): Unit = {
       if (profiles.isEmpty) initGroupSpinner(None, bypassGroupName)
       else if (currentGroupName == getString(R.string.allgroups) && bypassGroupName.isEmpty) initGroupSpinner()
-      else groupAdapter.notifyDataSetChanged()
+      else profileGroupAdapter.notifyDataSetChanged()
     }
 
     def remove(pos: Int) {
@@ -606,13 +606,17 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   private final class ProfileGroupViewHolder(val view: View) extends RecyclerView.ViewHolder(view)
     with View.OnClickListener {
     var groupName: String = _
+    var count: Long = 0
     private val text1 = itemView.findViewById(android.R.id.text1).asInstanceOf[TextView]
     private val ll = itemView.findViewById(R.id.group_item_layout).asInstanceOf[LinearLayout]
     itemView.setOnClickListener(this)
     def bind(groupName: String, currentGroupName: String): Unit = {
       this.groupName = groupName
       if (groupName == currentGroupName) {
-        val count = ProfileManagerActivity.countProfilesByGroup(currentGroupName)
+//        val count = ProfileManagerActivity.countProfilesByGroup(currentGroupName)
+        if (count != profilesAdapter.getItemCount) {
+           count = ProfileManagerActivity.countProfilesByGroup(currentGroupName)
+        }
 //        val count = profilesAdapter.getItemCount
         text1.setText(s"$groupName  $count")
         text1.setTypeface(null, Typeface.BOLD)
@@ -627,8 +631,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
     override def onClick(v: View): Unit = {
       if (currentGroupName == this.groupName) {
-        profilesAdapter.onGroupChange(currentGroupName)
-        profileGroupAdapter.notifyDataSetChanged()
+        if (count != profilesAdapter.getItemCount) {
+          profilesAdapter.onGroupChange(currentGroupName)
+          profileGroupAdapter.notifyDataSetChanged()
+        }
         return
       }
       currentGroupName = this.groupName
@@ -662,6 +668,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         }
         case None => {}
       };
+      profilesAdapter.onGroupChange(currentGroupName)
+      profileGroupAdapter.notifyDataSetChanged()
       notifyDataSetChanged();
     }
 
@@ -1299,7 +1307,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         val groupName = Option(data.getStringExtra(Key.SUBSCRIPTION_GROUP_NAME))
         undoManager.flush
         if (groupName.getOrElse("") != currentGroupName) initGroupSpinner(groupName)
-        else groupAdapter.notifyDataSetChanged()
+        else profileGroupAdapter.notifyDataSetChanged()
         if (data.getStringExtra(Key.SUBSCRIPTION_UPDATED) == "true" && groupName.getOrElse("") == currentGroupName) profilesAdapter.resetProfiles()
         profilesAdapter.notifyDataSetChanged()
       }

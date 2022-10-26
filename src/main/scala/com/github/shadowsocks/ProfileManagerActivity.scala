@@ -659,7 +659,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     override def getItemCount: Int = groups.length
 
     def initGroupData(groupName: Option[String] = None, ignoreGroupName: Option[String] = None) = {
-      currentGroupName = groupName.getOrElse(app.getString(R.string.allgroups))
+      val name = groupName.getOrElse(app.getString(R.string.allgroups))
+      if (currentGroupName != name) {
+        currentGroupName = name
+        app.editor.putString(Key.currentGroupName, currentGroupName).apply()
+      }
       groups.clear()
       app.profileManager.getGroupNames match {
         case Some(groupNames) => {
@@ -686,9 +690,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   private var menu : FloatingActionMenu = _
 
   private lazy val profilesAdapter = new ProfilesAdapter
-  private lazy val ssrsubAdapter = new SSRSubAdapter
+//  private lazy val ssrsubAdapter = new SSRSubAdapter
   private var undoManager: UndoSnackbarManager[Profile] = _
-  private lazy val groupAdapter = new GroupAdapter(this, R.layout.layout_group_spinner_item)
+//  private lazy val groupAdapter = new GroupAdapter(this, R.layout.layout_group_spinner_item)
   private lazy val groupLayoutManager = new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false)
   private lazy val profileGroupAdapter= new ProfileGroupAdapter()
 

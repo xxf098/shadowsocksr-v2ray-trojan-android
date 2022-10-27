@@ -134,7 +134,7 @@
   <string name="gotcha">好的</string>
   <string name="copy_url">复制 URL</string>
   <string name="copy">复制</string>
-  <string name="add_profile_dialog">添加配置文件？</string>
+  <string name="add_profile_dialog">添加%d个配置？</string>
   <string name="add_profile_methods_scan_qr_code">扫描二维码</string>
   <string name="add_profile_methods_manual_settings">手动设置</string>
   <string name="add_profile_nfc_hint_title">使用 Android Beam (NFC) 来添加配置</string>

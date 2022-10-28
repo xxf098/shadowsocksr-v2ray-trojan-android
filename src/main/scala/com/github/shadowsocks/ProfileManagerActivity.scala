@@ -1812,6 +1812,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             }
           }
           finish()
+          if (ProfileManagerActivity.countProfilesByGroup(currentGroupName) == 0) {
+            app.editor.putString(Key.currentGroupName, app.getString(R.string.allgroups)).apply()
+          }
           startActivity(new Intent(getIntent()))
         }): DialogInterface.OnClickListener)
         .setNegativeButton(android.R.string.no, null)

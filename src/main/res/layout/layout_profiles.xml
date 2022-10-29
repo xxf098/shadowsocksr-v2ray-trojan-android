@@ -12,15 +12,23 @@
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:orientation="vertical">
+<!--            https://www.myandroidsolutions.com/2019/04/11/android-bottom-border-line/-->
 
-            <android.support.v7.widget.AppCompatSpinner
-                android:id="@+id/group_choose_spinner"
+<!--            <android.support.v7.widget.AppCompatSpinner-->
+<!--                android:id="@+id/group_choose_spinner"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="50dp"-->
+<!--                android:layout_marginLeft="9dp"-->
+<!--                android:layout_marginStart="9dp"-->
+<!--                android:layout_marginRight="-3dp"-->
+<!--                android:layout_marginEnd="-3dp"/>-->
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/group_list"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginLeft="9dp"
-                android:layout_marginStart="9dp"
-                android:layout_marginRight="-3dp"
-                android:layout_marginEnd="-3dp"/>
+                android:background="@drawable/bottom_line"
+                android:layout_marginTop="4dp"
+                android:layout_height="45dp"/>
 
             <android.support.v7.widget.RecyclerView android:id="@+id/profilesList"
                 android:layout_width="match_parent"

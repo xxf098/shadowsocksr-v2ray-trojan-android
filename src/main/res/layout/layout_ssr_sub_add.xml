@@ -33,6 +33,7 @@
         android:id="@+id/et_subscription_url"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:hint="@string/supported_subscription_link"
         android:inputType="textUri|textMultiLine"
         android:maxLines="3">
         <requestFocus/>

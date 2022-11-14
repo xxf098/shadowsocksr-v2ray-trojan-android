@@ -134,7 +134,7 @@
   <string name="gotcha">好的</string>
   <string name="copy_url">复制 URL</string>
   <string name="copy">复制</string>
-  <string name="add_profile_dialog">添加配置文件？</string>
+  <string name="add_profile_dialog">添加%d个配置？</string>
   <string name="add_profile_methods_scan_qr_code">扫描二维码</string>
   <string name="add_profile_methods_manual_settings">手动设置</string>
   <string name="add_profile_nfc_hint_title">使用 Android Beam (NFC) 来添加配置</string>
@@ -274,6 +274,7 @@
   <string name="add_subscription">"添加订阅"</string>
   <string name="update_subscription">"更新订阅"</string>
   <string name="subscription_url">订阅地址</string>
+  <string name="supported_subscription_link">支持ssr，v2ray，clash订阅链接</string>
   <string name="use_default_group_name">使用默认群组名</string>
   <string name="ssrsub_expire_on">到期时间: %s</string>
 

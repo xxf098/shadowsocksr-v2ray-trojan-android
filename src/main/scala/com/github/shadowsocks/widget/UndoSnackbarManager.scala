@@ -35,6 +35,7 @@ class UndoSnackbarManager[T](view: View, undo: Iterator[(Int, T)] => Unit,
     val count = recycleBin.length
     last = Snackbar
       .make(view, view.getResources.getQuantityString(R.plurals.removed, count, count: Integer), Snackbar.LENGTH_LONG)
+      .setDuration(5000)
       .setCallback(removedCallback).setAction(R.string.undo, (_ => {
       undo(recycleBin.reverseIterator)
       recycleBin.clear

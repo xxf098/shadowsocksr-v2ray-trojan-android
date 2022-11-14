@@ -217,7 +217,7 @@
   <string name="profile_manager_dialog_content">&#8226; Tap to select a profile;\n&#8226; Swipe left/right or press left
     to remove;\n&#8226; Long press to reorder profiles.</string>
   <string name="gotcha">Gotcha!</string>
-  <string name="add_profile_dialog">Add Profiles?</string>
+  <string name="add_profile_dialog">Add %d Profiles?</string>
   <string name="add_profile_methods_scan_qr_code">Scan QR code</string>
   <string name="add_profile_methods_manual_settings">Manual Settings</string>
   <string name="add_profile_nfc_hint_title">Use Android Beam (NFC) to add a profile</string>
@@ -283,7 +283,8 @@
   <string name="add_subscription">Add a subscription</string>
   <string name="update_subscription">Refresh servers from subscription</string>
   <string name="subscription_url">Subscription URL</string>
-  <string name="use_default_group_name">Use Default Group Name</string>
+  <string name="use_default_group_name">Use default group name</string>
+  <string name="supported_subscription_link">Support ssr,v2ray,clash link</string>
   <string name="ssrsub_expire_on">Expire on: %s</string>
   <string name="check_subscriptions">Check Subscriptions</string>
 

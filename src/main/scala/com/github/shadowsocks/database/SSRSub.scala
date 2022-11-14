@@ -111,7 +111,7 @@ object SSRSub {
   def decodeBase64 (data: String): String = {
     if (URLUtil.isHttpsUrl(data) || URLUtil.isHttpUrl(data)) { return data }
     // none base64 data
-    if (data.substring(0, data.length.min(1024)).indexOf(":") > 0) {
+    if (data.substring(0, data.length.min(1500)).indexOf(":") > 0) {
       return data
     }
     val resp = data.replaceAll("=", "")
@@ -149,11 +149,10 @@ object SSRSub {
       }
       return Some(ssrsub)
     } else {
-      // FIXME: peek only
       var hasNext = Parser.findAllVmess(responseString).hasNext ||
           Parser.findAllTrojan(responseString).hasNext ||
           Parser.findAllShadowSocks(responseString).hasNext ||
-          Parser.findAllClash(responseString).isDefined
+          Parser.peekClash(responseString).isDefined
       if (hasNext) {
         val ssrsub = new SSRSub {
           url = requestURL
@@ -193,14 +192,14 @@ object SSRSub {
           (subUrl.endsWith(".yaml") ||
           subUrl.endsWith(".yml") ||
           subUrl.indexOf("clash=") > 0 ||
-          responseString.substring(0, responseString.length.min(1024)).indexOf("proxies:") >= 0 )) {
+          responseString.substring(0, responseString.length.min(1500)).indexOf("proxies:") >= 0 )) {
         Parser.findAllClash(responseString).foreach(v => links = v.trim)
       }
       val profiles = subUrl match {
         case url if url.indexOf("sub=1") > 0 => findAllSSR(links)
         case url if url.indexOf("sub=3") > 0 => Parser.findAllVmess(links) ++ Parser.findAllTrojan(links) ++ Parser.findAllVless(links)
         case url if url.indexOf("mu=5") > 0 => Parser.findAllTrojan(links)
-        case _ => Parser.findAllVmess(responseString) ++ Parser.findAllTrojan(links) ++ Parser.findAllVless(links) ++ findAllSSR(links) ++ Parser.findAllShadowSocks(links)
+        case _ => Parser.findAllVmess(links) ++ Parser.findAllTrojan(links) ++ Parser.findAllVless(links) ++ findAllSSR(links) ++ Parser.findAllShadowSocks(links)
       }
 //      if (responseString.indexOf("MAX=") == 0) {
 //        limit_num = responseString.split("\\n")(0).split("MAX=")(1).replaceAll("\\D+","").toInt

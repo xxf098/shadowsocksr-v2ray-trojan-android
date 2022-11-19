@@ -50,7 +50,7 @@ public abstract class Tun2socks
 
     public static native Shadowsocks newShadowSocks(final String p0, final long p1, final String p2, final String p3, final byte[] p4);
 
-    public static native Trojan newTrojan(final String p0, final long p1, final String p2, final String p3, final boolean p4, final byte[] p5);
+    public static native Trojan newTrojan(final String p0, final long p1, final String p2, final String p3, final boolean p4, final String p5, final String p6, final String p7, final byte[] p8);
 
     public static native Vmess newVmess(final String p0, final String p1, final String p2, final String p3, final long p4, final long p5, final String p6, final String p7, final String p8, final String p9, final byte[] p10);
 

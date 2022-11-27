@@ -89,6 +89,19 @@
             </group>
         </menu>
     </item>
+    <item android:title="@string/title_group_sort_method">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/action_sort_group_by_default"
+                    android:title="Normal"
+                    android:checked="true" />
+                <item
+                    android:id="@+id/action_sort_group_by_reverse"
+                    android:title="Reverse" />
+            </group>
+        </menu>
+    </item>
     <item android:id="@+id/action_batch_delete"
         android:title="@string/batch_delete"
         android:alphabeticShortcut="g"

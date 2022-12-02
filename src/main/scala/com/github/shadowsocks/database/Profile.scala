@@ -153,13 +153,16 @@ object Profile {
       throw new Exception("Not a Trojan Profile")
     }
     val trojanOption = getOption(profile)
-    Log.e("Profile", s"${profile.t_addr}, ${profile.t_port}, ${profile.t_password}, ${profile.t_peer}")
+    Log.e("Profile", s"${profile.t_addr}, ${profile.t_port}, ${profile.t_password}, ${profile.t_peer}, net: ${profile.v_net}, path: ${profile.v_path}, host: ${profile.v_host}, ${profile.t_allowInsecure}")
     Tun2socks.newTrojan(
       profile.t_addr,
       profile.t_port,
       profile.t_password,
       profile.t_peer,
       profile.t_allowInsecure, // SkipCertVerify
+      profile.v_net,
+      profile.v_path,
+      profile.v_host,
       trojanOption.getBytes(StandardCharsets.UTF_8)
     )
   }
@@ -474,7 +477,7 @@ class Profile {
     this match {
       case _ if isVmess => VmessQRCode(v_v, v_ps, v_add, v_port, v_id, v_aid, v_net, v_type, v_host, v_path, v_tls, v_security, null, v_security, url_group, t_allowInsecure).toString
       case _ if isV2RayJSON => "vjson://" + Utils.b64Encode(v_json_config.getBytes(Charset.forName("UTF-8")))
-      case _ if isTrojan => s"trojan://$t_password@$t_addr:$t_port?sni=$t_peer&allowInsecure=${if(t_allowInsecure) 1 else 0}#${Uri.encode(name)}"
+      case _ if isTrojan => s"trojan://$t_password@$t_addr:$t_port?sni=$t_peer&allowInsecure=${if(t_allowInsecure) 1 else 0}&type=${v_net}&path=${Uri.encode(v_path)}&host=${v_host}#${Uri.encode(name)}"
       case _ if isVless => s"vless://$v_id@$v_add:$v_port?security=$v_tls&encryption=$v_security&headerType=$v_type&type=$v_net#${Uri.encode(name)}"
       case _ if isShadowSocks => {
         implicit val flags: Int = Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP

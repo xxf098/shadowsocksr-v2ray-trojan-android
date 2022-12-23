@@ -300,7 +300,8 @@
   <string name="v_pref_headertypes">伪装类型</string>
   <string name="v_pref_networks">传输协议</string>
 
-  <string name="title_pref_sort_method">排序方式</string>
+  <string name="title_pref_sort_method">节点排序方式</string>
+  <string name="title_group_sort_method">群组排序方式</string>
   <string name="sort_by_default">默认</string>
   <string name="sort_by_elapsed">延时</string>
   <string name="sort_by_download">下载</string>

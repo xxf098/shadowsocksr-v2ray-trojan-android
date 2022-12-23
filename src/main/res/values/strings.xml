@@ -334,7 +334,8 @@
   <string name="v_pref_networks">Network</string>
 
 <!--  settings -->
-  <string name="title_pref_sort_method">Sort By</string>
+  <string name="title_pref_sort_method">Sort Profiles By</string>
+  <string name="title_group_sort_method">Sort Groups By</string>
   <string name="sort_by_default">By Default</string>
   <string name="sort_by_elapsed">By Elapsed</string>
   <string name="sort_by_download">By Download</string>

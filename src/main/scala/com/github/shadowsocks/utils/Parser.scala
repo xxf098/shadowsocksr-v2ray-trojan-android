@@ -307,6 +307,7 @@ object Parser {
         // common
         profile.url_group = "trojan"
         profile.host = host
+        profile.v_host = host
         profile.remotePort = port
         profile.localPort = 10809
         profile.name = host
@@ -318,12 +319,26 @@ object Parser {
         sni = if (TextUtils.isEmpty(sni)) { trojanUri.getQueryParameter("peer") } else sni
         if (!TextUtils.isEmpty(sni) && sni != profile.t_peer) {
           profile.t_peer = sni
+          profile.v_host = sni
           profile.t_allowInsecure = true
         }
         // allowInsecure
         if (trojanUri.getQueryParameter("allowInsecure") == "1") {
           profile.t_allowInsecure = true
         }
+        // security
+        if (trojanUri.getQueryParameter("tls") == "tls") {
+          profile.t_allowInsecure = false
+        }
+        // type=ws
+        val networkType = trojanUri.getQueryParameter("type")
+        if (!TextUtils.isEmpty(networkType)) { profile.v_net = networkType }
+        // path
+        val path = trojanUri.getQueryParameter("path")
+        if (!TextUtils.isEmpty(path)) { profile.v_path = Uri.decode(path) }
+        // ws host
+        val wsHost = trojanUri.getQueryParameter("host")
+        if (!TextUtils.isEmpty(wsHost)) { profile.v_host = wsHost }
         // get profile name
         val splits = m.group(1).split("#")
         if (splits.length > 1) {

@@ -15,4 +15,8 @@
         android:id="@+id/action_export_subscription"
         android:title="@string/action_export"
         app:showAsAction="never"/>
+<!--    <item-->
+<!--        android:id="@+id/action_check_subscription"-->
+<!--        android:title="@string/check_subscriptions"-->
+<!--        app:showAsAction="never"/>-->
 </menu>

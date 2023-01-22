@@ -305,6 +305,8 @@
   <string name="sort_by_default">默认</string>
   <string name="sort_by_elapsed">延时</string>
   <string name="sort_by_download">下载</string>
+  <string name="sort_by_normal">正序</string>
+  <string name="sort_by_reverse">逆序</string>
   <string-array name="sort_method_entry">
     <item>@string/sort_by_default</item>
     <item>@string/sort_by_elapsed</item>

@@ -12,7 +12,7 @@
   <string name="nat_summary">Use NAT mode instead of VPN mode. Requires ROOT permission.</string>
   <string name="stat">Network Traffic</string>
   <string name="stat_summary">Sent: \t\t\t\t\t%3$s\t↑\t%1$s/s\nReceived: \t%4$s\t↓\t%2$s/s</string>
-  <string name="stat_profiles" translatable="false">\n%1$s↑ %2$s↓ %3$sms %4$s/s</string>
+  <string name="stat_profiles" translatable="false">\n%1$s %2$s↓ %3$sms %4$s</string>
   <string name="traffic_summary">%1$s/s↑\t%2$s/s↓</string>
   <plurals name="bytes" translatable="false">
     <item quantity="one">B</item>
@@ -339,6 +339,8 @@
   <string name="sort_by_default">By Default</string>
   <string name="sort_by_elapsed">By Elapsed</string>
   <string name="sort_by_download">By Download</string>
+  <string name="sort_by_normal">Normal</string>
+  <string name="sort_by_reverse">Reverse</string>
   <string-array name="sort_method_entry">
     <item>@string/sort_by_default</item>
     <item>@string/sort_by_elapsed</item>

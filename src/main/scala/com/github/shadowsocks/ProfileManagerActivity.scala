@@ -193,12 +193,13 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val tx = item.tx + txTotal
       val rx = item.rx + rxTotal
       val elapsed = if (elapsedInput != -1) elapsedInput else item.elapsed
+      var speed = if (item.download_speed == 0) item.proxy_protocol else s"${TrafficMonitor.formatTrafficInternal(item.download_speed, true)}/s"
+      val upload = if (tx == 0) {
+        speed = if (item.download_speed > 0) s"${speed} ${item.proxy_protocol}" else s"0B/s ${item.proxy_protocol}"
+        ""
+      } else { s"${TrafficMonitor.formatTrafficInternal(tx, true)}↑" }
       val trafficStatus = if (displayInfo(2) && (tx != 0 || rx != 0 || elapsed != 0 || item.url_group != "")) {
-        getString(R.string.stat_profiles,
-          TrafficMonitor.formatTrafficInternal(tx, true),
-          TrafficMonitor.formatTrafficInternal(rx, true),
-          String.valueOf(elapsed),
-          TrafficMonitor.formatTrafficInternal(item.download_speed, true)).trim
+        getString(R.string.stat_profiles, upload, TrafficMonitor.formatTrafficInternal(rx, true), String.valueOf(elapsed), speed).trim
       } else ""
       handler.post(() => {
         text1.setText(item.name)

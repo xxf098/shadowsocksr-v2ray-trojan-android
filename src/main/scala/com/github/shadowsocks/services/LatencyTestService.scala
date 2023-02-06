@@ -9,6 +9,7 @@ import java.util.Locale
 import android.app.{NotificationManager, PendingIntent, ProgressDialog, Service}
 import android.content.DialogInterface.OnCancelListener
 import android.content.{BroadcastReceiver, Context, DialogInterface, Intent, IntentFilter}
+import android.net.Uri
 import android.os.{Bundle, IBinder, Looper, Message, ResultReceiver}
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
@@ -108,7 +109,7 @@ class LatencyTestService extends Service {
 
         val testV2rayJob1 = (v2rayProfiles: List[Profile]) => {
           val links = v2rayProfiles.map {
-            case p if p.isTrojan => s"trojan://${p.t_password}@${p.t_addr}:${p.t_port}?sni=${p.t_peer}&allowInsecure=${if(p.t_allowInsecure) 1 else 0}"
+            case p if p.isTrojan => s"trojan://${p.t_password}@${p.t_addr}:${p.t_port}?sni=${p.t_peer}&allowInsecure=${if(p.t_allowInsecure) 1 else 0}&type=${p.v_net}&path=${Uri.encode(p.v_path)}&host=${p.v_host}"
             case p if p.isVmess => VmessQRCode(p.v_v, "", p.v_add, p.v_port, p.v_id, p.v_aid, p.v_net, p.v_type, p.v_host, p.v_path, p.v_tls, p.v_security,null,p.v_security,"", p.t_allowInsecure).toString
             case p if p.isVless => s"vless://${p.v_id}@${p.v_add}:${p.v_port}?security=${p.v_tls}&encryption=${p.v_security}&headerType=${p.v_type}&type=${p.v_net}"
             case p if p.isShadowSocks => {

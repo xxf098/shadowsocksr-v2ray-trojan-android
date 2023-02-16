@@ -242,7 +242,7 @@ class LatencyTestService extends Service {
           pingFunc(ssrProfiles.grouped(4).toList, 4, ssrProfiles.size)
           val zeroSSRProfiles = ssrProfiles.filter(p => p.elapsed == 0 && p.isSSR)
           // ping again
-          if (zeroSSRProfiles.nonEmpty) {
+          if (zeroSSRProfiles.nonEmpty && zeroSSRProfiles.length < ssrProfiles.length/2) {
             max = profiles.size + zeroSSRProfiles.size
             pingFunc(zeroSSRProfiles.grouped(2).toList, 2, ssrProfiles.size)
           }

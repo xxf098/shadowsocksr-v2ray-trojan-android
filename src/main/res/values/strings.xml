@@ -284,7 +284,7 @@
   <string name="update_subscription">Refresh servers from subscription</string>
   <string name="subscription_url">Subscription URL</string>
   <string name="use_default_group_name">Use default group name</string>
-  <string name="supported_subscription_link">Support ssr,v2ray,clash link</string>
+  <string name="supported_subscription_link">Support v2ray,clash,ssr link</string>
   <string name="ssrsub_expire_on">Expire on: %s</string>
   <string name="check_subscriptions">Check Subscriptions</string>
 

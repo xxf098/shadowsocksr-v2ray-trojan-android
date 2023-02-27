@@ -71,6 +71,7 @@ import scala.concurrent.{Await, Future}
 import scala.collection.immutable.HashMap
 
 // support group on switch
+// TODO: ripple effect  https://developer.android.com/reference/android/graphics/drawable/RippleDrawable
 object ProfileManagerActivity {
   // profiles count
   def getProfilesByGroup (groupName: String, is_sort: Boolean, is_sort_download: Boolean): List[Profile] = {
@@ -144,7 +145,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           .setTitle(R.string.share)
           .create()
 //        if (!isNfcAvailable) dialog.setMessage(getString(R.string.share_message_without_nfc))
-        if (!isNfcAvailable) dialog.setMessage(item.name)
+        if (!isNfcAvailable) dialog.setMessage(s"${item.proxy_protocol.capitalize}•${item.name}")
         else if (!isNfcBeamEnabled) {
           dialog.setMessage(getString(R.string.share_message_nfc_disabled))
           dialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.turn_on_nfc),
@@ -192,12 +193,13 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val tx = item.tx + txTotal
       val rx = item.rx + rxTotal
       val elapsed = if (elapsedInput != -1) elapsedInput else item.elapsed
+      var speed = if (item.download_speed == 0) item.proxy_protocol else s"${TrafficMonitor.formatTrafficInternal(item.download_speed, true)}/s"
+      val upload = if (tx == 0) {
+        speed = if (item.download_speed > 0) s"${speed} ${item.proxy_protocol}" else s"0B/s ${item.proxy_protocol}"
+        ""
+      } else { s"${TrafficMonitor.formatTrafficInternal(tx, true)}↑" }
       val trafficStatus = if (displayInfo(2) && (tx != 0 || rx != 0 || elapsed != 0 || item.url_group != "")) {
-        getString(R.string.stat_profiles,
-          TrafficMonitor.formatTrafficInternal(tx, true),
-          TrafficMonitor.formatTrafficInternal(rx, true),
-          String.valueOf(elapsed),
-          TrafficMonitor.formatTrafficInternal(item.download_speed, true)).trim
+        getString(R.string.stat_profiles, upload, TrafficMonitor.formatTrafficInternal(rx, true), String.valueOf(elapsed), speed).trim
       } else ""
       handler.post(() => {
         text1.setText(item.name)
@@ -625,7 +627,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         val displayGroupName = if (groupName.length < 4) {s" $groupName "} else { groupName }
         text1.setText(displayGroupName)
         text1.setTypeface(null, Typeface.NORMAL)
-        ll.setBackgroundResource(R.drawable.background_group)
+        ll.setBackgroundResource(R.drawable.background_group_ripple)
       }
     }
 
@@ -665,9 +667,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         app.editor.putString(Key.currentGroupName, currentGroupName).apply()
       }
       groups.clear()
+      val reverse = app.settings.getString(Key.GROUP_SORT_METHOD, Key.GROUP_SORT_METHOD_DEFAULT) == Key.GROUP_SORT_METHOD_REVERSE
       app.profileManager.getGroupNames match {
         case Some(groupNames) => {
-          val allGroupNames = app.getString(R.string.allgroups) +: groupNames
+          val names = if (reverse) { groupNames.reverse } else { groupNames }
+          val allGroupNames = app.getString(R.string.allgroups) +: names
           allGroupNames.filter(_ != ignoreGroupName.orNull).foreach(name => groups += name);
         }
         case None => {}
@@ -675,6 +679,20 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       profilesAdapter.onGroupChange(currentGroupName)
       profileGroupAdapter.notifyDataSetChanged()
       notifyDataSetChanged();
+    }
+
+    def sortGroupName(reverse: Boolean= false) = {
+      groups.clear()
+      app.profileManager.getGroupNames match {
+        case Some(groupNames) => {
+          val names = if (reverse) { groupNames.reverse } else { groupNames }
+          val allGroupNames = app.getString(R.string.allgroups) +: names
+          allGroupNames.foreach(name => groups += name);
+        }
+        case None => {}
+      };
+      notifyDataSetChanged();
+      groupLayoutManager.scrollToPosition(this.getCurrentGroupPosition())
     }
 
     def getCurrentGroupPosition() = {
@@ -829,6 +847,12 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       case _ => R.id.action_sort_by_default
     }
     toolbar.getMenu.findItem(menuId).setChecked(true)
+    val groupSortMethod = app.settings.getString(Key.GROUP_SORT_METHOD, Key.SORT_METHOD_DEFAULT)
+    val groupMenuId = groupSortMethod match {
+      case Key.GROUP_SORT_METHOD_REVERSE => R.id.action_sort_group_by_reverse
+      case _ => R.id.action_sort_group_by_default
+    }
+    toolbar.getMenu.findItem(groupMenuId).setChecked(true)
 
     initFab()
     // get current group name
@@ -1850,6 +1874,20 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       is_sort_download = true
       profilesAdapter.resetProfiles()
       profilesAdapter.notifyDataSetChanged()
+      true
+    }
+    case R.id.action_sort_group_by_default => {
+      item.setChecked(true)
+      // TODO: check key
+      app.settings.edit().putString(Key.GROUP_SORT_METHOD, Key.GROUP_SORT_METHOD_DEFAULT).apply()
+      profileGroupAdapter.sortGroupName(false)
+      true
+    }
+    case R.id.action_sort_group_by_reverse => {
+      item.setChecked(true)
+      // TODO: check key
+      app.settings.edit().putString(Key.GROUP_SORT_METHOD, Key.GROUP_SORT_METHOD_REVERSE).apply()
+      profileGroupAdapter.sortGroupName(true)
       true
     }
     case _ => false

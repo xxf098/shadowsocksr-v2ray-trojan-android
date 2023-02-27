@@ -94,11 +94,11 @@
             <group android:checkableBehavior="single">
                 <item
                     android:id="@+id/action_sort_group_by_default"
-                    android:title="Normal"
+                    android:title="@string/sort_by_normal"
                     android:checked="true" />
                 <item
                     android:id="@+id/action_sort_group_by_reverse"
-                    android:title="Reverse" />
+                    android:title="@string/sort_by_reverse" />
             </group>
         </menu>
     </item>

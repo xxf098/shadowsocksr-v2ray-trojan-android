@@ -257,6 +257,18 @@ class ProfileManager(dbHelper: DBHelper) {
     }
   }
 
+  def updateProfileTraffic(id:Int, tx:Long, rx: Long): Boolean = {
+    try {
+      dbHelper.profileDao.executeRawNoArgs(s"UPDATE `profile` SET tx = $tx , rx = $rx  WHERE id = $id")
+      true
+    } catch {
+      case ex: Exception =>
+        Log.e(TAG, "updateProfileTraffic", ex)
+        app.track(ex)
+        false
+    }
+  }
+
   def updateGroupName(groupName:String, ssrsub_id:Int): Boolean = {
     try {
       dbHelper.profileDao.executeRawNoArgs(s"UPDATE `profile` SET url_group = '$groupName' WHERE ssrsub_id = $ssrsub_id")

@@ -40,7 +40,6 @@
 package com.github.shadowsocks.database
 
 import java.net.{HttpURLConnection, URL, URLEncoder}
-import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 import android.nfc.Tag
@@ -192,7 +191,7 @@ object SSRSub {
           (subUrl.endsWith(".yaml") ||
           subUrl.endsWith(".yml") ||
           subUrl.indexOf("clash=") > 0 ||
-          responseString.substring(0, responseString.length.min(1500)).indexOf("proxies:") >= 0 )) {
+          responseString.substring(0, responseString.length.min(2400)).indexOf("proxies:") >= 0 )) {
         Parser.findAllClash(responseString).foreach(v => links = v.trim)
       }
       val profiles = subUrl match {

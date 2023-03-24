@@ -98,7 +98,9 @@ object TrafficMonitor {
       case Some(p) => {
         p.tx += txTotal
         p.rx += rxTotal
-        app.profileManager.updateProfile(p)
+        txTotal = 0
+        rxTotal = 0
+        app.profileManager.updateProfileTraffic(p.id, p.tx, p.rx)
       }
       case None =>
     }

@@ -175,6 +175,7 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
     }
     inputStream = null
     outputStream = null
+    TrafficMonitor.persistStats(app.profileId)
     if (stopService) {
       vpnService.stopSelf()
       android.os.Process.killProcess(android.os.Process.myPid())

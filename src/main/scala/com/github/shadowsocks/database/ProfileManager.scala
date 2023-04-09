@@ -180,6 +180,12 @@ class ProfileManager(dbHelper: DBHelper) {
         .and().eq("url_group", profile.url_group)
         .and().eq("v_ps", profile.v_ps)
         .and().eq("v_tls", profile.v_tls).queryForFirst()
+    } else if (profile.isVless) {
+      dbHelper.profileDao.queryBuilder()
+        .where().eq("v_id", profile.v_id)
+        .and().eq("v_add", profile.v_add)
+        .and().eq("v_port", profile.v_tls)
+        .queryForFirst()
     } else if (profile.isTrojan) {
       dbHelper.profileDao.queryBuilder()
         .where().eq("t_addr", profile.t_addr)

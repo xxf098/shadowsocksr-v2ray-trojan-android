@@ -184,7 +184,7 @@ class ProfileManager(dbHelper: DBHelper) {
       dbHelper.profileDao.queryBuilder()
         .where().eq("v_id", profile.v_id)
         .and().eq("v_add", profile.v_add)
-        .and().eq("v_port", profile.v_tls)
+        .and().eq("v_port", profile.v_port)
         .queryForFirst()
     } else if (profile.isTrojan) {
       dbHelper.profileDao.queryBuilder()

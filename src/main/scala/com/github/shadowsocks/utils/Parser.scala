@@ -412,12 +412,12 @@ object Parser {
     })
 
   def findAllClash(clashData: String) = {
-    val data = clashData.split("\n").takeWhile(s => !s.contains("proxy-groups:")).mkString("\n")
+    val data = clashData.split("\n").takeWhile(s => !(s.startsWith("#") || s.contains("proxy-groups:"))).mkString("\n")
     Try(Tun2socks.parseClash(data)).toOption.flatMap(s => if (s.length> 0) Some(s) else None)
   }
 
   def peekClash(clashData: String) = {
-    val data = clashData.split("\n").takeWhile(s => !s.contains("proxy-groups:")).mkString("\n")
+    val data = clashData.split("\n").takeWhile(s => !(s.startsWith("#") || s.contains("proxy-groups:"))).mkString("\n")
     Try(Tun2socks.peekClash(data, 1)).toOption.flatMap(s => if (s.length> 0) Some(s) else None)
   }
 

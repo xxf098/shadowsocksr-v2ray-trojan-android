@@ -172,6 +172,9 @@ public abstract class Tun2socks
         }
 
         @Override
+        public native void persistTraffic(final long p0, final long p1);
+
+        @Override
         public native void updateTraffic(final long p0, final long p1);
     }
 

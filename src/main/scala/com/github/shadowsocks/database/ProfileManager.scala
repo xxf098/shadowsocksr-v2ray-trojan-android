@@ -270,7 +270,17 @@ class ProfileManager(dbHelper: DBHelper) {
     } catch {
       case ex: Exception =>
         Log.e(TAG, "updateProfileTraffic", ex)
-        app.track(ex)
+        false
+    }
+  }
+
+  def increaseProfileTraffic(id:Int, tx:Long, rx: Long): Boolean = {
+    try {
+      dbHelper.profileDao.executeRawNoArgs(s"UPDATE `profile` SET tx = tx + $tx , rx = rx + $rx  WHERE id = $id")
+      true
+    } catch {
+      case ex: Exception =>
+        Log.e(TAG, "increaseProfileTraffic", ex)
         false
     }
   }

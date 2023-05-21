@@ -17,6 +17,9 @@ object TrafficMonitor {
   // Bytes for the current session
   var txTotal: Long = _
   var rxTotal: Long = _
+  // traffic not saved to db
+  var txSavedTotal: Long = _
+  var rxSavedTotal: Long = _
 
   // Bytes for the last query
   var txLast: Long = _
@@ -73,11 +76,13 @@ object TrafficMonitor {
   }
 
   def update(tx: Long, rx: Long) {
-    if (txTotal != tx) {
+    if (txTotal < tx) {
+      txSavedTotal = tx - txTotal + txSavedTotal
       txTotal = tx
       dirty = true
     }
-    if (rxTotal != rx) {
+    if (rxTotal < rx) {
+      rxSavedTotal = rx - rxTotal + rxSavedTotal
       rxTotal = rx
       dirty = true
     }
@@ -88,21 +93,34 @@ object TrafficMonitor {
     rxRate = 0
     txTotal = 0
     rxTotal = 0
+    txSavedTotal = 0
+    rxSavedTotal = 0
     txLast = 0
     rxLast = 0
     dirty = true
   }
 
+  def checkNeedPersist(threshold: Long): Boolean = {
+    txSavedTotal >= threshold || rxSavedTotal >= threshold
+  }
+
   def persistStats(id: Int): Unit = {
     app.profileManager.getProfile(id) match {
       case Some(p) => {
-        p.tx += txTotal
-        p.rx += rxTotal
-        txTotal = 0
-        rxTotal = 0
+        p.tx += txSavedTotal
+        p.rx += rxSavedTotal
+        txSavedTotal = 0
+        rxSavedTotal = 0
         app.profileManager.updateProfileTraffic(p.id, p.tx, p.rx)
       }
       case None =>
     }
+  }
+
+  // increase save
+  def increaseTraffic(id: Int): Unit = {
+    app.profileManager.increaseProfileTraffic(id, txSavedTotal, rxSavedTotal)
+    txSavedTotal = 0
+    rxSavedTotal = 0
   }
 }

@@ -66,6 +66,15 @@ class V2RayVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
       rxTotal += p1
       TrafficMonitor.update(txTotal, rxTotal)
     }
+
+    override def persistTraffic(p0: Long, p1: Long): Unit = {
+      updateTraffic(p0, p1)
+      // only save when >= 1MB
+      if (TrafficMonitor.checkNeedPersist(1048576)) {
+        TrafficMonitor.increaseTraffic(profile.id)
+      }
+    }
+
   }
 
   override def run(): Unit = {

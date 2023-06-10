@@ -70,8 +70,6 @@ import scala.concurrent.duration.{Duration, SECONDS}
 import scala.concurrent.{Await, Future}
 import scala.collection.immutable.HashMap
 
-// support group on switch
-// TODO: ripple effect  https://developer.android.com/reference/android/graphics/drawable/RippleDrawable
 object ProfileManagerActivity {
   // profiles count
   def getProfilesByGroup (groupName: String, is_sort: Boolean, is_sort_download: Boolean): List[Profile] = {
@@ -900,7 +898,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     attachService(new IShadowsocksServiceCallback.Stub {
       def stateChanged(state: Int, profileName: String, msg: String) = () // ignore
       def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) =
-        if (selectedItem != null) selectedItem.updateText(txTotal, rxTotal)
+        if (selectedItem != null) {
+          if (selectedItem.item.isSSR || selectedItem.item.isShadowSocks) {selectedItem.updateText(txTotal, rxTotal)}
+          else {selectedItem.updateText(0, 0)}
+        }
     })
 
     if (app.settings.getBoolean(Key.profileTip, true)) {

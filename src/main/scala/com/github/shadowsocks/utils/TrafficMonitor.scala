@@ -119,8 +119,10 @@ object TrafficMonitor {
 
   // increase save
   def increaseTraffic(id: Int): Unit = {
-    app.profileManager.increaseProfileTraffic(id, txSavedTotal, rxSavedTotal)
-    txSavedTotal = 0
-    rxSavedTotal = 0
+    val result = app.profileManager.increaseProfileTraffic(id, txSavedTotal, rxSavedTotal)
+    if (result) {
+      txSavedTotal = 0
+      rxSavedTotal = 0
+    }
   }
 }

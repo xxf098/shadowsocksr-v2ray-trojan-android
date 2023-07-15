@@ -137,8 +137,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         val dialog = new AlertDialog.Builder(ProfileManagerActivity.this, R.style.Theme_Material_Dialog_Alert)
           .setCancelable(true)
           .setPositiveButton(R.string.close, null)
-          .setNegativeButton(R.string.copy_url, ((_, _) =>
-            clipboard.setPrimaryClip(ClipData.newPlainText(null, url))): DialogInterface.OnClickListener)
+          .setNegativeButton(R.string.copy_url, ((_, _) => {
+            clipboard.setPrimaryClip(ClipData.newPlainText(null, url))
+            Toast.makeText(ProfileManagerActivity.this, R.string.copy_url, Toast.LENGTH_SHORT).show
+          }): DialogInterface.OnClickListener)
           .setView(image)
           .setTitle(R.string.share)
           .create()

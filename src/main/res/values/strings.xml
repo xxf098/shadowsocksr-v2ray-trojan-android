@@ -302,7 +302,7 @@
   <!-- status -->
   <string name="sent">Sent:</string>
   <string name="received">Received:</string>
-  <string name="allgroups">All Groups</string>
+  <string name="allgroups">All</string>
   <string name="retry_test">Retry...</string>
 
 <!--  PreferenceScreen-->
